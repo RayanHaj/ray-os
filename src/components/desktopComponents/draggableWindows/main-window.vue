@@ -168,8 +168,12 @@ export default {
     },
 
     moveWindow(event) {
+      event.preventDefault();
       let windowElement = event.target.closest('.movable-window');
       const windowElementStyles = window.getComputedStyle(windowElement);
+
+      let yOutOfBoundsPositive = false;
+      let yOutOfBoundsNegative = false;
 
       const NUM_MAXIMUM_WIDTH = this.MAXIMUM_WIDTH;
       const NUM_MAXIMUM_HEIGHT = this.MAXIMUM_HEIGHT;
@@ -180,40 +184,24 @@ export default {
       let prevY = event.clientY;
 
       const onMouseMove = (event) => {
-        window.getSelection().removeAllRanges();
-        let object = {
-          'width': '',
-          'height': '',
-          'left': '',
-          'top': ''
-        }
-        console.log({
-          'NUM_WIDTH': NUM_WIDTH,
-          'NUM_MAXIMUM_WIDTH': NUM_MAXIMUM_WIDTH,
-          'NUM_HEIGHT': NUM_HEIGHT,
-          'NUM_MAXIMUM_HEIGHT': NUM_MAXIMUM_HEIGHT
-        })
         if ((NUM_WIDTH === NUM_MAXIMUM_WIDTH || NUM_WIDTH + 1 === NUM_MAXIMUM_WIDTH || NUM_WIDTH - 1 === NUM_MAXIMUM_WIDTH) && (NUM_HEIGHT === NUM_MAXIMUM_HEIGHT || (NUM_HEIGHT - 45) === NUM_MAXIMUM_HEIGHT)) {
           windowElement.style.left = `${prevX - (NUM_WIDTH / 2 - 250)}px`;
           windowElement.style.top = `${prevY}px`;
           windowElement.style.width = '60%';
           windowElement.style.height = '80%';
-
-          object.width = '60%';
-          object.height = '80%';
         }
 
         const newX = event.clientX;
         const newY = event.clientY;
+
+        yOutOfBoundsPositive = newX > NUM_MAXIMUM_WIDTH;
+        yOutOfBoundsNegative = newX < 0;
 
         const deltaX = newX - prevX;
         const deltaY = newY - prevY;
 
         windowElement.style.left = `${windowElement.offsetLeft + deltaX}px`;
         windowElement.style.top = `${windowElement.offsetTop + deltaY}px`;
-
-        object.left = `${prevX - (NUM_WIDTH / 2 - 250)}px`;
-        object.top = `${prevY}px`
 
         this.updateSizes();
 
@@ -222,6 +210,18 @@ export default {
       };
 
       const onMouseUp = () => {
+        if (yOutOfBoundsPositive) {
+          windowElement.style.left = '50%';
+          windowElement.style.width = '50%';
+          windowElement.style.height = '100%';
+          windowElement.style.top = 0;
+        }
+        if (yOutOfBoundsNegative) {
+          windowElement.style.left = 0;
+          windowElement.style.width = '50%';
+          windowElement.style.height = '100%';
+          windowElement.style.top = 0;
+        }
         document.removeEventListener('mousemove', onMouseMove);
         document.removeEventListener('mouseup', onMouseUp);
       };
