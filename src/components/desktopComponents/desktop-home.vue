@@ -129,13 +129,41 @@ export default {
 
       this.quickSettingMenuIsOpen = !this.quickSettingMenuIsOpen;
     },
+    validateBeforeClosingWindows(settingsMenu, footer, e) {
+      if (!this.quickSettingMenuIsOpen) {
+        return false;
+      }
+
+      if (footer.getRefQuickSettingsMenuButton().contains(e.target)) {
+        return false;
+      }
+
+      const children = Array.from(settingsMenu.$el.querySelectorAll('.btn'));
+      const btnElements = children.filter((child => child.classList.contains('btn')));
+
+      let result = null;
+      for (let element of btnElements) {
+        if (element.contains(e.target)) {
+          result = true;
+        }
+      }
+
+      if (result) {
+        return result;
+      }
+
+      if (settingsMenu.$el.contains(e.target)) {
+        return false;
+      }
+
+      return true;
+    },
     async closeOpenWindows(e) {
       e.preventDefault();
       const settingsMenu = this.$refs.settingsMenu;
       const footer = this.$refs.footerBar;
       if (footer) {
-        if (this.quickSettingMenuIsOpen && !footer.getRefQuickSettingsMenuButton().contains(e.target)) {
-          console.log(settingsMenu)
+        if (this.validateBeforeClosingWindows(settingsMenu, footer, e)) {
           await settingsMenu.closeSettingsMenuAnimation().then(() => {
             this.quickSettingMenuIsOpen = !this.quickSettingMenuIsOpen;
           });
