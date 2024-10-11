@@ -17,7 +17,7 @@
         <span>ENG</span>
         <span>US</span>
       </div>
-      <div class="wifi-sound-battery-wrapper footer-bar-right-item">
+      <div ref="quickSettingsMenuButton" class="wifi-sound-battery-wrapper footer-bar-right-item" @click="emitQuickSettingMenuClicked">
         <!--wifi-->
         <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 640 512">
           <!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
@@ -61,7 +61,8 @@ export default {
   data() {
     return {
       date: '',
-      time: ''
+      time: '',
+      quickSettingMenuIsOpen: false,
     }
   },
   mounted() {
@@ -86,6 +87,13 @@ export default {
   methods: {
     emitApplicationName(applicationName) {
       this.$emit('applicationName', applicationName)
+    },
+    emitQuickSettingMenuClicked() {
+      this.quickSettingMenuIsOpen = !this.quickSettingMenuIsOpen;
+      this.$emit('quickSettingsMenuOpen', this.quickSettingMenuIsOpen)
+    },
+    getRefQuickSettingsMenuButton() {
+      return this.$refs.quickSettingsMenuButton;
     }
   }
 }

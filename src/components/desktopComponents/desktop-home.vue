@@ -17,15 +17,19 @@
       <DesktopGrid grid-size="large" @application-name="setApplicationNameVariable" :application-name="applicationName"
                    :application-names="applicationNames" :window-size="windowDimensions" class="desktop-grid"></DesktopGrid>
     </div>
-    <FooterBar class="footer" @application-name="setApplicationNameVariable"
-               :application-names="applicationNames"></FooterBar>
+    <div class="footer-container">
+      <SettingsMenu v-if="quickSettingMenuIsOpen" class="quick-settings-menu"></SettingsMenu>
+      <FooterBar ref="footerBar" class="footer" @application-name="setApplicationNameVariable"
+                 @quick-settings-menu-open="openQuickSettingsMenu" :application-names="applicationNames"></FooterBar>
+    </div>
   </div>
 </template>
 
 <script>
-import FooterBar from "@/components/desktopComponents/footer-bar";
+import FooterBar from "@/components/desktopComponents/footer/footer-bar";
 import DesktopGrid from "@/components/desktopComponents/desktop-grid";
 import MainWindow from "@/components/desktopComponents/draggableWindows/main-window";
+import SettingsMenu from "@/components/desktopComponents/footer/footerComponents/settings-menu";
 
 export default {
   name: "desktop-home",
@@ -33,6 +37,7 @@ export default {
   data() {
     return {
       windowIsRendered: false,
+      quickSettingMenuIsOpen: false,
       windowWidth: '',
       windowHeight: '',
       applicationName: '',
@@ -42,19 +47,21 @@ export default {
       applicationNames: ['windows-start', 'microsoft-edge', 'file-explorer', 'settings']
     }
   },
-  components: {MainWindow, DesktopGrid, FooterBar},
+  components: {SettingsMenu, MainWindow, DesktopGrid, FooterBar},
   props: {
     backgroundImageId: Number
   },
   mounted() {
     this.updateSettings();
     window.addEventListener('resize', this.updateWindowDimensions);
+    window.addEventListener('click', this.closeOpenWindows);
   },
   created() {
     this.windowDimensions = [window.innerWidth, window.innerHeight - 45]
   },
   beforeUnmount() {
     window.removeEventListener('resize', this.updateWindowDimensions);
+    window.addEventListener('click', this.closeOpenWindows);
   },
   methods: {
     setApplicationNameVariable(name) {
@@ -109,6 +116,18 @@ export default {
           desktopElement.style.backgroundImage = `url(${require(`@/assets/images/desktopWallpapers/wallpaper_0${backgroundImage}.png`)})`;
         }
       }
+    },
+    openQuickSettingsMenu() {
+      this.quickSettingMenuIsOpen = !this.quickSettingMenuIsOpen;
+    },
+    closeOpenWindows(e) {
+      e.preventDefault();
+      const footer = this.$refs.footerBar;
+      if (footer) {
+        if (this.quickSettingMenuIsOpen && !footer.getRefQuickSettingsMenuButton().contains(e.target)) {
+          this.quickSettingMenuIsOpen = !this.quickSettingMenuIsOpen;
+        }
+      }
     }
   },
   watch: {
@@ -147,5 +166,18 @@ export default {
 
 .footer {
   z-index: 2;
+}
+
+.quick-settings-menu {
+  position: fixed;
+  right: 20px;
+  bottom: 60px;
+  width: 300px;
+}
+
+.footer-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 </style>

@@ -90,7 +90,9 @@ export default {
       gridFields.forEach(gridField => {
         gridField.addEventListener("dblclick", (e) => {
           e.preventDefault();
-
+          if (gridField.innerHTML === '') {
+            return;
+          }
           this.$emit('applicationName', gridField.children.namedItem('applicationName').innerText)
         });
         gridField.addEventListener("drag", (e) => {

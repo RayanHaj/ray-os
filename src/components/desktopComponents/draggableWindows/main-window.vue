@@ -254,6 +254,7 @@ export default {
   overflow: auto;
   position: relative;
   background-color: darkslategrey;
+  border: black 1px solid;
 }
 
 .window-header {
