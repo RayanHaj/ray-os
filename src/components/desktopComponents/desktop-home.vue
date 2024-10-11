@@ -159,14 +159,16 @@ export default {
       return true;
     },
     async closeOpenWindows(e) {
-      e.preventDefault();
-      const settingsMenu = this.$refs.settingsMenu;
-      const footer = this.$refs.footerBar;
-      if (footer) {
-        if (this.validateBeforeClosingWindows(settingsMenu, footer, e)) {
-          await settingsMenu.closeSettingsMenuAnimation().then(() => {
-            this.quickSettingMenuIsOpen = !this.quickSettingMenuIsOpen;
-          });
+      if (this.quickSettingMenuIsOpen === true) {
+        e.preventDefault();
+        const settingsMenu = this.$refs.settingsMenu;
+        const footer = this.$refs.footerBar;
+        if (footer) {
+          if (this.validateBeforeClosingWindows(settingsMenu, footer, e)) {
+            await settingsMenu.closeSettingsMenuAnimation().then(() => {
+              this.quickSettingMenuIsOpen = !this.quickSettingMenuIsOpen;
+            });
+          }
         }
       }
     }

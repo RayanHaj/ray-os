@@ -36,6 +36,7 @@ export default {
     const backgroundPreference = Number(localStorage.getItem('background-preference'));
     if (backgroundPreference !== 0) {
       const radioButtons = document.querySelectorAll("input[name='background-preference']");
+      console.log(radioButtons)
       radioButtons.forEach(radioButton => {
         if (backgroundPreference === Number(radioButton.value)) {
           radioButton.checked = true;
@@ -88,9 +89,6 @@ export default {
 </script>
 
 <style scoped>
-  input[type="radio"] {
-
-  }
   .window-content {
     padding: 30px;
   }

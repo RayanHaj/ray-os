@@ -194,8 +194,8 @@ export default {
         const newX = event.clientX;
         const newY = event.clientY;
 
-        yOutOfBoundsPositive = newX > NUM_MAXIMUM_WIDTH;
-        yOutOfBoundsNegative = newX < 0;
+        yOutOfBoundsPositive = newX >= NUM_MAXIMUM_WIDTH - 1;
+        yOutOfBoundsNegative = newX <= 1;
 
         const deltaX = newX - prevX;
         const deltaY = newY - prevY;

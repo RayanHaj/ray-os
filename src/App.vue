@@ -1,23 +1,27 @@
 <template>
   <section>
-    <MobileHome v-if="isMobile"></MobileHome>
-    <DesktopHome v-if="isMobile === false" :background-image-id="1"></DesktopHome>
+    <LoginScreen @login-finished="loginFinished = true"></LoginScreen>
+    <MobileHome v-if="isMobile && loginFinished"></MobileHome>
+    <DesktopHome v-if="(isMobile === false) && loginFinished" :background-image-id="1"></DesktopHome>
   </section>
 </template>
 
 <script>
 import DesktopHome from "@/components/desktopComponents/desktop-home";
 import MobileHome from "@/components/mobileComponents/mobile-home";
+import LoginScreen from "@/components/desktopComponents/login-screen";
 
 export default {
   name: 'App',
   components: {
+    LoginScreen,
     MobileHome,
     DesktopHome
   },
   data() {
     return {
       isMobile: false,
+      loginFinished: false,
     }
   },
   mounted() {
@@ -51,6 +55,10 @@ html, body {
 }
 
 DesktopHome {
+  width: 100%;
+  height: 100%;
+}
+LoginScreen {
   width: 100%;
   height: 100%;
 }
