@@ -126,7 +126,7 @@ export default {
         const newY = (viewportHeight - windowElement.offsetHeight) / 2;
 
         windowElement.style.left = `${newX}px`;
-        windowElement.style.top = `${newY - 22.5}px`;
+        windowElement.style.top = `${newY}px`;
 
         this.updateSizes();
 
@@ -187,7 +187,13 @@ export default {
           'left': '',
           'top': ''
         }
-        if ((NUM_WIDTH === NUM_MAXIMUM_WIDTH || NUM_WIDTH + 1 === NUM_MAXIMUM_WIDTH || NUM_WIDTH - 1 === NUM_MAXIMUM_WIDTH) && NUM_HEIGHT === NUM_MAXIMUM_HEIGHT) {
+        console.log({
+          'NUM_WIDTH': NUM_WIDTH,
+          'NUM_MAXIMUM_WIDTH': NUM_MAXIMUM_WIDTH,
+          'NUM_HEIGHT': NUM_HEIGHT,
+          'NUM_MAXIMUM_HEIGHT': NUM_MAXIMUM_HEIGHT
+        })
+        if ((NUM_WIDTH === NUM_MAXIMUM_WIDTH || NUM_WIDTH + 1 === NUM_MAXIMUM_WIDTH || NUM_WIDTH - 1 === NUM_MAXIMUM_WIDTH) && (NUM_HEIGHT === NUM_MAXIMUM_HEIGHT || (NUM_HEIGHT - 45) === NUM_MAXIMUM_HEIGHT)) {
           windowElement.style.left = `${prevX - (NUM_WIDTH / 2 - 250)}px`;
           windowElement.style.top = `${prevY}px`;
           windowElement.style.width = '60%';

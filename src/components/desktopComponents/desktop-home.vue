@@ -15,7 +15,7 @@
       <MainWindow v-if="openWindows.includes('settings')" @close-tab="closeWindow" @rendered="windowIsRendered = !windowIsRendered"
                   :window-size="windowDimensions" window-name="settings" @window-sizes="updateWindowSizeContainer" class="windows"/>
       <DesktopGrid grid-size="large" @application-name="setApplicationNameVariable" :application-name="applicationName"
-                   :application-names="applicationNames" class="desktop-grid"></DesktopGrid>
+                   :application-names="applicationNames" :window-size="windowDimensions" class="desktop-grid"></DesktopGrid>
     </div>
     <FooterBar class="footer" @application-name="setApplicationNameVariable"
                :application-names="applicationNames"></FooterBar>

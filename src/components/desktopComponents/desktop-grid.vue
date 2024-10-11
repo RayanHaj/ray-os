@@ -10,61 +10,7 @@ export default {
   name: "desktop-grid",
 
   mounted() {
-    const GRID_ELEMENT_WIDTH = 82;
-    const GRID_ELEMENT_HEIGHT = 82;
-
-    this.$nextTick(()=>{
-      this.GRID_WIDTH = Math.floor(this.$el.offsetWidth / GRID_ELEMENT_WIDTH);
-
-      //FIX THIS VARIABLE ASSIGNMENT
-      this.GRID_HEIGHT = Math.floor((this.$el.offsetHeight / GRID_ELEMENT_HEIGHT));
-      console.log(this.$el.offsetHeight)
-      console.log(this.GRID_HEIGHT)
-    })
-
-    this.createGrid();
-    this.addApplicationsToDesktop();
-
-    let gridFields = document.querySelectorAll('.gridField');
-    let draggedApplicationClone = null;
-    let draggedApplication = null
-    gridFields.forEach(gridField => {
-      gridField.addEventListener("dblclick", (e) => {
-        e.preventDefault();
-
-        this.$emit('applicationName', gridField.children.namedItem('applicationName').innerText)
-      });
-      gridField.addEventListener("drag", (e) => {
-        e.preventDefault();
-        gridField.classList.remove('filled');
-        draggedApplication = gridField;
-        console.log(draggedApplication)
-        draggedApplicationClone = gridField.cloneNode(true);
-        gridField.innerHTML = "";
-      });
-      gridField.addEventListener("dragover", (e) => {
-        e.preventDefault();
-        console.log("Dragging over")
-      });
-      gridField.addEventListener("dragleave", () => {
-
-      });
-      gridField.addEventListener("drop", () => {
-        const childrenArray = Array.from(draggedApplicationClone.children);
-        if (gridField.children.length === 0) {
-          gridField.classList.add('filled');
-          for (let child of childrenArray) {
-            gridField.appendChild(child);
-          }
-        } else {
-          draggedApplication.classList.add('filled');
-          for (let child of childrenArray) {
-            draggedApplication.appendChild(child);
-          }
-        }
-      });
-
-    })
+    this.init();
   },
 
   data() {
@@ -87,6 +33,10 @@ export default {
       type: String,
       required: true
     },
+    windowSize: {
+      type: Array,
+      required: false
+    },
     applicationNames: {
       type: Array,
       required: false
@@ -102,6 +52,15 @@ export default {
       }
     },
 
+    windowSize() {
+      const gridContainerChildElement = this.$el.children.item(0);
+      while (gridContainerChildElement.firstChild) {
+        gridContainerChildElement.removeChild(gridContainerChildElement.firstChild);
+      }
+
+      this.init();
+    },
+
     // IMPLEMENT THIS FUNCTION
     // applicationNames(newNames, oldNames) {
     //
@@ -109,6 +68,63 @@ export default {
   },
 
   methods: {
+    init() {
+      const GRID_ELEMENT_WIDTH = 82;
+      const GRID_ELEMENT_HEIGHT = 82;
+
+      console.log(`width: ${this.$el.offsetWidth}`)
+      this.GRID_WIDTH = Math.floor(this.$el.offsetWidth / GRID_ELEMENT_WIDTH);
+
+      this.$nextTick(()=>{
+
+        //FIX THIS VARIABLE ASSIGNMENT
+        this.GRID_HEIGHT = Math.floor((this.$el.offsetHeight / GRID_ELEMENT_HEIGHT));
+      })
+
+      this.createGrid();
+      this.addApplicationsToDesktop();
+
+      let gridFields = document.querySelectorAll('.gridField');
+      let draggedApplicationClone = null;
+      let draggedApplication = null
+      gridFields.forEach(gridField => {
+        gridField.addEventListener("dblclick", (e) => {
+          e.preventDefault();
+
+          this.$emit('applicationName', gridField.children.namedItem('applicationName').innerText)
+        });
+        gridField.addEventListener("drag", (e) => {
+          e.preventDefault();
+          gridField.classList.remove('filled');
+          draggedApplication = gridField;
+          console.log(draggedApplication)
+          draggedApplicationClone = gridField.cloneNode(true);
+          gridField.innerHTML = "";
+        });
+        gridField.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          console.log("Dragging over")
+        });
+        gridField.addEventListener("dragleave", () => {
+
+        });
+        gridField.addEventListener("drop", () => {
+          const childrenArray = Array.from(draggedApplicationClone.children);
+          if (gridField.children.length === 0) {
+            gridField.classList.add('filled');
+            for (let child of childrenArray) {
+              gridField.appendChild(child);
+            }
+          } else {
+            draggedApplication.classList.add('filled');
+            for (let child of childrenArray) {
+              draggedApplication.appendChild(child);
+            }
+          }
+        });
+
+      })
+    },
     createGrid() {
       let grid = document.querySelector('.grid');
 
