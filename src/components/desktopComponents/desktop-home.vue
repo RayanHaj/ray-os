@@ -18,7 +18,7 @@
                    :application-names="applicationNames" :window-size="windowDimensions" class="desktop-grid"></DesktopGrid>
     </div>
     <div class="footer-container">
-      <SettingsMenu v-if="quickSettingMenuIsOpen" class="quick-settings-menu"></SettingsMenu>
+      <SettingsMenu ref="settingsMenu" v-if="quickSettingMenuIsOpen" class="quick-settings-menu"></SettingsMenu>
       <FooterBar ref="footerBar" class="footer" @application-name="setApplicationNameVariable"
                  @quick-settings-menu-open="openQuickSettingsMenu" :application-names="applicationNames"></FooterBar>
     </div>
@@ -51,17 +51,17 @@ export default {
   props: {
     backgroundImageId: Number
   },
-  mounted() {
+  async mounted() {
     this.updateSettings();
     window.addEventListener('resize', this.updateWindowDimensions);
-    window.addEventListener('click', this.closeOpenWindows);
+    window.addEventListener('click', await this.closeOpenWindows);
   },
   created() {
     this.windowDimensions = [window.innerWidth, window.innerHeight - 45]
   },
-  beforeUnmount() {
+  async beforeUnmount() {
     window.removeEventListener('resize', this.updateWindowDimensions);
-    window.addEventListener('click', this.closeOpenWindows);
+    window.addEventListener('click', await this.closeOpenWindows);
   },
   methods: {
     setApplicationNameVariable(name) {
@@ -117,15 +117,28 @@ export default {
         }
       }
     },
-    openQuickSettingsMenu() {
+    async openQuickSettingsMenu() {
+      const settingsMenu = this.$refs.settingsMenu;
+
+      if (this.quickSettingMenuIsOpen) {
+        await settingsMenu.closeSettingsMenuAnimation().then(() => {
+          this.quickSettingMenuIsOpen = !this.quickSettingMenuIsOpen;
+        });
+        return;
+      }
+
       this.quickSettingMenuIsOpen = !this.quickSettingMenuIsOpen;
     },
-    closeOpenWindows(e) {
+    async closeOpenWindows(e) {
       e.preventDefault();
+      const settingsMenu = this.$refs.settingsMenu;
       const footer = this.$refs.footerBar;
       if (footer) {
         if (this.quickSettingMenuIsOpen && !footer.getRefQuickSettingsMenuButton().contains(e.target)) {
-          this.quickSettingMenuIsOpen = !this.quickSettingMenuIsOpen;
+          console.log(settingsMenu)
+          await settingsMenu.closeSettingsMenuAnimation().then(() => {
+            this.quickSettingMenuIsOpen = !this.quickSettingMenuIsOpen;
+          });
         }
       }
     }
