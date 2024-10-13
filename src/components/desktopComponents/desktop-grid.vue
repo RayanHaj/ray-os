@@ -44,10 +44,8 @@ export default {
   },
 
   watch: {
-    applicationName(newName, oldName) {
-      console.log(newName, oldName)
+    applicationName(newName) {
       if (newName !== '' && !this.openWindows.includes(newName)) {
-        // this.openWindow(newName);
         this.openWindows.push(newName);
       }
     },
@@ -60,11 +58,6 @@ export default {
 
       this.init();
     },
-
-    // IMPLEMENT THIS FUNCTION
-    // applicationNames(newNames, oldNames) {
-    //
-    // }
   },
 
   methods: {
@@ -161,16 +154,6 @@ export default {
       }
     },
 
-    // AddElementInGridPosition(yPos, xPos, application) {
-    //   let gridField = this.getGridFieldByPosition(yPos, xPos);
-    //
-    // },
-
-    DeleteElementInGridPosition(yPos, xPos) {
-      let gridField = this.getGridFieldByPosition(yPos, xPos);
-      gridField.innerHTML = "";
-    },
-
     addApplicationsToDesktop() {
       let xPos = 0;
       let yPos = 0;
@@ -184,8 +167,6 @@ export default {
           xPos++;
           gridField = this.getGridFieldByPosition(yPos, xPos)
         }
-
-        console.log(name)
 
         this.checkIfImageExists(name).then(value => {
           let checkBoxElement = document.createElement('input');
@@ -219,11 +200,11 @@ export default {
         img.src = require(`@/assets/images/footerIcons/${name}.png`);
 
         img.onload = () => {
-          resolve(true); // Resolve the promise as true if the image loads successfully
+          resolve(true);
         };
 
         img.onerror = () => {
-          resolve(false); // Resolve the promise as false if there’s an error
+          resolve(false);
         };
       });
     }

@@ -1,19 +1,13 @@
 <template>
-  <div class="desktop">
+  <div v-if="activatedEasterEgg === null" class="desktop">
     <div class="main-screen">
-      <!--      <MainWindow @close-tab="closeWindow" :open-windows="openWindows" :window-dimensions="windowDimensions"></MainWindow>-->
-      <!--
-      @Param: grid-size = small || medium || larger || large;
-      -->
-      <!--      <div v-for="(window, index) in openWindows" :key="index" class="windows">-->
-      <!--        <MainWindow v-if="window === 'file-explorer'" @close-tab="closeWindow" @rendered="windowIsRendered = !windowIsRendered" :window-size="windowDimensions" window-name="file-explorer" @window-sizes="updateWindowSizeContainer"></MainWindow>-->
-      <!--        <MainWindow v-if="window === 'settings'" @close-tab="closeWindow" @rendered="windowIsRendered = !windowIsRendered" :window-size="windowDimensions" window-name="settings" @window-sizes="updateWindowSizeContainer"/>-->
-      <!--      </div>-->
       <MainWindow v-if="openWindows.includes('file-explorer')" @close-tab="closeWindow"
                   @rendered="windowIsRendered = !windowIsRendered" :window-size="windowDimensions"
-                  window-name="file-explorer" @window-sizes="updateWindowSizeContainer" class="windows"></MainWindow>
+                  window-name="file-explorer"
+                  @battery-easter-egg-activated="activatedEasterEgg = $event" class="windows"></MainWindow>
       <MainWindow v-if="openWindows.includes('settings')" @close-tab="closeWindow" @rendered="windowIsRendered = !windowIsRendered"
-                  :window-size="windowDimensions" window-name="settings" @window-sizes="updateWindowSizeContainer" class="windows"/>
+                  :window-size="windowDimensions" window-name="settings"
+                  @battery-easter-egg-activated="activatedEasterEgg = $event" class="windows"/>
       <DesktopGrid grid-size="large" @application-name="setApplicationNameVariable" :application-name="applicationName"
                    :application-names="applicationNames" :window-size="windowDimensions" class="desktop-grid"></DesktopGrid>
     </div>
@@ -41,6 +35,7 @@ export default {
       windowWidth: '',
       windowHeight: '',
       applicationName: '',
+      activatedEasterEgg: null,
       openWindows: [],
       windowDimensions: [],
       backgroundColor: 'black',
@@ -171,12 +166,22 @@ export default {
           }
         }
       }
+    },
+    easterEggCompleted() {
+      this.activatedEasterEgg = null;
+      this.$nextTick(() => {
+        this.updateSettings();
+      })
     }
   },
   watch: {
     windowIsRendered() {
       this.updateWindowDimensions();
     },
+
+    activatedEasterEgg() {
+      console.log(this.activatedEasterEgg);
+    }
   }
 }
 </script>
@@ -215,7 +220,7 @@ export default {
   position: fixed;
   right: 20px;
   bottom: 60px;
-  width: 300px;
+  width: 350px;
 }
 
 .footer-container {

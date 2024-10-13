@@ -82,7 +82,7 @@ export default {
           console.log(counter);
           if (counter === 47) {
             this.sound.pause();
-            this.$emit('loginFinished');
+            this.$router.push('/desktop-home')
             return;
           }
           console.log(this.sound)

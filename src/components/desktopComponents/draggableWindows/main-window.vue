@@ -78,7 +78,7 @@ export default {
     return {
       MAXIMUM_WIDTH: '',
       MAXIMUM_HEIGHT: '',
-      tabsWrapperElement: null
+      tabsWrapperElement: null,
     }
   },
   props: {
@@ -95,7 +95,7 @@ export default {
     windowSize(newSize) {
       this.MAXIMUM_WIDTH = newSize[0];
       this.MAXIMUM_HEIGHT = newSize[1];
-    }
+    },
   },
   methods: {
     maximizeWindow() {
@@ -107,11 +107,6 @@ export default {
       if ((windowWidth === this.MAXIMUM_WIDTH || windowWidth + 1 === this.MAXIMUM_WIDTH || windowWidth - 1 === this.MAXIMUM_WIDTH) && windowHeight === this.MAXIMUM_HEIGHT) {
         windowElement.style.width = '60%';
         windowElement.style.height = '80%';
-        this.updateSizes();
-        // this.$emit('windowSizes', {
-        //   'width': '60%',
-        //   'height': '80%'
-        // });
         return;
       }
 
@@ -127,15 +122,6 @@ export default {
 
         windowElement.style.left = `${newX}px`;
         windowElement.style.top = `${newY}px`;
-
-        this.updateSizes();
-
-        // this.$emit('windowSizes', {
-        //   'width': '100%',
-        //   'height': '100%',
-        //   'left': `${newX}px`,
-        //   'top': `${newY - 22.5}px`
-        // })
       }
     },
 
@@ -154,17 +140,6 @@ export default {
         number += letter;
       }
       return Number(number);
-    },
-
-    updateSizes() {
-      const width = this.$el.offsetWidth;
-      const height = this.$el.offsetHeight;
-      this.$emit('windowSizes', {
-        width,
-        height,
-        left: this.$el.style.left,
-        top: this.$el.style.top,
-      });
     },
 
     moveWindow(event) {
@@ -202,8 +177,6 @@ export default {
 
         windowElement.style.left = `${windowElement.offsetLeft + deltaX}px`;
         windowElement.style.top = `${windowElement.offsetTop + deltaY}px`;
-
-        this.updateSizes();
 
         prevX = newX;
         prevY = newY;

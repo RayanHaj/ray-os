@@ -111,6 +111,7 @@ export default {
   font-family: 'Segoe UI Variable', serif;
   font-size: small;
   color: white;
+  user-select: none;
 }
 
 .footer-bar {
