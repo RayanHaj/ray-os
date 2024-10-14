@@ -42,18 +42,23 @@ export default {
       if (backgroundPreference === null) {
         localStorage.setItem('background-preference', '2');
         loginScreenElement.style.backgroundImage = `url(${require(`@/assets/images/desktopWallpapers/wallpaper_01.png`)})`;
+        loginScreenElement.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';  // Apply a dark color overlay
+        loginScreenElement.style.backgroundBlendMode = 'darken';
       }
 
       if (Number(backgroundPreference) === 1) {
         const backgroundColor = localStorage.getItem('background-color');
+        console.log(backgroundColor)
         if (backgroundColor) {
-          loginScreenElement.style.backgroundColor = this.backgroundColor;
+          loginScreenElement.style.backgroundColor = `${backgroundColor}`;
           loginScreenElement.style.backgroundImage = null;
         }
       } else {
         const backgroundImage = Number(localStorage.getItem('background-image'));
         if (backgroundImage !== 0) {
           loginScreenElement.style.backgroundImage = `url(${require(`@/assets/images/desktopWallpapers/wallpaper_0${backgroundImage}.png`)})`;
+          loginScreenElement.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';  // Apply a dark color overlay
+          loginScreenElement.style.backgroundBlendMode = 'darken';
         }
       }
     },
