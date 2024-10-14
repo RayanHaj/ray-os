@@ -17,11 +17,14 @@ export default {
       lightSwitchSound: null,
       lightSwitchSoundPlayed: false,
       alarmSound: null,
-      alarmSoundPlayed: false
+      alarmSoundPlayed: false,
+      typingSound: null
     }
   },
   async mounted() {
     await this.createBattery();
+
+    this.typingSound = new Audio(require(`@/assets/audio/typing-sound.mp3`));
 
     this.lightSwitchSound = new Audio(require(`@/assets/audio/light-switch-sound.mp3`));
     this.alarmSound = new Audio(require(`@/assets/audio/alarm-sound.mp3`));
@@ -101,6 +104,7 @@ export default {
           textElement.innerHTML = '';
           const interval = setInterval(() => {
             if (counter < string.length) {
+              this.typingSound.play();
               if (string[counter] === ' ') {
                 textElement.innerHTML += '&nbsp;';
               } else {
@@ -108,6 +112,7 @@ export default {
               }
               counter++;
             } else {
+              this.typingSound.pause();
               clearInterval(interval);
               resolve();
             }

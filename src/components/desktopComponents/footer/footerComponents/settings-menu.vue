@@ -105,7 +105,7 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 40px;
-  background-color: #242F36;
+  background-color: var(--background-color-window);
   border-radius: 10px;
   animation: 0.2s openingAnimation;
 }
@@ -149,7 +149,21 @@ export default {
 }
 
 .brightness-input {
+  -webkit-appearance: none;
+  height: 8px;
+  border-radius: 5px;
+  background-color: var(--background-color-input);
+  outline: none;
   width: 100%;
+}
+
+.brightness-input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  background: var(--footer-color);
+  border-radius: 50%;
+  cursor: pointer;
 }
 
 .toggle-button {
@@ -175,7 +189,7 @@ export default {
 }
 
 .footer-item:hover {
-  background-color: slateblue;
+  background-color: var(--hover-color);
   border-radius: 5px;
 }
 

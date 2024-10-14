@@ -7,7 +7,7 @@
                   @battery-easter-egg-activated="activatedEasterEgg = $event" class="windows"></MainWindow>
       <MainWindow v-if="openWindows.includes('settings')" @close-tab="closeWindow" @rendered="windowIsRendered = !windowIsRendered"
                   :window-size="windowDimensions" window-name="settings"
-                  @battery-easter-egg-activated="activatedEasterEgg = $event" class="windows"/>
+                  @battery-easter-egg-activated="activatedEasterEgg = $event" @theme-changed="$emit('themeChanged')" class="windows"/>
       <DesktopGrid grid-size="large" @application-name="setApplicationNameVariable" :application-name="applicationName"
                    :application-names="applicationNames" :window-size="windowDimensions" class="desktop-grid"></DesktopGrid>
     </div>

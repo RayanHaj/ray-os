@@ -119,7 +119,7 @@ export default {
   bottom: 0;
   width: 100%;
   height: 45px;
-  background-color: black;
+  background-color: var(--footer-color);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -145,7 +145,7 @@ export default {
 }
 
 .footer-bar-right-item:hover {
-  background-color: rgba(255, 255, 255, 0.09);
+  background-color: var(--hover-color);
   border-radius: 5px;
 }
 
@@ -155,7 +155,7 @@ export default {
 }
 
 .app-icon:hover {
-  background-color: #2c3e50;
+  background-color: var(--hover-color);
   border-radius: 5px;
 }
 

@@ -56,7 +56,7 @@
     </div>
     <div class="window-content">
       <FileExplorer v-if="windowName === 'file-explorer'"></FileExplorer>
-      <SettingsWindow v-if="windowName === 'settings'"></SettingsWindow>
+      <SettingsWindow @theme-changed="$emit('themeChanged')" v-if="windowName === 'settings'"></SettingsWindow>
     </div>
   </div>
 </template>
@@ -226,7 +226,7 @@ export default {
   resize: both;
   overflow: auto;
   position: relative;
-  background-color: darkslategrey;
+  background-color: var(--background-color-window);
   border: black 1px solid;
 }
 
