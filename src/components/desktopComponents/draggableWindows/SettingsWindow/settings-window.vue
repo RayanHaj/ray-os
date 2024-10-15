@@ -148,6 +148,7 @@ export default {
 
 <style scoped>
 .preference-button {
+  cursor: pointer;
   background-color: var(--background-color-input);
   padding: 10px;
 }
@@ -220,5 +221,12 @@ export default {
   .disabled {
     pointer-events: none;
     opacity: 0.5;
+  }
+
+  @media screen and (max-width: 1225px) {
+    .background-preference {
+      flex-direction: column;
+      align-items: center;
+    }
   }
 </style>
