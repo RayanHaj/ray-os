@@ -2,7 +2,7 @@
   <div class="window-content">
     <div class="header-title">Settings</div>
     <div class="settings">
-      <div class="background-preference">
+      <div ref="backgroundPreference" class="background-preference" :class="{ 'small-layout': windowSmall }">
         <div class="prefer-color-container">
           <div id="preferColor" class="preference-button preference-background">Prefer color</div>
           <div class="color-picker" :class="{ disabled: backgroundPreference === 2 }">
@@ -36,7 +36,28 @@
 export default {
   name: "settings-window",
 
+  data() {
+    return {
+      backgroundPreference: 0,
+      colorPickerValue: '',
+      selectedBackgroundImage: 0,
+      windowSmall: false,
+    }
+  },
+
   mounted() {
+    const backgroundPreferenceElement = this.$refs.backgroundPreference
+    const resizeObserver = new ResizeObserver(entries => {
+      requestAnimationFrame(() => {
+        for (let entry of entries) {
+          const width = entry.contentRect.width;
+          console.log(width)
+          this.windowSmall = width <= 1225;
+        }
+      });
+    });
+    resizeObserver.observe(backgroundPreferenceElement)
+
     const backgroundImage = Number(localStorage.getItem('background-image'));
     if (backgroundImage !== 0) {
       const radioButtons = document.querySelectorAll("input[name='wallpaper']");
@@ -94,14 +115,6 @@ export default {
         }
       })
     })
-  },
-
-  data() {
-    return {
-      backgroundPreference: 0,
-      colorPickerValue: '',
-      selectedBackgroundImage: 0,
-    }
   },
 
   watch: {
@@ -222,6 +235,12 @@ export default {
     pointer-events: none;
     opacity: 0.5;
   }
+
+.small-layout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 
   @media screen and (max-width: 1225px) {
     .background-preference {
