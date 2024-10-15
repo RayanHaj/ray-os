@@ -108,6 +108,7 @@ export default {
   background-color: var(--background-color-window);
   border-radius: 10px;
   animation: 0.2s openingAnimation;
+  z-index: 2;
 }
 
 .add-closing-animation {

@@ -1,13 +1,24 @@
 <template>
   <div v-if="activatedEasterEgg === null" class="desktop">
     <div class="main-screen">
-      <MainWindow v-if="openWindows.includes('file-explorer')" @close-tab="closeWindow"
-                  @rendered="windowIsRendered = !windowIsRendered" :window-size="windowDimensions"
+      <MainWindow v-if="openWindows.includes('file-explorer')"
+                  class="windows file-explorer"
                   window-name="file-explorer"
-                  @battery-easter-egg-activated="activatedEasterEgg = $event" class="windows"></MainWindow>
-      <MainWindow v-if="openWindows.includes('settings')" @close-tab="closeWindow" @rendered="windowIsRendered = !windowIsRendered"
-                  :window-size="windowDimensions" window-name="settings"
-                  @battery-easter-egg-activated="activatedEasterEgg = $event" @theme-changed="$emit('themeChanged')" class="windows"/>
+                  @battery-easter-egg-activated="activatedEasterEgg = $event"
+                  @rendered="windowIsRendered = !windowIsRendered"
+                  @close-tab="closeWindow"
+                  @minimize-window="minimizeWindow"
+                  :window-size="windowDimensions"></MainWindow>
+      <MainWindow v-if="openWindows.includes('settings')"
+                  class="windows settings"
+                  window-name="settings"
+                  @battery-easter-egg-activated="activatedEasterEgg = $event"
+                  @rendered="windowIsRendered = !windowIsRendered"
+                  @theme-changed="$emit('themeChanged')"
+                  @close-tab="closeWindow"
+                  @minimize-window="minimizeWindow"
+                  :window-size="windowDimensions"
+                  />
       <DesktopGrid grid-size="large" @application-name="setApplicationNameVariable" :application-name="applicationName"
                    :application-names="applicationNames" :window-size="windowDimensions" class="desktop-grid"></DesktopGrid>
     </div>
@@ -60,11 +71,14 @@ export default {
   },
   methods: {
     setApplicationNameVariable(name) {
-      console.log(this.openWindows)
       if (!this.openWindows.includes(name)) {
         this.openWindows.push(name);
         this.applicationName = name;
+        return;
       }
+
+      this.$el.querySelector(`.${name}`).style.display = 'block';
+
     },
     closeWindow(value) {
       this.openWindows = this.openWindows.filter(name => name !== value);
@@ -77,22 +91,6 @@ export default {
       const NAVBAR_HEIGHT = 45;
       this.windowDimensions = [window.innerWidth, window.innerHeight - NAVBAR_HEIGHT];
     },
-    // updateWindowSizeContainer(sizes) {
-    //   // const windowsElement = document.querySelector('.windows');
-    //   // windowsElement.style.top = sizes.top;
-    //   // windowsElement.style.left = sizes.left;
-    //
-    //   // const windowsElement = document.querySelector('.windows');
-    //   //
-    //   // if (sizes.width !== null && sizes.height !== null) {
-    //   //   windowsElement.style.width = sizes.width;
-    //   //   windowsElement.style.height = sizes.height;
-    //   // }
-    //   //
-    //   // windowsElement.style.top = sizes.top;
-    //   // windowsElement.style.left = sizes.left;
-    //   // console.log(sizes);
-    // },
     updateSettings() {
       const desktopElement = document.querySelector('.desktop');
 
@@ -172,6 +170,11 @@ export default {
       this.$nextTick(() => {
         this.updateSettings();
       })
+    },
+
+    minimizeWindow(windowName) {
+      const windowElement = this.$el.querySelector(`.${windowName}`);
+      windowElement.style.display = 'none';
     }
   },
   watch: {

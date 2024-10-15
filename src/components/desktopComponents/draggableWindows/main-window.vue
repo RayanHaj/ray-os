@@ -126,8 +126,10 @@ export default {
     },
 
     minimizeWindow() {
-      let windowElement = document.querySelector('.movable-window');
-      windowElement.style.display = 'none';
+      // let windowElement = document.querySelector('.movable-window');
+      // windowElement.style.display = 'none';
+
+      this.$emit('minimizeWindow', this.windowName);
     },
 
     convertFromPixelStringToNumber(string) {
