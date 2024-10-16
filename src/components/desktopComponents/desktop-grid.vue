@@ -15,24 +15,12 @@ export default {
 
   data() {
     return {
-      gridSizes: {
-        //[width and height of grid item, count width grid items, count height grid items]
-        'small': [14, 50, 50],
-        'normal': [20, 35, 35],
-        'larger': [28, 20, 20],
-        'large': [35, 56, 27]
-      },
-      openWindows: [],
       GRID_WIDTH: 31,
       GRID_HEIGHT: 15
     }
   },
 
   props: {
-    gridSize: {
-      type: String,
-      required: true
-    },
     windowSize: {
       type: Array,
       required: false
@@ -44,12 +32,6 @@ export default {
   },
 
   watch: {
-    applicationName(newName) {
-      if (newName !== '' && !this.openWindows.includes(newName)) {
-        this.openWindows.push(newName);
-      }
-    },
-
     windowSize() {
       const gridContainerChildElement = this.$el.children.item(0);
       while (gridContainerChildElement.firstChild) {
@@ -69,7 +51,6 @@ export default {
       this.GRID_WIDTH = Math.floor(this.$el.offsetWidth / GRID_ELEMENT_WIDTH);
 
       this.$nextTick(()=>{
-
         //FIX THIS VARIABLE ASSIGNMENT
         this.GRID_HEIGHT = Math.floor((this.$el.offsetHeight / GRID_ELEMENT_HEIGHT));
       })
@@ -159,6 +140,7 @@ export default {
       let yPos = 0;
       for (let name of this.applicationNames) {
         let gridField = null;
+
         if (yPos !== this.GRID_HEIGHT) {
           gridField = this.getGridFieldByPosition(yPos, xPos);
           yPos++

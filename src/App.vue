@@ -63,4 +63,41 @@ html, body {
   --font-color: #FFFFFFFF;
   --hover-color: #006370;
 }
+
+.sunset-beach {
+  --background-color: #FF6F61;
+  --footer-color: #D03F27;
+  --background-color-window: #FFCCB6;
+  --background-color-input: #FF6F61;
+  --font-color: #333333;
+  --hover-color: #E65C3D;
+}
+
+.forest-dream {
+  --background-color: #2E5B2A;
+  --footer-color: #1C3F1A;
+  --background-color-window: #A3CBA0;
+  --background-color-input: #2E5B2A;
+  --font-color: #FFFFFF;
+  --hover-color: #4F7A4C;
+}
+
+.cyberpunk-night {
+  --background-color: #1E1E2F;
+  --footer-color: #0F0F1A;
+  --background-color-window: #3D3D6B;
+  --background-color-input: #2B2B4D;
+  --font-color: #00FFCC;
+  --hover-color: #FF007F;
+}
+
+.satisfying-sky {
+  --background-color: #B3E5FC; /* Lichte luchtblauw */
+  --footer-color: #0288D1; /* Diep blauw */
+  --background-color-window: #E1F5FE; /* Zeer lichte luchtblauw */
+  --background-color-input: #B3E5FC; /* Lichte luchtblauw */
+  --font-color: #212121; /* Donkergrijs voor goede leesbaarheid */
+  --hover-color: #81D4FA; /* Lichte turquoise */
+}
+
 </style>

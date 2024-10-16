@@ -1,26 +1,24 @@
 <template>
   <div v-if="activatedEasterEgg === null" class="desktop">
     <div class="main-screen">
-      <MainWindow v-if="openWindows.includes('file-explorer')"
-                  class="windows file-explorer"
-                  window-name="file-explorer"
-                  @battery-easter-egg-activated="activatedEasterEgg = $event"
-                  @rendered="windowIsRendered = !windowIsRendered"
-                  @close-tab="closeWindow"
-                  @minimize-window="minimizeWindow"
-                  :window-size="windowDimensions"></MainWindow>
-      <MainWindow v-if="openWindows.includes('settings')"
-                  class="windows settings"
-                  window-name="settings"
-                  @battery-easter-egg-activated="activatedEasterEgg = $event"
-                  @rendered="windowIsRendered = !windowIsRendered"
-                  @theme-changed="$emit('themeChanged')"
-                  @close-tab="closeWindow"
-                  @minimize-window="minimizeWindow"
-                  :window-size="windowDimensions"
-                  />
-      <DesktopGrid grid-size="large" @application-name="setApplicationNameVariable" :application-name="applicationName"
-                   :application-names="applicationNames" :window-size="windowDimensions" class="desktop-grid"></DesktopGrid>
+      <MainWindow
+          v-for="window in openWindows"
+          :key="window"
+          class="windows"
+          :class="window"
+          :window-name="window"
+          @battery-easter-egg-activated="activatedEasterEgg = $event"
+          @rendered="windowIsRendered = !windowIsRendered"
+          @theme-changed="$emit('themeChanged')"
+          @close-tab="closeWindow"
+          @minimize-window="minimizeWindow"
+          :window-size="windowDimensions"
+      />
+      <DesktopGrid
+          @application-name="setApplicationNameVariable"
+          :application-names="applicationNames"
+          :window-size="windowDimensions"
+          class="desktop-grid"/>
     </div>
     <div class="footer-container">
       <SettingsMenu ref="settingsMenu" v-if="quickSettingMenuIsOpen" class="quick-settings-menu"></SettingsMenu>
@@ -58,6 +56,7 @@ export default {
     backgroundImageId: Number
   },
   async mounted() {
+    this.openWindows.push('welcome-window');
     this.updateSettings();
     window.addEventListener('resize', this.updateWindowDimensions);
     window.addEventListener('click', await this.closeOpenWindows);

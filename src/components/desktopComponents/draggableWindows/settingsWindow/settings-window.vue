@@ -1,6 +1,5 @@
 <template>
   <div class="window-content">
-    <div class="header-title">Settings</div>
     <div class="settings">
       <div ref="backgroundPreference" class="background-preference" :class="{ 'small-layout': windowSmall }">
         <div class="prefer-color-container">
@@ -27,6 +26,10 @@
       <select @change="handlePickedTheme" id="theme-picker">
         <option>default</option>
         <option>blue-sea</option>
+        <option>sunset-beach</option>
+        <option>forest-dream</option>
+        <option>cyberpunk-night</option>
+        <option>satisfying-sky</option>
       </select>
     </div>
   </div>
@@ -51,7 +54,6 @@ export default {
       requestAnimationFrame(() => {
         for (let entry of entries) {
           const width = entry.contentRect.width;
-          console.log(width)
           this.windowSmall = width <= 1225;
         }
       });
@@ -118,15 +120,11 @@ export default {
     for (let i = 0; i < preferButtons.length; i++) {
       preferButtons[i].addEventListener('click', () => {
         if (preferButtons[i].id === 'preferImage') {
-          console.log('preferImage')
           preferButtons[i].style.backgroundColor = 'var(--hover-color)';
-          console.log(preferButtons.at(preferButtons.indexOf('preferColor')))
           preferButtons.at(preferButtons.indexOf(preferColorElement)).style.backgroundColor = 'var(--background-color-input)';
           this.backgroundPreference = 2;
         } else {
-          console.log('preferColor')
           preferButtons[i].style.backgroundColor = 'var(--hover-color)';
-          console.log(preferButtons.at(preferButtons.indexOf('preferImage')))
           preferButtons.at(preferButtons.indexOf(preferImageElement)).style.backgroundColor = 'var(--background-color-input)';
           this.backgroundPreference = 1;
         }
@@ -142,7 +140,6 @@ export default {
       localStorage.setItem('background-image', newValue);
     },
     backgroundPreference(newValue) {
-      console.log(newValue)
       localStorage.setItem('background-preference', newValue);
     }
   },
@@ -151,7 +148,6 @@ export default {
     handlePickedTheme(theme) {
       localStorage.setItem('theme', theme.target.value);
       this.$emit('themeChanged');
-      console.log(theme.target.value);
     },
 
     convertRgbToHex(value) {
@@ -205,11 +201,6 @@ export default {
   .static-color {
     width: 100px;
     height: 100px;
-  }
-  .header-title {
-    font-size: 30px;
-    font-weight: bold;
-    margin-bottom: 70px;
   }
 
   .color-picker {
