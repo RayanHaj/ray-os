@@ -103,18 +103,35 @@ export default {
     });
 
     const backgroundPreference = Number(localStorage.getItem('background-preference'));
+    const preferColorElement = this.$el.querySelector('#preferColor');
+    const preferImageElement = this.$el.querySelector('#preferImage');
+    if (backgroundPreference === 1) {
+      this.backgroundPreference = 1;
+      preferColorElement.style.backgroundColor = 'var(--hover-color)';
+    } else {
+      this.backgroundPreference = 2;
+      preferImageElement.style.backgroundColor = 'var(--hover-color)';
+    }
     backgroundPreference === 1 ? this.backgroundPreference = 1 : this.backgroundPreference = 2;
 
-    const preferButtons = this.$el.querySelectorAll('.preference-background');
-    preferButtons.forEach(button => {
-      button.addEventListener('click', () => {
-        if (button.id === 'preferImage') {
+    const preferButtons = Array.from(this.$el.querySelectorAll('.preference-background'));
+    for (let i = 0; i < preferButtons.length; i++) {
+      preferButtons[i].addEventListener('click', () => {
+        if (preferButtons[i].id === 'preferImage') {
+          console.log('preferImage')
+          preferButtons[i].style.backgroundColor = 'var(--hover-color)';
+          console.log(preferButtons.at(preferButtons.indexOf('preferColor')))
+          preferButtons.at(preferButtons.indexOf(preferColorElement)).style.backgroundColor = 'var(--background-color-input)';
           this.backgroundPreference = 2;
         } else {
+          console.log('preferColor')
+          preferButtons[i].style.backgroundColor = 'var(--hover-color)';
+          console.log(preferButtons.at(preferButtons.indexOf('preferImage')))
+          preferButtons.at(preferButtons.indexOf(preferImageElement)).style.backgroundColor = 'var(--background-color-input)';
           this.backgroundPreference = 1;
         }
       })
-    })
+    }
   },
 
   watch: {
