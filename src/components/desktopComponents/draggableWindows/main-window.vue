@@ -1,7 +1,7 @@
 <template>
-  <div class="movable-window">
+  <div class="movable-window" @mousedown="moveWindowOnMouseDownWindowCorners">
     <div class="window-header">
-      <div class="top-header" @mousedown="moveWindow">
+      <div class="top-header" @mousedown="moveWindowOnMouseDownHeader">
         <div class="window-name">
           {{ windowName }}
         </div>
@@ -125,7 +125,103 @@ export default {
       return Number(number);
     },
 
-    moveWindow(event) {
+    moveWindowOnMouseDownWindowCorners(event) {
+      let oldPositionX = event.clientX;
+      let oldPositionY = event.clientY;
+      let windowElement = event.target.closest('.movable-window');
+      let windowWidth = windowElement.getBoundingClientRect().width;
+      let windowHeight = windowElement.getBoundingClientRect().height;
+      let windowLeft = windowElement.getBoundingClientRect().left;
+      let windowTop = windowElement.getBoundingClientRect().top;
+      let mousePositionX = oldPositionX - windowElement.getBoundingClientRect().x;
+      let mousePositionY = oldPositionY - windowElement.getBoundingClientRect().y;
+
+      const WINDOW_MOVE_AREA_SPACE = 3;
+
+      if (mousePositionX + WINDOW_MOVE_AREA_SPACE >= windowWidth) {
+        eventListenersRightSideWindow();
+      }
+
+      if (mousePositionX - WINDOW_MOVE_AREA_SPACE <= 0) {
+        eventListenersLeftSideWindow();
+      }
+
+      if (mousePositionY + WINDOW_MOVE_AREA_SPACE >= windowHeight) {
+        eventListenersBottomSideWindow();
+      }
+
+      if (mousePositionY - WINDOW_MOVE_AREA_SPACE <= 0) {
+        eventListenersTopSideWindow();
+      }
+
+      function eventListenersRightSideWindow() {
+        const onMouseMove = (event) => {
+          event.preventDefault();
+          windowElement.style.width = `${(windowWidth - (oldPositionX - event.clientX))}px`;
+        }
+
+        const onMouseUp = () => {
+          document.removeEventListener('mousemove', onMouseMove);
+          document.removeEventListener('mouseup', onMouseUp);
+        }
+
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+      }
+
+      function eventListenersLeftSideWindow() {
+        const onMouseMove = (event) => {
+          event.preventDefault();
+          const widthChange = windowLeft - event.clientX;
+          const newWidth = windowWidth + widthChange;
+          windowElement.style.width = `${newWidth}px`
+          windowElement.style.left = `${event.clientX}px`
+        }
+
+        const onMouseUp = () => {
+          document.removeEventListener('mousemove', onMouseMove);
+          document.removeEventListener('mouseup', onMouseUp);
+        }
+
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+      }
+
+      function eventListenersBottomSideWindow() {
+        const onMouseMove = (event) => {
+          event.preventDefault();
+          windowElement.style.height = `${(windowHeight - (oldPositionY - event.clientY))}px`
+        }
+
+        const onMouseUp = () => {
+          document.removeEventListener('mousemove', onMouseMove);
+          document.removeEventListener('mouseup', onMouseUp);
+        }
+
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+      }
+
+      function eventListenersTopSideWindow() {
+        const onMouseMove = (event) => {
+          event.preventDefault();
+          const heightChange = windowTop - event.clientY;
+          const newHeight = windowHeight + heightChange;
+          windowElement.style.height = `${newHeight}px`
+          windowElement.style.top = `${event.clientY}px`
+        }
+
+        const onMouseUp = () => {
+          document.removeEventListener('mousemove', onMouseMove);
+          document.removeEventListener('mouseup', onMouseUp);
+        }
+
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+      }
+    },
+
+    moveWindowOnMouseDownHeader(event) {
       event.preventDefault();
       let windowElement = event.target.closest('.movable-window');
       const windowElementStyles = window.getComputedStyle(windowElement);
@@ -181,7 +277,6 @@ export default {
         document.removeEventListener('mousemove', onMouseMove);
         document.removeEventListener('mouseup', onMouseUp);
       };
-
       document.addEventListener('mousemove', onMouseMove);
       document.addEventListener('mouseup', onMouseUp);
     },
@@ -224,6 +319,7 @@ export default {
   flex-direction: row;
   gap: 20px;
   justify-content: space-between;
+  margin-top: 3px;
 }
 
 .window-name {
