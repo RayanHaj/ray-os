@@ -56,8 +56,17 @@ export default {
     backgroundImageId: Number
   },
   async mounted() {
+    const userAgent = navigator.userAgent.toLowerCase();
+    const isMobileOrTablet = /mobile|android|tablet|ipad|iphone/.test(userAgent);
+
+    if (isMobileOrTablet === true) {
+      this.$router.push('/');
+    }
+
     this.openWindows.push('welcome-window');
+
     this.updateSettings();
+
     window.addEventListener('resize', this.updateWindowDimensions);
     window.addEventListener('click', await this.closeOpenWindows);
   },
@@ -101,9 +110,13 @@ export default {
           this.backgroundColor = backgroundColor;
           desktopElement.style.backgroundColor = this.backgroundColor;
           desktopElement.style.backgroundImage = null;
+        } else {
+          this.backgroundColor = '#0A162C'
+          desktopElement.style.backgroundColor = this.backgroundColor;
+          desktopElement.style.backgroundImage = null;
         }
       } else {
-        const backgroundImage = Number(localStorage.getItem('background-image'));
+        let backgroundImage = Number(localStorage.getItem('background-image')) ? Number(localStorage.getItem('background-image')) : 1;
         if (backgroundImage !== 0) {
           desktopElement.style.backgroundImage = `url(${require(`@/assets/images/desktopWallpapers/wallpaper_0${backgroundImage}.png`)})`;
         }

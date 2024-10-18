@@ -52,9 +52,13 @@ export default {
         if (backgroundColor) {
           loginScreenElement.style.backgroundColor = `${backgroundColor}`;
           loginScreenElement.style.backgroundImage = null;
+        } else {
+          this.backgroundColor = '#0A162C'
+          loginScreenElement.style.backgroundColor = this.backgroundColor;
+          loginScreenElement.style.backgroundImage = null;
         }
       } else {
-        const backgroundImage = Number(localStorage.getItem('background-image'));
+        let backgroundImage = Number(localStorage.getItem('background-image')) ? Number(localStorage.getItem('background-image')) : 1;
         if (backgroundImage !== 0) {
           loginScreenElement.style.backgroundImage = `url(${require(`@/assets/images/desktopWallpapers/wallpaper_0${backgroundImage}.png`)})`;
           loginScreenElement.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';  // Apply a dark color overlay

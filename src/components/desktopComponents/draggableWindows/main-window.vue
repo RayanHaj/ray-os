@@ -1,5 +1,5 @@
 <template>
-  <div class="movable-window" @mousedown="moveWindowOnMouseDownWindowCorners">
+  <div class="movable-window" @mousemove="mouseOverEventListeners" @mousedown="moveWindowOnMouseDownWindowCorners">
     <div class="window-header">
       <div class="top-header" @mousedown="moveWindowOnMouseDownHeader">
         <div class="window-name">
@@ -124,7 +124,46 @@ export default {
       }
       return Number(number);
     },
+    mouseOverEventListeners(event) {
+      event.preventDefault();
 
+      let oldPositionX = event.clientX;
+      let oldPositionY = event.clientY;
+      let windowElement = event.target.closest('.movable-window');
+      let windowWidth = windowElement.getBoundingClientRect().width;
+      let windowHeight = windowElement.getBoundingClientRect().height;
+      let mousePositionX = oldPositionX - windowElement.getBoundingClientRect().x;
+      let mousePositionY = oldPositionY - windowElement.getBoundingClientRect().y;
+
+      const WINDOW_MOVE_AREA_SPACE = 3;
+
+      let mouseOnResizeSpace = false;
+
+      if (mousePositionX + WINDOW_MOVE_AREA_SPACE >= windowWidth) {
+        windowElement.style.cursor = 'e-resize';
+        mouseOnResizeSpace = true;
+      }
+
+      if (mousePositionX - WINDOW_MOVE_AREA_SPACE <= 0) {
+        windowElement.style.cursor = 'w-resize';
+        mouseOnResizeSpace = true;
+      }
+
+      if (mousePositionY + WINDOW_MOVE_AREA_SPACE >= windowHeight) {
+        windowElement.style.cursor = 'n-resize';
+        mouseOnResizeSpace = true;
+      }
+
+      if (mousePositionY - WINDOW_MOVE_AREA_SPACE <= 0) {
+        windowElement.style.cursor = 's-resize';
+        mouseOnResizeSpace = true;
+      }
+
+      if (!mouseOnResizeSpace) {
+        windowElement.style.cursor = 'auto';
+        mouseOnResizeSpace = false;
+      }
+    },
     moveWindowOnMouseDownWindowCorners(event) {
       let oldPositionX = event.clientX;
       let oldPositionY = event.clientY;

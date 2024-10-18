@@ -22,6 +22,13 @@ export default {
     }
   },
   async mounted() {
+    const userAgent = navigator.userAgent.toLowerCase();
+    const isMobileOrTablet = /mobile|android|tablet|ipad|iphone/.test(userAgent);
+
+    if (isMobileOrTablet === true) {
+      this.$router.push('/');
+    }
+
     await this.createBattery();
 
     this.typingSound = new Audio(require(`@/assets/audio/typing-sound.mp3`));
