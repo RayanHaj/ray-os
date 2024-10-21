@@ -6,26 +6,16 @@
 <script>
 import DesktopLogin from "@/components/desktopComponents/desktop-login";
 import MobileLogin from "@/components/mobileComponents/mobile-login";
+import {deviceIsMobile} from "@/utils/util";
 
 export default {
   name: "entry-point",
   components: {MobileLogin, DesktopLogin},
   data() {
     return {
-      isMobile: false
+      isMobile: deviceIsMobile(),
     }
-  },
-  mounted() {
-    this.detectDevice();
-  },
-  methods: {
-    detectDevice() {
-      const userAgent = navigator.userAgent.toLowerCase();
-      const isMobileOrTablet = /mobile|android|tablet|ipad|iphone/.test(userAgent);
-
-      this.isMobile = isMobileOrTablet;
-    }
-  },
+  }
 }
 </script>
 

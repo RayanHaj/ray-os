@@ -59,6 +59,7 @@ export default {
     return {
       MAXIMUM_WIDTH: '',
       MAXIMUM_HEIGHT: '',
+      WINDOW_MOVE_AREA_SPACE: 6,
       tabsWrapperElement: null,
     }
   },
@@ -135,26 +136,18 @@ export default {
       let mousePositionX = oldPositionX - windowElement.getBoundingClientRect().x;
       let mousePositionY = oldPositionY - windowElement.getBoundingClientRect().y;
 
-      const WINDOW_MOVE_AREA_SPACE = 3;
-
       let mouseOnResizeSpace = false;
 
-      if (mousePositionX + WINDOW_MOVE_AREA_SPACE >= windowWidth) {
+      if (mousePositionX + this.WINDOW_MOVE_AREA_SPACE >= windowWidth) {
         windowElement.style.cursor = 'e-resize';
         mouseOnResizeSpace = true;
-      }
-
-      if (mousePositionX - WINDOW_MOVE_AREA_SPACE <= 0) {
+      } else if (mousePositionX - this.WINDOW_MOVE_AREA_SPACE <= 0) {
         windowElement.style.cursor = 'w-resize';
         mouseOnResizeSpace = true;
-      }
-
-      if (mousePositionY + WINDOW_MOVE_AREA_SPACE >= windowHeight) {
+      } else if (mousePositionY + this.WINDOW_MOVE_AREA_SPACE >= windowHeight) {
         windowElement.style.cursor = 'n-resize';
         mouseOnResizeSpace = true;
-      }
-
-      if (mousePositionY - WINDOW_MOVE_AREA_SPACE <= 0) {
+      } else if (mousePositionY - this.WINDOW_MOVE_AREA_SPACE <= 0) {
         windowElement.style.cursor = 's-resize';
         mouseOnResizeSpace = true;
       }
@@ -175,21 +168,19 @@ export default {
       let mousePositionX = oldPositionX - windowElement.getBoundingClientRect().x;
       let mousePositionY = oldPositionY - windowElement.getBoundingClientRect().y;
 
-      const WINDOW_MOVE_AREA_SPACE = 3;
-
-      if (mousePositionX + WINDOW_MOVE_AREA_SPACE >= windowWidth) {
+      if (mousePositionX + this.WINDOW_MOVE_AREA_SPACE >= windowWidth) {
         eventListenersRightSideWindow();
       }
 
-      if (mousePositionX - WINDOW_MOVE_AREA_SPACE <= 0) {
+      if (mousePositionX - this.WINDOW_MOVE_AREA_SPACE <= 0) {
         eventListenersLeftSideWindow();
       }
 
-      if (mousePositionY + WINDOW_MOVE_AREA_SPACE >= windowHeight) {
+      if (mousePositionY + this.WINDOW_MOVE_AREA_SPACE >= windowHeight) {
         eventListenersBottomSideWindow();
       }
 
-      if (mousePositionY - WINDOW_MOVE_AREA_SPACE <= 0) {
+      if (mousePositionY - this.WINDOW_MOVE_AREA_SPACE <= 0) {
         eventListenersTopSideWindow();
       }
 

@@ -30,9 +30,10 @@
 
 <script>
 import FooterBar from "@/components/desktopComponents/footer/footer-bar";
-import DesktopGrid from "@/components/desktopComponents/desktop-grid";
+import DesktopGrid from "@/components/sharedComponents/desktop-grid";
 import MainWindow from "@/components/desktopComponents/draggableWindows/main-window";
 import SettingsMenu from "@/components/desktopComponents/footer/footerComponents/settings-menu";
+import {deviceIsMobile} from "@/utils/util";
 
 export default {
   name: "desktop-home",
@@ -56,10 +57,7 @@ export default {
     backgroundImageId: Number
   },
   async mounted() {
-    const userAgent = navigator.userAgent.toLowerCase();
-    const isMobileOrTablet = /mobile|android|tablet|ipad|iphone/.test(userAgent);
-
-    if (isMobileOrTablet === true) {
+    if (deviceIsMobile() === true) {
       this.$router.push('/');
     }
 

@@ -6,6 +6,7 @@
 </template>
 
 <script>
+import {deviceIsMobile} from "@/utils/util";
 export default {
   name: "desktop-grid",
 
@@ -16,7 +17,9 @@ export default {
   data() {
     return {
       GRID_WIDTH: 31,
-      GRID_HEIGHT: 15
+      GRID_HEIGHT: 15,
+      GRID_FIELD_WIDTH: 82,
+      GRID_FIELD_HEIGHT: 82
     }
   },
 
@@ -44,23 +47,101 @@ export default {
 
   methods: {
     init() {
-      const GRID_ELEMENT_WIDTH = 82;
-      const GRID_ELEMENT_HEIGHT = 82;
+      this.GRID_WIDTH = Math.floor(this.$el.offsetWidth / this.GRID_FIELD_WIDTH);
 
-      console.log(`width: ${this.$el.offsetWidth}`)
-      this.GRID_WIDTH = Math.floor(this.$el.offsetWidth / GRID_ELEMENT_WIDTH);
-
-      this.$nextTick(()=>{
+      this.$nextTick(() => {
         //FIX THIS VARIABLE ASSIGNMENT
-        this.GRID_HEIGHT = Math.floor((this.$el.offsetHeight / GRID_ELEMENT_HEIGHT));
+        this.GRID_HEIGHT = Math.floor((this.$el.offsetHeight / this.GRID_FIELD_HEIGHT));
       })
 
       this.createGrid();
       this.addApplicationsToDesktop();
 
-      let gridFields = document.querySelectorAll('.gridField');
+      if (deviceIsMobile()) {
+        this.dragAndDropEventListenersMobile();
+      } else {
+        this.dragAndDropEventListenersDesktop();
+      }
+    },
+    createGrid() {
+      let grid = this.$el.querySelector('.grid');
+
+      for (let x = 0; x < this.GRID_WIDTH; x++) {
+        let upperGridField = document.createElement('div');
+        upperGridField.className = 'upperGridField';
+
+        for (let y = 0; y < this.GRID_HEIGHT; y++) {
+          let gridField = document.createElement('div');
+          gridField.className = 'gridField';
+          gridField.style.width = `${this.GRID_FIELD_WIDTH}px`;
+          gridField.style.height = `${this.GRID_FIELD_HEIGHT}px`;
+
+          upperGridField.appendChild(gridField);
+          grid.appendChild(upperGridField);
+        }
+      }
+    },
+    dragAndDropEventListenersMobile() {
+      let gridFields = this.$el.querySelectorAll('.gridField');
+      // eslint-disable-next-line no-unused-vars
+      let draggedApplicationClone = null;
+      // eslint-disable-next-line no-unused-vars
+      let draggedApplication = null
+      let startGridField = null;
+
+      gridFields.forEach(gridField => {
+        console.log(gridField)
+        gridField.addEventListener("dblclick", (e) => {
+          e.preventDefault();
+          if (gridField.innerHTML === '') {
+            return;
+          }
+          this.$emit('applicationName', gridField.children.namedItem('applicationName').innerText)
+        });
+        gridField.addEventListener("touchstart", (e) => {
+          e.preventDefault();
+          gridField.classList.remove('filled');
+          draggedApplication = gridField;
+          draggedApplicationClone = gridField.cloneNode(true);
+          gridField.style.display = 'none';
+          startGridField = gridField;
+        });
+
+        // The dragover event allows elements to accept drops by preventing the default behavior.
+        gridField.addEventListener("touchmove", (e) => {
+          e.preventDefault();
+          console.log('move')
+        });
+
+        gridField.addEventListener("touchend", (e) => {
+          e.preventDefault();
+          startGridField.innerHTML = "";
+          const childrenArray = Array.from(draggedApplicationClone.children);
+
+          const touch = e.changedTouches[0];
+          const x = touch.clientX;
+          const y = touch.clientY;
+
+          const newGridField = document.elementFromPoint(x, y)
+          if (newGridField.children.length === 0) {
+            newGridField.classList.add('filled');
+            for (let child of childrenArray) {
+              newGridField.appendChild(child);
+            }
+          } else {
+            draggedApplication.classList.add('filled');
+            for (let child of childrenArray) {
+              draggedApplication.appendChild(child);
+            }
+          }
+        });
+      });
+    },
+    dragAndDropEventListenersDesktop() {
+      let gridFields = this.$el.querySelectorAll('.gridField');
       let draggedApplicationClone = null;
       let draggedApplication = null
+
       gridFields.forEach(gridField => {
         gridField.addEventListener("dblclick", (e) => {
           e.preventDefault();
@@ -73,18 +154,17 @@ export default {
           e.preventDefault();
           gridField.classList.remove('filled');
           draggedApplication = gridField;
-          console.log(draggedApplication)
           draggedApplicationClone = gridField.cloneNode(true);
           gridField.innerHTML = "";
         });
+
+        // The dragover event allows elements to accept drops by preventing the default behavior.
         gridField.addEventListener("dragover", (e) => {
           e.preventDefault();
-          console.log("Dragging over")
         });
-        gridField.addEventListener("dragleave", () => {
 
-        });
-        gridField.addEventListener("drop", () => {
+        gridField.addEventListener("drop", (e) => {
+          e.preventDefault();
           const childrenArray = Array.from(draggedApplicationClone.children);
           if (gridField.children.length === 0) {
             gridField.classList.add('filled');
@@ -98,31 +178,10 @@ export default {
             }
           }
         });
-
-      })
-    },
-    createGrid() {
-      let grid = document.querySelector('.grid');
-
-      console.log(`grid height: ${this.GRID_HEIGHT}`);
-      console.log(`grid width: ${this.GRID_WIDTH}`);
-      for (let x = 0; x < this.GRID_WIDTH; x++) {
-        let upperGridField = document.createElement('div');
-        upperGridField.id = 'upperGridField';
-        upperGridField.className = 'upperGridField';
-
-        for (let y = 0; y < this.GRID_HEIGHT; y++) {
-          let gridField = document.createElement('div');
-          gridField.id = 'gridField';
-          gridField.className = 'gridField';
-
-          upperGridField.appendChild(gridField);
-          grid.appendChild(upperGridField);
-        }
-      }
+      });
     },
     getGridFieldByPosition(yPos, xPos) {
-      let upperGridField = document.getElementsByClassName('upperGridField');
+      let upperGridField = this.$el.getElementsByClassName('upperGridField');
       for (let x = 0; x < upperGridField.length; x++) {
         if (x === xPos) {
           let gridFields = upperGridField[x].getElementsByClassName('gridField');
@@ -151,27 +210,24 @@ export default {
         }
 
         this.checkIfImageExists(name).then(value => {
-          let checkBoxElement = document.createElement('input');
-          checkBoxElement.type = 'checkbox';
-          checkBoxElement.className = 'checkbox';
-          gridField.appendChild(checkBoxElement);
           if (value) {
             let img = document.createElement('img');
+            let applicationNameElement = document.createElement('div');
 
             img.src = require(`@/assets/images/footerIcons/${name}.png`);
+            img.className = 'applicationImage';
             img.width = 40;
             img.height = 40;
 
+            applicationNameElement.innerText = name;
+            applicationNameElement.style.fontSize = '9px';
+            applicationNameElement.style.color = 'white';
+            applicationNameElement.className = 'applicationName';
+            gridField.classList.add('filled');
+
             gridField.appendChild(img);
+            gridField.appendChild(applicationNameElement);
           }
-        }).finally(() => {
-          let applicationNameElement = document.createElement('div');
-          applicationNameElement.innerText = name;
-          applicationNameElement.style.fontSize = '9px';
-          applicationNameElement.style.color = 'white';
-          applicationNameElement.id = 'applicationName';
-          gridField.classList.add('filled');
-          gridField.appendChild(applicationNameElement);
         });
       }
     },
@@ -210,19 +266,11 @@ export default {
   position: relative;
 }
 
-.upperGridField {
-  display: flex;
-  flex-direction: column;
-}
-
 .gridField {
   display: flex;
-  position: relative;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  width: 82px;
-  height: 82px;
   font-size: 10px;
   gap: 2px;
   color: white;
@@ -231,16 +279,5 @@ export default {
 
 .gridField.filled:hover {
   background-color: rgba(190, 190, 190, 0.5);
-}
-
-.gridField.filled:hover .checkbox {
-  display: block;
-}
-
-.checkbox {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  display: none;
 }
 </style>
