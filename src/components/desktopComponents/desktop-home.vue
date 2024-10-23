@@ -49,7 +49,7 @@ export default {
       openWindows: [],
       windowDimensions: [],
       backgroundColor: 'black',
-      applicationNames: ['windows-start', 'microsoft-edge', 'file-explorer', 'settings']
+      applicationNames: ['windows-start', 'microsoft-edge', 'file-explorer', 'settings', 'a']
     }
   },
   components: {SettingsMenu, MainWindow, DesktopGrid, FooterBar},
@@ -69,11 +69,11 @@ export default {
     window.addEventListener('click', await this.closeOpenWindows);
   },
   created() {
-    this.windowDimensions = [window.innerWidth, window.innerHeight - 45]
+    this.windowDimensions = [this.innerWidth, window.innerHeight - 45]
   },
   async beforeUnmount() {
     window.removeEventListener('resize', this.updateWindowDimensions);
-    window.addEventListener('click', await this.closeOpenWindows);
+    window.removeEventListener('click', await this.closeOpenWindows);
   },
   methods: {
     setApplicationNameVariable(name) {

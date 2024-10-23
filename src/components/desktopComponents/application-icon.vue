@@ -1,5 +1,5 @@
 <template>
-  <div v-if="imageExists" class="footer-bar-item">
+  <div class="footer-bar-item">
     <img class="icon" :src="getImageUrl" :width="width ? width : 25" :height="height ? height : 25"
          :alt="this.iconImgName">
   </div>
@@ -27,7 +27,7 @@ export default {
 
   computed: {
     getImageUrl() {
-      return require(`@/assets/images/footerIcons/${this.iconImgName}.png`);
+      return this.imageExists ? require(`@/assets/images/footerIcons/${this.iconImgName}.png`) : require('@/assets/images/footerIcons/default-image.png');
     }
   },
 
@@ -40,6 +40,10 @@ export default {
         img.onload = () => {
           this.imageExists = true;
         };
+
+        img.onerror = () => {
+          this.imageExists = false;
+        }
       } catch (error) {
         this.imageExists = false;
       }
