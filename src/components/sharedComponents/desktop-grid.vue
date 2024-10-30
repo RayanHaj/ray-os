@@ -1,13 +1,28 @@
 <template>
   <div class="grid-container">
     <div class="grid">
-      <div v-for="(x, indexX) in GRID_WIDTH" :key="indexX" class="upperGridField">
-        <div v-for="(y, indexY) in GRID_HEIGHT" :key="indexY" class="gridField"
+      <div v-for="(numX, indexX) in GRID_WIDTH" :key="indexX" class="upperGridField">
+        <div v-for="(numY, indexY) in GRID_HEIGHT" :key="indexY" class="gridField"
              @dblclick.prevent="dragAndDropEventListenersDesktop($event.target.parentNode, 'dblclick')"
              @drag.prevent="dragAndDropEventListenersDesktop($event.target.parentNode,'drag')"
-             @dragover.prevent
              @drop.prevent="dragAndDropEventListenersDesktop($event.target,'drop')"
-             :style="{width: `${GRID_FIELD_WIDTH}px`, height: `${GRID_FIELD_HEIGHT}px`}">
+             @dragover.prevent
+             :style="{width: `${GRID_FIELD_WIDTH}px`, height: `${GRID_FIELD_HEIGHT}px`, maxWidth: `${GRID_FIELD_WIDTH}px`, maxHeight: `${GRID_FIELD_HEIGHT}px`}">
+          <div v-if="indexY <= countApplications - 1 && indexX <= Math.floor(countApplications / this.GRID_HEIGHT)"
+               class="gridField-content-wrapper"
+               :style="{width: `${GRID_FIELD_WIDTH}px`, height: `${GRID_FIELD_HEIGHT}px`, maxWidth: `${GRID_FIELD_WIDTH}px`, maxHeight: `${GRID_FIELD_HEIGHT}px`}"
+               draggable="true">
+            <img class="applicationImage"
+                 width="40"
+                 height="40"
+                 :src="applicationImageSrc(this.applicationNames[indexX * this.GRID_HEIGHT + indexY])"
+                 alt="applicationImage"
+                 draggable="false"
+            />
+            <div class="applicationName">
+              {{ this.applicationNames[indexX * GRID_HEIGHT + indexY] }}
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -21,7 +36,9 @@ export default {
   name: "desktop-grid",
 
   mounted() {
-    this.init();
+    this.$nextTick(() => {
+      this.init();
+    });
   },
 
   data() {
@@ -29,11 +46,12 @@ export default {
       windowHasResized: false,
       draggedApplication: null,
       draggedApplicationClone: null,
-      GRID_WIDTH: 31,
-      GRID_HEIGHT: 15,
+      countApplications: 0,
+      GRID_WIDTH: 0,
+      GRID_HEIGHT: 0,
       GRID_FIELD_WIDTH: 82,
       GRID_FIELD_HEIGHT: 82,
-      applicationNamesCurrentIndex: -1
+      linkedListApplicationNamesCurrentIndex: 0
     }
   },
 
@@ -50,37 +68,38 @@ export default {
 
   watch: {
     windowSize(newSize, oldSize) {
-      console.log(compareArrays(oldSize, newSize))
-
       if (compareArrays(oldSize, newSize) === false) {
-        if (this.windowHasResized) {
-          const gridFields = this.$el.querySelectorAll('.gridField');
-          gridFields.forEach(gridField => {
-            while (gridField.firstChild !== null) {
-              gridField.removeChild(gridField.firstChild);
-            }
-          })
-
-          this.init();
-        } else {
-          this.windowHasResized = true;
-        }
+        this.init();
+        this.$forceUpdate();
       }
     },
   },
-
   methods: {
-    init() {
-      this.GRID_WIDTH = Math.floor(this.$el.offsetWidth / this.GRID_FIELD_WIDTH);
-      this.GRID_HEIGHT = Math.floor((this.$el.offsetHeight / this.GRID_FIELD_HEIGHT));
-
-      this.addApplicationsToDesktop();
-
-      if (deviceIsMobile()) {
-        this.dragAndDropEventListenersMobile();
-      } else {
-        this.dragAndDropEventListenersDesktop();
+    applicationImageSrc(appName) {
+      try {
+        return require(`@/assets/images/footerIcons/${appName}.png`);
+      } catch (e) {
+        return require(`@/assets/images/footerIcons/default-image.png`);
       }
+    },
+    init() {
+        this.countApplications = this.applicationNames.length;
+
+        new Promise((resolve) => {
+          this.GRID_WIDTH = Math.floor(this.windowSize[0] / this.GRID_FIELD_WIDTH);
+          this.GRID_HEIGHT = Math.floor((this.windowSize[1] / this.GRID_FIELD_HEIGHT));
+
+          if (this.GRID_HEIGHT !== 0 && this.GRID_WIDTH !== 0) {
+            resolve();
+          }
+        }).then(() => console.log('hi')
+        ).finally(() => {
+          if (deviceIsMobile()) {
+            this.dragAndDropEventListenersMobile();
+          } else {
+            this.dragAndDropEventListenersDesktop();
+          }
+        })
     },
     dragAndDropEventListenersMobile() {
       let gridFields = this.$el.querySelectorAll('.gridField');
@@ -111,7 +130,6 @@ export default {
           e.preventDefault();
 
           const windowSizes = this.$el.getBoundingClientRect();
-
           const draggedApplicationCloneElement = this.$el.querySelector('.application_clone');
           const touch = e.changedTouches[0];
           const x = touch.clientX;
@@ -167,17 +185,10 @@ export default {
         }
         case 'drop': {
           if (this.draggedApplicationClone !== null) {
-            const childrenArray = Array.from(this.draggedApplicationClone.children);
-
             if (gridField.children.length === 0) {
               gridField.classList.add('filled');
               for (let child of Array.from(this.draggedApplicationClone.children)) {
                 gridField.appendChild(child);
-              }
-            } else {
-              this.draggedApplication.classList.add('filled');
-              for (let child of childrenArray) {
-                this.draggedApplication.appendChild(child);
               }
             }
           }
@@ -195,44 +206,6 @@ export default {
               return gridFields[y]
             }
           }
-        }
-      }
-    },
-
-    addApplicationsToDesktop() {
-      let xPos = 0;
-      let yPos = 0;
-      for (let name of this.applicationNames) {
-        let gridField = null;
-
-        if (yPos !== this.GRID_HEIGHT) {
-          gridField = this.getGridFieldByPosition(yPos, xPos);
-          yPos++
-        } else {
-          yPos = 0;
-          xPos++;
-          gridField = this.getGridFieldByPosition(yPos, xPos)
-        }
-
-        if (gridField !== undefined) {
-          this.checkIfImageExists(name).then(value => {
-            let img = document.createElement('img');
-            let applicationNameElement = document.createElement('div');
-
-            img.src = value === true ? require(`@/assets/images/footerIcons/${name}.png`) : require('@/assets/images/footerIcons/default-image.png');
-            img.className = 'applicationImage';
-            img.width = 40;
-            img.height = 40;
-
-            applicationNameElement.innerText = name;
-            applicationNameElement.style.fontSize = '9px';
-            applicationNameElement.style.color = 'white';
-            applicationNameElement.className = 'applicationName';
-            gridField.classList.add('filled');
-
-            gridField.appendChild(img);
-            gridField.appendChild(applicationNameElement);
-          });
         }
       }
     },
@@ -284,6 +257,13 @@ export default {
   gap: 2px;
   color: white;
   user-select: none;
+}
+
+.gridField-content-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .gridField.filled:hover {

@@ -214,6 +214,7 @@ export default {
 }
 
 .desktop-grid {
+  height: auto;
   z-index: 0;
   overflow: hidden;
 }
