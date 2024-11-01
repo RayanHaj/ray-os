@@ -49,7 +49,10 @@ export default {
       openWindows: [],
       windowDimensions: [],
       backgroundColor: 'black',
-      applicationNames: ['windows-start', 'microsoft-edge', 'file-explorer', 'settings', 'a']
+      applicationNames: ['windows-start', 'microsoft-edge', 'file-explorer', 'settings', 'a'],
+
+      // TEST
+      // applicationNames: ['windows-start', 'microsoft-edge', 'file-explorer', 'settings', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
     }
   },
   components: {SettingsMenu, MainWindow, DesktopGrid, FooterBar},
