@@ -61,7 +61,6 @@ export default {
       MAXIMUM_HEIGHT: '',
       WINDOW_MOVE_AREA_SPACE: 6,
       tabsWrapperElement: null,
-      mouseIsDown: false,
 
       moveWindowVariables: {
         yOutOfBoundsPositive: false,
