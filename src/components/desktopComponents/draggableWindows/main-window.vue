@@ -1,10 +1,10 @@
 <template>
-  <div class="movable-window" @mousemove="mouseOverEventListeners" @mousedown="moveWindowOnMouseDownWindowCorners">
+  <div class="movable-window"
+       @mousemove="mouseOverEventListeners"
+       @mousedown="moveWindowOnMouseDownWindowCorners">
     <div class="window-header">
-      <div class="top-header" @mousedown="moveWindowOnMouseDownHeader">
-        <div class="window-name">
-          {{ windowName }}
-        </div>
+      <div class="top-header" @mousedown.prevent="onMouseDownHeader($event)">
+        <div class="window-name"> {{ windowName }} </div>
         <div class="window-state-control">
           <!--window minimize-->
           <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 512 512" @click="minimizeWindow">
@@ -61,6 +61,16 @@ export default {
       MAXIMUM_HEIGHT: '',
       WINDOW_MOVE_AREA_SPACE: 6,
       tabsWrapperElement: null,
+      mouseIsDown: false,
+
+      moveWindowVariables: {
+        yOutOfBoundsPositive: false,
+        yOutOfBoundsNegative: false,
+        NUM_WIDTH: 0,
+        NUM_HEIGHT: 0,
+        prevX: 0,
+        prevY: 0,
+      }
     }
   },
   props: {
@@ -81,7 +91,7 @@ export default {
   },
   methods: {
     maximizeWindow() {
-      let windowElement = document.querySelector('.movable-window');
+      let windowElement = this.$el;
       let computedStyles = window.getComputedStyle(windowElement);
       let windowWidth = this.convertFromPixelStringToNumber(computedStyles.width);
       let windowHeight = this.convertFromPixelStringToNumber(computedStyles.height);
@@ -105,25 +115,6 @@ export default {
         windowElement.style.left = `${newX}px`;
         windowElement.style.top = `${newY}px`;
       }
-    },
-
-    minimizeWindow() {
-      // let windowElement = document.querySelector('.movable-window');
-      // windowElement.style.display = 'none';
-
-      this.$emit('minimizeWindow', this.windowName);
-    },
-
-    convertFromPixelStringToNumber(string) {
-      let number = '';
-      for (let index in string) {
-        const letter = string[index];
-        if (letter === '.' || letter === 'p') {
-          break;
-        }
-        number += letter;
-      }
-      return Number(number);
     },
     mouseOverEventListeners(event) {
       event.preventDefault();
@@ -250,65 +241,74 @@ export default {
         document.addEventListener('mouseup', onMouseUp);
       }
     },
+    onMouseDownHeader(event) {
+      this.moveWindowVariables.NUM_WIDTH = this.convertFromPixelStringToNumber(window.getComputedStyle(this.$el).width);
+      this.moveWindowVariables.NUM_HEIGHT = this.convertFromPixelStringToNumber(window.getComputedStyle(this.$el).height);
 
-    moveWindowOnMouseDownHeader(event) {
-      event.preventDefault();
-      let windowElement = event.target.closest('.movable-window');
-      const windowElementStyles = window.getComputedStyle(windowElement);
+      this.moveWindowVariables.prevX = event.clientX;
+      this.moveWindowVariables.prevY = event.clientY;
 
-      let yOutOfBoundsPositive = false;
-      let yOutOfBoundsNegative = false;
+      document.addEventListener('mouseup', this.onMouseUpHeader);
+      document.addEventListener('mousemove', this.onMouseMoveHeader);
+    },
+    onMouseMoveHeader(event) {
+      if ((this.moveWindowVariables.NUM_WIDTH === this.MAXIMUM_WIDTH ||
+           this.moveWindowVariables.NUM_WIDTH + 1 === this.MAXIMUM_WIDTH ||
+           this.moveWindowVariables.NUM_WIDTH - 1 === this.MAXIMUM_WIDTH) &&
+          (this.moveWindowVariables.NUM_HEIGHT === this.MAXIMUM_HEIGHT ||
+          (this.moveWindowVariables.NUM_HEIGHT - 45) === this.MAXIMUM_HEIGHT))
+      {
+        this.$el.style.left = `${this.moveWindowVariables.prevX - (this.moveWindowVariables.NUM_WIDTH / 2 - 250)}px`;
+        this.$el.style.top = `${this.moveWindowVariables.prevY}px`;
+        this.$el.style.width = '60%';
+        this.$el.style.height = '80%';
+      }
 
-      const NUM_MAXIMUM_WIDTH = this.MAXIMUM_WIDTH;
-      const NUM_MAXIMUM_HEIGHT = this.MAXIMUM_HEIGHT;
-      const NUM_WIDTH = this.convertFromPixelStringToNumber(windowElementStyles.width);
-      const NUM_HEIGHT = this.convertFromPixelStringToNumber(windowElementStyles.height);
+      const newX = event.clientX;
+      const newY = event.clientY;
 
-      let prevX = event.clientX;
-      let prevY = event.clientY;
+      this.moveWindowVariables.yOutOfBoundsPositive = newX >= this.MAXIMUM_WIDTH - 1;
+      this.moveWindowVariables.yOutOfBoundsNegative = newX <= 1;
 
-      const onMouseMove = (event) => {
-        if ((NUM_WIDTH === NUM_MAXIMUM_WIDTH || NUM_WIDTH + 1 === NUM_MAXIMUM_WIDTH || NUM_WIDTH - 1 === NUM_MAXIMUM_WIDTH) && (NUM_HEIGHT === NUM_MAXIMUM_HEIGHT || (NUM_HEIGHT - 45) === NUM_MAXIMUM_HEIGHT)) {
-          windowElement.style.left = `${prevX - (NUM_WIDTH / 2 - 250)}px`;
-          windowElement.style.top = `${prevY}px`;
-          windowElement.style.width = '60%';
-          windowElement.style.height = '80%';
+      const deltaX = newX - this.moveWindowVariables.prevX;
+      const deltaY = newY - this.moveWindowVariables.prevY;
+
+      this.$el.style.left = `${this.$el.offsetLeft + deltaX}px`;
+      this.$el.style.top = `${this.$el.offsetTop + deltaY}px`;
+
+      this.moveWindowVariables.prevX = newX;
+      this.moveWindowVariables.prevY = newY;
+    },
+    onMouseUpHeader() {
+      if (this.moveWindowVariables.yOutOfBoundsPositive) {
+        this.$el.style.left = '50%';
+        this.$el.style.width = '50%';
+        this.$el.style.height = '100%';
+        this.$el.style.top = 0;
+      }
+      if (this.moveWindowVariables.yOutOfBoundsNegative) {
+        this.$el.style.left = 0;
+        this.$el.style.width = '50%';
+        this.$el.style.height = '100%';
+        this.$el.style.top = 0;
+      }
+
+      document.removeEventListener('mousemove', this.onMouseMoveHeader);
+      document.removeEventListener('mouseup', this.onMouseUpHeader);
+    },
+    minimizeWindow() {
+      this.$emit('minimizeWindow', this.windowName);
+    },
+    convertFromPixelStringToNumber(string) {
+      let number = '';
+      for (let index in string) {
+        const letter = string[index];
+        if (letter === '.' || letter === 'p') {
+          break;
         }
-
-        const newX = event.clientX;
-        const newY = event.clientY;
-
-        yOutOfBoundsPositive = newX >= NUM_MAXIMUM_WIDTH - 1;
-        yOutOfBoundsNegative = newX <= 1;
-
-        const deltaX = newX - prevX;
-        const deltaY = newY - prevY;
-
-        windowElement.style.left = `${windowElement.offsetLeft + deltaX}px`;
-        windowElement.style.top = `${windowElement.offsetTop + deltaY}px`;
-
-        prevX = newX;
-        prevY = newY;
-      };
-
-      const onMouseUp = () => {
-        if (yOutOfBoundsPositive) {
-          windowElement.style.left = '50%';
-          windowElement.style.width = '50%';
-          windowElement.style.height = '100%';
-          windowElement.style.top = 0;
-        }
-        if (yOutOfBoundsNegative) {
-          windowElement.style.left = 0;
-          windowElement.style.width = '50%';
-          windowElement.style.height = '100%';
-          windowElement.style.top = 0;
-        }
-        document.removeEventListener('mousemove', onMouseMove);
-        document.removeEventListener('mouseup', onMouseUp);
-      };
-      document.addEventListener('mousemove', onMouseMove);
-      document.addEventListener('mouseup', onMouseUp);
+        number += letter;
+      }
+      return Number(number);
     },
   }
 }
