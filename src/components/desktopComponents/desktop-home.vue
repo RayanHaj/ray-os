@@ -37,7 +37,6 @@ import {deviceIsMobile} from "@/utils/util";
 
 export default {
   name: "desktop-home",
-
   data() {
     return {
       windowIsRendered: false,
@@ -59,6 +58,7 @@ export default {
   props: {
     backgroundImageId: Number
   },
+  emits: ['themeChanged'],
   async mounted() {
     if (deviceIsMobile() === true) {
       this.$router.push('/');
