@@ -220,9 +220,12 @@ export default {
       else if (this.mouseOverWindowVariables.mousePositionY + this.WINDOW_MOVE_AREA_SPACE >= this.mouseOverWindowVariables.windowHeight)
         return 'bottom';
       else if (this.mouseOverWindowVariables.mousePositionY - this.WINDOW_MOVE_AREA_SPACE <= 0)
-        return 'top'
+        return 'top';
     },
     onMouseDownHeader(event) {
+      if (this.mouseOverWindowVariables.mouseOnResizeSpace === true){
+        return;
+      }
       this.moveWindowVariables.NUM_WIDTH = this.convertFromPixelStringToNumber(window.getComputedStyle(this.$el).width);
       this.moveWindowVariables.NUM_HEIGHT = this.convertFromPixelStringToNumber(window.getComputedStyle(this.$el).height);
 
