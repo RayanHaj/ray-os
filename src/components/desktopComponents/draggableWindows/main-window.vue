@@ -78,6 +78,7 @@ export default {
         windowTop: 0,
         mousePositionX: 0,
         mousePositionY: 0,
+        windowDragging: false,
       }
     }
   },
@@ -156,7 +157,7 @@ export default {
         this.mouseOverWindowVariables.mouseOnResizeSpace = true;
       }
 
-      if (!this.mouseOverWindowVariables.mouseOnResizeSpace) {
+      if (this.mouseOverWindowVariables.mouseOnResizeSpace === false && this.mouseDownWindowVariables.windowDragging === false) {
         this.$el.style.cursor = 'auto';
         this.mouseOverWindowVariables.mouseOnResizeSpace = false;
       }
@@ -175,6 +176,8 @@ export default {
 
       const onMouseMove = (event) => {
         event.preventDefault();
+
+        this.mouseDownWindowVariables.windowDragging = true;
 
         switch (windowBorderSidePressed) {
           case 'right': {
@@ -205,6 +208,7 @@ export default {
       }
 
       const onMouseUp = () => {
+        this.mouseDownWindowVariables.windowDragging = false;
         document.removeEventListener('mousemove', onMouseMove);
         document.removeEventListener('mouseup', onMouseUp);
       }
@@ -226,6 +230,7 @@ export default {
       if (this.mouseOverWindowVariables.mouseOnResizeSpace === true){
         return;
       }
+
       this.moveWindowVariables.NUM_WIDTH = this.convertFromPixelStringToNumber(window.getComputedStyle(this.$el).width);
       this.moveWindowVariables.NUM_HEIGHT = this.convertFromPixelStringToNumber(window.getComputedStyle(this.$el).height);
 
@@ -237,10 +242,10 @@ export default {
     },
     onMouseMoveHeader(event) {
       if ((this.moveWindowVariables.NUM_WIDTH === this.MAXIMUM_WIDTH ||
-              this.moveWindowVariables.NUM_WIDTH + 1 === this.MAXIMUM_WIDTH ||
-              this.moveWindowVariables.NUM_WIDTH - 1 === this.MAXIMUM_WIDTH) &&
+           this.moveWindowVariables.NUM_WIDTH + 1 === this.MAXIMUM_WIDTH ||
+           this.moveWindowVariables.NUM_WIDTH - 1 === this.MAXIMUM_WIDTH) &&
           (this.moveWindowVariables.NUM_HEIGHT === this.MAXIMUM_HEIGHT ||
-              (this.moveWindowVariables.NUM_HEIGHT - 45) === this.MAXIMUM_HEIGHT)) {
+          (this.moveWindowVariables.NUM_HEIGHT - 45) === this.MAXIMUM_HEIGHT)) {
         this.$el.style.left = `${this.moveWindowVariables.prevX - (this.moveWindowVariables.NUM_WIDTH / 2 - 250)}px`;
         this.$el.style.top = `${this.moveWindowVariables.prevY}px`;
         this.$el.style.width = '60%';
