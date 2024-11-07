@@ -8,23 +8,30 @@
             @dblclick="dragAndDropEventListenersDesktop($event, 'dblclick')"
             @drop="dragAndDropEventListenersDesktop($event, 'drop')"
             @dragstart="dragAndDropEventListenersDesktop($event, 'dragstart')"
-            @dragover.prevent
+            @dragover.prevent="dragAndDropEventListenersDesktop($event, 'dragover')"
+            @click="this.contextMenuActive === true ? this.contextMenuActive = false : null"
+            @contextmenu.prevent="onRightClick"
+            @mouseover="onMouseOver"
+            @mouseleave="onMouseLeave"
             :style="{width: `${GRID_FIELD_WIDTH}px`, height: `${GRID_FIELD_HEIGHT}px`, maxWidth: `${GRID_FIELD_WIDTH}px`, maxHeight: `${GRID_FIELD_HEIGHT}px`}"
         >
           <div
               v-if="checkShouldFillGridField(indexX, indexY)"
-              class="gridField-content-wrapper"
+              class="grid-field-content-wrapper"
               :style="{width: `${GRID_FIELD_WIDTH}px`, height: `${GRID_FIELD_HEIGHT}px`, maxWidth: `${GRID_FIELD_WIDTH}px`, maxHeight: `${GRID_FIELD_HEIGHT}px`}"
               draggable="true"
           >
-            <img
-                class="applicationImage"
-                width="40"
-                height="40"
-                :src="applicationImageSrc(applicationNames[indexX * GRID_HEIGHT + indexY])"
-                alt="applicationImage"
-                draggable="false"
-            />
+            <div class="grid-field-img-checkbox-wrapper">
+              <input type="checkbox" class="grid-field-checkbox">
+              <img
+                  class="applicationImage"
+                  width="40"
+                  height="40"
+                  :src="applicationImageSrc(applicationNames[indexX * GRID_HEIGHT + indexY])"
+                  alt="applicationImage"
+                  draggable="false"
+              />
+            </div>
             <div class="applicationName">
               {{ applicationNames[indexX * GRID_HEIGHT + indexY] }}
             </div>
@@ -32,6 +39,8 @@
         </div>
       </div>
     </div>
+
+    <div v-show="contextMenuActive === true" class="context-menu" ref="contextMenu"></div>
   </div>
 </template>
 
@@ -49,10 +58,11 @@ export default {
 
   data() {
     return {
+      hasBeenDraggedFromStartPosition: false,
+      contextMenuActive: false,
       windowHasResized: false,
       draggedApplication: null,
       draggedApplicationClone: null,
-      hasBeenDraggedFromStartPosition: false,
       countApplications: 0,
       GRID_WIDTH: 0,
       GRID_HEIGHT: 0,
@@ -61,9 +71,6 @@ export default {
       linkedListApplicationNamesCurrentIndex: 0,
       listApplicationElements: []
     }
-  },
-
-  computed: {
   },
 
   props: {
@@ -110,21 +117,7 @@ export default {
 
           array.push(applicationElementObject);
         }
-      })
-      // this.$el.querySelectorAll('.gridField').forEach(gridField => {
-      //   if (gridField.children.length !== 0) {
-      //     const applicationElement = gridField.children[0];
-      //     const applicationName = gridField.children[0].children[1].innerText;
-      //     const indexOfApplicationName = this.applicationNames.indexOf(applicationName);
-      //
-      //     let applicationElementObject = {
-      //       'applicationElement': applicationElement,
-      //       'indexOfApplicationName': indexOfApplicationName
-      //     }
-      //
-      //     array.push(applicationElementObject);
-      //   }
-      // });
+      });
 
       array.forEach(object => {
         this.listApplicationElements[object.indexOfApplicationName] = object.applicationElement;
@@ -137,12 +130,35 @@ export default {
         this.GRID_HEIGHT = Math.floor((this.windowSize[1] / this.GRID_FIELD_HEIGHT));
       }
     },
+    onRightClick(e) {
+      const contextMenu = this.$refs.contextMenu;
+      if (this.contextMenuActive === false) {
+        this.contextMenuActive = true;
+      }
+
+      contextMenu.style.left = `${e.clientX}px`;
+      contextMenu.style.top = `${e.clientY}px`;
+    },
+    onMouseOver(e) {
+      const gridField = e.currentTarget;
+      const checkbox = gridField.querySelector('.grid-field-checkbox');
+      if (checkbox) {
+        checkbox.style.display = 'block';
+      }
+    },
+    onMouseLeave(e) {
+      const gridField = e.currentTarget;
+      const checkbox = gridField.querySelector('.grid-field-checkbox');
+      if (checkbox) {
+        checkbox.style.display = 'none';
+      }
+    },
     dragAndDropEventListenersDesktop(event, eventName) {
       const gridField = event.currentTarget;
 
       switch (eventName) {
         case 'dblclick': {
-          if (gridField.innerHTML === '') return;
+          if (!gridField.querySelector('.grid-field-content-wrapper')) return;
           this.$emit('applicationName', gridField.querySelector('.applicationName').innerText);
           break;
         }
@@ -155,23 +171,25 @@ export default {
 
           imgClone.style.width = '40px';
           imgClone.style.height = '40px';
-          imgClone.style.pointerEvents = 'none';
           imgClone.style.position = 'absolute';
           imgClone.style.top = '-1000px'
 
           this.$el.appendChild(imgClone);
-          event.dataTransfer.setDragImage(imgClone, 20, 20);
 
+          event.dataTransfer.setDragImage(imgClone, 20, 20);
           setTimeout(() => {
             this.$el.removeChild(imgClone);
           }, 0)
+          break;
+        }
+        case 'dragover': {
           break;
         }
         case 'drop': {
           if (this.draggedApplicationClone) {
             if (gridField.children.length === 0) {
               gridField.classList.add('filled');
-              gridField.appendChild(this.draggedApplicationClone.querySelector('.gridField-content-wrapper'));
+              gridField.appendChild(this.draggedApplicationClone.querySelector('.grid-field-content-wrapper'));
               this.draggedApplication.innerHTML = "";
               this.draggedApplication.classList.remove('filled');
             }
@@ -266,7 +284,16 @@ export default {
   user-select: none;
 }
 
-.gridField-content-wrapper {
+.grid-field-checkbox {
+  position: absolute;
+  display: none;
+}
+
+.grid-field-img-checkbox-wrapper {
+  position: relative;
+}
+
+.grid-field-content-wrapper {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -275,5 +302,11 @@ export default {
 
 .gridField.filled:hover {
   background-color: rgba(190, 190, 190, 0.5);
+}
+
+.context-menu {
+  position: absolute;
+  background-color: black;
+  padding: 100px;
 }
 </style>

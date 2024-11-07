@@ -59,6 +59,7 @@ export default {
         NUM_HEIGHT: 0,
         prevX: 0,
         prevY: 0,
+        windowIsMoving: false,
       },
       mouseOverWindowVariables: {
         oldPositionX: 0,
@@ -78,7 +79,7 @@ export default {
         windowTop: 0,
         mousePositionX: 0,
         mousePositionY: 0,
-        windowDragging: false,
+        mousePressedDown: false,
       }
     }
   },
@@ -135,6 +136,10 @@ export default {
     mouseOverEventListeners(event) {
       event.preventDefault();
 
+      if (this.moveWindowVariables.windowIsMoving === true) {
+        return;
+      }
+
       this.mouseOverWindowVariables.oldPositionX = event.clientX;
       this.mouseOverWindowVariables.oldPositionY = event.clientY;
       this.mouseOverWindowVariables.windowWidth = this.$el.getBoundingClientRect().width;
@@ -157,7 +162,7 @@ export default {
         this.mouseOverWindowVariables.mouseOnResizeSpace = true;
       }
 
-      if (this.mouseOverWindowVariables.mouseOnResizeSpace === false && this.mouseDownWindowVariables.windowDragging === false) {
+      if (this.mouseOverWindowVariables.mouseOnResizeSpace === false && this.mouseDownWindowVariables.mousePressedDown === false) {
         this.$el.style.cursor = 'auto';
         this.mouseOverWindowVariables.mouseOnResizeSpace = false;
       }
@@ -177,7 +182,7 @@ export default {
       const onMouseMove = (event) => {
         event.preventDefault();
 
-        this.mouseDownWindowVariables.windowDragging = true;
+        this.mouseDownWindowVariables.mousePressedDown = true;
 
         switch (windowBorderSidePressed) {
           case 'right': {
@@ -208,7 +213,7 @@ export default {
       }
 
       const onMouseUp = () => {
-        this.mouseDownWindowVariables.windowDragging = false;
+        this.mouseDownWindowVariables.mousePressedDown = false;
         document.removeEventListener('mousemove', onMouseMove);
         document.removeEventListener('mouseup', onMouseUp);
       }
@@ -241,6 +246,7 @@ export default {
       document.addEventListener('mousemove', this.onMouseMoveHeader);
     },
     onMouseMoveHeader(event) {
+      this.moveWindowVariables.windowIsMoving = true;
       if ((this.moveWindowVariables.NUM_WIDTH === this.MAXIMUM_WIDTH ||
            this.moveWindowVariables.NUM_WIDTH + 1 === this.MAXIMUM_WIDTH ||
            this.moveWindowVariables.NUM_WIDTH - 1 === this.MAXIMUM_WIDTH) &&
@@ -268,6 +274,7 @@ export default {
       this.moveWindowVariables.prevY = newY;
     },
     onMouseUpHeader() {
+      this.moveWindowVariables.windowIsMoving = false;
       if (this.moveWindowVariables.yOutOfBoundsPositive) {
         this.$el.style.left = '50%';
         this.$el.style.width = '50%';
