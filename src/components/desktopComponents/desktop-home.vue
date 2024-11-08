@@ -12,7 +12,10 @@
           @theme-changed="$emit('themeChanged')"
           @close-tab="closeWindow"
           @minimize-window="minimizeWindow"
+          @split-other-window="splitOtherWindow = $event"
           :window-size="windowDimensions"
+          :open-windows="openWindows"
+          :split-other-window="splitOtherWindow"
       />
       <DesktopGrid
           @application-name="setApplicationNameVariable"
@@ -44,6 +47,7 @@ export default {
       windowWidth: '',
       windowHeight: '',
       applicationName: '',
+      splitOtherWindow: {},
       activatedEasterEgg: null,
       openWindows: [],
       windowDimensions: [],

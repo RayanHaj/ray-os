@@ -51,10 +51,9 @@ export default {
       MAXIMUM_WIDTH: '',
       MAXIMUM_HEIGHT: '',
       WINDOW_MOVE_AREA_SPACE: 6,
-      tabsWrapperElement: null,
       moveWindowVariables: {
-        yOutOfBoundsPositive: false,
-        yOutOfBoundsNegative: false,
+        xOutOfBoundsPositive: false,
+        xOutOfBoundsNegative: false,
         NUM_WIDTH: 0,
         NUM_HEIGHT: 0,
         prevX: 0,
@@ -99,13 +98,34 @@ export default {
     windowName: {
       type: String,
       required: true
+    },
+    openWindows: {
+      type: Array,
+      required: true
+    },
+    splitOtherWindow: {
+      type: Object,
+      required: true
     }
   },
+  emits: ['splitOtherWindow', 'minimizeWindow', 'rendered'],
   watch: {
     windowSize(newSize) {
       this.MAXIMUM_WIDTH = newSize[0];
       this.MAXIMUM_HEIGHT = newSize[1];
     },
+    splitOtherWindow(newWindow) {
+      if (newWindow.window === this.windowName) {
+        if (newWindow.xOutOfBoundsPositive === true) {
+          this.moveWindowVariables.xOutOfBoundsPositive = false;
+          this.moveWindowVariables.xOutOfBoundsNegative = true;
+        } else {
+          this.moveWindowVariables.xOutOfBoundsPositive = true;
+          this.moveWindowVariables.xOutOfBoundsNegative = false;
+        }
+        this.splitWindow();
+      }
+    }
   },
   methods: {
     maximizeWindow() {
@@ -261,8 +281,8 @@ export default {
       const newX = event.clientX;
       const newY = event.clientY;
 
-      this.moveWindowVariables.yOutOfBoundsPositive = newX >= this.MAXIMUM_WIDTH - 1;
-      this.moveWindowVariables.yOutOfBoundsNegative = newX <= 1;
+      this.moveWindowVariables.xOutOfBoundsPositive = newX >= this.MAXIMUM_WIDTH - 1;
+      this.moveWindowVariables.xOutOfBoundsNegative = newX <= 1;
 
       const deltaX = newX - this.moveWindowVariables.prevX;
       const deltaY = newY - this.moveWindowVariables.prevY;
@@ -275,21 +295,40 @@ export default {
     },
     onMouseUpHeader() {
       this.moveWindowVariables.windowIsMoving = false;
-      if (this.moveWindowVariables.yOutOfBoundsPositive) {
-        this.$el.style.left = '50%';
-        this.$el.style.width = '50%';
-        this.$el.style.height = '100%';
-        this.$el.style.top = 0;
-      }
-      if (this.moveWindowVariables.yOutOfBoundsNegative) {
-        this.$el.style.left = 0;
-        this.$el.style.width = '50%';
-        this.$el.style.height = '100%';
-        this.$el.style.top = 0;
+      const returnPosOutOfBoundsPositiveOrNegative = this.splitWindow();
+      if (this.openWindows.length > 1) {
+        const currentWindowIndex = this.openWindows.indexOf(this.windowName);
+
+        let nextWindow = '';
+        if (this.openWindows.length - 1 >= currentWindowIndex + 1) {
+          nextWindow = this.openWindows[currentWindowIndex + 1];
+        } else if (this.openWindows.length - 1 >= currentWindowIndex - 1) {
+          nextWindow = this.openWindows[currentWindowIndex - 1];
+        }
+
+        this.$emit(
+            'splitOtherWindow',
+            {'window': nextWindow, 'xOutOfBoundsPositive': returnPosOutOfBoundsPositiveOrNegative}
+        )
       }
 
       document.removeEventListener('mousemove', this.onMouseMoveHeader);
       document.removeEventListener('mouseup', this.onMouseUpHeader);
+    },
+    splitWindow() {
+      if (this.moveWindowVariables.xOutOfBoundsPositive) {
+        this.$el.style.left = '50%';
+        this.$el.style.width = '50%';
+        this.$el.style.height = '100%';
+        this.$el.style.top = 0;
+        return true;
+      } else if (this.moveWindowVariables.xOutOfBoundsNegative) {
+        this.$el.style.left = 0;
+        this.$el.style.width = '50%';
+        this.$el.style.height = '100%';
+        this.$el.style.top = 0;
+        return false;
+      }
     },
     minimizeWindow() {
       this.$emit('minimizeWindow', this.windowName);
