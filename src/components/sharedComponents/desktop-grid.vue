@@ -2,8 +2,7 @@
   <div class="grid-container">
     <div v-if="GRID_HEIGHT > 0" class="grid">
       <div v-for="(numX, indexX) in GRID_WIDTH" :key="indexX" class="upperGridField">
-        <div
-            v-for="(numY, indexY) in GRID_HEIGHT" :key="indexY" class="gridField"
+        <div v-for="(numY, indexY) in GRID_HEIGHT" :key="indexY" class="gridField"
             :class="{'filled': checkShouldFillGridField(indexX, indexY) }"
             @dblclick="dragAndDropEventListenersDesktop($event, 'dblclick')"
             @drop="dragAndDropEventListenersDesktop($event, 'drop')"

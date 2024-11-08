@@ -44,18 +44,15 @@ export default {
     return {
       windowIsRendered: false,
       quickSettingMenuIsOpen: false,
+      activatedEasterEgg: null,
       windowWidth: '',
       windowHeight: '',
       applicationName: '',
       splitOtherWindow: {},
-      activatedEasterEgg: null,
       openWindows: [],
       windowDimensions: [],
       backgroundColor: 'black',
-      applicationNames: ['windows-start', 'microsoft-edge', 'file-explorer', 'settings', 'a'],
-
-      // TEST
-      // applicationNames: ['windows-start', 'microsoft-edge', 'file-explorer', 'settings', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+      applicationNames: ['windows-start', 'microsoft-edge', 'file-explorer', 'settings'],
     }
   },
   components: {SettingsMenu, MainWindow, DesktopGrid, FooterBar},
@@ -68,7 +65,7 @@ export default {
       this.$router.push('/');
     }
 
-    this.openWindows.push('welcome-window');
+    // this.openWindows.push('welcome-window');
 
     this.updateSettings();
 
@@ -76,7 +73,7 @@ export default {
     window.addEventListener('click', await this.closeOpenWindows);
   },
   created() {
-    this.windowDimensions = [this.innerWidth, window.innerHeight - 45]
+    this.windowDimensions = [window.innerWidth, window.innerHeight - 45]
   },
   async beforeUnmount() {
     window.removeEventListener('resize', this.updateWindowDimensions);
@@ -105,7 +102,7 @@ export default {
       this.windowDimensions = [window.innerWidth, window.innerHeight - NAVBAR_HEIGHT];
     },
     updateSettings() {
-      const desktopElement = document.querySelector('.desktop');
+      const desktopElement = this.$el;
 
       const backgroundPreference = localStorage.getItem('background-preference');
 
