@@ -9,11 +9,16 @@
             @drop="dragAndDropEventListenersDesktop($event, 'drop')"
             @dragstart="dragAndDropEventListenersDesktop($event, 'dragstart')"
             @dragover.prevent="dragAndDropEventListenersDesktop($event, 'dragover')"
-            @click="this.contextMenuActive === true ? this.contextMenuActive = false : null"
-            @contextmenu.prevent="onRightClick"
-            @mouseover="onMouseOver"
-            @mouseleave="onMouseLeave"
-            :style="{width: `${GRID_FIELD_WIDTH}px`, height: `${GRID_FIELD_HEIGHT}px`, maxWidth: `${GRID_FIELD_WIDTH}px`, maxHeight: `${GRID_FIELD_HEIGHT}px`}"
+            @click="onClickGridField"
+            @contextmenu.prevent="onRightClickGridField"
+            @mouseover="onMouseOverGridField"
+            @mouseleave="onMouseLeaveGridField"
+            :style="{
+              width: `${GRID_FIELD_WIDTH}px`,
+              height: `${GRID_FIELD_HEIGHT}px`,
+              maxWidth: `${GRID_FIELD_WIDTH}px`,
+              maxHeight: `${GRID_FIELD_HEIGHT}px`
+            }"
         >
           <div
               v-if="checkShouldFillGridField(indexX, indexY)"
@@ -40,7 +45,11 @@
       </div>
     </div>
 
-    <div v-show="contextMenuActive === true" class="context-menu" ref="contextMenu"></div>
+    <div v-show="contextMenuActive === true" class="context-menu" ref="contextMenu">
+      <button v-if="currentGridFieldOnRightClickContainsApplication" @click="contextMenuActions($event, 'copy')">copy</button>
+      <button @click="contextMenuActions($event, 'paste')">paste</button>
+      <button v-if="currentGridFieldOnRightClickContainsApplication" @click="contextMenuActions($event, 'delete')">delete</button>
+    </div>
   </div>
 </template>
 
@@ -58,17 +67,17 @@ export default {
 
   data() {
     return {
-      hasBeenDraggedFromStartPosition: false,
       contextMenuActive: false,
-      windowHasResized: false,
       draggedApplication: null,
       draggedApplicationClone: null,
+      currentGridFieldOnRightClick: null,
+      currentGridFieldOnRightClickContainsApplication: false,
+      copiedApplication: null,
       countApplications: 0,
       GRID_WIDTH: 0,
       GRID_HEIGHT: 0,
       GRID_FIELD_WIDTH: 82,
       GRID_FIELD_HEIGHT: 82,
-      linkedListApplicationNamesCurrentIndex: 0,
       listApplicationElements: []
     }
   },
@@ -87,7 +96,6 @@ export default {
   watch: {
     windowSize(newSize, oldSize) {
       if (compareArrays(oldSize, newSize) === false) {
-        this.listApplicationElements = [];
         this.init();
 
         let gridFields = this.getAllGridFields();
@@ -103,7 +111,8 @@ export default {
   },
   methods: {
     init() {
-      let array = [];
+      let listApplicationElementsTempArray = [];
+
       this.getAllGridFields().forEach(gridField => {
         if (gridField.children.length !== 0) {
           const applicationElement = gridField.children[0];
@@ -115,13 +124,15 @@ export default {
             'indexOfApplicationName': indexOfApplicationName
           }
 
-          array.push(applicationElementObject);
+          listApplicationElementsTempArray.push(applicationElementObject);
         }
       });
 
-      array.forEach(object => {
-        this.listApplicationElements[object.indexOfApplicationName] = object.applicationElement;
-      });
+      if (this.listApplicationElements.length === 0) {
+        listApplicationElementsTempArray.forEach(object => {
+          this.listApplicationElements[object.indexOfApplicationName] = object.applicationElement;
+        });
+      }
 
       this.countApplications = this.applicationNames.length;
 
@@ -130,8 +141,18 @@ export default {
         this.GRID_HEIGHT = Math.floor((this.windowSize[1] / this.GRID_FIELD_HEIGHT));
       }
     },
-    onRightClick(e) {
+    onClickGridField() {
+      this.contextMenuActive === true ? this.contextMenuActive = false : null
+    },
+    onRightClickGridField(e) {
       const contextMenu = this.$refs.contextMenu;
+      this.currentGridFieldOnRightClick = e.currentTarget;
+
+      if (this.currentGridFieldOnRightClick.querySelector('.grid-field-content-wrapper')) {
+        this.currentGridFieldOnRightClickContainsApplication = true;
+      } else {
+        this.currentGridFieldOnRightClickContainsApplication = false;
+      }
       if (this.contextMenuActive === false) {
         this.contextMenuActive = true;
       }
@@ -139,19 +160,45 @@ export default {
       contextMenu.style.left = `${e.clientX}px`;
       contextMenu.style.top = `${e.clientY}px`;
     },
-    onMouseOver(e) {
+    onMouseOverGridField(e) {
       const gridField = e.currentTarget;
       const checkbox = gridField.querySelector('.grid-field-checkbox');
       if (checkbox) {
         checkbox.style.display = 'block';
       }
     },
-    onMouseLeave(e) {
+    onMouseLeaveGridField(e) {
       const gridField = e.currentTarget;
       const checkbox = gridField.querySelector('.grid-field-checkbox');
       if (checkbox) {
         checkbox.style.display = 'none';
       }
+    },
+    contextMenuActions(e, action) {
+      switch(action) {
+        case 'copy': {
+          this.copiedApplication = this.currentGridFieldOnRightClick.cloneNode(true);
+          break;
+        }
+        case 'paste': {
+          const currentGridFieldContent = this.currentGridFieldOnRightClick.querySelector('.grid-field-content-wrapper');
+          const copiedGridFieldContent = this.copiedApplication.querySelector('.grid-field-content-wrapper');
+          if (this.copiedApplication !== null && currentGridFieldContent === null) {
+            this.currentGridFieldOnRightClick.innerHTML = '';
+            this.currentGridFieldOnRightClick.classList.add('filled');
+            this.currentGridFieldOnRightClick.appendChild(copiedGridFieldContent.cloneNode(true));
+          }
+          break;
+        }
+        case 'delete': {
+          if (this.currentGridFieldOnRightClick.querySelector('.grid-field-content-wrapper')) {
+            this.currentGridFieldOnRightClick.classList.remove('filled');
+            this.currentGridFieldOnRightClick.innerHTML = '';
+          }
+        }
+      }
+
+      this.contextMenuActive = false;
     },
     dragAndDropEventListenersDesktop(event, eventName) {
       const gridField = event.currentTarget;
@@ -214,8 +261,8 @@ export default {
 
     addApplicationsToDesktop() {
       let gridFields = this.getAllGridFields();
-
       let index = 0;
+
       gridFields.forEach(gridField => {
         if (typeof this.listApplicationElements[index] !== 'undefined') {
           gridField.appendChild(this.listApplicationElements[index]);
@@ -305,8 +352,9 @@ export default {
 }
 
 .context-menu {
+  display: flex;
+  flex-direction: column;
   position: absolute;
   background-color: black;
-  padding: 100px;
 }
 </style>
