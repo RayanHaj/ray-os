@@ -3,10 +3,12 @@
     <div class="main-screen">
       <MainWindow
           v-for="window in openWindows"
-          :key="window"
-          class="windows"
-          :class="window"
-          :window-name="window"
+          :key="window.windowName"
+          :class="window.windowName"
+          class="window"
+          :style="{zIndex: openWindows.find(openWindow => openWindow.windowName === window.windowName).zIndex}"
+          :window-name="window.windowName"
+          @click="onClickWindow($event, window)"
           @battery-easter-egg-activated="activatedEasterEgg = $event"
           @rendered="windowIsRendered = !windowIsRendered"
           @theme-changed="$emit('themeChanged')"
@@ -44,6 +46,7 @@ export default {
     return {
       windowIsRendered: false,
       quickSettingMenuIsOpen: false,
+      closingWindow: false,
       activatedEasterEgg: null,
       windowWidth: '',
       windowHeight: '',
@@ -51,6 +54,7 @@ export default {
       splitOtherWindow: {},
       openWindows: [],
       windowDimensions: [],
+      highestZIndex: 1,
       backgroundColor: 'black',
       applicationNames: ['windows-start', 'microsoft-edge', 'file-explorer', 'settings'],
     }
@@ -64,8 +68,6 @@ export default {
     if (deviceIsMobile() === true) {
       this.$router.push('/');
     }
-
-    // this.openWindows.push('welcome-window');
 
     this.updateSettings();
 
@@ -81,9 +83,10 @@ export default {
   },
   methods: {
     setApplicationNameVariable(name) {
-      if (!this.openWindows.includes(name)) {
-        this.openWindows.push(name);
+      if (!this.openWindows.some(window => window.windowName === name)) {
+        this.openWindows.push({'windowName': name, 'zIndex': this.highestZIndex});
         this.applicationName = name;
+        this.highestZIndex++;
         return;
       }
 
@@ -91,10 +94,22 @@ export default {
 
     },
     closeWindow(value) {
-      this.openWindows = this.openWindows.filter(name => name !== value);
+      const closeWindowId = this.openWindows.findIndex(window => window.windowName === value);
 
+      this.openWindows.splice(closeWindowId, 1);
+
+      this.sortWindowArray();
       if (value === 'settings') {
         this.updateSettings();
+      }
+    },
+    onClickWindow(e, window) {
+      const mouseTarget = e.target.parentNode;
+      if (this.closingWindow !== true && mouseTarget.classList[0] !== 'window-state-control') {
+        const windowIndex = this.openWindows.findIndex(openWindow => openWindow.windowName === window.windowName);
+        this.openWindows.splice(windowIndex, 1);
+        this.openWindows.push(window);
+        this.sortWindowArray()
       }
     },
     updateWindowDimensions() {
@@ -189,6 +204,16 @@ export default {
     minimizeWindow(windowName) {
       const windowElement = this.$el.querySelector(`.${windowName}`);
       windowElement.style.display = 'none';
+    },
+
+    sortWindowArray() {
+      if (this.openWindows.length > 0) {
+        let counter = 2;
+        this.openWindows.forEach(window => {
+          window.zIndex = counter++;
+        });
+        this.highestZIndex = counter;
+      }
     }
   },
   watch: {
@@ -223,11 +248,10 @@ export default {
   overflow: hidden;
 }
 
-.windows {
+.window {
   position: absolute;
   width: 100%;
   height: calc(100% - 45px);
-  z-index: 2;
 }
 
 .footer {
