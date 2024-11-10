@@ -55,6 +55,8 @@ export default {
       moveWindowVariables: {
         xOutOfBoundsPositive: false,
         xOutOfBoundsNegative: false,
+        yOutOfBoundsPositive: false,
+        yOutOfBoundsNegative: false,
         NUM_WIDTH: 0,
         NUM_HEIGHT: 0,
         prevX: 0,
@@ -117,12 +119,29 @@ export default {
     },
     splitOtherWindow(newWindow) {
       if (newWindow.window.windowName === this.windowName) {
-        if (newWindow.xOutOfBoundsPositive === 'positive') {
+        console.log(newWindow.xOutOfBoundsPositive)
+        if (newWindow.xOutOfBoundsPositive === 'positive-x') {
           this.moveWindowVariables.xOutOfBoundsPositive = false;
           this.moveWindowVariables.xOutOfBoundsNegative = true;
+          this.moveWindowVariables.yOutOfBoundsPositive = false;
+          this.moveWindowVariables.yOutOfBoundsNegative = false;
           this.splitWindow();
-        } else if (newWindow.xOutOfBoundsPositive === 'negative') {
+        } else if (newWindow.xOutOfBoundsPositive === 'negative-x') {
           this.moveWindowVariables.xOutOfBoundsPositive = true;
+          this.moveWindowVariables.xOutOfBoundsNegative = false;
+          this.moveWindowVariables.yOutOfBoundsPositive = false;
+          this.moveWindowVariables.yOutOfBoundsNegative = false;
+          this.splitWindow();
+        } else if (newWindow.xOutOfBoundsPositive === 'positive-y') {
+          this.moveWindowVariables.yOutOfBoundsPositive = false;
+          this.moveWindowVariables.yOutOfBoundsNegative = true;
+          this.moveWindowVariables.xOutOfBoundsPositive = false;
+          this.moveWindowVariables.xOutOfBoundsNegative = false;
+          this.splitWindow();
+        } else if (newWindow.xOutOfBoundsPositive === 'negative-y') {
+          this.moveWindowVariables.yOutOfBoundsPositive = true;
+          this.moveWindowVariables.yOutOfBoundsNegative = false;
+          this.moveWindowVariables.xOutOfBoundsPositive = false;
           this.moveWindowVariables.xOutOfBoundsNegative = false;
           this.splitWindow();
         }
@@ -286,6 +305,9 @@ export default {
       this.moveWindowVariables.xOutOfBoundsPositive = newX >= this.MAXIMUM_WIDTH - 1;
       this.moveWindowVariables.xOutOfBoundsNegative = newX <= 1;
 
+      this.moveWindowVariables.yOutOfBoundsNegative = newY >= this.MAXIMUM_HEIGHT - 1;
+      this.moveWindowVariables.yOutOfBoundsPositive = newY <= 1;
+
       const deltaX = newX - this.moveWindowVariables.prevX;
       const deltaY = newY - this.moveWindowVariables.prevY;
 
@@ -318,22 +340,33 @@ export default {
       document.removeEventListener('mouseup', this.onMouseUpHeader);
     },
     splitWindow() {
+      const WINDOW_HEIGHT = 93.5;
       if (this.moveWindowVariables.xOutOfBoundsPositive) {
         this.$el.style.left = '50%';
         this.$el.style.width = '50%';
 
-        //FIND OTHER IMPLEMENTATION INSTEAD OF HARDCODING WITH PX
-        this.$el.style.height = '1234px';
+        this.$el.style.height = `${WINDOW_HEIGHT}%`;
         this.$el.style.top = 0;
-        return 'positive';
+        return 'positive-x';
       } else if (this.moveWindowVariables.xOutOfBoundsNegative) {
         this.$el.style.left = 0;
         this.$el.style.width = '50%';
 
-        //FIND OTHER IMPLEMENTATION INSTEAD OF HARDCODING WITH PX
-        this.$el.style.height = '1234px';
+        this.$el.style.height = `${WINDOW_HEIGHT}%`;
         this.$el.style.top = 0;
-        return 'negative';
+        return 'negative-x';
+      } else if (this.moveWindowVariables.yOutOfBoundsPositive) {
+        this.$el.style.left = 0;
+        this.$el.style.width = '100%';
+        this.$el.style.height = `${WINDOW_HEIGHT / 2}%`;
+        this.$el.style.top = 0;
+        return 'positive-y';
+      } else if (this.moveWindowVariables.yOutOfBoundsNegative) {
+        this.$el.style.left = 0;
+        this.$el.style.width = '100%';
+        this.$el.style.height = `${WINDOW_HEIGHT / 2}%`;
+        this.$el.style.top = `${WINDOW_HEIGHT / 2}%`;
+        return 'negative-y';
       }
 
       return false;
