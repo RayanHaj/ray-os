@@ -3,16 +3,16 @@
     <div v-if="GRID_HEIGHT > 0" class="grid">
       <div v-for="(numX, indexX) in GRID_WIDTH" :key="indexX" class="upperGridField">
         <div v-for="(numY, indexY) in GRID_HEIGHT" :key="indexY" class="gridField"
-            :class="{'filled': checkShouldFillGridField(indexX, indexY) }"
-            @dblclick="dragAndDropEventListenersDesktop($event, 'dblclick')"
-            @drop="dragAndDropEventListenersDesktop($event, 'drop')"
-            @dragstart="dragAndDropEventListenersDesktop($event, 'dragstart')"
-            @dragover.prevent="dragAndDropEventListenersDesktop($event, 'dragover')"
-            @click="onClickGridField"
-            @contextmenu.prevent="onRightClickGridField"
-            @mouseover="onMouseOverGridField"
-            @mouseleave="onMouseLeaveGridField"
-            :style="{
+             :class="{'filled': checkShouldFillGridField(indexX, indexY) }"
+             @dblclick="dragAndDropEventListenersDesktop($event, 'dblclick')"
+             @drop="dragAndDropEventListenersDesktop($event, 'drop')"
+             @dragstart="dragAndDropEventListenersDesktop($event, 'dragstart')"
+             @dragover.prevent="dragAndDropEventListenersDesktop($event, 'dragover')"
+             @click="onClickGridField"
+             @contextmenu.prevent="onRightClickGridField"
+             @mouseover="onMouseOverGridField"
+             @mouseleave="onMouseLeaveGridField"
+             :style="{
               width: `${GRID_FIELD_WIDTH}px`,
               height: `${GRID_FIELD_HEIGHT}px`,
               maxWidth: `${GRID_FIELD_WIDTH}px`,
@@ -45,9 +45,12 @@
     </div>
 
     <div v-show="contextMenuActive === true" class="context-menu" ref="contextMenu">
-      <button v-if="currentGridFieldOnRightClickContainsApplication" @click="contextMenuActions($event, 'copy')">copy</button>
+      <button v-if="currentGridFieldOnRightClickContainsApplication" @click="contextMenuActions($event, 'copy')">copy
+      </button>
       <button @click="contextMenuActions($event, 'paste')">paste</button>
-      <button v-if="currentGridFieldOnRightClickContainsApplication" @click="contextMenuActions($event, 'delete')">delete</button>
+      <button v-if="currentGridFieldOnRightClickContainsApplication" @click="contextMenuActions($event, 'delete')">
+        delete
+      </button>
     </div>
   </div>
 </template>
@@ -127,11 +130,9 @@ export default {
         }
       });
 
-      if (this.listApplicationElements.length === 0) {
-        listApplicationElementsTempArray.forEach(object => {
-          this.listApplicationElements[object.indexOfApplicationName] = object.applicationElement;
-        });
-      }
+      listApplicationElementsTempArray.forEach(object => {
+        this.listApplicationElements[object.indexOfApplicationName] = object.applicationElement;
+      });
 
       this.countApplications = this.applicationNames.length;
 
@@ -174,7 +175,7 @@ export default {
       }
     },
     contextMenuActions(e, action) {
-      switch(action) {
+      switch (action) {
         case 'copy': {
           this.copiedApplication = this.currentGridFieldOnRightClick.cloneNode(true);
           break;
