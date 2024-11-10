@@ -27,8 +27,12 @@
     </div>
     <div class="footer-container">
       <SettingsMenu ref="settingsMenu" v-if="quickSettingMenuIsOpen" class="quick-settings-menu"></SettingsMenu>
-      <FooterBar ref="footerBar" class="footer" @application-name="setApplicationNameVariable"
-                 @quick-settings-menu-open="openQuickSettingsMenu" :application-names="applicationNames"></FooterBar>
+      <FooterBar ref="footerBar"
+                 class="footer"
+                 @application-name="setApplicationNameVariable"
+                 @quick-settings-menu-open="openQuickSettingsMenu"
+                 :application-names="applicationNames"
+      />
     </div>
   </div>
 </template>
@@ -91,7 +95,6 @@ export default {
       }
 
       this.$el.querySelector(`.${name}`).style.display = 'block';
-
     },
     closeWindow(value) {
       const closeWindowId = this.openWindows.findIndex(window => window.windowName === value);
@@ -109,7 +112,7 @@ export default {
         const windowIndex = this.openWindows.findIndex(openWindow => openWindow.windowName === window.windowName);
         this.openWindows.splice(windowIndex, 1);
         this.openWindows.push(window);
-        this.sortWindowArray()
+        this.sortWindowArray();
       }
     },
     updateWindowDimensions() {
@@ -213,6 +216,7 @@ export default {
           window.zIndex = counter++;
         });
         this.highestZIndex = counter;
+        this.$el.querySelector('.footer').style.zIndex = this.highestZIndex + 1;
       }
     }
   },
@@ -244,7 +248,6 @@ export default {
 
 .desktop-grid {
   height: auto;
-  z-index: 0;
   overflow: hidden;
 }
 
