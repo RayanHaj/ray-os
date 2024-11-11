@@ -92,12 +92,12 @@ html, body {
 }
 
 .satisfying-sky {
-  --background-color: #B3E5FC; /* Lichte luchtblauw */
-  --footer-color: #0288D1; /* Diep blauw */
-  --background-color-window: #E1F5FE; /* Zeer lichte luchtblauw */
-  --background-color-input: #B3E5FC; /* Lichte luchtblauw */
-  --font-color: #212121; /* Donkergrijs voor goede leesbaarheid */
-  --hover-color: #81D4FA; /* Lichte turquoise */
+  --background-color: #B3E5FC;
+  --footer-color: #0288D1;
+  --background-color-window: #E1F5FE;
+  --background-color-input: #B3E5FC;
+  --font-color: #212121;
+  --hover-color: #81D4FA;
 }
 
 </style>

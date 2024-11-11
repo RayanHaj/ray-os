@@ -138,7 +138,9 @@ export default {
 
       if (this.windowSize[0] !== null && this.windowSize[1] !== null) {
         this.GRID_WIDTH = Math.floor(this.windowSize[0] / this.GRID_FIELD_WIDTH);
+        console.log(this.GRID_WIDTH)
         this.GRID_HEIGHT = Math.floor((this.windowSize[1] / this.GRID_FIELD_HEIGHT));
+        console.log(this.GRID_HEIGHT)
       }
     },
     onClickGridField() {

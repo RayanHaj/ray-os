@@ -401,7 +401,7 @@ export default {
 * {
   font-family: 'Segoe UI Variable', serif;
   font-size: small;
-  color: white;
+  color: var(--font-color);
 }
 
 .movable-window {

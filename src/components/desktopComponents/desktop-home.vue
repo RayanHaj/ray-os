@@ -1,5 +1,7 @@
 <template>
-  <div v-if="activatedEasterEgg === null" class="desktop">
+  <div v-if="activatedEasterEgg === null"
+       class="desktop"
+       :style="{ filter: `brightness(${desktopBrightnessValue}%)`}">
     <div class="main-screen">
       <MainWindow
           v-for="window in openWindows"
@@ -26,7 +28,11 @@
           class="desktop-grid"/>
     </div>
     <div class="footer-container">
-      <SettingsMenu ref="settingsMenu" v-if="quickSettingMenuIsOpen" class="quick-settings-menu"></SettingsMenu>
+      <SettingsMenu v-if="quickSettingMenuIsOpen"
+                    ref="settingsMenu"
+                    class="quick-settings-menu"
+                    @brightness-value-changed="updateBrightnessValue"
+      />
       <FooterBar ref="footerBar"
                  class="footer"
                  @application-name="setApplicationNameVariable"
@@ -60,6 +66,7 @@ export default {
       windowDimensions: [],
       highestZIndex: 1,
       backgroundColor: 'black',
+      desktopBrightnessValue: 100,
       applicationNames: ['windows-start', 'microsoft-edge', 'file-explorer', 'settings'],
     }
   },
@@ -95,6 +102,12 @@ export default {
       }
 
       this.$el.querySelector(`.${name}`).style.display = 'block';
+    },
+    updateBrightnessValue() {
+      const value = localStorage.getItem('brightnessValue');
+      if (value !== null) {
+        this.desktopBrightnessValue = value;
+      }
     },
     closeWindow(value) {
       const closeWindowId = this.openWindows.findIndex(window => window.windowName === value);
@@ -234,7 +247,7 @@ export default {
 
 <style scoped>
 * {
-  color: black;
+  color: var(--font-color);
 }
 
 .desktop {
