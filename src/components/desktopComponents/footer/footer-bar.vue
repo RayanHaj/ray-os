@@ -12,6 +12,7 @@
           <div class="close-window" :style="{ visibility: isHoveringOnOpenWindow ? 'visible' : 'hidden' }">
             <!--window close-->
             <svg class="window-close" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 384 512"
+                 @click="$emit('closeWindow', iconImageName)"
             >
               <!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
               <path fill="#ffffff"

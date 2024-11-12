@@ -37,6 +37,7 @@
                  class="footer"
                  @application-name="setApplicationNameVariable"
                  @quick-settings-menu-open="openQuickSettingsMenu"
+                 @close-window="closeWindow"
                  :application-names="applicationNames"
                  :open-windows="openWindows"
       />
@@ -103,7 +104,7 @@ export default {
         return;
       }
 
-      this.$el.querySelector(`.${name}`).style.display = 'block';
+      this.$el.querySelector(`.${name}`).style.display = 'flex';
       window.minimized = false;
     },
     updateBrightnessValue() {
