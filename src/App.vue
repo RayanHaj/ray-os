@@ -100,4 +100,13 @@ html, body {
   --hover-color: #81D4FA;
 }
 
+.modern-elegance {
+  --background-color: #1A1A1A;
+  --footer-color: #262626;
+  --background-color-window: #2C2C2C;
+  --background-color-input: #333333;
+  --font-color: #E0E0E0;
+  --hover-color: #3B82F6;
+}
+
 </style>

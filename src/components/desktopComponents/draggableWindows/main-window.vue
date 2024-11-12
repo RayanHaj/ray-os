@@ -34,6 +34,7 @@
       <FileExplorer v-if="windowName === 'file-explorer'"/>
       <SettingsWindow v-if="windowName === 'settings'" @theme-changed="$emit('themeChanged')"/>
       <WelcomeWindow v-if="windowName === 'welcome-window'"/>
+      <MicrosoftEdgeWindow v-if="windowName === 'microsoft-edge'" :disable-pointer-events="disablePointerEvents"/>
     </div>
   </div>
 </template>
@@ -42,16 +43,19 @@
 import FileExplorer from "@/components/desktopComponents/draggableWindows/fileExplorer/file-explorer";
 import SettingsWindow from "@/components/desktopComponents/draggableWindows/settingsWindow/settings-window";
 import WelcomeWindow from "@/components/desktopComponents/draggableWindows/welcomeWindow/welcome-window";
+import MicrosoftEdgeWindow
+  from "@/components/desktopComponents/draggableWindows/microsoftEdgeWindow/microsoft-edge-window";
 
 export default {
   name: "main-window",
-  components: {WelcomeWindow, SettingsWindow, FileExplorer},
+  components: {MicrosoftEdgeWindow, WelcomeWindow, SettingsWindow, FileExplorer},
   data() {
     return {
       MAXIMUM_WIDTH: '',
       MAXIMUM_HEIGHT: '',
-      dynamicStyles: null,
       WINDOW_MOVE_AREA_SPACE: 6,
+      dynamicStyles: null,
+      disablePointerEvents: false,
       moveWindowVariables: {
         xOutOfBoundsPositive: false,
         xOutOfBoundsNegative: false,
@@ -152,13 +156,19 @@ export default {
   },
   methods: {
     maximizeWindow() {
-      let computedStyles = window.getComputedStyle(this.$el);
-      let windowWidth = this.convertFromPixelStringToNumber(computedStyles.width);
-      let windowHeight = this.convertFromPixelStringToNumber(computedStyles.height);
+      let windowWidth = this.$el.offsetWidth;
+      let windowHeight = this.$el.offsetHeight;
 
-      if ((windowWidth === this.MAXIMUM_WIDTH || windowWidth + 1 === this.MAXIMUM_WIDTH || windowWidth - 1 === this.MAXIMUM_WIDTH) && windowHeight >= this.MAXIMUM_HEIGHT) {
-        this.$el.style.width = '60%';
-        this.$el.style.height = '80%';
+      let result = false;
+      for (let i = 0; i <= 2; i++) {
+        if ((windowWidth === this.MAXIMUM_WIDTH || windowWidth + i === this.MAXIMUM_WIDTH || windowWidth - i === this.MAXIMUM_WIDTH) && windowHeight >= this.MAXIMUM_HEIGHT) {
+          this.$el.style.width = '60%';
+          this.$el.style.height = '80%';
+          return
+        }
+      }
+
+      if (result) {
         return;
       }
 
@@ -253,9 +263,12 @@ export default {
             break;
           }
         }
+
+        this.disablePointerEvents = true;
       }
 
       const onMouseUp = () => {
+        this.disablePointerEvents = false;
         this.mouseDownWindowVariables.mousePressedDown = false;
         document.removeEventListener('mousemove', onMouseMove);
         document.removeEventListener('mouseup', onMouseUp);
@@ -279,8 +292,8 @@ export default {
         return;
       }
 
-      this.moveWindowVariables.NUM_WIDTH = this.convertFromPixelStringToNumber(window.getComputedStyle(this.$el).width);
-      this.moveWindowVariables.NUM_HEIGHT = this.convertFromPixelStringToNumber(window.getComputedStyle(this.$el).height);
+      this.moveWindowVariables.NUM_WIDTH = this.$el.offsetWidth;
+      this.moveWindowVariables.NUM_HEIGHT = this.$el.offsetHeight;
 
       this.moveWindowVariables.prevX = event.clientX;
       this.moveWindowVariables.prevY = event.clientY;
@@ -290,15 +303,18 @@ export default {
     },
     onMouseMoveHeader(event) {
       this.moveWindowVariables.windowIsMoving = true;
-      if ((this.moveWindowVariables.NUM_WIDTH === this.MAXIMUM_WIDTH ||
-           this.moveWindowVariables.NUM_WIDTH + 1 === this.MAXIMUM_WIDTH ||
-           this.moveWindowVariables.NUM_WIDTH - 1 === this.MAXIMUM_WIDTH) &&
-          (this.moveWindowVariables.NUM_HEIGHT === this.MAXIMUM_HEIGHT ||
-          (this.moveWindowVariables.NUM_HEIGHT - 45) === this.MAXIMUM_HEIGHT)) {
-        this.$el.style.left = `${this.moveWindowVariables.prevX - (this.moveWindowVariables.NUM_WIDTH / 2 - 250)}px`;
-        this.$el.style.top = `${this.moveWindowVariables.prevY}px`;
-        this.$el.style.width = '60%';
-        this.$el.style.height = '80%';
+
+      let windowWidth = this.$el.offsetWidth;
+      let windowHeight = this.$el.offsetHeight;
+
+      for (let i = 0; i <= 2; i++) {
+        if ((windowWidth === this.MAXIMUM_WIDTH || windowWidth + i === this.MAXIMUM_WIDTH || windowWidth - i === this.MAXIMUM_WIDTH) && windowHeight >= this.MAXIMUM_HEIGHT) {
+          this.$el.style.left = `${this.moveWindowVariables.prevX - (this.moveWindowVariables.NUM_WIDTH / 2 - 250)}px`;
+          this.$el.style.top = `${this.moveWindowVariables.prevY}px`;
+          this.$el.style.width = '60%';
+          this.$el.style.height = '80%';
+          break;
+        }
       }
 
       const newX = event.clientX;
@@ -406,7 +422,9 @@ export default {
 
 .movable-window {
   width: 100%;
-  height: 100%;
+  height: calc(100% - 30px);
+  display: flex;
+  flex-direction: column;
   resize: both;
   overflow: auto;
   position: relative;
@@ -414,10 +432,15 @@ export default {
   border: black 1px solid;
 }
 
+.window-content {
+  height: calc(100% - 30px);
+}
+
 .window-header {
-  height: 50px;
+  height: 30px;
   position: sticky;
   top: 0;
+  background-color: var(--footer-color);
 }
 
 .top-header {
@@ -425,11 +448,13 @@ export default {
   flex-direction: row;
   gap: 20px;
   justify-content: space-between;
+  align-items: center;
+  height: 30px;
   margin-top: 3px;
 }
 
 .window-name {
-  font-size: 25px;
+  font-size: 14px;
   font-weight: bold;
   margin-left: 10px;
 }

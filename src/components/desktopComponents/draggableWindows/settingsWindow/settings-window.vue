@@ -30,7 +30,9 @@
         <option>forest-dream</option>
         <option>cyberpunk-night</option>
         <option>satisfying-sky</option>
+        <option>modern-elegance</option>
       </select>
+      <div class="long"></div>
     </div>
   </div>
 </template>
@@ -173,6 +175,11 @@ export default {
 </script>
 
 <style scoped>
+.long {
+  background-color: red;
+  width: 100px;
+  height: 1000px;
+}
 .preference-button {
   cursor: pointer;
   background-color: var(--background-color-input);
@@ -194,9 +201,6 @@ export default {
     flex-direction: column;
     gap: 15px;
     width: 50%;
-  }
-  .window-content {
-    padding: 30px;
   }
   .static-color {
     width: 100px;

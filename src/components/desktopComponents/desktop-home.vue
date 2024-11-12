@@ -38,6 +38,7 @@
                  @application-name="setApplicationNameVariable"
                  @quick-settings-menu-open="openQuickSettingsMenu"
                  :application-names="applicationNames"
+                 :open-windows="openWindows"
       />
     </div>
   </div>
@@ -94,14 +95,16 @@ export default {
   },
   methods: {
     setApplicationNameVariable(name) {
-      if (!this.openWindows.some(window => window.windowName === name)) {
-        this.openWindows.push({'windowName': name, 'zIndex': this.highestZIndex});
+      const window = this.openWindows.find(window => window.windowName === name)
+      if (!window) {
+        this.openWindows.push({'windowName': name, 'zIndex': this.highestZIndex, 'minimized': false});
         this.applicationName = name;
         this.highestZIndex++;
         return;
       }
 
       this.$el.querySelector(`.${name}`).style.display = 'block';
+      window.minimized = false;
     },
     updateBrightnessValue() {
       const value = localStorage.getItem('brightnessValue');
@@ -118,6 +121,8 @@ export default {
       if (value === 'settings') {
         this.updateSettings();
       }
+
+      this.applicationName = '';
     },
     onClickWindow(e, window) {
       const mouseTarget = e.target.parentNode;
@@ -130,10 +135,15 @@ export default {
     },
     updateWindowDimensions() {
       const NAVBAR_HEIGHT = 45;
-      this.windowDimensions = [window.innerWidth, window.innerHeight - NAVBAR_HEIGHT];
+      this.windowDimensions = [this.$el.offsetWidth, this.$el.offsetHeight - NAVBAR_HEIGHT];
     },
     updateSettings() {
       const desktopElement = this.$el;
+
+      const desktopBrightness = localStorage.getItem('brightnessValue');
+      if (desktopBrightness) {
+        this.desktopBrightnessValue = desktopBrightness;
+      }
 
       const backgroundPreference = localStorage.getItem('background-preference');
 
@@ -218,8 +228,10 @@ export default {
     },
 
     minimizeWindow(windowName) {
+      const window = this.openWindows.find(window => window.windowName === windowName);
       const windowElement = this.$el.querySelector(`.${windowName}`);
       windowElement.style.display = 'none';
+      window.minimized = true;
     },
 
     sortWindowArray() {

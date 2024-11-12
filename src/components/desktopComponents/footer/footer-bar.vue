@@ -1,8 +1,41 @@
 <template>
   <div class="footer-bar">
     <div class="footer-bar-items-left">
-      <div class="app-icon" v-for="iconImageName in applicationNames" :key="iconImageName">
-        <ApplicationIcon @click="emitApplicationName(iconImageName)" :icon-img-name="iconImageName"></ApplicationIcon>
+      <div class="app-icon" :class="iconImageName" v-for="(iconImageName, index) in applicationNames"
+           :key="iconImageName"
+           @mouseover="onMouseoverApplicationIcon(iconImageName)" @mouseleave="onMouseleaveApplicationIcon">
+        <div
+            v-if="currentIconHover.name === iconImageName && currentIconHover.hasHoverState && openWindows.some(openWindow => openWindow.windowName === iconImageName)"
+            :style="{ left: index < 2 ? '-35px' : null, marginLeft: index < 2 ? '0px' : null }"
+            @mouseover="onMouseoverOpenWindow" @mouseleave="onMouseleaveOpenWindow"
+            class="open-window-preview">
+          <div class="close-window" :style="{ visibility: isHoveringOnOpenWindow ? 'visible' : 'hidden' }">
+            <!--window close-->
+            <svg class="window-close" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 384 512"
+            >
+              <!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
+              <path fill="#ffffff"
+                    d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"/>
+            </svg>
+          </div>
+          <div class="open-window-name">
+            {{ iconImageName }}
+          </div>
+          <div>
+            Window is open
+          </div>
+        </div>
+        <div>
+          <ApplicationIcon @click="emitApplicationName(iconImageName)" :icon-img-name="iconImageName"/>
+          <div :class="openWindows.find(openWindow => openWindow.windowName === iconImageName) &&
+                       openWindows.find(openWindow => openWindow.windowName === iconImageName).minimized === true ?
+                       'horizontal-line-minimized' :
+                       'horizontal-line'"
+               :style="{ visibility: openWindows.some(openWindow => openWindow.windowName === iconImageName) ?
+               'visible' :
+               'hidden' }"
+          />
+        </div>
       </div>
     </div>
     <div class="footer-bar-items-right">
@@ -17,7 +50,8 @@
         <span>ENG</span>
         <span>US</span>
       </div>
-      <div ref="quickSettingsMenuButton" class="wifi-sound-battery-wrapper footer-bar-right-item" @click="emitQuickSettingMenuClicked">
+      <div ref="quickSettingsMenuButton" class="wifi-sound-battery-wrapper footer-bar-right-item"
+           @click="emitQuickSettingMenuClicked">
         <!--wifi-->
         <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 640 512">
           <!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
@@ -62,8 +96,10 @@ export default {
     return {
       date: '',
       time: '',
+      currentIconHover: {},
       quickSettingMenuIsOpen: false,
-    }
+      isHoveringOnOpenWindow: false,
+    };
   },
   mounted() {
     function addLeadingZero(number) {
@@ -74,13 +110,17 @@ export default {
       const now = new Date();
 
       this.date = `${addLeadingZero((now.getMonth() + 1))}/${addLeadingZero(now.getUTCDate())}/${now.getFullYear()}`;
-      this.time = now.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+      this.time = now.toLocaleString('en-US', {hour: 'numeric', minute: 'numeric', hour12: true});
     }, 1000);
   },
   props: {
     applicationNames: {
       type: Array,
       required: true
+    },
+    openWindows: {
+      type: Array,
+      required: false
     }
   },
   components: {ApplicationIcon},
@@ -94,6 +134,33 @@ export default {
     },
     getRefQuickSettingsMenuButton() {
       return this.$refs.quickSettingsMenuButton;
+    },
+    onMouseoverApplicationIcon(name) {
+      if (name === 'windows-start') {
+        this.currentIconHover = {
+          name: name,
+          hasHoverState: false
+        }
+        return;
+      }
+
+      this.currentIconHover = {
+        name: name,
+        hasHoverState: true
+      }
+    },
+    onMouseleaveApplicationIcon(e) {
+      if (e.offsetY > -1) {
+        this.currentIconHover = {}
+      }
+    },
+    onMouseoverOpenWindow() {
+      console.log('ehelej')
+      this.isHoveringOnOpenWindow = true;
+    },
+    onMouseleaveOpenWindow() {
+      this.isHoveringOnOpenWindow = false;
+      this.currentIconHover = ''
     }
   }
 }
@@ -110,8 +177,33 @@ export default {
 * {
   font-family: 'Segoe UI Variable', serif;
   font-size: small;
-  color: white;
+  color: var(--font-color);
   user-select: none;
+}
+
+.open-window-preview {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  height: 150px;
+  width: 200px;
+  padding: 10px;
+  border-radius: 10px;
+  background-color: var(--background-color);
+  color: var(--font-color);
+  bottom: 50px;
+}
+
+.close-window {
+  align-self: end;
+}
+
+.open-window-name {
+  font-size: 27px;
+  font-style: italic;
+  font-weight: bolder;
 }
 
 .footer-bar {
@@ -150,8 +242,11 @@ export default {
 }
 
 .app-icon {
+  display: flex;
   padding: 5px 6px 0;
   transition: 0.3s;
+  justify-content: center;
+  position: relative;
 }
 
 .app-icon:hover {
@@ -193,5 +288,27 @@ export default {
   margin-right: 3px;
   padding-top: 10px;
   padding-bottom: 10px;
+}
+
+.horizontal-line {
+  width: 23px;
+  padding: 1px;
+  border-radius: 20px;
+  background-color: var(--font-color);
+  bottom: -1px;
+  position: absolute;
+  transition: width 0.5s;
+}
+
+.horizontal-line-minimized {
+  display: flex;
+  width: 5px;
+  padding: 1px;
+  border-radius: 20px;
+  background-color: var(--font-color);
+  bottom: -1px;
+  position: absolute;
+  left: 14px;
+  transition: width 0.5s;
 }
 </style>
