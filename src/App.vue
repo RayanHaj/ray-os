@@ -109,4 +109,25 @@ html, body {
   --hover-color: #3B82F6;
 }
 
+.blue-sea-remastered {
+  --background-color: #0d45ce;
+  --footer-color: #0d45ce;
+  --background-color-window: #2a5cd9;
+  --background-color-input: #0d45ce;
+  --font-color: #F1F1F1;
+  --hover-color: #60A5FA;
+}
+
+.elegant-black-white {
+  --background-color: #000000; /* Diep zwart als achtergrondkleur */
+  --footer-color: #111111; /* Iets lichter zwart voor de footer */
+  --background-color-window: #1A1A1A; /* Donkergrijs voor vensters */
+  --background-color-input: #262626; /* Subtiele grijstint voor invoervelden */
+  --font-color: #B0C4DE; /* Helder wit voor tekst */
+  --hover-color: #2E3B4E; /* Zacht wit voor hover-effecten */
+  --border-color: #333333; /* Dunne grijze borders voor scheidingselementen */
+  --highlight-color: #E6E6E6; /* Lichtgrijs voor actieve elementen */
+}
+
+
 </style>

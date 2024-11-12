@@ -31,6 +31,8 @@
         <option>cyberpunk-night</option>
         <option>satisfying-sky</option>
         <option>modern-elegance</option>
+        <option>blue-sea-remastered</option>
+        <option>elegant-black-white</option>
       </select>
     </div>
   </div>

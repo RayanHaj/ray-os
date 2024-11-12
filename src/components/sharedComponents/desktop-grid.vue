@@ -1,17 +1,21 @@
 <template>
   <div class="grid-container">
-    <div v-if="GRID_HEIGHT > 0" class="grid">
+    <div v-if="GRID_HEIGHT > 0"
+         class="grid"
+         @dragover.prevent="dragAndDropEventListenersDesktop($event, 'dragover')"
+         @mousemove="mousePositions = {x: $event.clientX, y: $event.clientY}">
       <div v-for="(numX, indexX) in GRID_WIDTH" :key="indexX" class="upperGridField">
         <div v-for="(numY, indexY) in GRID_HEIGHT" :key="indexY" class="gridField"
              :class="{'filled': checkShouldFillGridField(indexX, indexY) }"
              @dblclick="dragAndDropEventListenersDesktop($event, 'dblclick')"
              @drop="dragAndDropEventListenersDesktop($event, 'drop')"
              @dragstart="dragAndDropEventListenersDesktop($event, 'dragstart')"
-             @dragover.prevent="dragAndDropEventListenersDesktop($event, 'dragover')"
-             @click="onClickGridField"
+             @click="onClickGridField($event)"
+             @keydown.prevent="onKeydownGridField($event)"
              @contextmenu.prevent="onRightClickGridField"
              @mouseover="onMouseOverGridField"
              @mouseleave="onMouseLeaveGridField"
+             tabindex="0"
              :style="{
               width: `${GRID_FIELD_WIDTH}px`,
               height: `${GRID_FIELD_HEIGHT}px`,
@@ -80,7 +84,9 @@ export default {
       GRID_HEIGHT: 0,
       GRID_FIELD_WIDTH: 82,
       GRID_FIELD_HEIGHT: 82,
-      listApplicationElements: []
+      listApplicationElements: [],
+      selectedApplications: [],
+      mousePositions: {x: 0, y: 0},
     }
   },
 
@@ -138,13 +144,52 @@ export default {
 
       if (this.windowSize[0] !== null && this.windowSize[1] !== null) {
         this.GRID_WIDTH = Math.floor(this.windowSize[0] / this.GRID_FIELD_WIDTH);
-        console.log(this.GRID_WIDTH)
         this.GRID_HEIGHT = Math.floor((this.windowSize[1] / this.GRID_FIELD_HEIGHT));
-        console.log(this.GRID_HEIGHT)
       }
     },
-    onClickGridField() {
+    onClickGridField(event) {
+      const gridField = event.currentTarget;
+      const checkbox = event.currentTarget.querySelector('.grid-field-checkbox');
+      if (checkbox) {
+        checkbox.checked = !checkbox.checked;
+        checkbox.checked === true ? gridField.classList.add('selected') : gridField.classList.remove('selected');
+      }
+
       this.contextMenuActive === true ? this.contextMenuActive = false : null
+    },
+    onKeydownGridField(event) {
+      if (event.ctrlKey && event.code === 'KeyC') {
+        this.selectedApplications = this.getAllSelectedGridFields();
+      }
+      if (event.ctrlKey && event.code === 'KeyV') {
+        if (this.selectedApplications.length > 0) {
+          const gridFieldAtMousePosition = this.getGridFieldByPosition(this.mousePositions.x, this.mousePositions.y);
+          if (this.selectedApplications.length > 1) {
+            const gridFieldsInVerticalRow = gridFieldAtMousePosition.parentNode;
+            console.log(Array.of(gridFieldsInVerticalRow.querySelectorAll('.gridField')))
+            // const indexOfGridFieldInVerticalRow = Array.of(gridFieldsInVerticalRow).filter(gridField => gridField !== gridFieldAtMousePosition);
+            // console.log(indexOfGridFieldInVerticalRow)
+          }
+          this.selectedApplications.forEach(application => {
+            const clone = application.children[0].cloneNode(true);
+            this.addApplicationToSpecificGridField(clone, gridFieldAtMousePosition);
+          });
+        }
+      }
+    },
+    getAllSelectedGridFields() {
+      const gridFields = this.getAllGridFields();
+
+      let array = [];
+
+      gridFields.forEach(gridField => {
+        const checkbox = gridField.querySelector('.grid-field-checkbox');
+        if (checkbox && checkbox.checked) {
+          array.push(gridField);
+        }
+      });
+
+      return array;
     },
     onRightClickGridField(e) {
       const contextMenu = this.$refs.contextMenu;
@@ -172,7 +217,7 @@ export default {
     onMouseLeaveGridField(e) {
       const gridField = e.currentTarget;
       const checkbox = gridField.querySelector('.grid-field-checkbox');
-      if (checkbox) {
+      if (checkbox && !gridField.classList.contains('selected')) {
         checkbox.style.display = 'none';
       }
     },
@@ -202,10 +247,10 @@ export default {
 
       this.contextMenuActive = false;
     },
-    dragAndDropEventListenersDesktop(event, eventName) {
+    dragAndDropEventListenersDesktop(event, type) {
       const gridField = event.currentTarget;
 
-      switch (eventName) {
+      switch (type) {
         case 'dblclick': {
           if (!gridField.querySelector('.grid-field-content-wrapper')) return;
           this.$emit('applicationName', gridField.querySelector('.applicationName').innerText);
@@ -236,6 +281,8 @@ export default {
         }
         case 'drop': {
           if (this.draggedApplicationClone) {
+            const checkbox = this.draggedApplicationClone.querySelector('.grid-field-checkbox');
+            checkbox.checked = true;
             if (gridField.children.length === 0) {
               gridField.classList.add('filled');
               gridField.appendChild(this.draggedApplicationClone.querySelector('.grid-field-content-wrapper'));
@@ -247,18 +294,18 @@ export default {
         }
       }
     },
-    getGridFieldByPosition(yPos, xPos) {
-      let upperGridField = this.$el.querySelectorAll('.upperGridField');
-      for (let x = 0; x < upperGridField.length; x++) {
-        if (x === xPos) {
-          let gridFields = upperGridField[x].querySelectorAll('.gridField');
-          for (let y = 0; y < gridFields.length; y++) {
-            if (y === yPos) {
-              return gridFields[y]
-            }
-          }
-        }
+    getGridFieldByPosition(xPos, yPos) {
+      const element = document.elementFromPoint(xPos, yPos);
+      if (!element.classList.contains('gridField')) {
+        return;
       }
+
+      return element;
+    },
+
+    addApplicationToSpecificGridField(application, gridField) {
+      gridField.appendChild(application);
+      gridField.classList.add('filled');
     },
 
     addApplicationsToDesktop() {
@@ -267,24 +314,14 @@ export default {
 
       gridFields.forEach(gridField => {
         if (typeof this.listApplicationElements[index] !== 'undefined') {
-          gridField.appendChild(this.listApplicationElements[index]);
-          gridField.classList.add('filled');
+          this.addApplicationToSpecificGridField(this.listApplicationElements[index], gridField);
           index++;
         }
       });
     },
 
     getAllGridFields() {
-      let upperGridField = this.$el.querySelectorAll('.upperGridField');
-      let gridFieldsList = [];
-      for (let x = 0; x < upperGridField.length; x++) {
-        let gridFields = upperGridField[x].querySelectorAll('.gridField');
-        for (let y = 0; y < gridFields.length; y++) {
-          gridFieldsList.push(gridFields[y]);
-        }
-      }
-
-      return gridFieldsList;
+      return this.$el.querySelectorAll('.gridField');
     },
 
     applicationImageSrc(appName) {
@@ -328,7 +365,6 @@ export default {
   justify-content: center;
   align-items: center;
   font-size: 10px;
-  gap: 2px;
   color: white;
   user-select: none;
 }
@@ -351,6 +387,14 @@ export default {
 
 .gridField.filled:hover {
   background-color: rgba(190, 190, 190, 0.5);
+}
+
+.gridField.filled.selected {
+  background-color: rgba(190, 190, 190, 0.5);
+}
+
+.gridField:focus {
+  outline: none;
 }
 
 .context-menu {

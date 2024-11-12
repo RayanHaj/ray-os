@@ -124,6 +124,7 @@ export default {
   background-size: cover;
   background-position: center;
   z-index: 1;
+  overflow: auto;
 }
 
 .profile-wrapper {

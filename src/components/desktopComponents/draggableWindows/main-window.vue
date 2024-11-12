@@ -53,7 +53,7 @@ export default {
     return {
       MAXIMUM_WIDTH: '',
       MAXIMUM_HEIGHT: '',
-      WINDOW_MOVE_AREA_SPACE: 6,
+      WINDOW_RESIZE_AREA_SPACE: 10,
       dynamicStyles: null,
       disablePointerEvents: false,
       moveWindowVariables: {
@@ -174,13 +174,13 @@ export default {
 
       if (windowWidth !== this.MAXIMUM_WIDTH || windowHeight !== this.MAXIMUM_HEIGHT) {
         this.$el.style.width = '100%';
-        this.$el.style.height = '100%';
+        this.$el.style.height = 'calc(100% - 45px)';
 
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
 
         const newX = (viewportWidth - this.$el.offsetWidth) / 2;
-        const newY = (viewportHeight - this.$el.offsetHeight) / 2;
+        const newY = (viewportHeight - this.$el.offsetHeight) / 2 - 23;
 
         this.$el.style.left = `${newX}px`;
         this.$el.style.top = `${newY}px`;
@@ -201,16 +201,16 @@ export default {
       this.mouseOverWindowVariables.mousePositionY = this.mouseOverWindowVariables.oldPositionY - this.$el.getBoundingClientRect().y;
       this.mouseOverWindowVariables.mouseOnResizeSpace = false;
 
-      if (this.mouseOverWindowVariables.mousePositionX + this.WINDOW_MOVE_AREA_SPACE >= this.mouseOverWindowVariables.windowWidth) {
+      if (this.mouseOverWindowVariables.mousePositionX + this.WINDOW_RESIZE_AREA_SPACE >= this.mouseOverWindowVariables.windowWidth) {
         this.$el.style.cursor = 'e-resize';
         this.mouseOverWindowVariables.mouseOnResizeSpace = true;
-      } else if (this.mouseOverWindowVariables.mousePositionX - this.WINDOW_MOVE_AREA_SPACE <= 0) {
+      } else if (this.mouseOverWindowVariables.mousePositionX - this.WINDOW_RESIZE_AREA_SPACE <= 0) {
         this.$el.style.cursor = 'w-resize';
         this.mouseOverWindowVariables.mouseOnResizeSpace = true;
-      } else if (this.mouseOverWindowVariables.mousePositionY + this.WINDOW_MOVE_AREA_SPACE >= this.mouseOverWindowVariables.windowHeight) {
+      } else if (this.mouseOverWindowVariables.mousePositionY + this.WINDOW_RESIZE_AREA_SPACE >= this.mouseOverWindowVariables.windowHeight) {
         this.$el.style.cursor = 'n-resize';
         this.mouseOverWindowVariables.mouseOnResizeSpace = true;
-      } else if (this.mouseOverWindowVariables.mousePositionY - this.WINDOW_MOVE_AREA_SPACE <= 0) {
+      } else if (this.mouseOverWindowVariables.mousePositionY - this.WINDOW_RESIZE_AREA_SPACE <= 0) {
         this.$el.style.cursor = 's-resize';
         this.mouseOverWindowVariables.mouseOnResizeSpace = true;
       }
@@ -278,13 +278,13 @@ export default {
       document.addEventListener('mouseup', onMouseUp);
     },
     returnPressedWindowBorderSide() {
-      if (this.mouseOverWindowVariables.mousePositionX + this.WINDOW_MOVE_AREA_SPACE >= this.mouseOverWindowVariables.windowWidth)
+      if (this.mouseOverWindowVariables.mousePositionX + this.WINDOW_RESIZE_AREA_SPACE >= this.mouseOverWindowVariables.windowWidth)
         return 'right';
-      else if (this.mouseOverWindowVariables.mousePositionX - this.WINDOW_MOVE_AREA_SPACE <= 0)
+      else if (this.mouseOverWindowVariables.mousePositionX - this.WINDOW_RESIZE_AREA_SPACE <= 0)
         return 'left';
-      else if (this.mouseOverWindowVariables.mousePositionY + this.WINDOW_MOVE_AREA_SPACE >= this.mouseOverWindowVariables.windowHeight)
+      else if (this.mouseOverWindowVariables.mousePositionY + this.WINDOW_RESIZE_AREA_SPACE >= this.mouseOverWindowVariables.windowHeight)
         return 'bottom';
-      else if (this.mouseOverWindowVariables.mousePositionY - this.WINDOW_MOVE_AREA_SPACE <= 0)
+      else if (this.mouseOverWindowVariables.mousePositionY - this.WINDOW_RESIZE_AREA_SPACE <= 0)
         return 'top';
     },
     onMouseDownHeader(event) {
@@ -423,6 +423,8 @@ export default {
 .movable-window {
   width: 100%;
   height: calc(100% - 30px);
+  min-width: 40%;
+  min-height: 50%;
   display: flex;
   flex-direction: column;
   resize: both;
@@ -433,7 +435,8 @@ export default {
 }
 
 .window-content {
-  height: calc(100% - 30px);
+  overflow: auto;
+  height: 100%;
 }
 
 .window-header {
