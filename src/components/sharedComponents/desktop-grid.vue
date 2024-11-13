@@ -86,7 +86,7 @@ export default {
       GRID_FIELD_WIDTH: 82,
       GRID_FIELD_HEIGHT: 82,
       listApplicationElements: [],
-      selectedApplications: [],
+      copiedApplications: [],
       applicationNames: json.applicationNames,
       mousePositions: {x: 0, y: 0},
     }
@@ -151,43 +151,57 @@ export default {
       if (checkbox) {
         checkbox.checked = !checkbox.checked;
         checkbox.checked === true ? gridField.classList.add('selected') : gridField.classList.remove('selected');
+        this.unCheckAllCheckBoxesExceptGivenCheckbox(checkbox);
       }
 
       this.contextMenuActive === true ? this.contextMenuActive = false : null
     },
+    unCheckAllCheckBoxesExceptGivenCheckbox(checkbox) {
+      this.getAllGridFields().forEach(gridField => {
+        const gridFieldCheckbox = gridField.querySelector('.grid-field-checkbox');
+        if (gridFieldCheckbox && gridFieldCheckbox.checked === true && gridFieldCheckbox !== checkbox) {
+          gridFieldCheckbox.checked = false;
+          gridField.classList.remove('selected');
+        }
+      });
+    },
     onKeydownGridField(event) {
-      if (event.ctrlKey && event.code === 'KeyC') {
-        this.selectedApplications = this.getAllSelectedGridFields();
-      }
-      if (event.ctrlKey && event.code === 'KeyV') {
-        if (this.selectedApplications.length > 0) {
-          const gridFieldAtMousePosition = this.getGridFieldByPosition(this.mousePositions.x, this.mousePositions.y);
-          if (this.selectedApplications.length > 1) {
-            const gridFieldsInVerticalRow = gridFieldAtMousePosition.parentNode;
-            console.log(Array.of(gridFieldsInVerticalRow.querySelectorAll('.gridField')))
-            // const indexOfGridFieldInVerticalRow = Array.of(gridFieldsInVerticalRow).filter(gridField => gridField !== gridFieldAtMousePosition);
-            // console.log(indexOfGridFieldInVerticalRow)
-          }
-          this.selectedApplications.forEach(application => {
-            const clone = application.children[0].cloneNode(true);
-            this.addApplicationToSpecificGridField(clone, gridFieldAtMousePosition);
-          });
+      if (event.key === 'Delete') {
+        let selectedGridField = this.getSelectedGridField();
+        if (selectedGridField) {
+          selectedGridField.classList.remove('filled');
+          selectedGridField.innerHTML = '';
         }
       }
+      if (event.ctrlKey && event.code === 'KeyC') {
+        this.copiedApplication = this.getSelectedGridField();
+      }
+      if (event.ctrlKey && event.code === 'KeyV') {
+        const gridFieldAtMousePosition = this.getGridFieldByPosition(this.mousePositions.x, this.mousePositions.y);
+        if (!gridFieldAtMousePosition || gridFieldAtMousePosition.classList.contains('filled')) {
+          return;
+        }
+
+        const parentClone = this.copiedApplication.cloneNode(true);
+        parentClone.classList.remove('selected')
+
+        const childClone = parentClone.children[0];
+        childClone.querySelector('.grid-field-checkbox').checked = false;
+        this.addApplicationToSpecificGridField(childClone, gridFieldAtMousePosition);
+      }
     },
-    getAllSelectedGridFields() {
+    getSelectedGridField() {
       const gridFields = this.getAllGridFields();
 
-      let array = [];
-
+      let returnValue = null;
       gridFields.forEach(gridField => {
         const checkbox = gridField.querySelector('.grid-field-checkbox');
-        if (checkbox && checkbox.checked) {
-          array.push(gridField);
+        if (checkbox && checkbox.checked === true) {
+          returnValue = gridField;
         }
       });
 
-      return array;
+      return returnValue;
     },
     onRightClickGridField(e) {
       const contextMenu = this.$refs.contextMenu;
