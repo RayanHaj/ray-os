@@ -93,6 +93,7 @@ export default {
   },
   methods: {
     setApplicationNameVariable(name) {
+      name = name.replaceAll(' ', '');
       const window = this.openWindows.find(window => window.windowName === name)
       if (!window) {
         this.openWindows.push({'windowName': name, 'zIndex': this.highestZIndex, 'minimized': false});
@@ -228,8 +229,10 @@ export default {
     minimizeWindow(windowName) {
       const window = this.openWindows.find(window => window.windowName === windowName);
       const windowElement = this.$el.querySelector(`.${windowName}`);
-      windowElement.style.display = 'none';
-      window.minimized = true;
+      if (windowElement) {
+        windowElement.style.display = 'none';
+        window.minimized = true;
+      }
     },
 
     sortWindowArray() {

@@ -31,7 +31,7 @@
       </div>
     </div>
     <div class="window-content">
-      <FileExplorer v-if="windowName === 'FileExplorer'"/>
+      <FileExplorer v-if="windowName === 'File Explorer'"/>
       <SettingsWindow v-if="windowName === 'Settings'" @theme-changed="$emit('themeChanged')"/>
       <WelcomeWindow v-if="windowName === 'Welcome'"/>
       <MicrosoftEdgeWindow v-if="windowName === 'Microsoft Edge'" :disable-pointer-events="disablePointerEvents"/>
