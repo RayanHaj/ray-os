@@ -1,11 +1,14 @@
 import express from 'express';
 import fetch from 'node-fetch';
 import dotenv from 'dotenv';
+import cors from 'cors';
 
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3000;
+
+app.use(cors())
 
 app.get('/api/sounds', async (req, res) => {
     const url = `https://freesound.org/apiv2/sounds/${req.query.id}/?token=${process.env.FREE_SOUND_API_KEY}`;
