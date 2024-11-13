@@ -25,6 +25,8 @@ export default {
 
   mounted() {
     this.parsedName = parseApplicationNameToImageNameFormat(this.iconImgName);
+    console.log(this.iconImgName)
+    console.log(this.parsedName)
     this.checkIfImageExists();
   },
 

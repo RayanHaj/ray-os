@@ -104,6 +104,13 @@ export default {
       applicationNames: json.applicationNames
     };
   },
+  beforeMount() {
+    for (let i = 0; i < this.applicationNames.length; i++) {
+      this.applicationNames[i] = this.applicationNames[i].replaceAll(' ', '');
+    }
+
+    console.log(this.applicationNames)
+  },
   mounted() {
     function addLeadingZero(number) {
       return ('0' + number).slice(-2);
@@ -154,12 +161,11 @@ export default {
       }
     },
     onMouseoverOpenWindow() {
-      console.log('ehelej')
       this.isHoveringOnOpenWindow = true;
     },
     onMouseleaveOpenWindow() {
       this.isHoveringOnOpenWindow = false;
-      this.currentIconHover = ''
+      this.currentIconHover = '';
     }
   }
 }

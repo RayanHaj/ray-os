@@ -18,13 +18,15 @@ export function compareArrays(arrayOne, arrayTwo) {
 
 export function parseApplicationNameToImageNameFormat(name) {
     let parsedName = '';
-    for (let letter of name) {
-        if (letter === ' ') {
+    for (let i = 0; i < name.length; i++) {
+        if (name[i] === ' ') {
             parsedName += '-';
-        } else if (letter === letter.toUpperCase()) {
-            parsedName += letter.toLowerCase();
+        } else if (name[i + 1] !== undefined && name[i] === name[i].toLowerCase() && name[i + 1] === name[i + 1].toUpperCase()) {
+            parsedName += `${name[i]}-`;
+        } else if (name[i] === name[i].toUpperCase()) {
+            parsedName += name[i].toLowerCase();
         } else {
-            parsedName += letter;
+            parsedName += name[i];
         }
     }
 
