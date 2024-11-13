@@ -60,7 +60,8 @@
 </template>
 
 <script>
-import {compareArrays} from "@/utils/util";
+import {compareArrays, parseApplicationNameToImageNameFormat} from "@/utils/util";
+import json from "@/assets/json/windowComponents"
 
 export default {
   name: "desktop-grid",
@@ -86,6 +87,7 @@ export default {
       GRID_FIELD_HEIGHT: 82,
       listApplicationElements: [],
       selectedApplications: [],
+      applicationNames: json.applicationNames,
       mousePositions: {x: 0, y: 0},
     }
   },
@@ -94,11 +96,7 @@ export default {
     windowSize: {
       type: Array,
       required: false
-    },
-    applicationNames: {
-      type: Array,
-      required: false
-    },
+    }
   },
 
   watch: {
@@ -325,8 +323,9 @@ export default {
     },
 
     applicationImageSrc(appName) {
+      const parsedAppName = parseApplicationNameToImageNameFormat(appName);
       try {
-        return require(`@/assets/images/footerIcons/${appName}.png`);
+        return require(`@/assets/images/footerIcons/${parsedAppName}.png`);
       } catch (e) {
         return require(`@/assets/images/footerIcons/default-image.png`);
       }

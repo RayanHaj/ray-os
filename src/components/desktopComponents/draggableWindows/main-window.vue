@@ -31,10 +31,10 @@
       </div>
     </div>
     <div class="window-content">
-      <FileExplorer v-if="windowName === 'file-explorer'"/>
-      <SettingsWindow v-if="windowName === 'settings'" @theme-changed="$emit('themeChanged')"/>
-      <WelcomeWindow v-if="windowName === 'welcome-window'"/>
-      <MicrosoftEdgeWindow v-if="windowName === 'microsoft-edge'" :disable-pointer-events="disablePointerEvents"/>
+      <FileExplorer v-if="windowName === 'FileExplorer'"/>
+      <SettingsWindow v-if="windowName === 'Settings'" @theme-changed="$emit('themeChanged')"/>
+      <WelcomeWindow v-if="windowName === 'Welcome'"/>
+      <MicrosoftEdgeWindow v-if="windowName === 'Microsoft Edge'" :disable-pointer-events="disablePointerEvents"/>
     </div>
   </div>
 </template>
@@ -51,6 +51,7 @@ export default {
   components: {MicrosoftEdgeWindow, WelcomeWindow, SettingsWindow, FileExplorer},
   data() {
     return {
+      components: [MicrosoftEdgeWindow, WelcomeWindow, SettingsWindow, FileExplorer],
       MAXIMUM_WIDTH: '',
       MAXIMUM_HEIGHT: '',
       WINDOW_RESIZE_AREA_SPACE: 10,

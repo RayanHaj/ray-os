@@ -6,6 +6,7 @@
 </template>
 
 <script>
+import { parseApplicationNameToImageNameFormat } from "@/utils/util"
 export default {
   name: "application-icon",
 
@@ -17,17 +18,19 @@ export default {
 
   data() {
     return {
-      imageExists: false
+      imageExists: false,
+      parsedName: ''
     };
   },
 
   mounted() {
+    this.parsedName = parseApplicationNameToImageNameFormat(this.iconImgName);
     this.checkIfImageExists();
   },
 
   computed: {
     getImageUrl() {
-      return this.imageExists ? require(`@/assets/images/footerIcons/${this.iconImgName}.png`) : require('@/assets/images/footerIcons/default-image.png');
+      return this.imageExists ? require(`@/assets/images/footerIcons/${this.parsedName}.png`) : require('@/assets/images/footerIcons/default-image.png');
     }
   },
 
@@ -35,7 +38,7 @@ export default {
     checkIfImageExists() {
       try {
         const img = new Image();
-        img.src = require(`@/assets/images/footerIcons/${this.iconImgName}.png`);
+        img.src = require(`@/assets/images/footerIcons/${this.parsedName}.png`);
 
         img.onload = () => {
           this.imageExists = true;

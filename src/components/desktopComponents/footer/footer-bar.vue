@@ -90,6 +90,7 @@
 
 <script>
 import ApplicationIcon from "@/components/desktopComponents/application-icon";
+import json from "@/assets/json/windowComponents"
 
 export default {
   name: "footer-bar",
@@ -100,6 +101,7 @@ export default {
       currentIconHover: {},
       quickSettingMenuIsOpen: false,
       isHoveringOnOpenWindow: false,
+      applicationNames: json.applicationNames
     };
   },
   mounted() {
@@ -115,10 +117,6 @@ export default {
     }, 1000);
   },
   props: {
-    applicationNames: {
-      type: Array,
-      required: true
-    },
     openWindows: {
       type: Array,
       required: false

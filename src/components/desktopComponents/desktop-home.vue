@@ -23,7 +23,6 @@
       />
       <DesktopGrid
           @application-name="setApplicationNameVariable"
-          :application-names="applicationNames"
           :window-size="windowDimensions"
           class="desktop-grid"/>
     </div>
@@ -38,7 +37,6 @@
                  @application-name="setApplicationNameVariable"
                  @quick-settings-menu-open="openQuickSettingsMenu"
                  @close-window="closeWindow"
-                 :application-names="applicationNames"
                  :open-windows="openWindows"
       />
     </div>
@@ -69,7 +67,6 @@ export default {
       highestZIndex: 1,
       backgroundColor: 'black',
       desktopBrightnessValue: 100,
-      applicationNames: ['windows-start', 'microsoft-edge', 'file-explorer', 'settings'],
     }
   },
   components: {SettingsMenu, MainWindow, DesktopGrid, FooterBar},
