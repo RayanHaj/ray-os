@@ -17,9 +17,9 @@
         <div class="prefer-image-container">
           <div id="preferImage" class="preference-button preference-background">Prefer image</div>
           <div class="background-image-picker" :class="{ disabled: backgroundPreference === 1 }">
-            <img id="bg1" class="static-background option" src="@/../src/assets/images/desktopWallpapers/wallpaper_01.png" width="250" height="100" alt="wallpaper_01">
-            <img id="bg2" class="static-background option" src="@/../src/assets/images/desktopWallpapers/wallpaper_02.png" width="250" height="100" alt="wallpaper_02">
-            <img id="bg3" class="static-background option" src="@/../src/assets/images/desktopWallpapers/wallpaper_03.png" width="250" height="100" alt="wallpaper_03">
+            <img id="bg1" class="static-background option" src="../../../../../assets/images/desktopWallpapers/wallpaper_01.png" width="250" height="100" alt="wallpaper_01">
+            <img id="bg2" class="static-background option" src="../../../../../assets/images/desktopWallpapers/wallpaper_02.png" width="250" height="100" alt="wallpaper_02">
+            <img id="bg3" class="static-background option" src="../../../../../assets/images/desktopWallpapers/wallpaper_03.png" width="250" height="100" alt="wallpaper_03">
           </div>
         </div>
       </div>

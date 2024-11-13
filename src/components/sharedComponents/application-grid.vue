@@ -7,14 +7,14 @@
       <div v-for="(numX, indexX) in GRID_WIDTH" :key="indexX" class="upperGridField">
         <div v-for="(numY, indexY) in GRID_HEIGHT" :key="indexY" class="gridField"
              :class="{'filled': checkShouldFillGridField(indexX, indexY) }"
-             @dblclick="dragAndDropEventListenersDesktop($event, 'dblclick')"
              @drop="dragAndDropEventListenersDesktop($event, 'drop')"
              @dragstart="dragAndDropEventListenersDesktop($event, 'dragstart')"
+             @mouseover="onMouseOverGridField"
+             @mouseleave="onMouseLeaveGridField"
+             @dblclick="onDoubleClick($event)"
              @click="onClickGridField($event)"
              @keydown.prevent="onKeydownGridField($event)"
              @contextmenu.prevent="onRightClickGridField"
-             @mouseover="onMouseOverGridField"
-             @mouseleave="onMouseLeaveGridField"
              tabindex="0"
              :style="{
               width: `${GRID_FIELD_WIDTH}px`,
@@ -64,7 +64,7 @@ import {compareArrays, parseApplicationNameToImageNameFormat} from "@/utils/util
 import json from "@/assets/json/windowComponents"
 
 export default {
-  name: "desktop-grid",
+  name: "application-grid",
 
   mounted() {
     this.$nextTick(() => {
@@ -111,7 +111,7 @@ export default {
             gridField.classList.remove('filled');
           }
         });
-        this.addApplicationsToDesktop();
+        this.addApplicationsToGrid();
       }
     },
   },
@@ -233,6 +233,11 @@ export default {
         checkbox.style.display = 'none';
       }
     },
+    onDoubleClick(event) {
+      const gridField = event.currentTarget;
+      if (!gridField.querySelector('.grid-field-content-wrapper')) return;
+      this.$emit('applicationName', gridField.querySelector('.applicationName').innerText);
+    },
     contextMenuActions(e, action) {
       switch (action) {
         case 'copy': {
@@ -263,11 +268,6 @@ export default {
       const gridField = event.currentTarget;
 
       switch (type) {
-        case 'dblclick': {
-          if (!gridField.querySelector('.grid-field-content-wrapper')) return;
-          this.$emit('applicationName', gridField.querySelector('.applicationName').innerText);
-          break;
-        }
         case 'dragstart': {
           this.draggedApplication = gridField;
           this.draggedApplicationClone = gridField.cloneNode(true);
@@ -320,7 +320,7 @@ export default {
       gridField.classList.add('filled');
     },
 
-    addApplicationsToDesktop() {
+    addApplicationsToGrid() {
       let gridFields = this.getAllGridFields();
       let index = 0;
 

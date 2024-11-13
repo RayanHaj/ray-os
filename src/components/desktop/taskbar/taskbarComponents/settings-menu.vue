@@ -179,7 +179,7 @@ export default {
   -webkit-appearance: none;
   width: 20px;
   height: 20px;
-  background: var(--footer-color);
+  background: var(--taskbar-color);
   border-radius: 50%;
   cursor: pointer;
 }

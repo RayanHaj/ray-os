@@ -5,7 +5,7 @@
 </template>
 <script>
 export default {
-  name: "file-explorer",
+  name: "file-explorer-window",
   data() {
     return {
       backendUrl: 'http://localhost:3000',

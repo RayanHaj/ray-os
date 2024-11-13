@@ -32,7 +32,7 @@
                     class="quick-settings-menu"
                     @brightness-value-changed="updateBrightnessValue"
       />
-      <FooterBar ref="footerBar"
+      <taskbar ref="footerBar"
                  class="footer"
                  @application-name="setApplicationNameVariable"
                  @quick-settings-menu-open="openQuickSettingsMenu"
@@ -44,10 +44,10 @@
 </template>
 
 <script>
-import FooterBar from "@/components/desktopComponents/footer/footer-bar";
-import DesktopGrid from "@/components/sharedComponents/desktop-grid";
-import MainWindow from "@/components/desktopComponents/draggableWindows/main-window";
-import SettingsMenu from "@/components/desktopComponents/footer/footerComponents/settings-menu";
+import taskbarFooter from "@/components/desktop/taskbar/taskbar-footer";
+import ApplicationGrid from "@/components/sharedComponents/application-grid";
+import ApplicationWindow from "@/components/desktop/window/application-window";
+import SettingsMenu from "@/components/desktop/taskbar/taskbarComponents/settings-menu";
 import {deviceIsMobile} from "@/utils/util";
 
 export default {
@@ -69,7 +69,7 @@ export default {
       desktopBrightnessValue: 100,
     }
   },
-  components: {SettingsMenu, MainWindow, DesktopGrid, FooterBar},
+  components: {SettingsMenu, MainWindow: ApplicationWindow, DesktopGrid: ApplicationGrid, taskbar: taskbarFooter},
   props: {
     backgroundImageId: Number
   },
@@ -93,7 +93,6 @@ export default {
   },
   methods: {
     setApplicationNameVariable(name) {
-      name = name.replaceAll(' ', '');
       const window = this.openWindows.find(window => window.windowName === name)
       if (!window) {
         this.openWindows.push({'windowName': name, 'zIndex': this.highestZIndex, 'minimized': false});

@@ -4,12 +4,12 @@
 </template>
 
 <script>
-import DesktopLogin from "@/components/desktopComponents/desktop-login";
-import MobileLogin from "@/components/mobileComponents/mobile-login";
+import DesktopLogin from "@/components/desktop/desktop-login";
+import MobileLogin from "@/components/mobile/mobile-login";
 import {deviceIsMobile} from "@/utils/util";
 
 export default {
-  name: "entry-point",
+  name: "app-entry-point",
   components: {MobileLogin, DesktopLogin},
   data() {
     return {

@@ -1,6 +1,6 @@
 <template>
-  <div class="footer-bar">
-    <div class="footer-bar-items-left">
+  <div class="taskbar">
+    <div class="taskbar-items-left">
       <div class="app-icon" :class="iconImageName" v-for="(iconImageName, index) in applicationNames"
            :key="iconImageName"
            @mouseover="onMouseoverApplicationIcon(iconImageName)" @mouseleave="onMouseleaveApplicationIcon">
@@ -39,19 +39,19 @@
         </div>
       </div>
     </div>
-    <div class="footer-bar-items-right">
-      <div class="show-hidden-icons-wrapper footer-bar-right-item">
+    <div class="taskbar-items-right">
+      <div class="show-hidden-icons-wrapper taskbar-right-item">
         <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 448 512">
           <!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
           <path fill="#ffffff"
                 d="M201.4 137.4c12.5-12.5 32.8-12.5 45.3 0l160 160c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L224 205.3 86.6 342.6c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3l160-160z"/>
         </svg>
       </div>
-      <div class="keyboard-layout-wrapper footer-bar-right-item">
+      <div class="keyboard-layout-wrapper taskbar-right-item">
         <span>ENG</span>
         <span>US</span>
       </div>
-      <div ref="quickSettingsMenuButton" class="wifi-sound-battery-wrapper footer-bar-right-item"
+      <div ref="quickSettingsMenuButton" class="wifi-sound-battery-wrapper taskbar-right-item"
            @click="emitQuickSettingMenuClicked">
         <!--wifi-->
         <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 640 512">
@@ -72,7 +72,7 @@
                 d="M464 160c8.8 0 16 7.2 16 16l0 160c0 8.8-7.2 16-16 16L80 352c-8.8 0-16-7.2-16-16l0-160c0-8.8 7.2-16 16-16l384 0zM80 96C35.8 96 0 131.8 0 176L0 336c0 44.2 35.8 80 80 80l384 0c44.2 0 80-35.8 80-80l0-16c17.7 0 32-14.3 32-32l0-64c0-17.7-14.3-32-32-32l0-16c0-44.2-35.8-80-80-80L80 96zm368 96L96 192l0 128 352 0 0-128z"/>
         </svg>
       </div>
-      <div class="date-time-notification-wrapper footer-bar-right-item">
+      <div class="date-time-notification-wrapper taskbar-right-item">
         <div class="date-time-wrapper">
           <div class="time">{{ time }}</div>
           <div class="date">{{ date }}</div>
@@ -89,11 +89,11 @@
 </template>
 
 <script>
-import ApplicationIcon from "@/components/desktopComponents/application-icon";
+import ApplicationIcon from "@/components/desktop/application-icon";
 import json from "@/assets/json/windowComponents"
 
 export default {
-  name: "footer-bar",
+  name: "taskbarFooter",
   data() {
     return {
       date: '',
@@ -103,13 +103,6 @@ export default {
       isHoveringOnOpenWindow: false,
       applicationNames: json.applicationNames
     };
-  },
-  beforeMount() {
-    for (let i = 0; i < this.applicationNames.length; i++) {
-      this.applicationNames[i] = this.applicationNames[i].replaceAll(' ', '');
-    }
-
-    console.log(this.applicationNames)
   },
   mounted() {
     function addLeadingZero(number) {
@@ -211,37 +204,37 @@ export default {
   font-weight: bolder;
 }
 
-.footer-bar {
+.taskbar {
   position: absolute;
   bottom: 0;
   width: 100%;
   height: 45px;
-  background-color: var(--footer-color);
+  background-color: var(--taskbar-color);
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.footer-bar-items-left {
+.taskbar-items-left {
   display: flex;
   align-items: center;
   gap: 8px;
   margin-left: 10px;
 }
 
-.footer-bar-items-right {
+.taskbar-items-right {
   margin-right: 8px;
   display: flex;
   flex-direction: row;
 }
 
-.footer-bar-right-item {
+.taskbar-right-item {
   padding: 4px 8px 4px 8px;
   transition: 0.3s;
   cursor: default;
 }
 
-.footer-bar-right-item:hover {
+.taskbar-right-item:hover {
   background-color: var(--hover-color);
   border-radius: 5px;
 }

@@ -48,7 +48,7 @@ html, body {
 
 .default {
   --background-color: #000000;
-  --footer-color: #000000;
+  --taskbar-color: #000000;
   --background-color-window: #242F36;
   --background-color-input: #2f4f4f;
   --font-color: #FFFFFFFF;
@@ -57,7 +57,7 @@ html, body {
 
 .blue-sea {
   --background-color: #04ADBF;
-  --footer-color: #024959;
+  --taskbar-color: #024959;
   --background-color-window: #0D1440;
   --background-color-input: #04ADBF;
   --font-color: #FFFFFFFF;
@@ -66,7 +66,7 @@ html, body {
 
 .sunset-beach {
   --background-color: #FF6F61;
-  --footer-color: #D03F27;
+  --taskbar-color: #D03F27;
   --background-color-window: #FFCCB6;
   --background-color-input: #FF6F61;
   --font-color: #333333;
@@ -75,7 +75,7 @@ html, body {
 
 .forest-dream {
   --background-color: #2E5B2A;
-  --footer-color: #1C3F1A;
+  --taskbar-color: #1C3F1A;
   --background-color-window: #A3CBA0;
   --background-color-input: #2E5B2A;
   --font-color: #FFFFFF;
@@ -84,7 +84,7 @@ html, body {
 
 .cyberpunk-night {
   --background-color: #1E1E2F;
-  --footer-color: #0F0F1A;
+  --taskbar-color: #0F0F1A;
   --background-color-window: #3D3D6B;
   --background-color-input: #2B2B4D;
   --font-color: #00FFCC;
@@ -93,7 +93,7 @@ html, body {
 
 .satisfying-sky {
   --background-color: #B3E5FC;
-  --footer-color: #0288D1;
+  --taskbar-color: #0288D1;
   --background-color-window: #E1F5FE;
   --background-color-input: #B3E5FC;
   --font-color: #212121;
@@ -102,7 +102,7 @@ html, body {
 
 .modern-elegance {
   --background-color: #1A1A1A;
-  --footer-color: #262626;
+  --taskbar-color: #262626;
   --background-color-window: #2C2C2C;
   --background-color-input: #333333;
   --font-color: #E0E0E0;
@@ -111,7 +111,7 @@ html, body {
 
 .blue-sea-remastered {
   --background-color: #0d45ce;
-  --footer-color: #0d45ce;
+  --taskbar-color: #0d45ce;
   --background-color-window: #2a5cd9;
   --background-color-input: #0d45ce;
   --font-color: #F1F1F1;
@@ -120,7 +120,7 @@ html, body {
 
 .elegant-black-white {
   --background-color: #000000; /* Diep zwart als achtergrondkleur */
-  --footer-color: #111111; /* Iets lichter zwart voor de footer */
+  --taskbar-color: #111111; /* Iets lichter zwart voor de footer */
   --background-color-window: #1A1A1A; /* Donkergrijs voor vensters */
   --background-color-input: #262626; /* Subtiele grijstint voor invoervelden */
   --font-color: #B0C4DE; /* Helder wit voor tekst */

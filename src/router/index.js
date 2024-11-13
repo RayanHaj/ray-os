@@ -1,8 +1,8 @@
 import {createRouter, createWebHistory} from "vue-router";
-import DesktopHome from "@/components/desktopComponents/desktop-home";
-import BatteryEasterEgg from "@/components/desktopComponents/easterEggsComponents/battery-easter-egg";
-import EntryPoint from "@/components/entry-point";
-import MobileHome from "@/components/mobileComponents/mobile-home";
+import DesktopHome from "@/components/desktop/desktop-home";
+import BatteryEasterEgg from "@/components/desktop/easterEggs/battery-easter-egg";
+import EntryPoint from "@/components/app-entry-point";
+import MobileHome from "@/components/mobile/mobile-home";
 
 const router = createRouter({
     history: createWebHistory(),

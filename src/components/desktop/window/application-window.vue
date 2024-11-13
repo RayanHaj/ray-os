@@ -1,5 +1,5 @@
 <template>
-  <div class="movable-window"
+  <div class="window"
        @mousemove="mouseOverEventListeners"
        @mousedown="moveWindowOnMouseDownWindowCorners">
     <div class="window-header">
@@ -40,18 +40,17 @@
 </template>
 
 <script>
-import FileExplorer from "@/components/desktopComponents/draggableWindows/fileExplorer/file-explorer";
-import SettingsWindow from "@/components/desktopComponents/draggableWindows/settingsWindow/settings-window";
-import WelcomeWindow from "@/components/desktopComponents/draggableWindows/welcomeWindow/welcome-window";
-import MicrosoftEdgeWindow
-  from "@/components/desktopComponents/draggableWindows/microsoftEdgeWindow/microsoft-edge-window";
+import FileExplorerWindow from "@/components/desktop/window/windowContent/fileExplorer/file-explorer-window";
+import SettingsWindow from "@/components/desktop/window/windowContent/settings/settings-window";
+import WelcomeWindow from "@/components/desktop/window/windowContent/welcome/welcome-window";
+import MicrosoftEdgeWindow from "@/components/desktop/window/windowContent/microsoftEdge/microsoft-edge-window";
 
 export default {
-  name: "main-window",
-  components: {MicrosoftEdgeWindow, WelcomeWindow, SettingsWindow, FileExplorer},
+  name: "application-window",
+  components: {MicrosoftEdgeWindow, WelcomeWindow, SettingsWindow: SettingsWindow, FileExplorer: FileExplorerWindow},
   data() {
     return {
-      components: [MicrosoftEdgeWindow, WelcomeWindow, SettingsWindow, FileExplorer],
+      components: [MicrosoftEdgeWindow, WelcomeWindow, SettingsWindow, FileExplorerWindow],
       MAXIMUM_WIDTH: '',
       MAXIMUM_HEIGHT: '',
       WINDOW_RESIZE_AREA_SPACE: 10,
@@ -421,7 +420,7 @@ export default {
   color: var(--font-color);
 }
 
-.movable-window {
+.window {
   width: 100%;
   height: calc(100% - 30px);
   min-width: 40%;
@@ -444,7 +443,7 @@ export default {
   height: 30px;
   position: sticky;
   top: 0;
-  background-color: var(--footer-color);
+  background-color: var(--taskbar-color);
 }
 
 .top-header {

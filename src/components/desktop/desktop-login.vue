@@ -22,7 +22,7 @@
 
 <script>
 export default {
-  name: "login-screen",
+  name: "desktop-login",
   data() {
     return {
       chooseProfilePressed: false,
