@@ -147,14 +147,17 @@ export default {
     },
     onClickGridField(event) {
       const gridField = event.currentTarget;
-      const checkbox = event.currentTarget.querySelector('.grid-field-checkbox');
+      this.checkOrUncheckGivenCheckbox(gridField);
+    },
+    checkOrUncheckGivenCheckbox(gridField) {
+      const checkbox = gridField.querySelector('.grid-field-checkbox');
       if (checkbox) {
         checkbox.checked = !checkbox.checked;
         checkbox.checked === true ? gridField.classList.add('selected') : gridField.classList.remove('selected');
         this.unCheckAllCheckBoxesExceptGivenCheckbox(checkbox);
       }
 
-      this.contextMenuActive === true ? this.contextMenuActive = false : null
+      this.contextMenuActive === true ? this.contextMenuActive = false : null;
     },
     unCheckAllCheckBoxesExceptGivenCheckbox(checkbox) {
       this.getAllGridFields().forEach(gridField => {

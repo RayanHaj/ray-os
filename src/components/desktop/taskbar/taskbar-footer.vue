@@ -155,6 +155,13 @@ export default {
     onMouseleaveApplicationIcon(e) {
       if (e.offsetY > -1) {
         this.currentIconHover = {}
+      } else {
+        setTimeout(() => {
+          if (!this.isHoveringOnOpenWindow) {
+            this.isHoveringOnOpenWindow = false;
+            this.currentIconHover = '';
+          }
+        }, 1000);
       }
     },
     onMouseoverOpenWindow() {
