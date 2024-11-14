@@ -5,9 +5,9 @@
     <div class="main-screen">
       <MainWindow
           v-for="window in openWindows"
+          class="window"
           :key="window.windowName"
           :class="window.windowName"
-          class="window"
           :style="{zIndex: openWindows.find(openWindow => openWindow.windowName === window.windowName).zIndex}"
           :window-name="window.windowName"
           @click="onClickWindow($event, window)"
@@ -32,12 +32,13 @@
                     class="quick-settings-menu"
                     @brightness-value-changed="updateBrightnessValue"
       />
-      <taskbar ref="footerBar"
-                 class="footer"
-                 @application-name="setApplicationNameVariable"
-                 @quick-settings-menu-open="openQuickSettingsMenu"
-                 @close-window="closeWindow"
-                 :open-windows="openWindows"
+      <taskbar ref="taskbar"
+               class="taskbar"
+               @application-name="setApplicationNameVariable"
+               @quick-settings-menu-open="openQuickSettingsMenu"
+               @close-window="closeWindow"
+               :open-windows="openWindows"
+               :height="TASKBAR_HEIGHT"
       />
     </div>
   </div>
@@ -54,12 +55,11 @@ export default {
   name: "desktop-home",
   data() {
     return {
+      TASKBAR_HEIGHT: 45,
       windowIsRendered: false,
       quickSettingMenuIsOpen: false,
       closingWindow: false,
       activatedEasterEgg: null,
-      windowWidth: '',
-      windowHeight: '',
       applicationName: '',
       splitOtherWindow: {},
       openWindows: [],
@@ -74,7 +74,7 @@ export default {
     backgroundImageId: Number
   },
   emits: ['themeChanged'],
-  async mounted() {
+  mounted() {
     if (deviceIsMobile() === true) {
       this.$router.push('/');
     }
@@ -82,14 +82,37 @@ export default {
     this.updateSettings();
 
     window.addEventListener('resize', this.updateWindowDimensions);
-    window.addEventListener('click', await this.closeOpenWindows);
+    window.addEventListener('click', this.closeOpenWindows);
   },
   created() {
-    this.windowDimensions = [window.innerWidth, window.innerHeight - 45]
+    this.windowDimensions = [window.innerWidth, (window.innerHeight - this.TASKBAR_HEIGHT) - 1];
   },
-  async beforeUnmount() {
+  beforeUnmount() {
     window.removeEventListener('resize', this.updateWindowDimensions);
-    window.removeEventListener('click', await this.closeOpenWindows);
+    window.removeEventListener('click', this.closeOpenWindows);
+  },
+  watch: {
+    windowIsRendered() {
+      this.updateWindowDimensions();
+    },
+
+    activatedEasterEgg() {
+      console.log(this.activatedEasterEgg);
+    },
+
+    'openWindows.length'(newValue) {
+      this.$nextTick(() => {
+        if (newValue === 0) return;
+
+        if (newValue > 1) {
+          this.$el.querySelectorAll('.window').forEach(window => {
+            window.style.height = `calc(100% - ${this.TASKBAR_HEIGHT}px)`;
+          });
+        } else {
+          this.$el.querySelector('.window').style.height = `calc(100% - ${this.TASKBAR_HEIGHT}px)`;
+        }
+      })
+    }
   },
   methods: {
     setApplicationNameVariable(name) {
@@ -132,8 +155,7 @@ export default {
       }
     },
     updateWindowDimensions() {
-      const NAVBAR_HEIGHT = 45;
-      this.windowDimensions = [this.$el.offsetWidth, this.$el.offsetHeight - NAVBAR_HEIGHT];
+      this.windowDimensions = [window.innerWidth, (window.innerHeight - this.TASKBAR_HEIGHT) - 1];
     },
     updateSettings() {
       const desktopElement = this.$el;
@@ -164,7 +186,7 @@ export default {
       }
     },
     async openQuickSettingsMenu() {
-      const settingsMenu = this.$refs.settingsMenu;
+      const settingsMenu = this.$refs.taskbar;
 
       if (this.quickSettingMenuIsOpen) {
         await settingsMenu.closeSettingsMenuAnimation().then(() => {
@@ -204,14 +226,14 @@ export default {
 
       return true;
     },
-    async closeOpenWindows(e) {
+    closeOpenWindows(e) {
       if (this.quickSettingMenuIsOpen === true) {
         e.preventDefault();
         const settingsMenu = this.$refs.settingsMenu;
-        const footer = this.$refs.footerBar;
-        if (footer) {
-          if (this.validateBeforeClosingWindows(settingsMenu, footer, e)) {
-            await settingsMenu.closeSettingsMenuAnimation().then(() => {
+        const taskbar = this.$refs.footerBar;
+        if (taskbar) {
+          if (this.validateBeforeClosingWindows(settingsMenu, taskbar, e)) {
+            settingsMenu.closeSettingsMenuAnimation().then(() => {
               this.quickSettingMenuIsOpen = !this.quickSettingMenuIsOpen;
             });
           }
@@ -241,17 +263,8 @@ export default {
           window.zIndex = counter++;
         });
         this.highestZIndex = counter;
-        this.$el.querySelector('.footer').style.zIndex = this.highestZIndex + 1;
+        this.$el.querySelector('.taskbar').style.zIndex = this.highestZIndex + 1;
       }
-    }
-  },
-  watch: {
-    windowIsRendered() {
-      this.updateWindowDimensions();
-    },
-
-    activatedEasterEgg() {
-      console.log(this.activatedEasterEgg);
     }
   }
 }
@@ -279,10 +292,9 @@ export default {
 .window {
   position: absolute;
   width: 100%;
-  height: calc(100% - 45px);
 }
 
-.footer {
+.taskbar {
   z-index: 2;
 }
 

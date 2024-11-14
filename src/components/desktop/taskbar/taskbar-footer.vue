@@ -1,5 +1,5 @@
 <template>
-  <div class="taskbar">
+  <div class="taskbar" :style="{ height: `${height}px` }">
     <div class="taskbar-items-left">
       <div class="app-icon" :class="iconImageName" v-for="(iconImageName, index) in applicationNames"
            :key="iconImageName"
@@ -120,6 +120,10 @@ export default {
     openWindows: {
       type: Array,
       required: false
+    },
+    height: {
+      type: Number,
+      required: true
     }
   },
   components: {ApplicationIcon},
@@ -208,7 +212,6 @@ export default {
   position: absolute;
   bottom: 0;
   width: 100%;
-  height: 45px;
   background-color: var(--taskbar-color);
   display: flex;
   justify-content: space-between;

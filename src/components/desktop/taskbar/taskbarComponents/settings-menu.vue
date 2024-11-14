@@ -52,7 +52,7 @@
       </svg>
       <input v-model="brightnessInputValue" class="brightness-input" type="range" min="20" max="100" value="100">
     </div>
-    <div class="footer">
+    <div class="taskbar">
       <div class="battery" @click="batteryEasterEggs">
         <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 576 512" class="footer-item btn">
           <!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
@@ -142,7 +142,7 @@ export default {
   grid-template-columns: repeat(3, 1fr);
 }
 
-.footer {
+.taskbar {
   display: flex;
   flex-direction: row;
   justify-content: space-between;

@@ -119,6 +119,7 @@ export default {
   watch: {
     windowSize(newSize) {
       this.MAXIMUM_WIDTH = newSize[0];
+      console.log('windowSizeWatcher: ' + newSize)
       this.MAXIMUM_HEIGHT = newSize[1];
     },
     splitOtherWindow(newWindow) {
@@ -174,7 +175,7 @@ export default {
 
       if (windowWidth !== this.MAXIMUM_WIDTH || windowHeight !== this.MAXIMUM_HEIGHT) {
         this.$el.style.width = '100%';
-        this.$el.style.height = 'calc(100% - 45px)';
+        this.$el.style.height = `calc(100% - 45px)`;
 
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
@@ -304,8 +305,8 @@ export default {
     onMouseMoveHeader(event) {
       this.moveWindowVariables.windowIsMoving = true;
 
-      let windowWidth = this.$el.offsetWidth;
-      let windowHeight = this.$el.offsetHeight;
+      let windowWidth = this.moveWindowVariables.NUM_WIDTH;
+      let windowHeight = this.moveWindowVariables.NUM_HEIGHT;
 
       for (let i = 0; i <= 2; i++) {
         if ((windowWidth === this.MAXIMUM_WIDTH || windowWidth + i === this.MAXIMUM_WIDTH || windowWidth - i === this.MAXIMUM_WIDTH) && windowHeight >= this.MAXIMUM_HEIGHT) {
@@ -361,14 +362,12 @@ export default {
       if (this.moveWindowVariables.xOutOfBoundsPositive) {
         this.$el.style.left = '50%';
         this.$el.style.width = '50%';
-
         this.$el.style.height = `${this.MAXIMUM_HEIGHT}px`;
         this.$el.style.top = 0;
         return 'positive-x';
       } else if (this.moveWindowVariables.xOutOfBoundsNegative) {
         this.$el.style.left = 0;
         this.$el.style.width = '50%';
-
         this.$el.style.height = `${this.MAXIMUM_HEIGHT}px`;
         this.$el.style.top = 0;
         return 'negative-x';
@@ -424,7 +423,7 @@ export default {
   width: 100%;
   height: calc(100% - 30px);
   min-width: 40%;
-  min-height: 50%;
+  min-height: 30%;
   display: flex;
   flex-direction: column;
   resize: both;
