@@ -113,6 +113,10 @@ export default {
     splitOtherWindow: {
       type: Object,
       required: true
+    },
+    taskbarHeight: {
+      type: Number,
+      required: true
     }
   },
   emits: ['splitOtherWindow', 'minimizeWindow', 'rendered', 'closeTab'],
@@ -175,7 +179,7 @@ export default {
 
       if (windowWidth !== this.MAXIMUM_WIDTH || windowHeight !== this.MAXIMUM_HEIGHT) {
         this.$el.style.width = '100%';
-        this.$el.style.height = `calc(100% - 45px)`;
+        this.$el.style.height = `calc(100% - ${this.taskbarHeight}px)`;
 
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
@@ -420,8 +424,7 @@ export default {
 }
 
 .window {
-  width: 100%;
-  height: calc(100% - 30px);
+  box-sizing: border-box;
   min-width: 40%;
   min-height: 30%;
   display: flex;

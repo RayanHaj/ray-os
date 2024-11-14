@@ -20,6 +20,7 @@
           :window-size="windowDimensions"
           :open-windows="openWindows"
           :split-other-window="splitOtherWindow"
+          :taskbar-height="TASKBAR_HEIGHT"
       />
       <DesktopGrid
           @application-name="setApplicationNameVariable"
@@ -85,7 +86,7 @@ export default {
     window.addEventListener('click', this.closeOpenWindows);
   },
   created() {
-    this.windowDimensions = [window.innerWidth, (window.innerHeight - this.TASKBAR_HEIGHT) - 1];
+    this.windowDimensions = [window.innerWidth, (window.innerHeight - this.TASKBAR_HEIGHT)];
   },
   beforeUnmount() {
     window.removeEventListener('resize', this.updateWindowDimensions);
@@ -100,16 +101,16 @@ export default {
       console.log(this.activatedEasterEgg);
     },
 
-    'openWindows.length'(newValue) {
+    'openWindows.length'(newLength, oldLength) {
       this.$nextTick(() => {
-        if (newValue === 0) return;
+        if (newLength === 0) return;
 
-        if (newValue > 1) {
+        if (newLength > oldLength) {
           this.$el.querySelectorAll('.window').forEach(window => {
-            window.style.height = `calc(100% - ${this.TASKBAR_HEIGHT}px)`;
+            if (this.openWindows[newLength - 1].windowName === window.querySelector('.window-name').innerText) {
+              window.style.height = `calc(100% - ${this.TASKBAR_HEIGHT}px)`;
+            }
           });
-        } else {
-          this.$el.querySelector('.window').style.height = `calc(100% - ${this.TASKBAR_HEIGHT}px)`;
         }
       })
     }
@@ -159,7 +160,7 @@ export default {
       }
     },
     updateWindowDimensions() {
-      this.windowDimensions = [window.innerWidth, (window.innerHeight - this.TASKBAR_HEIGHT) - 1];
+      this.windowDimensions = [window.innerWidth, (window.innerHeight - this.TASKBAR_HEIGHT)];
     },
     updateSettings() {
       const desktopElement = this.$el;
