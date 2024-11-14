@@ -7,7 +7,7 @@
           v-for="window in openWindows"
           class="window"
           :key="window.windowName"
-          :class="window.windowName"
+          :ref="window.windowName"
           :style="{zIndex: openWindows.find(openWindow => openWindow.windowName === window.windowName).zIndex}"
           :window-name="window.windowName"
           @click="onClickWindow($event, window)"
@@ -124,8 +124,12 @@ export default {
         return;
       }
 
-      this.$el.querySelector(`.${name}`).style.display = 'flex';
-      window.minimized = false;
+      const windowComponent = this.$refs[name][0];
+
+      if (windowComponent) {
+        windowComponent.$el.style.display = 'flex';
+        window.minimized = false;
+      }
     },
     updateBrightnessValue() {
       const value = localStorage.getItem('brightnessValue');
@@ -249,9 +253,12 @@ export default {
 
     minimizeWindow(windowName) {
       const window = this.openWindows.find(window => window.windowName === windowName);
-      const windowElement = this.$el.querySelector(`.${windowName}`);
-      if (windowElement) {
-        windowElement.style.display = 'none';
+      const windowComponent = this.$refs[windowName][0];
+
+      console.log(windowComponent)
+
+      if (windowComponent) {
+        windowComponent.$el.style.display = 'none';
         window.minimized = true;
       }
     },
