@@ -3,6 +3,7 @@
     <div v-if="GRID_HEIGHT > 0"
          class="grid"
          @dragover.prevent="dragAndDropEventListenersDesktop($event, 'dragover')"
+         @touchover.prevent="dragAndDropEventListenersDesktop($event, 'touchover')"
          @mousemove="mousePositions = {x: $event.clientX, y: $event.clientY}">
       <div v-for="(numX, indexX) in GRID_WIDTH" :key="indexX" class="upperGridField">
         <div v-for="(numY, indexY) in GRID_HEIGHT" :key="indexY" class="gridField"
@@ -11,6 +12,9 @@
              @dragstart="dragAndDropEventListenersDesktop($event, 'dragstart')"
              @mouseover="onMouseOverGridField"
              @mouseleave="onMouseLeaveGridField"
+             @touchstart="dragAndDropEventListenersDesktop($event, 'touchstart')"
+             @touchover="onMouseOverGridField"
+             @touchleave="onMouseLeaveGridField"
              @dblclick="onDoubleClick($event)"
              @click="onClickGridField($event)"
              @keydown.prevent="onKeydownGridField($event)"
@@ -83,6 +87,7 @@
 
 <script>
 import {compareArrays, parseApplicationNameToImageNameFormat} from "@/utils/util";
+import { enableDragDropTouch } from "@/assets/libraries/drag-drop-touch.esm.min";
 import json from "@/assets/json/config.json"
 
 export default {
@@ -90,6 +95,7 @@ export default {
 
   mounted() {
     this.$nextTick(() => {
+      enableDragDropTouch();
       this.init();
     });
   },
@@ -308,7 +314,8 @@ export default {
       const gridField = event.currentTarget;
 
       switch (type) {
-        case 'dragstart': {
+        case 'dragstart':
+        case 'touchstart': {
           this.draggedApplication = gridField;
           this.draggedApplicationClone = gridField.cloneNode(true);
 
@@ -322,13 +329,16 @@ export default {
 
           this.$el.appendChild(imgClone);
 
-          event.dataTransfer.setDragImage(imgClone, 20, 20);
+          if (type === 'dragstart') {
+            event.dataTransfer.setDragImage(imgClone, 20, 20);
+          }
           setTimeout(() => {
             this.$el.removeChild(imgClone);
           }, 0)
           break;
         }
-        case 'dragover': {
+        case 'dragover':
+        case 'touchover': {
           break;
         }
         case 'drop': {
