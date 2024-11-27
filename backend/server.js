@@ -11,12 +11,13 @@ const port = process.env.PORT || 3000;
 app.use(cors())
 
 app.get('/api/sounds', async (req, res) => {
-    const url = `https://freesound.org/apiv2/sounds/${req.query.id}/?token=${process.env.FREE_SOUND_API_KEY}`;
+    const ids = req.query.ids.split(',');
+    const url = `https://freesound.org/apiv2/sounds/${ids[0]}/?token=${process.env.FREE_SOUND_API_KEY}`;
 
     try {
-       const response = await fetch(url);
-       const data = await response.json();
-       res.json(data);
+        const response = await fetch(url);
+        const data = await response.json();
+        res.json(data);
    } catch (error) {
        res.status(500).json({ error: 'failed to fetch sound' });
    }

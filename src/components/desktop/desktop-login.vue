@@ -2,7 +2,7 @@
   <div class="container">
     <div class="profile-wrapper">
       <div class="img-wrapper">
-        <img src="@/assets/images/profile-picture.png" width="220" height="220" alt="profile-picture">
+        <img src="@/assets/images/footerIcons/default-image.png" width="220" height="220" alt="profile-picture">
       </div>
       <div class="name-wrapper">Rayan el Hajaoui</div>
     </div>

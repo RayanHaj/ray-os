@@ -6,27 +6,9 @@
       <div class="top-header" @mousedown.prevent="onMouseDownHeader($event)">
         <div class="window-name"> {{ windowName }}</div>
         <div class="window-state-control">
-          <!--window minimize-->
-          <svg class="window-minimize" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 512 512" @click="minimizeWindow">
-            <!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
-            <path fill="#ffffff"
-                  d="M32 416c-17.7 0-32 14.3-32 32s14.3 32 32 32l448 0c17.7 0 32-14.3 32-32s-14.3-32-32-32L32 416z"/>
-          </svg>
-
-          <!--window maximize-->
-          <svg class="window-maximize" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 512 512" @click="maximizeWindow">
-            <!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
-            <path fill="#ffffff"
-                  d="M432 64L208 64c-8.8 0-16 7.2-16 16l0 16-64 0 0-16c0-44.2 35.8-80 80-80L432 0c44.2 0 80 35.8 80 80l0 224c0 44.2-35.8 80-80 80l-16 0 0-64 16 0c8.8 0 16-7.2 16-16l0-224c0-8.8-7.2-16-16-16zM0 192c0-35.3 28.7-64 64-64l256 0c35.3 0 64 28.7 64 64l0 256c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 192zm64 32c0 17.7 14.3 32 32 32l192 0c17.7 0 32-14.3 32-32s-14.3-32-32-32L96 192c-17.7 0-32 14.3-32 32z"/>
-          </svg>
-
-          <!--window close-->
-          <svg class="window-close" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 384 512"
-               @click="$emit('closeTab', windowName)">
-            <!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
-            <path fill="#ffffff"
-                  d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"/>
-          </svg>
+          <SvgComponent :svg-type="'minimize'" @clicked="minimizeWindow"></SvgComponent>
+          <SvgComponent :svg-type="'maximize'" @clicked="maximizeWindow"></SvgComponent>
+          <SvgComponent :svg-type="'close'" @clicked="$emit('closeTab', windowName)"></SvgComponent>
         </div>
       </div>
     </div>
@@ -35,6 +17,7 @@
       <SettingsWindow v-if="windowName === 'Settings'" @theme-changed="$emit('themeChanged')"/>
       <WelcomeWindow v-if="windowName === 'Welcome'"/>
       <MicrosoftEdgeWindow v-if="windowName === 'Microsoft Edge'" :disable-pointer-events="disablePointerEvents"/>
+      <SereneSoundsWindow v-if="windowName === 'Serene Sounds'"/>
     </div>
   </div>
 </template>
@@ -44,13 +27,17 @@ import FileExplorerWindow from "@/components/desktop/window/windowContent/fileEx
 import SettingsWindow from "@/components/desktop/window/windowContent/settings/settings-window";
 import WelcomeWindow from "@/components/desktop/window/windowContent/welcome/welcome-window";
 import MicrosoftEdgeWindow from "@/components/desktop/window/windowContent/microsoftEdge/microsoft-edge-window";
+import SereneSoundsWindow from "@/components/desktop/window/windowContent/sereneSounds/serene-sounds-window";
+import SvgComponent from "@/components/ui/svg-component";
 
 export default {
   name: "application-window",
-  components: {MicrosoftEdgeWindow, WelcomeWindow, SettingsWindow: SettingsWindow, FileExplorer: FileExplorerWindow},
+  components: {
+    SvgComponent,
+    SereneSoundsWindow, MicrosoftEdgeWindow, WelcomeWindow, SettingsWindow: SettingsWindow, FileExplorer: FileExplorerWindow},
   data() {
     return {
-      components: [MicrosoftEdgeWindow, WelcomeWindow, SettingsWindow, FileExplorerWindow],
+      components: [MicrosoftEdgeWindow, WelcomeWindow, SettingsWindow, FileExplorerWindow, SvgComponent],
       MAXIMUM_WIDTH: '',
       MAXIMUM_HEIGHT: '',
       WINDOW_RESIZE_AREA_SPACE: 10,
@@ -185,7 +172,7 @@ export default {
         const viewportHeight = window.innerHeight;
 
         const newX = (viewportWidth - this.$el.offsetWidth) / 2;
-        const newY = (viewportHeight - this.$el.offsetHeight) / 2 - 23;
+        const newY = (viewportHeight - this.$el.offsetHeight) / 2 - 22;
 
         this.$el.style.left = `${newX}px`;
         this.$el.style.top = `${newY}px`;

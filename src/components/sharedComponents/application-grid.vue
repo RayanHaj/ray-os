@@ -33,14 +33,16 @@
               <input type="checkbox" class="grid-field-checkbox">
               <img
                   class="applicationImage"
-                  width="40"
-                  height="40"
                   :src="applicationImageSrc(applicationNames[indexX * GRID_HEIGHT + indexY])"
                   alt="applicationImage"
                   draggable="false"
+                  :style="{
+                    width: `${IMAGE_WIDTH}px`,
+                    height: `${IMAGE_HEIGHT}px`
+                  }"
               />
             </div>
-            <div class="applicationName">
+            <div class="applicationName" :style="{fontSize: `${GRID_FIELD_TEXT_FONT_SIZE}px`}">
               {{ applicationNames[indexX * GRID_HEIGHT + indexY] }}
             </div>
           </div>
@@ -49,19 +51,39 @@
     </div>
 
     <div v-show="contextMenuActive === true" class="context-menu" ref="contextMenu">
-      <button v-if="currentGridFieldOnRightClickContainsApplication" @click="contextMenuActions($event, 'copy')">copy
-      </button>
-      <button @click="contextMenuActions($event, 'paste')">paste</button>
-      <button v-if="currentGridFieldOnRightClickContainsApplication" @click="contextMenuActions($event, 'delete')">
-        delete
-      </button>
+      <div class="context-actions-wrapper">
+        <svg class="context-action" v-if="currentGridFieldOnRightClickContainsApplication"
+             xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" :width="CONTEXT_MENU_SVG_WIDTH"
+             :height="CONTEXT_MENU_SVG_HEIGHT"
+             @click="contextMenuActions($event, 'copy')">
+          <!--!Font Awesome Free 6.7.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
+          <path
+              d="M208 0L332.1 0c12.7 0 24.9 5.1 33.9 14.1l67.9 67.9c9 9 14.1 21.2 14.1 33.9L448 336c0 26.5-21.5 48-48 48l-192 0c-26.5 0-48-21.5-48-48l0-288c0-26.5 21.5-48 48-48zM48 128l80 0 0 64-64 0 0 256 192 0 0-32 64 0 0 48c0 26.5-21.5 48-48 48L48 512c-26.5 0-48-21.5-48-48L0 176c0-26.5 21.5-48 48-48z"/>
+        </svg>
+        <svg class="context-action" v-if="currentGridFieldOnRightClickContainsApplication"
+             xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" :width="CONTEXT_MENU_SVG_WIDTH"
+             :height="CONTEXT_MENU_SVG_HEIGHT"
+             @click="contextMenuActions($event, 'delete')">
+          <!--!Font Awesome Free 6.7.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
+          <path
+              d="M135.2 17.7L128 32 32 32C14.3 32 0 46.3 0 64S14.3 96 32 96l384 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-96 0-7.2-14.3C307.4 6.8 296.3 0 284.2 0L163.8 0c-12.1 0-23.2 6.8-28.6 17.7zM416 128L32 128 53.2 467c1.6 25.3 22.6 45 47.9 45l245.8 0c25.3 0 46.3-19.7 47.9-45L416 128z"/>
+        </svg>
+        <svg class="context-action" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"
+             :width="CONTEXT_MENU_SVG_WIDTH"
+             :height="CONTEXT_MENU_SVG_HEIGHT"
+             @click="contextMenuActions($event, 'paste')">
+          <!--!Font Awesome Free 6.7.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
+          <path
+              d="M160 0c-23.7 0-44.4 12.9-55.4 32L48 32C21.5 32 0 53.5 0 80L0 400c0 26.5 21.5 48 48 48l144 0 0-272c0-44.2 35.8-80 80-80l48 0 0-16c0-26.5-21.5-48-48-48l-56.6 0C204.4 12.9 183.7 0 160 0zM272 128c-26.5 0-48 21.5-48 48l0 272 0 16c0 26.5 21.5 48 48 48l192 0c26.5 0 48-21.5 48-48l0-220.1c0-12.7-5.1-24.9-14.1-33.9l-67.9-67.9c-9-9-21.2-14.1-33.9-14.1L320 128l-48 0zM160 40a24 24 0 1 1 0 48 24 24 0 1 1 0-48z"/>
+        </svg>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 import {compareArrays, parseApplicationNameToImageNameFormat} from "@/utils/util";
-import json from "@/assets/json/windowComponents"
+import json from "@/assets/json/config.json"
 
 export default {
   name: "application-grid",
@@ -74,6 +96,15 @@ export default {
 
   data() {
     return {
+      GRID_WIDTH: 0,
+      GRID_HEIGHT: 0,
+      IMAGE_WIDTH: 40,
+      IMAGE_HEIGHT: 40,
+      GRID_FIELD_WIDTH: 82,
+      GRID_FIELD_HEIGHT: 82,
+      GRID_FIELD_TEXT_FONT_SIZE: 10,
+      CONTEXT_MENU_SVG_WIDTH: 20,
+      CONTEXT_MENU_SVG_HEIGHT: 20,
       contextMenuActive: false,
       draggedApplication: null,
       draggedApplicationClone: null,
@@ -81,10 +112,6 @@ export default {
       currentGridFieldOnRightClickContainsApplication: false,
       copiedApplication: null,
       countApplications: 0,
-      GRID_WIDTH: 0,
-      GRID_HEIGHT: 0,
-      GRID_FIELD_WIDTH: 82,
-      GRID_FIELD_HEIGHT: 82,
       listApplicationElements: [],
       copiedApplications: [],
       applicationNames: json.applicationNames,
@@ -108,7 +135,10 @@ export default {
         gridFields.forEach(gridField => {
           if (gridField.children.length !== 0) {
             gridField.removeChild(gridField.children[0]);
-            gridField.classList.remove('filled');
+
+            if (gridField.classList.contains('filled')) {
+              gridField.classList.remove('filled');
+            }
           }
         });
         this.addApplicationsToGrid();
@@ -124,6 +154,10 @@ export default {
           const applicationElement = gridField.children[0];
           const applicationName = gridField.children[0].children[1].innerText;
           const indexOfApplicationName = this.applicationNames.indexOf(applicationName);
+
+          if (listApplicationElementsTempArray.some(element => element.indexOfApplicationName === indexOfApplicationName)) {
+            return;
+          }
 
           let applicationElementObject = {
             'applicationElement': applicationElement,
@@ -248,9 +282,12 @@ export default {
           break;
         }
         case 'paste': {
+          if (this.copiedApplication === null || this.currentGridFieldOnRightClick === null) {
+            return;
+          }
           const currentGridFieldContent = this.currentGridFieldOnRightClick.querySelector('.grid-field-content-wrapper');
           const copiedGridFieldContent = this.copiedApplication.querySelector('.grid-field-content-wrapper');
-          if (this.copiedApplication !== null && currentGridFieldContent === null) {
+          if (copiedGridFieldContent !== null && currentGridFieldContent === null) {
             this.currentGridFieldOnRightClick.innerHTML = '';
             this.currentGridFieldOnRightClick.classList.add('filled');
             this.currentGridFieldOnRightClick.appendChild(copiedGridFieldContent.cloneNode(true));
@@ -417,6 +454,28 @@ export default {
   display: flex;
   flex-direction: column;
   position: absolute;
-  background-color: black;
+  background-color: var(--background-color-window);
+  width: 120px;
+  height: 100px;
+  padding: 3px;
+}
+
+.context-actions-wrapper {
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+}
+
+.context-action {
+  padding: 10px;
+}
+
+.context-action:hover {
+  background-color: var(--hover-color);
+  border-radius: 5px;
+}
+
+.context-action path {
+  fill: var(--font-color);
 }
 </style>

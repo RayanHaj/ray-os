@@ -1,0 +1,158 @@
+{
+  "applicationNames": [
+    "Microsoft Edge",
+    "File Explorer",
+    "Settings",
+    "Serene Sounds"
+  ],
+  "sounds": [
+    {
+      "id": 456123,
+      "url": "https://freesound.org/people/BurghRecords/sounds/456123/",
+      "name": "Birds In The Forest",
+      "tags": [
+        "bird",
+        "forest"
+      ],
+      "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+      "duration": 74.3943,
+      "username": "BurghRecords",
+      "previews": {
+        "preview-hq-mp3": "https://cdn.freesound.org/previews/456/456123_7241289-hq.mp3",
+        "preview-hq-ogg": "https://cdn.freesound.org/previews/456/456123_7241289-hq.ogg",
+        "preview-lq-mp3": "https://cdn.freesound.org/previews/456/456123_7241289-lq.mp3",
+        "preview-lq-ogg": "https://cdn.freesound.org/previews/456/456123_7241289-lq.ogg"
+      }
+    },
+    {
+      "id": 238732,
+      "url": "https://freesound.org/people/kijjaz/sounds/238732/",
+      "name": "Bangkok Rain Thunder",
+      "tags": [
+        "thunder",
+        "rain"
+      ],
+      "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+      "duration": 70.937,
+      "username": "kijjaz",
+      "previews": {
+        "preview-hq-mp3": "https://cdn.freesound.org/previews/238/238732_26950-hq.mp3",
+        "preview-hq-ogg": "https://cdn.freesound.org/previews/238/238732_26950-hq.ogg",
+        "preview-lq-mp3": "https://cdn.freesound.org/previews/238/238732_26950-lq.mp3",
+        "preview-lq-ogg": "https://cdn.freesound.org/previews/238/238732_26950-lq.ogg"
+      }
+    },
+    {
+      "id": 689185,
+      "url": "https://freesound.org/people/AppleCorey/sounds/689185/",
+      "name": "Gently-falling rain and thunder",
+      "tags": [
+        "rain",
+        "thunder"
+      ],
+      "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+      "duration": 298.012,
+      "username": "AppleCorey",
+      "previews": {
+        "preview-hq-mp3": "https://cdn.freesound.org/previews/689/689185_3727883-hq.mp3",
+        "preview-hq-ogg": "https://cdn.freesound.org/previews/689/689185_3727883-hq.ogg",
+        "preview-lq-mp3": "https://cdn.freesound.org/previews/689/689185_3727883-lq.mp3",
+        "preview-lq-ogg": "https://cdn.freesound.org/previews/689/689185_3727883-lq.ogg"
+      }
+    },
+    {
+      "id": 708373,
+      "url": "https://freesound.org/people/lonerdroner/sounds/708373/",
+      "name": "Twilight Birds",
+      "tags": [
+        "forest",
+        "birds",
+        "nature"
+      ],
+      "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+      "duration": 31.9623,
+      "username": "lonerdroner",
+      "previews": {
+        "preview-hq-mp3": "https://cdn.freesound.org/previews/708/708373_15314137-hq.mp3",
+        "preview-hq-ogg": "https://cdn.freesound.org/previews/708/708373_15314137-hq.ogg",
+        "preview-lq-mp3": "https://cdn.freesound.org/previews/708/708373_15314137-lq.mp3",
+        "preview-lq-ogg": "https://cdn.freesound.org/previews/708/708373_15314137-lq.ogg"
+      }
+    },
+    {
+      "id": 340091,
+      "url": "https://freesound.org/people/tbirch55/sounds/340091/",
+      "name": "Woodpecker and Other Birds",
+      "tags": [
+        "birds",
+        "nature"
+      ],
+      "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+      "duration": 102.772,
+      "username": "tbirch55",
+      "previews": {
+        "preview-hq-mp3": "https://cdn.freesound.org/previews/340/340091_5342645-hq.mp3",
+        "preview-hq-ogg": "https://cdn.freesound.org/previews/340/340091_5342645-hq.ogg",
+        "preview-lq-mp3": "https://cdn.freesound.org/previews/340/340091_5342645-lq.mp3",
+        "preview-lq-ogg": "https://cdn.freesound.org/previews/340/340091_5342645-lq.ogg"
+      }
+    },
+    {
+      "id": 759738,
+      "url": "https://freesound.org/people/Garuda1982/sounds/759738/",
+      "name": "Village pond with bird sounds",
+      "tags": [
+        "birds",
+        "nature",
+        "sounds",
+        "pond",
+        "Village"
+      ],
+      "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+      "duration": 410.944,
+      "username": "Garuda1982",
+      "previews": {
+        "preview-hq-mp3": "https://cdn.freesound.org/previews/759/759738_2061858-hq.mp3",
+        "preview-hq-ogg": "https://cdn.freesound.org/previews/759/759738_2061858-hq.ogg",
+        "preview-lq-mp3": "https://cdn.freesound.org/previews/759/759738_2061858-lq.mp3",
+        "preview-lq-ogg": "https://cdn.freesound.org/previews/759/759738_2061858-lq.ogg"
+      }
+    },
+    {
+      "id": 481641,
+      "url": "https://freesound.org/people/Dan099/sounds/481641/",
+      "name": "water",
+      "tags": [
+        "nature",
+        "water"
+      ],
+      "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+      "duration": 120,
+      "username": "Dan099",
+      "previews": {
+        "preview-hq-mp3": "https://cdn.freesound.org/previews/481/481641_10288085-hq.mp3",
+        "preview-hq-ogg": "https://cdn.freesound.org/previews/481/481641_10288085-hq.ogg",
+        "preview-lq-mp3": "https://cdn.freesound.org/previews/481/481641_10288085-lq.mp3",
+        "preview-lq-ogg": "https://cdn.freesound.org/previews/481/481641_10288085-lq.ogg"
+      }
+    },
+    {
+      "id": 664251,
+      "url": "https://freesound.org/people/felix.blume/sounds/664251/",
+      "name": "Wind blowing in the countryside",
+      "tags": [
+        "wind",
+        "countryside"
+      ],
+      "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+      "duration": 181,
+      "username": "felix.blume",
+      "previews": {
+        "preview-hq-mp3": "https://cdn.freesound.org/previews/664/664251_1661766-hq.mp3",
+        "preview-hq-ogg": "https://cdn.freesound.org/previews/664/664251_1661766-hq.ogg",
+        "preview-lq-mp3": "https://cdn.freesound.org/previews/664/664251_1661766-lq.mp3",
+        "preview-lq-ogg": "https://cdn.freesound.org/previews/664/664251_1661766-lq.ogg"
+      }
+    }
+  ]
+}
