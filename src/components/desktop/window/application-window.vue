@@ -1,9 +1,12 @@
 <template>
   <div class="window"
        @mousemove="mouseOverEventListeners"
-       @mousedown="moveWindowOnMouseDownWindowCorners">
+       @mousedown="moveWindowOnMouseDownWindowCorners"
+       @touchover="mouseOverEventListeners"
+       @touchstart="moveWindowOnMouseDownWindowCorners"
+  >
     <div class="window-header">
-      <div class="top-header" @mousedown.prevent="onMouseDownHeader($event)">
+      <div class="top-header" @mousedown.prevent="onMouseDownHeader($event)" @touchstart.prevent="onMouseDownHeader($event)">
         <div class="window-name"> {{ windowName }}</div>
         <div class="window-state-control">
           <SvgComponent :svg-type="'minimize'" @clicked="minimizeWindow"></SvgComponent>
@@ -29,12 +32,18 @@ import WelcomeWindow from "@/components/desktop/window/windowContent/welcome/wel
 import MicrosoftEdgeWindow from "@/components/desktop/window/windowContent/microsoftEdge/microsoft-edge-window";
 import SereneSoundsWindow from "@/components/desktop/window/windowContent/sereneSounds/serene-sounds-window";
 import SvgComponent from "@/components/ui/svg-component";
+import { enableDragDropTouch } from "@/assets/libraries/drag-drop-touch.esm.min";
 
 export default {
   name: "application-window",
   components: {
     SvgComponent,
-    SereneSoundsWindow, MicrosoftEdgeWindow, WelcomeWindow, SettingsWindow: SettingsWindow, FileExplorer: FileExplorerWindow},
+    SereneSoundsWindow,
+    MicrosoftEdgeWindow,
+    WelcomeWindow,
+    SettingsWindow: SettingsWindow,
+    FileExplorer: FileExplorerWindow
+  },
   data() {
     return {
       components: [MicrosoftEdgeWindow, WelcomeWindow, SettingsWindow, FileExplorerWindow, SvgComponent],
@@ -80,6 +89,7 @@ export default {
     this.$emit('rendered');
   },
   mounted() {
+    enableDragDropTouch();
     if (this.windowName === 'welcome-window') {
       this.maximizeWindow();
     }
@@ -224,7 +234,7 @@ export default {
 
       const windowBorderSidePressed = this.returnPressedWindowBorderSide();
 
-      const onMouseMove = (event) => {
+      const onMove = (event) => {
         event.preventDefault();
 
         this.mouseDownWindowVariables.mousePressedDown = true;
@@ -259,15 +269,20 @@ export default {
         this.disablePointerEvents = true;
       }
 
-      const onMouseUp = () => {
+      const onUp = () => {
         this.disablePointerEvents = false;
         this.mouseDownWindowVariables.mousePressedDown = false;
-        document.removeEventListener('mousemove', onMouseMove);
-        document.removeEventListener('mouseup', onMouseUp);
+
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+        document.removeEventListener('touchmove', onMove);
+        document.removeEventListener('touchend', onUp);
       }
 
-      document.addEventListener('mousemove', onMouseMove);
-      document.addEventListener('mouseup', onMouseUp);
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+      document.addEventListener('touchmove', onMove);
+      document.addEventListener('touchend', onUp);
     },
     returnPressedWindowBorderSide() {
       if (this.mouseOverWindowVariables.mousePositionX + this.WINDOW_RESIZE_AREA_SPACE >= this.mouseOverWindowVariables.windowWidth)
@@ -280,7 +295,7 @@ export default {
         return 'top';
     },
     onMouseDownHeader(event) {
-      if (this.mouseOverWindowVariables.mouseOnResizeSpace === true){
+      if (this.mouseOverWindowVariables.mouseOnResizeSpace === true) {
         return;
       }
 
@@ -292,6 +307,8 @@ export default {
 
       document.addEventListener('mouseup', this.onMouseUpHeader);
       document.addEventListener('mousemove', this.onMouseMoveHeader);
+      document.addEventListener('touchmove', this.onMouseMoveHeader);
+      document.addEventListener('touchend', this.onMouseUpHeader)
     },
     onMouseMoveHeader(event) {
       this.moveWindowVariables.windowIsMoving = true;
@@ -348,6 +365,8 @@ export default {
 
       document.removeEventListener('mousemove', this.onMouseMoveHeader);
       document.removeEventListener('mouseup', this.onMouseUpHeader);
+      document.removeEventListener('touchmove', this.onMouseMoveHeader);
+      document.removeEventListener('touchend', this.onMouseUpHeader);
     },
     splitWindow() {
       if (this.moveWindowVariables.xOutOfBoundsPositive) {
