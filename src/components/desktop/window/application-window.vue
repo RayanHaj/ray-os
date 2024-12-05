@@ -11,42 +11,29 @@
         <div class="window-state-control">
           <SvgComponent :svg-type="'minimize'" @clicked="minimizeWindow"></SvgComponent>
           <SvgComponent :svg-type="'maximize'" @clicked="maximizeWindow"></SvgComponent>
-          <SvgComponent :svg-type="'close'" @clicked="$emit('closeTab', windowName)"></SvgComponent>
+          <SvgComponent :svg-type="'close'" @clicked="$emit('closeWindow', windowName)"></SvgComponent>
         </div>
       </div>
     </div>
     <div class="window-content">
-      <FileExplorer v-if="windowName === 'File Explorer'"/>
-      <SettingsWindow v-if="windowName === 'Settings'" @theme-changed="$emit('themeChanged')"/>
-      <WelcomeWindow v-if="windowName === 'Welcome'"/>
-      <MicrosoftEdgeWindow v-if="windowName === 'Microsoft Edge'" :disable-pointer-events="disablePointerEvents"/>
-      <SereneSoundsWindow v-if="windowName === 'Serene Sounds'"/>
+      <WindowContent :window-name="windowName" :disable-pointer-events="disablePointerEvents" @theme-changed="$emit('themeChanged')"></WindowContent>
     </div>
   </div>
 </template>
 
 <script>
-import FileExplorerWindow from "@/components/desktop/window/windowContent/fileExplorer/file-explorer-window";
-import SettingsWindow from "@/components/desktop/window/windowContent/settings/settings-window";
-import WelcomeWindow from "@/components/desktop/window/windowContent/welcome/welcome-window";
-import MicrosoftEdgeWindow from "@/components/desktop/window/windowContent/microsoftEdge/microsoft-edge-window";
-import SereneSoundsWindow from "@/components/desktop/window/windowContent/sereneSounds/serene-sounds-window";
 import SvgComponent from "@/components/ui/svg-component";
+import WindowContent from "@/components/desktop/window/windowContent/window-content";
 import { enableDragDropTouch } from "@/assets/libraries/drag-drop-touch.esm.min";
 
 export default {
   name: "application-window",
   components: {
     SvgComponent,
-    SereneSoundsWindow,
-    MicrosoftEdgeWindow,
-    WelcomeWindow,
-    SettingsWindow: SettingsWindow,
-    FileExplorer: FileExplorerWindow
+    WindowContent
   },
   data() {
     return {
-      components: [MicrosoftEdgeWindow, WelcomeWindow, SettingsWindow, FileExplorerWindow, SvgComponent],
       MAXIMUM_WIDTH: '',
       MAXIMUM_HEIGHT: '',
       WINDOW_RESIZE_AREA_SPACE: 10,
@@ -116,7 +103,7 @@ export default {
       required: true
     }
   },
-  emits: ['splitOtherWindow', 'minimizeWindow', 'rendered', 'closeTab'],
+  emits: ['splitOtherWindow', 'minimizeWindow', 'rendered', 'closeWindow'],
   watch: {
     windowSize(newSize) {
       this.MAXIMUM_WIDTH = newSize[0];

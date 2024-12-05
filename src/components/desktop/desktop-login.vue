@@ -88,13 +88,12 @@ export default {
           counter += 1;
           clearInterval(interval);
 
-          console.log(counter);
-          if (counter === 47) {
+          if (counter === 20) {
             this.sound.pause();
             this.$router.push('/desktop-home')
             return;
           }
-          console.log(this.sound)
+
           this.sound.play();
           inputField.value += "*";
 

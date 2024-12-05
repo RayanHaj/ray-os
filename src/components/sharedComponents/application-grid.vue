@@ -35,16 +35,9 @@
           >
             <div class="grid-field-img-checkbox-wrapper">
               <input type="checkbox" class="grid-field-checkbox">
-              <img
-                  class="applicationImage"
-                  :src="applicationImageSrc(applicationNames[indexX * GRID_HEIGHT + indexY])"
-                  alt="applicationImage"
-                  draggable="false"
-                  :style="{
-                    width: `${IMAGE_WIDTH}px`,
-                    height: `${IMAGE_HEIGHT}px`
-                  }"
-              />
+              <div class="applicationSvg">
+                <svg-component :svg-type="applicationNames[indexX * GRID_HEIGHT + indexY].toLowerCase()" :custom-width="50" :custom-height="50"/>
+              </div>
             </div>
             <div class="applicationName" :style="{fontSize: `${GRID_FIELD_TEXT_FONT_SIZE}px`}">
               {{ applicationNames[indexX * GRID_HEIGHT + indexY] }}
@@ -89,10 +82,11 @@
 import {compareArrays, parseApplicationNameToImageNameFormat} from "@/utils/util";
 import { enableDragDropTouch } from "@/assets/libraries/drag-drop-touch.esm.min";
 import json from "@/assets/json/config.json"
+import SvgComponent from "@/components/ui/svg-component";
 
 export default {
   name: "application-grid",
-
+  components: {SvgComponent},
   mounted() {
     this.$nextTick(() => {
       enableDragDropTouch();
@@ -319,8 +313,8 @@ export default {
           this.draggedApplication = gridField;
           this.draggedApplicationClone = gridField.cloneNode(true);
 
-          const imgElement = gridField.children[0].querySelector('.applicationImage');
-          const imgClone = imgElement.cloneNode();
+          const svgElement = gridField.children[0].querySelector('.applicationSvg');
+          const imgClone = svgElement.cloneNode(true);
 
           imgClone.style.width = '40px';
           imgClone.style.height = '40px';

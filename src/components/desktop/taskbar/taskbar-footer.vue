@@ -20,7 +20,7 @@
           </div>
         </div>
         <div>
-          <ApplicationIcon @click="emitApplicationName(iconImageName)" :icon-img-name="iconImageName"/>
+          <svg-component @clicked="emitApplicationName(iconImageName)" :svg-type="iconImageName.toLowerCase()" :custom-width="25" :custom-height="25"></svg-component>
           <div :class="openWindows.find(openWindow => openWindow.windowName === iconImageName) &&
                        openWindows.find(openWindow => openWindow.windowName === iconImageName).minimized === true ?
                        'horizontal-line-minimized' :
@@ -34,7 +34,7 @@
     </div>
     <div class="taskbar-items-right">
       <div class="show-hidden-icons-wrapper taskbar-right-item">
-        <SvgComponent :svg-type="'arrowUp'"></SvgComponent>
+        <SvgComponent :svg-type="'arrowUp'" :custom-height="15" :custom-width="15"></SvgComponent>
       </div>
       <div class="keyboard-layout-wrapper taskbar-right-item">
         <span>ENG</span>
@@ -42,9 +42,9 @@
       </div>
       <div ref="quickSettingsMenuButton" class="wifi-sound-battery-wrapper taskbar-right-item"
            @click="emitQuickSettingMenuClicked">
-        <SvgComponent :svg-type="'wifi'"></SvgComponent>
-        <SvgComponent :svg-type="'volume'"></SvgComponent>
-        <SvgComponent :svg-type="'battery'"></SvgComponent>
+        <SvgComponent :svg-type="'wifi'" :custom-height="15" :custom-width="15"></SvgComponent>
+        <SvgComponent :svg-type="'volume'" :custom-height="15" :custom-width="15"></SvgComponent>
+        <SvgComponent :svg-type="'battery'" :custom-height="15" :custom-width="15"></SvgComponent>
       </div>
       <div class="date-time-notification-wrapper taskbar-right-item">
         <div class="date-time-wrapper">
@@ -60,7 +60,6 @@
 </template>
 
 <script>
-import ApplicationIcon from "@/components/desktop/application-icon";
 import SvgComponent from "@/components/ui/svg-component";
 import json from "@/assets/json/config.json"
 
@@ -98,7 +97,7 @@ export default {
       required: true
     }
   },
-  components: {ApplicationIcon, SvgComponent},
+  components: { SvgComponent },
   methods: {
     emitApplicationName(applicationName) {
       this.$emit('applicationName', applicationName)

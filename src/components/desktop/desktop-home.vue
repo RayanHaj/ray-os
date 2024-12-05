@@ -14,7 +14,7 @@
           @battery-easter-egg-activated="activatedEasterEgg = $event"
           @rendered="windowIsRendered = !windowIsRendered"
           @theme-changed="$emit('themeChanged')"
-          @close-tab="closeWindow"
+          @close-window="closeWindow"
           @minimize-window="minimizeWindow"
           @split-other-window="splitOtherWindow = $event"
           :window-size="windowDimensions"
@@ -100,28 +100,24 @@ export default {
     activatedEasterEgg() {
       console.log(this.activatedEasterEgg);
     },
-
-    'openWindows.length'(newLength, oldLength) {
-      this.$nextTick(() => {
-        if (newLength === 0) return;
-
-        if (newLength > oldLength) {
-          this.$el.querySelectorAll('.window').forEach(window => {
-            if (this.openWindows[newLength - 1].windowName === window.querySelector('.window-name').innerText) {
-              window.style.height = `calc(100% - ${this.TASKBAR_HEIGHT}px)`;
-            }
-          });
-        }
-      })
-    }
   },
   methods: {
     setApplicationNameVariable(name) {
-      const window = this.openWindows.find(window => window.windowName === name)
+      const window = this.openWindows.find(window => window.windowName === name);
       if (!window) {
         this.openWindows.push({'windowName': name, 'zIndex': this.highestZIndex, 'minimized': false});
         this.applicationName = name;
         this.highestZIndex++;
+
+        this.$nextTick(() => {
+          this.$el.querySelectorAll('.window').forEach(element => {
+            console.log(element)
+            if (name === element.querySelector('.window-name').innerText) {
+              element.style.height = `calc(100% - ${this.TASKBAR_HEIGHT}px)`;
+            }
+          });
+        });
+
         return;
       }
 
@@ -147,7 +143,6 @@ export default {
       if (value === 'settings') {
         this.updateSettings();
       }
-
       this.applicationName = '';
     },
     onClickWindow(e, window) {

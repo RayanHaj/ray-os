@@ -1,15 +1,17 @@
 <template>
   <div class="footer-bar-item">
-    <img class="icon" :src="getImageUrl" :width="width ? width : 25" :height="height ? height : 25"
-         :alt="this.iconImgName">
+    <svg-component :svg-type="iconImgName.toLowerCase()" :custom-width="width" :custom-height="height"></svg-component>
+<!--    <img class="icon" :src="getImageUrl" :width="width ? width : 25" :height="height ? height : 25"-->
+<!--         :alt="this.iconImgName">-->
   </div>
 </template>
 
 <script>
 import { parseApplicationNameToImageNameFormat } from "@/utils/util"
+import SvgComponent from "@/components/ui/svg-component";
 export default {
   name: "application-icon",
-
+  components: {SvgComponent},
   props: {
     iconImgName: String,
     height: Number,
