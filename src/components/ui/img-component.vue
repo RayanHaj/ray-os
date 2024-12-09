@@ -1,5 +1,5 @@
 <template>
-  <img @click="$emit('clicked')" class="image" :src="getImageUrl" :width="width" :height="height" :alt="`image[${imageName}]`">
+  <img @click="$emit('clicked')" class="image" :src="getImageUrl" :width="width" :height="height" :alt="`image[${imageName}]`" :draggable="setDraggable">
 </template>
 
 <script>
@@ -8,14 +8,22 @@ export default {
   name: "img-component",
   props: {
     imageName: {
+      type: String,
       required: true,
       default: 'default-image'
     },
     customWidth: {
+      type: Number,
       required: false
     },
     customHeight: {
+      type: Number,
       required: false
+    },
+    setDraggable: {
+      type: Boolean,
+      required: false,
+      default: true
     }
   },
   data() {

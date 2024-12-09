@@ -18,6 +18,7 @@
           @minimize-window="minimizeWindow"
           @split-other-window="splitOtherWindow = $event"
           @preview-application-window="this.previewApplicationWindow = $event"
+          @window-resizing="windowIsResizing = $event"
           :window-size="windowDimensions"
           :open-windows="openWindows"
           :split-other-window="splitOtherWindow"
@@ -27,6 +28,7 @@
       <DesktopGrid
           @application-name="setApplicationNameVariable"
           :window-size="windowDimensions"
+          :window-resizing="windowIsResizing"
           class="desktop-grid"/>
     </div>
     <div class="footer-container">
@@ -62,6 +64,7 @@ export default {
     return {
       TASKBAR_HEIGHT: 44,
       windowIsRendered: false,
+      windowIsResizing: false,
       quickSettingMenuIsOpen: false,
       closingWindow: false,
       activatedEasterEgg: null,

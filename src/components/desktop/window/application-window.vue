@@ -113,7 +113,7 @@ export default {
       required: false
     }
   },
-  emits: ['splitOtherWindow', 'minimizeWindow', 'rendered', 'closeWindow', 'clicked', 'previewApplicationWindow'],
+  emits: ['splitOtherWindow', 'minimizeWindow', 'rendered', 'closeWindow', 'clicked', 'previewApplicationWindow', 'windowResizing'],
   watch: {
     windowSize(newSize) {
       this.MAXIMUM_WIDTH = newSize[0];
@@ -242,14 +242,14 @@ export default {
 
       const onMove = (event) => {
         event.preventDefault();
-
+        this.$emit('windowResizing', true);
         this.mouseDownWindowVariables.mousePressedDown = true;
 
         const minWidthPercentage = parseFloat(this.MINIMUM_WIDTH_WINDOW);
-        const minWidthPixel = (minWidthPercentage / 100) * this.MAXIMUM_WIDTH;
+        const minWidthPixels = (minWidthPercentage / 100) * this.MAXIMUM_WIDTH;
 
         const minHeightPercentage = parseFloat(this.MINIMUM_HEIGHT_WINDOW);
-        const minHeightPixel = (minHeightPercentage / 100) * this.MAXIMUM_HEIGHT;
+        const minHeightPixels = (minHeightPercentage / 100) * this.MAXIMUM_HEIGHT;
 
         switch (windowBorderSidePressed) {
           case 'right': {
@@ -261,7 +261,7 @@ export default {
             const widthChange = this.mouseDownWindowVariables.windowLeft - event.clientX;
             const newWidth = this.mouseDownWindowVariables.windowWidth + widthChange;
 
-            if (newWidth <= minWidthPixel) {
+            if (newWidth <= minWidthPixels) {
               return;
             }
 
@@ -278,7 +278,7 @@ export default {
             const heightChange = this.mouseDownWindowVariables.windowTop - event.clientY;
             const newHeight = this.mouseDownWindowVariables.windowHeight + heightChange;
 
-            if (newHeight <= minHeightPixel) {
+            if (newHeight <= minHeightPixels) {
               return;
             }
 
@@ -294,6 +294,7 @@ export default {
       const onUp = () => {
         this.disablePointerEvents = false;
         this.mouseDownWindowVariables.mousePressedDown = false;
+        this.$emit('windowResizing', false);
 
         document.removeEventListener('mousemove', onMove);
         document.removeEventListener('mouseup', onUp);

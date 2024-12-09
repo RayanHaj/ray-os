@@ -3,7 +3,7 @@
     <div class="taskbar-items-left">
       <div class="app-icon" :class="iconImageName" v-for="(iconImageName, index) in applicationNames"
            :key="iconImageName"
-           @mouseover="onMouseoverApplicationIcon(iconImageName)" @mouseleave="onMouseleaveApplicationIcon">
+           @mouseenter="onMouseoverApplicationIcon(iconImageName)" @mouseleave="onMouseleaveApplicationIcon">
         <div
             v-if="currentIconHover.name === iconImageName && currentIconHover.hasHoverState && openWindows.some(openWindow => openWindow.windowName === iconImageName)"
             :style="{ left: index === 0 ? '0' : (index === 1 ? '-45px' : undefined)  }"
@@ -66,11 +66,13 @@ import json from "@/assets/json/config.json";
 
 export default {
   name: "taskbarFooter",
+  emits: ['closeWindow', 'applicationName', 'quickSettingsMenuOpen', 'hoveringOnWindowImageTaskbar'],
   data() {
     return {
       date: '',
       time: '',
       currentIconHover: {},
+      previewImageCache: null,
       quickSettingMenuIsOpen: false,
       isHoveringOnOpenWindowImage: false,
       isHoveringOnOpenWindowPreview: false,
@@ -81,6 +83,8 @@ export default {
     function addLeadingZero(number) {
       return ('0' + number).slice(-2);
     }
+
+    this.previewImageCache = new Map();
 
     setInterval(() => {
       const now = new Date();
@@ -118,12 +122,23 @@ export default {
     onMouseoverApplicationIcon(name) {
       if (this.openWindows.some(window => window.windowName === name)) {
         this.isHoveringOnOpenWindowImage = true;
-        this.$emit('hoveringOnWindowImageTaskbar', name);
-      }
 
-      this.currentIconHover = {
-        name: name,
-        hasHoverState: true
+        this.currentIconHover = {
+          name: name,
+          hasHoverState: true
+        }
+
+        const cachedImage = this.previewImageCache.get(name);
+        if (cachedImage) {
+          this.$nextTick(() => {
+            const openWindowPreview = this.$el.querySelector('.open-window-preview');
+            openWindowPreview.appendChild(cachedImage);
+          })
+          return;
+        }
+
+        console.log('emitted')
+        this.$emit('hoveringOnWindowImageTaskbar', name);
       }
     },
     onMouseleaveApplicationIcon(e) {
@@ -161,6 +176,7 @@ export default {
         newValue.style.height = '100%';
 
         openWindowPreview.appendChild(newValue);
+        this.previewImageCache.set(this.currentIconHover.name, newValue);
       }
     }
   }
@@ -181,6 +197,7 @@ export default {
   color: var(--font-color);
   user-select: none;
 }
+
 .open-window-img-name-wrapper {
   display: flex;
   flex-direction: row;
@@ -188,6 +205,7 @@ export default {
   align-items: center;
   gap: 5px;
 }
+
 .open-window-preview-wrapper {
   position: absolute;
   display: flex;
@@ -218,6 +236,7 @@ export default {
   justify-content: space-between;
   width: 100%;
   align-self: end;
+  z-index: 10;
 }
 
 .open-window-name {

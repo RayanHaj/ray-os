@@ -109,6 +109,10 @@ export default {
     windowSize: {
       type: Array,
       required: false
+    },
+    windowResizing: {
+      type: Boolean,
+      required: true
     }
   },
 
@@ -130,6 +134,17 @@ export default {
         this.addApplicationsToGrid();
       }
     },
+    windowResizing(newValue) {
+      this.getAllGridFields().forEach(gridField => {
+        const contentWrapper = gridField.querySelector('.grid-field-content-wrapper');
+        const image = gridField.querySelector('.image');
+
+        if (contentWrapper && image) {
+          contentWrapper.draggable = !newValue;
+          image.draggable = !newValue;
+        }
+      });
+    }
   },
   methods: {
     init() {
