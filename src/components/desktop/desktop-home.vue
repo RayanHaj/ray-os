@@ -10,17 +10,19 @@
           :ref="window.windowName"
           :style="{zIndex: openWindows.find(openWindow => openWindow.windowName === window.windowName).zIndex}"
           :window-name="window.windowName"
-          @click="onClickWindow($event, window)"
+          @clicked="onClickWindow($event, window)"
           @battery-easter-egg-activated="activatedEasterEgg = $event"
           @rendered="windowIsRendered = !windowIsRendered"
           @theme-changed="$emit('themeChanged')"
           @close-window="closeWindow"
           @minimize-window="minimizeWindow"
           @split-other-window="splitOtherWindow = $event"
+          @preview-application-window="this.previewApplicationWindow = $event"
           :window-size="windowDimensions"
           :open-windows="openWindows"
           :split-other-window="splitOtherWindow"
           :taskbar-height="TASKBAR_HEIGHT"
+          :current-hovered-image-taskbar-name="currentHoveredImageTaskbarName"
       />
       <DesktopGrid
           @application-name="setApplicationNameVariable"
@@ -38,8 +40,10 @@
                @application-name="setApplicationNameVariable"
                @quick-settings-menu-open="openQuickSettingsMenu"
                @close-window="closeWindow"
+               @hovering-on-window-image-taskbar="currentHoveredImageTaskbarName = $event"
                :open-windows="openWindows"
                :height="TASKBAR_HEIGHT"
+               :preview-application-window="previewApplicationWindow"
       />
     </div>
   </div>
@@ -56,11 +60,13 @@ export default {
   name: "desktop-home",
   data() {
     return {
-      TASKBAR_HEIGHT: 45,
+      TASKBAR_HEIGHT: 44,
       windowIsRendered: false,
       quickSettingMenuIsOpen: false,
       closingWindow: false,
       activatedEasterEgg: null,
+      currentHoveredImageTaskbarName: null,
+      previewApplicationWindow: null,
       applicationName: '',
       splitOtherWindow: {},
       openWindows: [],
@@ -74,7 +80,7 @@ export default {
   props: {
     backgroundImageId: Number
   },
-  emits: ['themeChanged'],
+  emits: ['themeChanged', 'clicked'],
   mounted() {
     if (deviceIsMobile() === true) {
       this.$router.push('/');
@@ -99,7 +105,7 @@ export default {
 
     activatedEasterEgg() {
       console.log(this.activatedEasterEgg);
-    },
+    }
   },
   methods: {
     setApplicationNameVariable(name) {
@@ -135,15 +141,29 @@ export default {
       }
     },
     closeWindow(value) {
-      const closeWindowId = this.openWindows.findIndex(window => window.windowName === value);
+      new Promise((resolve, reject) => {
+        const closeWindowId = this.openWindows.findIndex(window => window.windowName === value);
+        this.openWindows.splice(closeWindowId, 1);
 
-      this.openWindows.splice(closeWindowId, 1);
+        console.log(this.openWindows)
 
-      this.sortWindowArray();
-      if (value === 'settings') {
-        this.updateSettings();
-      }
-      this.applicationName = '';
+        if (this.openWindows[closeWindowId]) {
+          this.openWindows[closeWindowId].windowName !== value ? resolve() : reject();
+        } else {
+          resolve();
+        }
+      }).then((error) => {
+        if (error) {
+          console.log('error closing window');
+          return;
+        }
+        console.log('closeWindow')
+        this.sortWindowArray();
+        if (value === 'settings') {
+          this.updateSettings();
+        }
+        this.applicationName = '';
+      });
     },
     onClickWindow(e, window) {
       const mouseTarget = e.target.parentNode;
@@ -261,6 +281,7 @@ export default {
 
     sortWindowArray() {
       if (this.openWindows.length > 0) {
+        console.log('hello Per')
         let counter = 2;
         this.openWindows.forEach(window => {
           window.zIndex = counter++;

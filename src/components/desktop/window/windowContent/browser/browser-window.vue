@@ -6,7 +6,7 @@
 
 <script>
 export default {
-  name: "microsoft-edge-window",
+  name: "browser-window",
   props: {
     disablePointerEvents: {
       type: Boolean,

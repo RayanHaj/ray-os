@@ -1,21 +1,23 @@
 <template>
   <div class="window"
+       ref="window"
+       :style="{ minWidth: MINIMUM_WIDTH_WINDOW, minHeight: MINIMUM_HEIGHT_WINDOW }"
        @mousemove="mouseOverEventListeners"
        @mousedown="moveWindowOnMouseDownWindowCorners"
        @touchover="mouseOverEventListeners"
        @touchstart="moveWindowOnMouseDownWindowCorners"
   >
     <div class="window-header">
-      <div class="top-header" @mousedown.prevent="onMouseDownHeader($event)" @touchstart.prevent="onMouseDownHeader($event)">
+      <div class="top-header" @click="$emit('clicked', $event)" @mousedown.prevent="onMouseDownHeader($event)" @touchstart.prevent="onMouseDownHeader($event)">
         <div class="window-name"> {{ windowName }}</div>
-        <div class="window-state-control">
-          <SvgComponent :svg-type="'minimize'" @clicked="minimizeWindow"></SvgComponent>
-          <SvgComponent :svg-type="'maximize'" @clicked="maximizeWindow"></SvgComponent>
-          <SvgComponent :svg-type="'close'" @clicked="$emit('closeWindow', windowName)"></SvgComponent>
-        </div>
+      </div>
+      <div class="window-state-control">
+        <SvgComponent :svg-type="'minimize'" @clicked="minimizeWindow"></SvgComponent>
+        <SvgComponent :svg-type="'maximize'" @clicked="maximizeWindow"></SvgComponent>
+        <SvgComponent :svg-type="'close'" @clicked="$emit('closeWindow', windowName)"></SvgComponent>
       </div>
     </div>
-    <div class="window-content">
+    <div @click="$emit('clicked', $event)" class="window-content">
       <WindowContent :window-name="windowName" :disable-pointer-events="disablePointerEvents" @theme-changed="$emit('themeChanged')"></WindowContent>
     </div>
   </div>
@@ -25,6 +27,7 @@
 import SvgComponent from "@/components/ui/svg-component";
 import WindowContent from "@/components/desktop/window/windowContent/window-content";
 import { enableDragDropTouch } from "@/assets/libraries/drag-drop-touch.esm.min";
+import html2canvas from "html2canvas";
 
 export default {
   name: "application-window",
@@ -36,9 +39,12 @@ export default {
     return {
       MAXIMUM_WIDTH: '',
       MAXIMUM_HEIGHT: '',
+      MINIMUM_WIDTH_WINDOW: '40%',
+      MINIMUM_HEIGHT_WINDOW: '30%',
       WINDOW_RESIZE_AREA_SPACE: 10,
       dynamicStyles: null,
       disablePointerEvents: false,
+      indexTest: 0,
       moveWindowVariables: {
         xOutOfBoundsPositive: false,
         xOutOfBoundsNegative: false,
@@ -101,9 +107,13 @@ export default {
     taskbarHeight: {
       type: Number,
       required: true
+    },
+    currentHoveredImageTaskbarName: {
+      type: String,
+      required: false
     }
   },
-  emits: ['splitOtherWindow', 'minimizeWindow', 'rendered', 'closeWindow'],
+  emits: ['splitOtherWindow', 'minimizeWindow', 'rendered', 'closeWindow', 'clicked', 'previewApplicationWindow'],
   watch: {
     windowSize(newSize) {
       this.MAXIMUM_WIDTH = newSize[0];
@@ -140,6 +150,15 @@ export default {
         }
 
         this.splitWindow();
+      }
+    },
+    currentHoveredImageTaskbarName(newValue) {
+      if (this.windowName === newValue) {
+        html2canvas(this.$el).then((canvas) => {
+          canvas.style.transform = "scale(1)";
+          canvas.style.transformOrigin = "center center";
+          this.$emit('previewApplicationWindow', canvas);
+        })
       }
     }
   },
@@ -226,6 +245,12 @@ export default {
 
         this.mouseDownWindowVariables.mousePressedDown = true;
 
+        const minWidthPercentage = parseFloat(this.MINIMUM_WIDTH_WINDOW);
+        const minWidthPixel = (minWidthPercentage / 100) * this.MAXIMUM_WIDTH;
+
+        const minHeightPercentage = parseFloat(this.MINIMUM_HEIGHT_WINDOW);
+        const minHeightPixel = (minHeightPercentage / 100) * this.MAXIMUM_HEIGHT;
+
         switch (windowBorderSidePressed) {
           case 'right': {
             this.$el.style.width =
@@ -235,6 +260,11 @@ export default {
           case 'left': {
             const widthChange = this.mouseDownWindowVariables.windowLeft - event.clientX;
             const newWidth = this.mouseDownWindowVariables.windowWidth + widthChange;
+
+            if (newWidth <= minWidthPixel) {
+              return;
+            }
+
             this.$el.style.width = `${newWidth}px`
             this.$el.style.left = `${event.clientX}px`
             break;
@@ -247,6 +277,11 @@ export default {
           case 'top': {
             const heightChange = this.mouseDownWindowVariables.windowTop - event.clientY;
             const newHeight = this.mouseDownWindowVariables.windowHeight + heightChange;
+
+            if (newHeight <= minHeightPixel) {
+              return;
+            }
+
             this.$el.style.height = `${newHeight}px`
             this.$el.style.top = `${event.clientY}px`
             break;
@@ -282,6 +317,7 @@ export default {
         return 'top';
     },
     onMouseDownHeader(event) {
+      console.log('header touch down')
       if (this.mouseOverWindowVariables.mouseOnResizeSpace === true) {
         return;
       }
@@ -418,8 +454,6 @@ export default {
 
 .window {
   box-sizing: border-box;
-  min-width: 40%;
-  min-height: 30%;
   display: flex;
   flex-direction: column;
   resize: both;
@@ -435,6 +469,9 @@ export default {
 }
 
 .window-header {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row;
   height: 30px;
   position: sticky;
   top: 0;
@@ -448,7 +485,7 @@ export default {
   justify-content: space-between;
   align-items: center;
   height: 30px;
-  margin-top: 3px;
+  width: 100%;
 }
 
 .window-name {
@@ -460,8 +497,11 @@ export default {
 .window-state-control {
   display: flex;
   flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  margin-right: 8px;
   gap: 10px;
-  padding: 10px;
+  height: 100%;
 }
 
 path {

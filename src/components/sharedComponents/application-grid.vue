@@ -35,8 +35,8 @@
           >
             <div class="grid-field-img-checkbox-wrapper">
               <input type="checkbox" class="grid-field-checkbox">
-              <div class="applicationSvg">
-                <svg-component :svg-type="applicationNames[indexX * GRID_HEIGHT + indexY].toLowerCase()" :custom-width="50" :custom-height="50"/>
+              <div class="applicationImg">
+                <ImgComponent :image-name="applicationNames[indexX * GRID_HEIGHT + indexY]" :custom-width="50" :custom-height="50"/>
               </div>
             </div>
             <div class="applicationName" :style="{fontSize: `${GRID_FIELD_TEXT_FONT_SIZE}px`}">
@@ -49,30 +49,15 @@
 
     <div v-show="contextMenuActive === true" class="context-menu" ref="contextMenu">
       <div class="context-actions-wrapper">
-        <svg class="context-action" v-if="currentGridFieldOnRightClickContainsApplication"
-             xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" :width="CONTEXT_MENU_SVG_WIDTH"
-             :height="CONTEXT_MENU_SVG_HEIGHT"
-             @click="contextMenuActions($event, 'copy')">
-          <!--!Font Awesome Free 6.7.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
-          <path
-              d="M208 0L332.1 0c12.7 0 24.9 5.1 33.9 14.1l67.9 67.9c9 9 14.1 21.2 14.1 33.9L448 336c0 26.5-21.5 48-48 48l-192 0c-26.5 0-48-21.5-48-48l0-288c0-26.5 21.5-48 48-48zM48 128l80 0 0 64-64 0 0 256 192 0 0-32 64 0 0 48c0 26.5-21.5 48-48 48L48 512c-26.5 0-48-21.5-48-48L0 176c0-26.5 21.5-48 48-48z"/>
-        </svg>
-        <svg class="context-action" v-if="currentGridFieldOnRightClickContainsApplication"
-             xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" :width="CONTEXT_MENU_SVG_WIDTH"
-             :height="CONTEXT_MENU_SVG_HEIGHT"
-             @click="contextMenuActions($event, 'delete')">
-          <!--!Font Awesome Free 6.7.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
-          <path
-              d="M135.2 17.7L128 32 32 32C14.3 32 0 46.3 0 64S14.3 96 32 96l384 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-96 0-7.2-14.3C307.4 6.8 296.3 0 284.2 0L163.8 0c-12.1 0-23.2 6.8-28.6 17.7zM416 128L32 128 53.2 467c1.6 25.3 22.6 45 47.9 45l245.8 0c25.3 0 46.3-19.7 47.9-45L416 128z"/>
-        </svg>
-        <svg class="context-action" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"
-             :width="CONTEXT_MENU_SVG_WIDTH"
-             :height="CONTEXT_MENU_SVG_HEIGHT"
-             @click="contextMenuActions($event, 'paste')">
-          <!--!Font Awesome Free 6.7.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
-          <path
-              d="M160 0c-23.7 0-44.4 12.9-55.4 32L48 32C21.5 32 0 53.5 0 80L0 400c0 26.5 21.5 48 48 48l144 0 0-272c0-44.2 35.8-80 80-80l48 0 0-16c0-26.5-21.5-48-48-48l-56.6 0C204.4 12.9 183.7 0 160 0zM272 128c-26.5 0-48 21.5-48 48l0 272 0 16c0 26.5 21.5 48 48 48l192 0c26.5 0 48-21.5 48-48l0-220.1c0-12.7-5.1-24.9-14.1-33.9l-67.9-67.9c-9-9-21.2-14.1-33.9-14.1L320 128l-48 0zM160 40a24 24 0 1 1 0 48 24 24 0 1 1 0-48z"/>
-        </svg>
+        <div v-if="currentGridFieldOnRightClickContainsApplication" class="context-action">
+          <SvgComponent svg-type="copy" :custom-height="CONTEXT_MENU_SVG_HEIGHT" :custom-width="CONTEXT_MENU_SVG_WIDTH" @clicked="contextMenuActions($event, 'copy')"/>
+        </div>
+        <div v-if="currentGridFieldOnRightClickContainsApplication" class="context-action">
+          <SvgComponent svg-type="delete" :custom-height="CONTEXT_MENU_SVG_HEIGHT" :custom-width="CONTEXT_MENU_SVG_WIDTH" @clicked="contextMenuActions($event, 'delete')"/>
+        </div>
+        <div class="context-action">
+          <SvgComponent svg-type="paste" :custom-height="CONTEXT_MENU_SVG_HEIGHT" :custom-width="CONTEXT_MENU_SVG_WIDTH" @clicked="contextMenuActions($event, 'paste')"/>
+        </div>
       </div>
     </div>
   </div>
@@ -83,10 +68,11 @@ import {compareArrays, parseApplicationNameToImageNameFormat} from "@/utils/util
 import { enableDragDropTouch } from "@/assets/libraries/drag-drop-touch.esm.min";
 import json from "@/assets/json/config.json"
 import SvgComponent from "@/components/ui/svg-component";
+import ImgComponent from "@/components/ui/img-component";
 
 export default {
   name: "application-grid",
-  components: {SvgComponent},
+  components: {ImgComponent, SvgComponent},
   mounted() {
     this.$nextTick(() => {
       enableDragDropTouch();
@@ -313,11 +299,11 @@ export default {
           this.draggedApplication = gridField;
           this.draggedApplicationClone = gridField.cloneNode(true);
 
-          const svgElement = gridField.children[0].querySelector('.applicationSvg');
-          const imgClone = svgElement.cloneNode(true);
+          const imgElement = gridField.children[0].querySelector('.applicationImg');
+          const imgClone = imgElement.cloneNode(true);
 
-          imgClone.style.width = '40px';
-          imgClone.style.height = '40px';
+          imgClone.style.width = '50px';
+          imgClone.style.height = '50px';
           imgClone.style.position = 'absolute';
           imgClone.style.top = '-1000px'
 
@@ -333,6 +319,7 @@ export default {
         }
         case 'dragover':
         case 'touchover': {
+          event.preventDefault();
           break;
         }
         case 'drop': {
@@ -383,9 +370,9 @@ export default {
     applicationImageSrc(appName) {
       const parsedAppName = parseApplicationNameToImageNameFormat(appName);
       try {
-        return require(`@/assets/images/footerIcons/${parsedAppName}.png`);
+        return require(`@/assets/images/${parsedAppName}.png`);
       } catch (e) {
-        return require(`@/assets/images/footerIcons/default-image.png`);
+        return require(`@/assets/images/default-image.png`);
       }
     },
 
@@ -471,7 +458,9 @@ export default {
 }
 
 .context-action {
-  padding: 10px;
+  display: flex;
+  align-items: center;
+  padding: 5px;
 }
 
 .context-action:hover {

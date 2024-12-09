@@ -7,20 +7,20 @@
         <div
             v-if="currentIconHover.name === iconImageName && currentIconHover.hasHoverState && openWindows.some(openWindow => openWindow.windowName === iconImageName)"
             :style="{ left: index === 0 ? '0' : (index === 1 ? '-45px' : undefined)  }"
-            @mouseover="onMouseoverOpenWindow" @mouseleave="onMouseleaveOpenWindow"
-            class="open-window-preview">
-          <div class="close-window" :style="{ visibility: isHoveringOnOpenWindow ? 'visible' : 'hidden' }">
-            <SvgComponent :svg-type="'close'" @clicked="$emit('closeWindow', iconImageName)"></SvgComponent>
+            @mouseover.once="onMouseoverOpenWindow" @mouseleave="onMouseleaveOpenWindow"
+            class="open-window-preview-wrapper">
+          <div class="close-window" :style="{ visibility: isHoveringOnOpenWindowPreview ? 'visible' : 'hidden' }">
+            <div class="open-window-img-name-wrapper">
+              <ImgComponent :image-name="iconImageName" :custom-width="18" :custom-height="18"/>
+              <div class="open-window-name">{{ iconImageName }}</div>
+            </div>
+            <SvgComponent :svg-type="'close'" @clicked="$emit('closeWindow', iconImageName)"/>
           </div>
-          <div class="open-window-name">
-            {{ iconImageName }}
-          </div>
-          <div>
-            {{ iconImageName }} is open
-          </div>
+          <div class="open-window-preview"></div>
         </div>
         <div>
-          <svg-component @clicked="emitApplicationName(iconImageName)" :svg-type="iconImageName.toLowerCase()" :custom-width="25" :custom-height="25"></svg-component>
+          <ImgComponent @clicked="emitApplicationName(iconImageName)" :image-name="iconImageName" :custom-width="25"
+                        :custom-height="25"/>
           <div :class="openWindows.find(openWindow => openWindow.windowName === iconImageName) &&
                        openWindows.find(openWindow => openWindow.windowName === iconImageName).minimized === true ?
                        'horizontal-line-minimized' :
@@ -34,7 +34,7 @@
     </div>
     <div class="taskbar-items-right">
       <div class="show-hidden-icons-wrapper taskbar-right-item">
-        <SvgComponent :svg-type="'arrowUp'" :custom-height="15" :custom-width="15"></SvgComponent>
+        <SvgComponent :svg-type="'arrowUp'" :custom-height="15" :custom-width="15"/>
       </div>
       <div class="keyboard-layout-wrapper taskbar-right-item">
         <span>ENG</span>
@@ -42,9 +42,9 @@
       </div>
       <div ref="quickSettingsMenuButton" class="wifi-sound-battery-wrapper taskbar-right-item"
            @click="emitQuickSettingMenuClicked">
-        <SvgComponent :svg-type="'wifi'" :custom-height="15" :custom-width="15"></SvgComponent>
-        <SvgComponent :svg-type="'volume'" :custom-height="15" :custom-width="15"></SvgComponent>
-        <SvgComponent :svg-type="'battery'" :custom-height="15" :custom-width="15"></SvgComponent>
+        <SvgComponent :svg-type="'wifi'" :custom-height="15" :custom-width="15"/>
+        <SvgComponent :svg-type="'volume'" :custom-height="15" :custom-width="15"/>
+        <SvgComponent :svg-type="'battery'" :custom-height="15" :custom-width="15"/>
       </div>
       <div class="date-time-notification-wrapper taskbar-right-item">
         <div class="date-time-wrapper">
@@ -52,7 +52,7 @@
           <div class="date">{{ date }}</div>
         </div>
         <div class="notification-icon-wrapper">
-          <SvgComponent class="notification-icon-wrapper" svg-type="notification" :custom-width="16" :custom-height="16"></SvgComponent>
+          <SvgComponent svg-type="notification" :custom-width="16" :custom-height="16"/>
         </div>
       </div>
     </div>
@@ -61,7 +61,8 @@
 
 <script>
 import SvgComponent from "@/components/ui/svg-component";
-import json from "@/assets/json/config.json"
+import ImgComponent from "@/components/ui/img-component";
+import json from "@/assets/json/config.json";
 
 export default {
   name: "taskbarFooter",
@@ -71,7 +72,8 @@ export default {
       time: '',
       currentIconHover: {},
       quickSettingMenuIsOpen: false,
-      isHoveringOnOpenWindow: false,
+      isHoveringOnOpenWindowImage: false,
+      isHoveringOnOpenWindowPreview: false,
       applicationNames: json.applicationNames
     };
   },
@@ -95,9 +97,13 @@ export default {
     height: {
       type: Number,
       required: true
+    },
+    previewApplicationWindow: {
+      type: HTMLCanvasElement,
+      required: false
     }
   },
-  components: { SvgComponent },
+  components: {ImgComponent, SvgComponent},
   methods: {
     emitApplicationName(applicationName) {
       this.$emit('applicationName', applicationName)
@@ -110,12 +116,9 @@ export default {
       return this.$refs.quickSettingsMenuButton;
     },
     onMouseoverApplicationIcon(name) {
-      if (name === 'windows-start') {
-        this.currentIconHover = {
-          name: name,
-          hasHoverState: false
-        }
-        return;
+      if (this.openWindows.some(window => window.windowName === name)) {
+        this.isHoveringOnOpenWindowImage = true;
+        this.$emit('hoveringOnWindowImageTaskbar', name);
       }
 
       this.currentIconHover = {
@@ -124,23 +127,41 @@ export default {
       }
     },
     onMouseleaveApplicationIcon(e) {
+      if (this.isHoveringOnOpenWindowImage === true) {
+        this.isHoveringOnOpenWindowImage = false;
+      }
+
       if (e.offsetY > -1) {
         this.currentIconHover = {}
       } else {
         setTimeout(() => {
-          if (!this.isHoveringOnOpenWindow) {
-            this.isHoveringOnOpenWindow = false;
+          if (!this.isHoveringOnOpenWindowPreview) {
+            this.isHoveringOnOpenWindowPreview = false;
             this.currentIconHover = '';
           }
         }, 1000);
       }
     },
     onMouseoverOpenWindow() {
-      this.isHoveringOnOpenWindow = true;
+      this.isHoveringOnOpenWindowPreview = true;
     },
     onMouseleaveOpenWindow() {
-      this.isHoveringOnOpenWindow = false;
+      this.isHoveringOnOpenWindowPreview = false;
       this.currentIconHover = '';
+    }
+  },
+  watch: {
+    previewApplicationWindow(newValue) {
+      const openWindowPreview = this.$el.querySelector('.open-window-preview');
+      if (openWindowPreview) {
+        openWindowPreview.innerHTML = '';
+
+        newValue.style.position = 'relative';
+        newValue.style.width = '100%';
+        newValue.style.height = '100%';
+
+        openWindowPreview.appendChild(newValue);
+      }
     }
   }
 }
@@ -160,12 +181,17 @@ export default {
   color: var(--font-color);
   user-select: none;
 }
-
-.open-window-preview {
+.open-window-img-name-wrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+}
+.open-window-preview-wrapper {
   position: absolute;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   align-items: center;
   height: 150px;
   width: 200px;
@@ -176,12 +202,26 @@ export default {
   bottom: 50px;
 }
 
+.open-window-preview {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 200px;
+  height: 200px;
+  overflow: hidden;
+}
+
 .close-window {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
   align-self: end;
 }
 
 .open-window-name {
-  font-size: 27px;
+  font-size: 10px;
   font-style: italic;
   font-weight: bolder;
 }

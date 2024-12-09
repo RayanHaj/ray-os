@@ -32,7 +32,7 @@ export default {
 
   computed: {
     getImageUrl() {
-      return this.imageExists ? require(`@/assets/images/footerIcons/${this.parsedName}.png`) : require('@/assets/images/footerIcons/default-image.png');
+      return this.imageExists ? require(`@/assets/images/${this.parsedName}.png`) : require('@/assets/images/default-image.png');
     }
   },
 
