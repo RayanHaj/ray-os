@@ -9,16 +9,16 @@
   >
     <div class="window-header">
       <div class="top-header" @click="$emit('clicked', $event)" @mousedown.prevent="onMouseDownHeader($event)" @touchstart.prevent="onMouseDownHeader($event)">
-        <div class="window-name"> {{ windowName }}</div>
+        <div class="window-name"> {{ windowName }} </div>
       </div>
       <div class="window-state-control">
-        <SvgComponent :svg-type="'minimize'" @clicked="minimizeWindow"></SvgComponent>
-        <SvgComponent :svg-type="'maximize'" @clicked="maximizeWindow"></SvgComponent>
-        <SvgComponent :svg-type="'close'" @clicked="$emit('closeWindow', windowName)"></SvgComponent>
+        <SvgComponent :svg-type="'minimize'" @clicked="minimizeWindow"/>
+        <SvgComponent :svg-type="'maximize'" @clicked="maximizeWindow"/>
+        <SvgComponent :svg-type="'close'" @clicked="$emit('closeWindow', windowName)"/>
       </div>
     </div>
     <div @click="$emit('clicked', $event)" class="window-content">
-      <WindowContent :window-name="windowName" :disable-pointer-events="disablePointerEvents" @theme-changed="$emit('themeChanged')"></WindowContent>
+      <WindowContent :window-name="windowName" :disable-pointer-events="disablePointerEvents" @theme-changed="$emit('themeChanged')"/>
     </div>
   </div>
 </template>
@@ -42,9 +42,7 @@ export default {
       MINIMUM_WIDTH_WINDOW: '40%',
       MINIMUM_HEIGHT_WINDOW: '30%',
       WINDOW_RESIZE_AREA_SPACE: 10,
-      dynamicStyles: null,
       disablePointerEvents: false,
-      indexTest: 0,
       moveWindowVariables: {
         xOutOfBoundsPositive: false,
         xOutOfBoundsNegative: false,
@@ -117,38 +115,16 @@ export default {
   watch: {
     windowSize(newSize) {
       this.MAXIMUM_WIDTH = newSize[0];
-      console.log('windowSizeWatcher: ' + newSize)
       this.MAXIMUM_HEIGHT = newSize[1];
     },
     splitOtherWindow(newWindow) {
       if (newWindow.window.windowName === this.windowName) {
-        switch (newWindow.xOutOfBoundsPositive) {
-          case 'positive-x':
-            this.moveWindowVariables.xOutOfBoundsPositive = false;
-            this.moveWindowVariables.xOutOfBoundsNegative = true;
-            this.moveWindowVariables.yOutOfBoundsPositive = false;
-            this.moveWindowVariables.yOutOfBoundsNegative = false;
-            break;
-          case 'negative-x':
-            this.moveWindowVariables.xOutOfBoundsPositive = true;
-            this.moveWindowVariables.xOutOfBoundsNegative = false;
-            this.moveWindowVariables.yOutOfBoundsPositive = false;
-            this.moveWindowVariables.yOutOfBoundsNegative = false;
-            break;
-          case 'positive-y':
-            this.moveWindowVariables.yOutOfBoundsPositive = false;
-            this.moveWindowVariables.yOutOfBoundsNegative = true;
-            this.moveWindowVariables.xOutOfBoundsPositive = false;
-            this.moveWindowVariables.xOutOfBoundsNegative = false;
-            break;
-          case 'negative-y':
-            this.moveWindowVariables.yOutOfBoundsPositive = true;
-            this.moveWindowVariables.yOutOfBoundsNegative = false;
-            this.moveWindowVariables.xOutOfBoundsPositive = false;
-            this.moveWindowVariables.xOutOfBoundsNegative = false;
-            break;
-        }
-
+        this.setOutOfBoundsValues(
+            newWindow.xOutOfBoundsPositive === 'negative-x',
+            newWindow.xOutOfBoundsPositive === 'positive-x',
+            newWindow.xOutOfBoundsPositive === 'negative-y',
+            newWindow.xOutOfBoundsPositive === 'positive-y'
+        );
         this.splitWindow();
       }
     },
@@ -204,17 +180,10 @@ export default {
       this.mouseOverWindowVariables.mousePositionY = this.mouseOverWindowVariables.oldPositionY - this.$el.getBoundingClientRect().y;
       this.mouseOverWindowVariables.mouseOnResizeSpace = false;
 
-      if (this.mouseOverWindowVariables.mousePositionX + this.WINDOW_RESIZE_AREA_SPACE >= this.mouseOverWindowVariables.windowWidth) {
-        this.$el.style.cursor = 'e-resize';
-        this.mouseOverWindowVariables.mouseOnResizeSpace = true;
-      } else if (this.mouseOverWindowVariables.mousePositionX - this.WINDOW_RESIZE_AREA_SPACE <= 0) {
-        this.$el.style.cursor = 'w-resize';
-        this.mouseOverWindowVariables.mouseOnResizeSpace = true;
-      } else if (this.mouseOverWindowVariables.mousePositionY + this.WINDOW_RESIZE_AREA_SPACE >= this.mouseOverWindowVariables.windowHeight) {
-        this.$el.style.cursor = 'n-resize';
-        this.mouseOverWindowVariables.mouseOnResizeSpace = true;
-      } else if (this.mouseOverWindowVariables.mousePositionY - this.WINDOW_RESIZE_AREA_SPACE <= 0) {
-        this.$el.style.cursor = 's-resize';
+      const windowBorderSidePressed = this.returnPressedWindowBorderSide();
+
+      if (windowBorderSidePressed) {
+        this.$el.style.cursor = `${windowBorderSidePressed}-resize`;
         this.mouseOverWindowVariables.mouseOnResizeSpace = true;
       }
 
@@ -247,12 +216,12 @@ export default {
         const minHeightPixels = (minHeightPercentage / 100) * this.MAXIMUM_HEIGHT;
 
         switch (windowBorderSidePressed) {
-          case 'right': {
+          case 'e': {
             this.$el.style.width =
                 `${(this.mouseDownWindowVariables.windowWidth - (this.mouseDownWindowVariables.oldPositionX - event.clientX))}px`;
             break;
           }
-          case 'left': {
+          case 'w': {
             const widthChange = this.mouseDownWindowVariables.windowLeft - event.clientX;
             const newWidth = this.mouseDownWindowVariables.windowWidth + widthChange;
 
@@ -264,12 +233,12 @@ export default {
             this.$el.style.left = `${event.clientX}px`
             break;
           }
-          case 'bottom': {
+          case 's': {
             this.$el.style.height =
                 `${(this.mouseDownWindowVariables.windowHeight - (this.mouseDownWindowVariables.oldPositionY - event.clientY))}px`;
             break;
           }
-          case 'top': {
+          case 'n': {
             const heightChange = this.mouseDownWindowVariables.windowTop - event.clientY;
             const newHeight = this.mouseDownWindowVariables.windowHeight + heightChange;
 
@@ -303,17 +272,12 @@ export default {
       document.addEventListener('touchend', onUp);
     },
     returnPressedWindowBorderSide() {
-      if (this.mouseOverWindowVariables.mousePositionX + this.WINDOW_RESIZE_AREA_SPACE >= this.mouseOverWindowVariables.windowWidth)
-        return 'right';
-      else if (this.mouseOverWindowVariables.mousePositionX - this.WINDOW_RESIZE_AREA_SPACE <= 0)
-        return 'left';
-      else if (this.mouseOverWindowVariables.mousePositionY + this.WINDOW_RESIZE_AREA_SPACE >= this.mouseOverWindowVariables.windowHeight)
-        return 'bottom';
-      else if (this.mouseOverWindowVariables.mousePositionY - this.WINDOW_RESIZE_AREA_SPACE <= 0)
-        return 'top';
+      if (this.mouseOverWindowVariables.mousePositionY + this.WINDOW_RESIZE_AREA_SPACE >= this.mouseOverWindowVariables.windowHeight) return 's';
+      else if (this.mouseOverWindowVariables.mousePositionX + this.WINDOW_RESIZE_AREA_SPACE >= this.mouseOverWindowVariables.windowWidth) return 'e';
+      else if (this.mouseOverWindowVariables.mousePositionX - this.WINDOW_RESIZE_AREA_SPACE <= 0) return 'w';
+      else if (this.mouseOverWindowVariables.mousePositionY - this.WINDOW_RESIZE_AREA_SPACE <= 0) return 'n';
     },
     onMouseDownHeader(event) {
-      console.log('header touch down')
       if (this.mouseOverWindowVariables.mouseOnResizeSpace === true) {
         return;
       }
@@ -389,47 +353,36 @@ export default {
     },
     splitWindow() {
       if (this.moveWindowVariables.xOutOfBoundsPositive) {
-        this.$el.style.left = '50%';
-        this.$el.style.width = '50%';
-        this.$el.style.height = `${this.MAXIMUM_HEIGHT}px`;
-        this.$el.style.top = 0;
+        this.setSplitWindowValues('50%', '50%', `${this.MAXIMUM_HEIGHT}px`, 0)
         return 'positive-x';
       } else if (this.moveWindowVariables.xOutOfBoundsNegative) {
-        this.$el.style.left = 0;
-        this.$el.style.width = '50%';
-        this.$el.style.height = `${this.MAXIMUM_HEIGHT}px`;
-        this.$el.style.top = 0;
+        this.setSplitWindowValues(0, '50%', `${this.MAXIMUM_HEIGHT}px`, 0)
         return 'negative-x';
       } else if (this.moveWindowVariables.yOutOfBoundsPositive) {
-        this.$el.style.left = 0;
-        this.$el.style.width = '100%';
-        this.$el.style.height = `${this.MAXIMUM_HEIGHT / 2}px`;
-        this.$el.style.top = 0;
+        this.setSplitWindowValues(0, '100%', `${this.MAXIMUM_HEIGHT / 2}px`, 0)
         return 'positive-y';
       } else if (this.moveWindowVariables.yOutOfBoundsNegative) {
-        this.$el.style.left = 0;
-        this.$el.style.width = '100%';
-        this.$el.style.height = `${this.MAXIMUM_HEIGHT / 2}px`;
-        this.$el.style.top = `${this.MAXIMUM_HEIGHT / 2}px`;
+        this.setSplitWindowValues(0, '100%', `${this.MAXIMUM_HEIGHT / 2}px`, `${this.MAXIMUM_HEIGHT / 2}px`)
         return 'negative-y';
       }
 
       return false;
     },
+    setSplitWindowValues(left, width, height, top) {
+      this.$el.style.left = left;
+      this.$el.style.width = width;
+      this.$el.style.height = height;
+      this.$el.style.top = top;
+    },
+    setOutOfBoundsValues(xPositive, xNegative, yPositive, yNegative) {
+      this.moveWindowVariables.xOutOfBoundsPositive = xPositive;
+      this.moveWindowVariables.xOutOfBoundsNegative = xNegative;
+      this.moveWindowVariables.yOutOfBoundsPositive = yPositive;
+      this.moveWindowVariables.yOutOfBoundsNegative = yNegative;
+    },
     minimizeWindow() {
       this.$emit('minimizeWindow', this.windowName);
-    },
-    convertFromPixelStringToNumber(string) {
-      let number = '';
-      for (let index in string) {
-        const letter = string[index];
-        if (letter === '.' || letter === 'p') {
-          break;
-        }
-        number += letter;
-      }
-      return Number(number);
-    },
+    }
   }
 }
 </script>
