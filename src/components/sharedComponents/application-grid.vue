@@ -120,14 +120,12 @@ export default {
         this.init();
 
         this.$el.querySelectorAll('.tile').forEach(tile => {
-          if (tile.children.length === 0) {
-            return;
-          }
+          if (tile.children.length !== 0) {
+            tile.removeChild(tile.querySelector('.tile-content-wrapper'));
 
-          tile.removeChild(tile.querySelector('.tile-content-wrapper'));
-
-          if (tile.classList.contains('filled')) {
-            tile.classList.remove('filled');
+            if (tile.classList.contains('filled')) {
+              tile.classList.remove('filled');
+            }
           }
         });
         this.addApplicationsToGrid();
