@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container" @click="$emit('clicked')">
     <div class="toggle-buttons">
       <div class="wifi-toggle-wrapper">
         <div class="internet-toggle toggle-button btn">
@@ -86,6 +86,7 @@ export default {
       brightnessInputValue: 100,
     }
   },
+  emits: ['clicked'],
   mounted() {
     const value = localStorage.getItem('brightnessValue');
     if (value !== null) {

@@ -27,6 +27,7 @@
       />
       <DesktopGrid
           @application-name="setApplicationNameVariable"
+          @clicked="activateQuickSettingsMenu(false)"
           :window-size="windowDimensions"
           :window-resizing="windowIsResizing"
           class="desktop-grid"/>
@@ -36,11 +37,12 @@
                     ref="settingsMenu"
                     class="quick-settings-menu"
                     @brightness-value-changed="updateBrightnessValue"
+                    @clicked="console.log('settings menu clicked')"
       />
       <taskbar ref="taskbar"
                class="taskbar"
                @application-name="setApplicationNameVariable"
-               @quick-settings-menu-open="openQuickSettingsMenu"
+               @quick-settings-menu-open="activateQuickSettingsMenu(true)"
                @close-window="closeWindow"
                @hovering-on-window-image-taskbar="currentHoveredImageTaskbarName = $event"
                :open-windows="openWindows"
@@ -92,14 +94,12 @@ export default {
     this.updateSettings();
 
     window.addEventListener('resize', this.updateWindowDimensions);
-    window.addEventListener('click', this.closeOpenWindows);
   },
   created() {
     this.windowDimensions = [window.innerWidth, (window.innerHeight - this.TASKBAR_HEIGHT)];
   },
   beforeUnmount() {
     window.removeEventListener('resize', this.updateWindowDimensions);
-    window.removeEventListener('click', this.closeOpenWindows);
   },
   watch: {
     windowIsRendered() {
@@ -169,6 +169,7 @@ export default {
       });
     },
     onClickWindow(e, window) {
+      this.activateQuickSettingsMenu(false);
       const mouseTarget = e.target.parentNode;
       if (this.closingWindow !== true && mouseTarget.classList[0] !== 'window-state-control') {
         const windowIndex = this.openWindows.findIndex(openWindow => openWindow.windowName === window.windowName);
@@ -208,83 +209,28 @@ export default {
         }
       }
     },
-    async openQuickSettingsMenu() {
-      const settingsMenu = this.$refs.taskbar;
-
-      if (this.quickSettingMenuIsOpen) {
-        await settingsMenu.closeSettingsMenuAnimation().then(() => {
-          this.quickSettingMenuIsOpen = !this.quickSettingMenuIsOpen;
-        });
-        return;
-      }
-
-      this.quickSettingMenuIsOpen = !this.quickSettingMenuIsOpen;
-    },
-    validateBeforeClosingWindows(settingsMenu, footer, e) {
-      if (!this.quickSettingMenuIsOpen) {
-        return false;
-      }
-
-      if (footer.getRefQuickSettingsMenuButton().contains(e.target)) {
-        return false;
-      }
-
-      const children = Array.from(settingsMenu.$el.querySelectorAll('.btn'));
-      const btnElements = children.filter((child => child.classList.contains('btn')));
-
-      let result = null;
-      for (let element of btnElements) {
-        if (element.contains(e.target)) {
-          result = true;
-        }
-      }
-
-      if (result) {
-        return result;
-      }
-
-      if (settingsMenu.$el.contains(e.target)) {
-        return false;
-      }
-
-      return true;
-    },
-    closeOpenWindows(e) {
-      if (this.quickSettingMenuIsOpen === true) {
-        e.preventDefault();
-        const settingsMenu = this.$refs.settingsMenu;
-        const taskbar = this.$refs.footerBar;
-        if (taskbar) {
-          if (this.validateBeforeClosingWindows(settingsMenu, taskbar, e)) {
-            settingsMenu.closeSettingsMenuAnimation().then(() => {
-              this.quickSettingMenuIsOpen = !this.quickSettingMenuIsOpen;
-            });
-          }
+    activateQuickSettingsMenu(quickSettingsMenuButtonClicked) {
+      if (quickSettingsMenuButtonClicked) {
+        this.quickSettingMenuIsOpen === true ?
+            this.quickSettingMenuIsOpen = false :
+            this.quickSettingMenuIsOpen = true;
+      } else {
+        if (this.quickSettingMenuIsOpen === true) {
+          this.quickSettingMenuIsOpen = false;
         }
       }
     },
-    easterEggCompleted() {
-      this.activatedEasterEgg = null;
-      this.$nextTick(() => {
-        this.updateSettings();
-      })
-    },
-
     minimizeWindow(windowName) {
       const window = this.openWindows.find(window => window.windowName === windowName);
       const windowComponent = this.$refs[windowName][0];
-
-      console.log(windowComponent)
 
       if (windowComponent) {
         windowComponent.$el.style.display = 'none';
         window.minimized = true;
       }
     },
-
     sortWindowArray() {
       if (this.openWindows.length > 0) {
-        console.log('hello Per')
         let counter = 2;
         this.openWindows.forEach(window => {
           window.zIndex = counter++;

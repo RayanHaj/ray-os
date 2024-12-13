@@ -26,7 +26,7 @@
 <script>
 import SvgComponent from "@/components/ui/svg-component";
 import WindowContent from "@/components/desktop/window/windowContent/window-content";
-import { enableDragDropTouch } from "@/assets/libraries/drag-drop-touch.esm.min";
+import {enableDragDropTouch} from "@/assets/libraries/drag-drop-touch.esm.min";
 import html2canvas from "html2canvas";
 
 export default {
@@ -167,17 +167,12 @@ export default {
       let windowWidth = this.$el.offsetWidth;
       let windowHeight = this.$el.offsetHeight;
 
-      let result = false;
       for (let i = 0; i <= 2; i++) {
         if ((windowWidth === this.MAXIMUM_WIDTH || windowWidth + i === this.MAXIMUM_WIDTH || windowWidth - i === this.MAXIMUM_WIDTH) && windowHeight >= this.MAXIMUM_HEIGHT) {
           this.$el.style.width = '60%';
           this.$el.style.height = '80%';
           return
         }
-      }
-
-      if (result) {
-        return;
       }
 
       if (windowWidth !== this.MAXIMUM_WIDTH || windowHeight !== this.MAXIMUM_HEIGHT) {
@@ -459,7 +454,7 @@ export default {
   flex-direction: column;
   resize: both;
   overflow: auto;
-  position: relative;
+  position: absolute;
   background-color: var(--background-color-window);
   border: black 1px solid;
 }

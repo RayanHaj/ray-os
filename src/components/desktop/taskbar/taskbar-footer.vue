@@ -66,7 +66,7 @@ import json from "@/assets/json/config.json";
 
 export default {
   name: "taskbarFooter",
-  emits: ['closeWindow', 'applicationName', 'quickSettingsMenuOpen', 'hoveringOnWindowImageTaskbar'],
+  emits: ['closeWindow', 'applicationName', 'quickSettingsMenuOpen', 'hoveringOnWindowImageTaskbar', 'clicked'],
   data() {
     return {
       date: '',
