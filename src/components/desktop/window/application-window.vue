@@ -184,11 +184,13 @@ export default {
 
       if (windowBorderSidePressed) {
         this.$el.style.cursor = `${windowBorderSidePressed}-resize`;
+        this.$el.style.userSelect = 'none';
         this.mouseOverWindowVariables.mouseOnResizeSpace = true;
       }
 
       if (this.mouseOverWindowVariables.mouseOnResizeSpace === false && this.mouseDownWindowVariables.mousePressedDown === false) {
         this.$el.style.cursor = 'auto';
+        this.$el.style.userSelect = 'auto';
         this.mouseOverWindowVariables.mouseOnResizeSpace = false;
       }
     },
