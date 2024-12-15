@@ -215,39 +215,74 @@ export default {
         const minHeightPercentage = parseFloat(this.MINIMUM_HEIGHT_WINDOW);
         const minHeightPixels = (minHeightPercentage / 100) * this.MAXIMUM_HEIGHT;
 
+        const east = () => {
+          this.$el.style.width = `${(this.mouseDownWindowVariables.windowWidth - (this.mouseDownWindowVariables.oldPositionX - event.clientX))}px`;
+        }
+
+        const west = () => {
+          const widthChange = this.mouseDownWindowVariables.windowLeft - event.clientX;
+          const newWidth = this.mouseDownWindowVariables.windowWidth + widthChange;
+
+          if (newWidth <= minWidthPixels) {
+            return;
+          }
+
+          this.$el.style.width = `${newWidth}px`
+          this.$el.style.left = `${event.clientX}px`
+        }
+
+        const south = () => {
+          this.$el.style.height =
+              `${(this.mouseDownWindowVariables.windowHeight - (this.mouseDownWindowVariables.oldPositionY - event.clientY))}px`;
+        }
+
+        const north = () => {
+          const heightChange = this.mouseDownWindowVariables.windowTop - event.clientY;
+          const newHeight = this.mouseDownWindowVariables.windowHeight + heightChange;
+
+          if (newHeight <= minHeightPixels) {
+            return;
+          }
+
+          this.$el.style.height = `${newHeight}px`
+          this.$el.style.top = `${event.clientY}px`
+        }
+
         switch (windowBorderSidePressed) {
-          case 'e': {
-            this.$el.style.width =
-                `${(this.mouseDownWindowVariables.windowWidth - (this.mouseDownWindowVariables.oldPositionX - event.clientX))}px`;
+          case 'n': {
+            north();
             break;
           }
-          case 'w': {
-            const widthChange = this.mouseDownWindowVariables.windowLeft - event.clientX;
-            const newWidth = this.mouseDownWindowVariables.windowWidth + widthChange;
-
-            if (newWidth <= minWidthPixels) {
-              return;
-            }
-
-            this.$el.style.width = `${newWidth}px`
-            this.$el.style.left = `${event.clientX}px`
+          case 'e': {
+            east();
             break;
           }
           case 's': {
-            this.$el.style.height =
-                `${(this.mouseDownWindowVariables.windowHeight - (this.mouseDownWindowVariables.oldPositionY - event.clientY))}px`;
+            south();
             break;
           }
-          case 'n': {
-            const heightChange = this.mouseDownWindowVariables.windowTop - event.clientY;
-            const newHeight = this.mouseDownWindowVariables.windowHeight + heightChange;
-
-            if (newHeight <= minHeightPixels) {
-              return;
-            }
-
-            this.$el.style.height = `${newHeight}px`
-            this.$el.style.top = `${event.clientY}px`
+          case 'w': {
+            west();
+            break;
+          }
+          case 'ne': {
+            north();
+            east();
+            break;
+          }
+          case 'nw': {
+            north();
+            west();
+            break;
+          }
+          case 'se': {
+            south();
+            east();
+            break;
+          }
+          case 'sw': {
+            south();
+            west();
             break;
           }
         }
@@ -272,10 +307,20 @@ export default {
       document.addEventListener('touchend', onUp);
     },
     returnPressedWindowBorderSide() {
-      if (this.mouseOverWindowVariables.mousePositionY + this.WINDOW_RESIZE_AREA_SPACE >= this.mouseOverWindowVariables.windowHeight) return 's';
-      else if (this.mouseOverWindowVariables.mousePositionX + this.WINDOW_RESIZE_AREA_SPACE >= this.mouseOverWindowVariables.windowWidth) return 'e';
-      else if (this.mouseOverWindowVariables.mousePositionX - this.WINDOW_RESIZE_AREA_SPACE <= 0) return 'w';
-      else if (this.mouseOverWindowVariables.mousePositionY - this.WINDOW_RESIZE_AREA_SPACE <= 0) return 'n';
+      const north = this.mouseOverWindowVariables.mousePositionY - this.WINDOW_RESIZE_AREA_SPACE <= 0;
+      const east = this.mouseOverWindowVariables.mousePositionX + this.WINDOW_RESIZE_AREA_SPACE >= this.mouseOverWindowVariables.windowWidth;
+      const south = this.mouseOverWindowVariables.mousePositionY + this.WINDOW_RESIZE_AREA_SPACE >= this.mouseOverWindowVariables.windowHeight;
+      const west = this.mouseOverWindowVariables.mousePositionX - this.WINDOW_RESIZE_AREA_SPACE <= 0;
+
+      if (north && east) return 'ne';
+      if (north && west) return 'nw';
+      if (south && east) return 'se';
+      if (south && west) return 'sw';
+
+      if (north) return 'n';
+      if (east) return 'e';
+      if (south) return 's';
+      if (west) return 'w';
     },
     onMouseDownHeader(event) {
       if (this.mouseOverWindowVariables.mouseOnResizeSpace === true) {
@@ -405,7 +450,6 @@ export default {
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  resize: both;
   overflow: auto;
   position: absolute;
   background-color: var(--background-color-window);
