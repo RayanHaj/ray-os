@@ -6,11 +6,13 @@
       </div>
       <div class="calculator-answer">
         <div class="full-sum-preview">{{ calculationList.join(' ') }}</div>
-        <div class="display-input-value">{{ inputNumber }}</div>
+        <div class="display-input-value" :style="{ 'font-size': isNaN(Number(previousOperator)) && disableButtons === true ? '25px' : '55px'}">{{ inputNumber }}</div>
       </div>
       <div class="calculator-actions">
-        <button class="calculator-button" v-for="operator in characterList" :key="operator" @click="onClickOperatorButton(operator)">
-          <SvgComponent svg-type="backspace" :custom-width="28" :custom-height="28" v-if="operator === 'back'"></SvgComponent>
+        <button class="calculator-button" v-for="operator in characterList" :key="operator"
+                :disabled="isNaN(Number(operator)) && disableButtons === true" @click="onClickOperatorButton(operator)">
+          <SvgComponent svg-type="backspace" :custom-width="28" :custom-height="28"
+                        v-if="operator === 'back'"></SvgComponent>
           {{ operator !== 'back' ? operator : null }}
         </button>
       </div>
@@ -22,8 +24,9 @@
 </template>
 
 <script>
-import { parseCalculationString } from "@/utils/util"
+import {parseCalculationString} from "@/utils/util"
 import SvgComponent from "@/components/ui/svg-component";
+
 export default {
   name: "calculator-window",
   components: {SvgComponent},
@@ -37,11 +40,17 @@ export default {
       startCalculate: false,
       clearCalculationList: false,
       calculationAfterOperator: false,
+      disableButtons: false,
       previousOperator: ''
     }
   },
   methods: {
     calculate(operator, afterCalcClearList) {
+      if (this.calculationList[1] === '÷' && this.calculationList[2] === '0') {
+        this.inputNumber = 'Cannot divide by zero';
+        this.disableButtons = true;
+        return;
+      }
       this.calculationAnswer = parseCalculationString(this.calculationList);
       this.calculationList.push(operator);
       this.inputNumber = this.calculationAnswer.toString();
@@ -57,6 +66,14 @@ export default {
         this.calculationList = [];
       }
       if (!isNaN(Number(operator))) {
+        if (this.disableButtons) {
+          this.disableButtons = false;
+          this.inputNumber = '';
+          this.calculationList = [];
+          this.clearCalculationList = false;
+          this.calculationAfterOperator = false;
+          this.startCalculate = false;
+        }
         if (this.clearCalculationList) {
           if (this.calculationAfterOperator) {
             this.calculationList = [this.calculationAnswer.toString(), this.previousOperator];
@@ -208,45 +225,45 @@ export default {
 </script>
 
 <style scoped>
-  .calculator-container {
-    margin: 5px;
-  }
+.calculator-container {
+  margin: 5px;
+}
 
-  .calculator {
-    display: flex;
-    flex-direction: column;
-    width: 70%;
-  }
+.calculator {
+  display: flex;
+  flex-direction: column;
+  width: 70%;
+}
 
-  .calculator-answer {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    padding: 10px;
-  }
+.calculator-answer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  padding: 10px;
+}
 
-  .calculator-actions {
-    display: grid;
-    grid-template-columns: auto auto auto auto;
-    gap: 3px;
-  }
+.calculator-actions {
+  display: grid;
+  grid-template-columns: auto auto auto auto;
+  gap: 3px;
+}
 
-  .calculator-button {
-    background-color: var(--hover-color);
-    border-radius: 5px;
-  }
+.calculator-button {
+  background-color: var(--hover-color);
+  border-radius: 5px;
+}
 
-  .full-sum-preview {
-    font-size: 20px;
-    height: 20px;
-  }
+.full-sum-preview {
+  font-size: 20px;
+  height: 20px;
+}
 
-  .display-input-value {
-    font-size: 55px;
-    height: 55px;
-  }
+.display-input-value {
+  font-size: 55px;
+  height: 55px;
+}
 
-  .calculator-button {
-    font-size: 40px;
-  }
+.calculator-button {
+  font-size: 40px;
+}
 </style>
