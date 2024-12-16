@@ -7,6 +7,7 @@ import FileExplorer from "@/components/desktop/window/windowContent/fileExplorer
 import Settings from "@/components/desktop/window/windowContent/settings/settings-window";
 import Browser from "@/components/desktop/window/windowContent/browser/browser-window";
 import SereneSounds from "@/components/desktop/window/windowContent/sereneSounds/serene-sounds-window";
+import Calculator from "@/components/desktop/window/windowContent/calculator/calculator-window";
 
 export default {
   name: "window-content",
@@ -14,7 +15,8 @@ export default {
     SereneSounds,
     Browser,
     Settings,
-    FileExplorer
+    FileExplorer,
+    Calculator
   },
   emits: ['themeChanged'],
   props: {

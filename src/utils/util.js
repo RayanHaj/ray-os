@@ -31,3 +31,25 @@ export function parseApplicationNameToImageNameFormat(name) {
 
     return parsedName;
 }
+
+export function parseCalculationString(calculationArray) {
+    console.log(calculationArray)
+    for (let i = 0; i < calculationArray.length; i++) {
+        if (isNaN(Number(calculationArray[i]))) {
+            switch (calculationArray[i]) {
+                case '+': {
+                    return Number(calculationArray[i - 1]) + Number(calculationArray[i + 1]);
+                }
+                case '-': {
+                    return Number(calculationArray[i - 1]) - Number(calculationArray[i + 1]);
+                }
+                case '×': {
+                    return Number(calculationArray[i - 1]) * Number(calculationArray[i + 1]);
+                }
+                case '÷': {
+                    return Number(calculationArray[i - 1]) / Number(calculationArray[i + 1]);
+                }
+            }
+        }
+    }
+}
