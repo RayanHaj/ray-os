@@ -32,22 +32,32 @@ export function parseApplicationNameToImageNameFormat(name) {
     return parsedName;
 }
 
-export function parseCalculationString(calculationArray) {
-    console.log(calculationArray)
-    for (let i = 0; i < calculationArray.length; i++) {
-        if (isNaN(Number(calculationArray[i]))) {
-            switch (calculationArray[i]) {
+export function parseCalculationString(calculation) {
+    console.log(calculation)
+    for (let i = 0; i < calculation.length; i++) {
+        if (isNaN(Number(calculation[i]))) {
+            switch (calculation[i]) {
                 case '+': {
-                    return Number(calculationArray[i - 1]) + Number(calculationArray[i + 1]);
+                    return Number(calculation[i - 1]) + Number(calculation[i + 1]);
                 }
                 case '-': {
-                    return Number(calculationArray[i - 1]) - Number(calculationArray[i + 1]);
+                    return Number(calculation[i - 1]) - Number(calculation[i + 1]);
                 }
                 case '×': {
-                    return Number(calculationArray[i - 1]) * Number(calculationArray[i + 1]);
+                    return Number(calculation[i - 1]) * Number(calculation[i + 1]);
                 }
                 case '÷': {
-                    return Number(calculationArray[i - 1]) / Number(calculationArray[i + 1]);
+                    return Number(calculation[i - 1]) / Number(calculation[i + 1]);
+                }
+                case '√': {
+                    console.log(calculation)
+                    return Math.sqrt(Number(calculation[0]));
+                }
+                case 'x²': {
+                    return Math.pow(Number(calculation[0]), 2);
+                }
+                case '1/x': {
+                    return 1 / Number(calculation[0]);
                 }
             }
         }

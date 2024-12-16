@@ -29,7 +29,7 @@ export default {
   components: {SvgComponent},
   data() {
     return {
-      characterList: ['÷', 'CE', 'C', 'back', '1/x', 'x²', '√', '÷', '7', '8', '9', '×', '4', '5', '6', '-', '1', '2', '3', '+', '+/-', '0', '.', '='],
+      characterList: ['PI', 'CE', 'C', 'back', '1/x', 'x²', '√', '÷', '7', '8', '9', '×', '4', '5', '6', '-', '1', '2', '3', '+', '+/-', '0', '.', '='],
       calculationList: [],
       calculationAnswer: 0,
       inputNumber: '',
@@ -70,6 +70,26 @@ export default {
         this.handleNumber(operator);
       }
 
+      if (operator === '.') {
+        this.inputNumber += '.';
+      }
+
+      if (operator === 'CE') {
+        this.handleCE();
+      }
+
+      if (operator === 'C') {
+        this.handleC();
+      }
+
+      if (operator === 'PI') {
+        this.handlePI();
+      }
+
+      if (operator === '+/-') {
+        this.handlePositiveNegative();
+      }
+
       if (operator === 'back') {
         this.handleBackspace();
       }
@@ -81,6 +101,10 @@ export default {
         }
 
         this.handleOperator(operator);
+      }
+
+      if (operator === '√' || operator === 'x²' || operator === '1/x') {
+        this.handleSpecialOperator(operator)
       }
 
       if (operator === '=') {
@@ -122,6 +146,14 @@ export default {
 
       this.clearInputNumber = true;
     },
+    handleSpecialOperator(operator) {
+      if (this.inputNumber.isEmpty) {
+        return;
+      }
+
+      this.inputNumber = parseCalculationString([this.inputNumber, operator]);
+      console.log(this.inputNumber)
+    },
     handleBackspace() {
       if (this.inputNumber.length !== 0) {
         this.inputNumber = this.inputNumber.substring(0, this.inputNumber.length - 1);
@@ -139,6 +171,37 @@ export default {
       this.calculationList.push(this.inputNumber);
 
       this.calculate(equalSign, true);
+    },
+    handleCE() {
+      if (this.inputNumber.isEmpty) {
+        return;
+      }
+
+      if (this.calculationList.includes('=')) {
+        this.calculationList = [];
+        this.inputNumber = '';
+        return;
+      }
+
+      this.inputNumber = '';
+    },
+    handleC() {
+      if (this.inputNumber.isEmpty && this.calculationList.length === 0) {
+        return;
+      }
+
+      this.calculationList = [];
+      this.inputNumber = '';
+    },
+    handlePI() {
+      this.inputNumber = Math.PI;
+    },
+    handlePositiveNegative() {
+      if (this.inputNumber[0] === '-') {
+        this.inputNumber = this.inputNumber.substring(1);
+      } else {
+        this.inputNumber = '-' + this.inputNumber
+      }
     }
   }
 }
