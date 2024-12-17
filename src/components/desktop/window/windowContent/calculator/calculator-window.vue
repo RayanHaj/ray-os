@@ -1,23 +1,29 @@
 <template>
-  <div class="calculator-container">
+  <div class="calculator-container" ref="calculatorContainer">
     <section class="calculator">
       <div class="calculator-header">
         <SvgComponent svg-type="moveWindowToTopCorner" :custom-width="20" :custom-height="20"/>
       </div>
-      <div class="calculator-answer">
-        <div class="full-sum-preview">{{ calculationList.join(' ') }}</div>
-        <div class="display-input-value"
-             :style="{ 'font-size': isNaN(Number(previousOperator)) && disableButtons === true ? '25px' : '55px'}">
-          {{ inputNumber }}
+      <div class="calculation-interface">
+        <div class="calculator-answer">
+          <div class="full-sum-preview">{{ calculationList.join(' ') }}</div>
+          <div class="display-input-value"
+               :style="{ 'font-size': isNaN(Number(previousOperator)) && disableButtons === true ? '25px' : '55px'}">
+            {{ inputNumber }}
+          </div>
         </div>
-      </div>
-      <div class="calculator-actions">
-        <button class="calculator-button" v-for="operator in characterList" :key="operator"
-                :disabled="isNaN(Number(operator)) && disableButtons === true" @click="onClickOperatorButton(operator)">
-          <SvgComponent svg-type="backspace" :custom-width="28" :custom-height="28"
-                        v-if="operator === 'backspace'"></SvgComponent>
-          {{ operator !== 'backspace' ? operator : null }}
-        </button>
+        <div class="calculator-actions">
+          <button class="calculator-button" v-for="operator in characterList" :key="operator"
+                  :style="{
+                  height: containerHeight < 567 ? '33px' : containerHeight < 747 ? '70px' : containerHeight < 987 ? '100px' : '140px',
+                  fontSize: containerHeight < 567 ? '15px' : containerHeight < 747 ? '20px' : containerHeight < 987 ? '25px' : '30px',
+                }"
+                  :disabled="isNaN(Number(operator)) && disableButtons === true" @click="onClickOperatorButton(operator)">
+            <SvgComponent svg-type="backspace" :custom-width="28" :custom-height="28"
+                          v-if="operator === 'backspace'"></SvgComponent>
+            {{ operator !== 'backspace' ? operator : null }}
+          </button>
+        </div>
       </div>
     </section>
     <section class="calculation-history">
@@ -27,7 +33,7 @@
       <div class="history-list-wrapper">
         <div class="history-list-item" v-for="element in calculationHistory" :key="element">
           <div class="history-list-item-content" @click="restorePastCalculation(element)">
-            <div class="calculation">{{ element.calculation }}</div>
+            <div class="history-list-item-calculation">{{ element.calculation }}</div>
             <div class="answer" style="color: var(--hover-color)">{{ element.answer }}</div>
           </div>
         </div>
@@ -55,8 +61,18 @@ export default {
       clearCalculationList: false,
       calculationAfterOperator: false,
       disableButtons: false,
-      previousOperator: ''
+      previousOperator: '',
+      containerHeight: 0
     }
+  },
+  mounted() {
+    const resizeObserver = new ResizeObserver(() => {
+      if (this.$refs.calculatorContainer) {
+        this.containerHeight = this.$refs.calculatorContainer.offsetHeight;
+      }
+    });
+
+    resizeObserver.observe(this.$refs.calculatorContainer);
   },
   methods: {
     calculate(operator, afterCalcClearList) {
@@ -157,6 +173,9 @@ export default {
         if (this.calculationList.length >= 2) {
           this.startCalculate = true;
         }
+      }
+      if (this.inputNumber.length === 16) {
+        return;
       }
 
       this.inputNumber += number;
@@ -260,13 +279,15 @@ export default {
 .calculator-container {
   display: flex;
   flex-direction: row;
-  margin: 5px;
+  height: 100%;
+  width: 100%;
+  overflow-y: hidden;
 }
 
 .calculation-history {
   display: flex;
   flex-direction: column;
-  width: 20%;
+  width: 30%;
 }
 
 .calculation-history-header {
@@ -277,7 +298,7 @@ export default {
 .history-list-wrapper {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100%;
   max-height: 100%;
   overflow-y: auto;
 }
@@ -299,7 +320,8 @@ export default {
 .calculator {
   display: flex;
   flex-direction: column;
-  width: 80%;
+  justify-content: space-between;
+  width: 70%;
 }
 
 .calculator-answer {
@@ -312,6 +334,7 @@ export default {
 .calculator-actions {
   display: grid;
   grid-template-columns: auto auto auto auto;
+  margin: 10px;
   gap: 3px;
 }
 
@@ -319,7 +342,6 @@ export default {
   background-color: var(--hover-color);
   border: none;
   border-radius: 5px;
-  height: 150px;
 }
 
 .full-sum-preview {
@@ -336,9 +358,15 @@ export default {
   font-size: 40px;
 }
 
-@media screen and (min-height: 700px){
+.history-list-item-calculation {
+  font-size: 12px;
+}
+
+@media (max-height: 768px) {
   .calculator-button {
-    height: 50px;
+    background-color: var(--hover-color);
+    font-size: 25px;
+    height: 70px;
   }
 }
 </style>
