@@ -9,6 +9,7 @@
   >
     <div class="window-header">
       <div class="top-header" @click="$emit('clicked', $event)" @mousedown.prevent="onMouseDownHeader($event)" @touchstart.prevent="onMouseDownHeader($event)">
+        <ImgComponent :image-name="windowName" :custom-width="20" :custom-height="20" class="window-img"></ImgComponent>
         <div class="window-name"> {{ windowName }} </div>
       </div>
       <div class="window-state-control">
@@ -28,10 +29,12 @@ import SvgComponent from "@/components/ui/svg-component";
 import WindowContent from "@/components/desktop/window/windowContent/window-content";
 import {enableDragDropTouch} from "@/assets/libraries/drag-drop-touch.esm.min";
 import html2canvas from "html2canvas";
+import ImgComponent from "@/components/ui/img-component";
 
 export default {
   name: "application-window",
   components: {
+    ImgComponent,
     SvgComponent,
     WindowContent
   },
@@ -479,11 +482,10 @@ export default {
 .top-header {
   display: flex;
   flex-direction: row;
-  gap: 20px;
-  justify-content: space-between;
   align-items: center;
   height: 30px;
   width: 100%;
+  padding-left: 10px;
 }
 
 .window-name {
