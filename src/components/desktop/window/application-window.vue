@@ -81,8 +81,11 @@ export default {
   },
   mounted() {
     enableDragDropTouch();
-    if (this.windowName === 'welcome-window') {
-      this.maximizeWindow();
+    console.log(this.windowName)
+    switch (this.windowName) {
+      case 'Calculator': {
+        this.MINIMUM_HEIGHT_WINDOW = '50%';
+      }
     }
   },
   props: {
