@@ -8,9 +8,10 @@
        @touchstart="moveWindowOnMouseDownWindowCorners"
   >
     <div class="window-header">
-      <div class="top-header" @click="$emit('clicked', $event)" @mousedown.prevent="onMouseDownHeader($event)" @touchstart.prevent="onMouseDownHeader($event)">
+      <div class="top-header" @click="$emit('clicked', $event)" @mousedown.prevent="onMouseDownHeader($event)"
+           @touchstart.prevent="onMouseDownHeader($event)">
         <ImgComponent :image-name="windowName" :custom-width="20" :custom-height="20" class="window-img"></ImgComponent>
-        <div class="window-name"> {{ windowName }} </div>
+        <div class="window-name"> {{ windowName }}</div>
       </div>
       <div class="window-state-control">
         <SvgComponent :svg-type="'minimize'" @clicked="minimizeWindow"/>
@@ -19,7 +20,8 @@
       </div>
     </div>
     <div @click="$emit('clicked', $event)" class="window-content">
-      <WindowContent :window-name="windowName" :disable-pointer-events="disablePointerEvents" @theme-changed="$emit('themeChanged')"/>
+      <WindowContent :window-name="windowName" :disable-pointer-events="disablePointerEvents"
+                     @theme-changed="$emit('themeChanged')"/>
     </div>
   </div>
 </template>
@@ -149,27 +151,16 @@ export default {
       let windowWidth = this.$el.offsetWidth;
       let windowHeight = this.$el.offsetHeight;
 
-      for (let i = 0; i <= 2; i++) {
-        if ((windowWidth === this.MAXIMUM_WIDTH || windowWidth + i === this.MAXIMUM_WIDTH || windowWidth - i === this.MAXIMUM_WIDTH) && windowHeight >= this.MAXIMUM_HEIGHT) {
-          this.$el.style.width = '60%';
-          this.$el.style.height = '80%';
-          return
-        }
+      if (windowWidth === this.MAXIMUM_WIDTH && windowHeight === this.MAXIMUM_HEIGHT) {
+        this.$el.style.width = '60%';
+        this.$el.style.height = '80%';
+        return;
       }
 
-      if (windowWidth !== this.MAXIMUM_WIDTH || windowHeight !== this.MAXIMUM_HEIGHT) {
-        this.$el.style.width = '100%';
-        this.$el.style.height = `calc(100% - ${this.taskbarHeight}px)`;
-
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
-
-        const newX = (viewportWidth - this.$el.offsetWidth) / 2;
-        const newY = (viewportHeight - this.$el.offsetHeight) / 2 - 22;
-
-        this.$el.style.left = `${newX}px`;
-        this.$el.style.top = `${newY}px`;
-      }
+      this.$el.style.width = '100%';
+      this.$el.style.height = `calc(100% - ${this.taskbarHeight}px)`;
+      this.$el.style.left = `${(window.innerWidth - this.$el.offsetWidth) / 2}px`;
+      this.$el.style.top = `${((window.innerHeight - this.$el.offsetHeight) / 2) - (this.taskbarHeight / 2)}px`;
     },
     mouseOverEventListeners(event) {
       event.preventDefault();
@@ -353,8 +344,8 @@ export default {
       let windowHeight = this.moveWindowVariables.NUM_HEIGHT;
 
       for (let i = 0; i <= 2; i++) {
-        if ((windowWidth === this.MAXIMUM_WIDTH || windowWidth + i === this.MAXIMUM_WIDTH || windowWidth - i === this.MAXIMUM_WIDTH) && windowHeight >= this.MAXIMUM_HEIGHT) {
-          this.$el.style.left = `${this.moveWindowVariables.prevX - (this.moveWindowVariables.NUM_WIDTH / 2 - 250)}px`;
+        if (windowWidth === this.MAXIMUM_WIDTH && windowHeight === this.MAXIMUM_HEIGHT) {
+          this.$el.style.left = `${this.moveWindowVariables.prevX - (this.moveWindowVariables.NUM_WIDTH / 3)}px`;
           this.$el.style.top = `${this.moveWindowVariables.prevY}px`;
           this.$el.style.width = '60%';
           this.$el.style.height = '80%';
@@ -393,10 +384,7 @@ export default {
           nextWindow = this.openWindows[currentWindowIndex - 1];
         }
 
-        this.$emit(
-            'splitOtherWindow',
-            {'window': nextWindow, 'xOutOfBoundsPositive': returnPosOutOfBoundsPositiveOrNegative}
-        )
+        this.$emit('splitOtherWindow', {'window': nextWindow, 'xOutOfBoundsPositive': returnPosOutOfBoundsPositiveOrNegative});
       }
 
       document.removeEventListener('mousemove', this.onMouseMoveHeader);
