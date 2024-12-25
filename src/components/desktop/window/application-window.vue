@@ -20,8 +20,11 @@
       </div>
     </div>
     <div @click="$emit('clicked', $event)" class="window-content">
-      <WindowContent :window-name="windowName" :disable-pointer-events="disablePointerEvents"
-                     @theme-changed="$emit('themeChanged')"/>
+      <WindowContent :window-name="windowName"
+                     :disable-pointer-events="disablePointerEvents"
+                     @theme-changed="$emit('themeChanged')"
+                     @move-calculator-window-to-top-corner="setSplitWindowValues(0, '40%', '30%', 0)"
+      />
     </div>
   </div>
 </template>

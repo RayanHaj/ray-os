@@ -1,5 +1,9 @@
 <template>
-  <component :is="windowName.replace(' ', '')" @theme-changed="$emit('themeChanged')" :disable-pointer-events="disablePointerEvents"/>
+  <component :is="windowName.replace(' ', '')"
+             :disable-pointer-events="disablePointerEvents"
+             @theme-changed="$emit('themeChanged')"
+             @move-calculator-window-to-top-corner="$emit('moveCalculatorWindowToTopCorner')"
+  />
 </template>
 
 <script>
@@ -18,7 +22,7 @@ export default {
     FileExplorer,
     Calculator
   },
-  emits: ['themeChanged'],
+  emits: ['themeChanged', 'moveCalculatorWindowToTopCorner'],
   props: {
     windowName: {
       type: String,

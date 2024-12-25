@@ -2,7 +2,11 @@
   <div class="calculator-container" ref="calculatorContainer">
     <section class="calculator">
       <div class="calculator-header">
-        <SvgComponent svg-type="moveWindowToTopCorner" :custom-width="20" :custom-height="20"/>
+        <SvgComponent @clicked="$emit('moveCalculatorWindowToTopCorner')"
+                      svg-type="moveWindowToTopCorner"
+                      :custom-width="20"
+                      :custom-height="20"
+        />
       </div>
       <div class="calculator-answer">
         <div class="full-sum-preview">{{ calculationList.join(' ') }}</div>
@@ -51,6 +55,7 @@ import SvgComponent from "@/components/ui/svg-component";
 export default {
   name: "calculator-window",
   components: {SvgComponent},
+  emits: ['moveCalculatorWindowToTopCorner'],
   data() {
     return {
       MAX_NUMBER_LENGTH: 16,
@@ -288,6 +293,10 @@ export default {
   height: 100%;
   width: 100%;
   overflow-y: auto;
+}
+
+.calculator-header {
+  margin: 5px;
 }
 
 .calculation-history {
