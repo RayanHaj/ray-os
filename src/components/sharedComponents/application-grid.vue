@@ -41,18 +41,23 @@
 
     <div v-show="contextMenuActive === true" class="context-menu" ref="contextMenu">
       <div class="context-actions-wrapper">
-        <div v-if="tileOnRightClickIsFilled" class="context-action">
+        <div v-if="tileOnRightClickIsFilled" class="context-action" title="copy">
           <SvgComponent svg-type="copy" :custom-height="CONTEXT_MENU_SVG_HEIGHT" :custom-width="CONTEXT_MENU_SVG_WIDTH"
                         @clicked="contextMenuActions($event, 'copy')"/>
         </div>
-        <div v-if="tileOnRightClickIsFilled" class="context-action">
+        <div v-if="tileOnRightClickIsFilled" class="context-action" title="delete">
           <SvgComponent svg-type="delete" :custom-height="CONTEXT_MENU_SVG_HEIGHT"
                         :custom-width="CONTEXT_MENU_SVG_WIDTH" @clicked="contextMenuActions($event, 'delete')"/>
         </div>
-        <div class="context-action">
+        <div class="context-action" title="paste">
           <SvgComponent svg-type="paste" :custom-height="CONTEXT_MENU_SVG_HEIGHT" :custom-width="CONTEXT_MENU_SVG_WIDTH"
                         @clicked="contextMenuActions($event, 'paste')"/>
         </div>
+      </div>
+      <hr style="width: 90%; margin-top: 5px; margin-bottom: 5px;"/>
+      <div class="context-other-actions-wrapper">
+        <div class="context-action">Open</div>
+        <div class="context-action">Open file location</div>
       </div>
     </div>
   </div>
@@ -374,16 +379,16 @@ export default {
   display: flex;
   flex-direction: column;
   position: absolute;
+  padding: 10px;
+  border-radius: 10px;
   background-color: var(--background-color-window);
-  width: 120px;
-  height: 100px;
-  padding: 3px;
 }
 
 .context-actions-wrapper {
   display: flex;
+  margin-left: 6px;
+  gap: 9px;
   flex-direction: row;
-  gap: 5px;
 }
 
 .context-action {
@@ -392,9 +397,15 @@ export default {
   padding: 5px;
 }
 
+.context-other-actions-wrapper {
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+}
+
 .context-action:hover {
   background-color: var(--hover-color);
-  border-radius: 5px;
+  cursor: default;
 }
 
 .context-action path {
