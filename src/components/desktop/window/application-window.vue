@@ -14,9 +14,23 @@
         <div class="window-name"> {{ windowName }}</div>
       </div>
       <div class="window-state-control">
-        <SvgComponent :svg-type="'minimize'" @clicked="minimizeWindow"/>
-        <SvgComponent :svg-type="'maximize'" @clicked="maximizeWindow"/>
-        <SvgComponent :svg-type="'close'" @clicked="$emit('closeWindow', windowName)"/>
+        <div class="svg-wrapper">
+          <button class="minimize-button" @click="minimizeWindow">
+            <SvgComponent :svg-type="'minimize'"/>
+          </button>
+          <button class="maximize-button" @click="maximizeWindow" @mouseenter="onMouseoverMaximizeSvg" @mouseleave="onMouseleaveMaximizeSvg">
+            <SvgComponent :svg-type="'maximize'"/>
+          </button>
+          <button class="close-button" @click="$emit('closeWindow', windowName)">
+            <SvgComponent :svg-type="'close'"/>
+          </button>
+        </div>
+        <SplitWindowsComponent
+            v-show="showSplitWindowComponent"
+            @mouseover="mouseOnSplitWindowComponent = true"
+            @mouseleave="onMouseleaveSplitWindowComponent"
+            @position="splitCurrentWindow"
+        />
       </div>
     </div>
     <div @click="$emit('clicked', $event)" class="window-content">
@@ -35,22 +49,33 @@ import WindowContent from "@/components/desktop/window/windowContent/window-cont
 import {enableDragDropTouch} from "@/assets/libraries/drag-drop-touch.esm.min";
 import html2canvas from "html2canvas";
 import ImgComponent from "@/components/ui/img-component";
+import SplitWindowsComponent from "@/components/ui/split-windows-component";
 
 export default {
   name: "application-window",
   components: {
     ImgComponent,
     SvgComponent,
-    WindowContent
+    WindowContent,
+    SplitWindowsComponent
   },
   data() {
     return {
       MAXIMUM_WIDTH: '',
       MAXIMUM_HEIGHT: '',
       MINIMUM_WIDTH_WINDOW: '40%',
-      MINIMUM_HEIGHT_WINDOW: '30%',
-      WINDOW_RESIZE_AREA_SPACE: 10,
+      MINIMUM_HEIGHT_WINDOW: '45%',
+      WINDOW_RESIZE_AREA_SPACE: {
+        left: 10,
+        right: 10,
+        top: 10,
+        bottom: 10
+      },
       disablePointerEvents: false,
+      showSplitWindowComponent: false,
+      mouseOnSplitWindowComponent: false,
+      mouseoverTimeoutId: null,
+      mouseleaveTimeoutId: null,
       moveWindowVariables: {
         xOutOfBoundsPositive: false,
         xOutOfBoundsNegative: false,
@@ -89,12 +114,6 @@ export default {
   },
   mounted() {
     enableDragDropTouch();
-    console.log(this.windowName)
-    switch (this.windowName) {
-      case 'Calculator': {
-        this.MINIMUM_HEIGHT_WINDOW = '50%';
-      }
-    }
   },
   props: {
     windowSize: {
@@ -309,10 +328,10 @@ export default {
       document.addEventListener('touchend', onUp);
     },
     returnPressedWindowBorderSide() {
-      const north = this.mouseOverWindowVariables.mousePositionY - this.WINDOW_RESIZE_AREA_SPACE <= 0;
-      const east = this.mouseOverWindowVariables.mousePositionX + this.WINDOW_RESIZE_AREA_SPACE >= this.mouseOverWindowVariables.windowWidth;
-      const south = this.mouseOverWindowVariables.mousePositionY + this.WINDOW_RESIZE_AREA_SPACE >= this.mouseOverWindowVariables.windowHeight;
-      const west = this.mouseOverWindowVariables.mousePositionX - this.WINDOW_RESIZE_AREA_SPACE <= 0;
+      const north = this.mouseOverWindowVariables.mousePositionY - this.WINDOW_RESIZE_AREA_SPACE.top <= 0;
+      const east = this.mouseOverWindowVariables.mousePositionX + this.WINDOW_RESIZE_AREA_SPACE.right >= this.mouseOverWindowVariables.windowWidth;
+      const south = this.mouseOverWindowVariables.mousePositionY + this.WINDOW_RESIZE_AREA_SPACE.bottom >= this.mouseOverWindowVariables.windowHeight;
+      const west = this.mouseOverWindowVariables.mousePositionX - this.WINDOW_RESIZE_AREA_SPACE.left <= 0;
 
       if (north && east) return 'ne';
       if (north && west) return 'nw';
@@ -387,7 +406,10 @@ export default {
           nextWindow = this.openWindows[currentWindowIndex - 1];
         }
 
-        this.$emit('splitOtherWindow', {'window': nextWindow, 'xOutOfBoundsPositive': returnPosOutOfBoundsPositiveOrNegative});
+        this.$emit('splitOtherWindow', {
+          'window': nextWindow,
+          'xOutOfBoundsPositive': returnPosOutOfBoundsPositiveOrNegative
+        });
       }
 
       document.removeEventListener('mousemove', this.onMouseMoveHeader);
@@ -397,16 +419,16 @@ export default {
     },
     splitWindow() {
       if (this.moveWindowVariables.xOutOfBoundsPositive) {
-        this.setSplitWindowValues('50%', '50%', `${this.MAXIMUM_HEIGHT}px`, 0)
+        this.setSplitWindowValues('50%', '50%', `${this.MAXIMUM_HEIGHT}px`, 0);
         return 'positive-x';
       } else if (this.moveWindowVariables.xOutOfBoundsNegative) {
-        this.setSplitWindowValues(0, '50%', `${this.MAXIMUM_HEIGHT}px`, 0)
+        this.setSplitWindowValues(0, '50%', `${this.MAXIMUM_HEIGHT}px`, 0);
         return 'negative-x';
       } else if (this.moveWindowVariables.yOutOfBoundsPositive) {
-        this.setSplitWindowValues(0, '100%', `${this.MAXIMUM_HEIGHT / 2}px`, 0)
+        this.setSplitWindowValues(0, '100%', `${this.MAXIMUM_HEIGHT / 2}px`, 0);
         return 'positive-y';
       } else if (this.moveWindowVariables.yOutOfBoundsNegative) {
-        this.setSplitWindowValues(0, '100%', `${this.MAXIMUM_HEIGHT / 2}px`, `${this.MAXIMUM_HEIGHT / 2}px`)
+        this.setSplitWindowValues(0, '100%', `${this.MAXIMUM_HEIGHT / 2}px`, `${this.MAXIMUM_HEIGHT / 2}px`);
         return 'negative-y';
       }
 
@@ -417,6 +439,70 @@ export default {
       this.$el.style.width = width;
       this.$el.style.height = height;
       this.$el.style.top = top;
+    },
+    splitCurrentWindow(position) {
+      switch (position) {
+        case 'topLeft': {
+          this.setSplitWindowValues(0, '50%', `${this.MAXIMUM_HEIGHT / 2}px`, 0);
+          break;
+        }
+        case 'topRight': {
+          this.setSplitWindowValues('50%', '50%', `${this.MAXIMUM_HEIGHT / 2}px`, 0);
+          break;
+        }
+        case 'bottomLeft': {
+          this.setSplitWindowValues(0, '50%', `${this.MAXIMUM_HEIGHT / 2}px`, `${this.MAXIMUM_HEIGHT / 2}px`);
+          break;
+        }
+        case 'bottomRight': {
+          this.setSplitWindowValues('50%', '50%', `${this.MAXIMUM_HEIGHT / 2}px`, `${this.MAXIMUM_HEIGHT / 2}px`);
+          break;
+        }
+        case 'left': {
+          this.setSplitWindowValues(0, '50%', `${this.MAXIMUM_HEIGHT}px`, 0);
+          break;
+        }
+        case 'right': {
+          this.setSplitWindowValues('50%', '50%', `${this.MAXIMUM_HEIGHT}px`, 0)
+          break;
+        }
+        case 'top': {
+          this.setSplitWindowValues(0, '100%', `${this.MAXIMUM_HEIGHT / 2}px`, 0);
+          break;
+        }
+        case 'bottom': {
+          this.setSplitWindowValues(0, '100%', `${this.MAXIMUM_HEIGHT / 2}px`, `${this.MAXIMUM_HEIGHT / 2}px`);
+          break;
+        }
+      }
+    },
+    onMouseoverMaximizeSvg() {
+      if (this.mouseleaveTimeoutId) {
+        clearTimeout(this.mouseleaveTimeoutId);
+        this.mouseleaveTimeoutId = null;
+      }
+      if (this.mouseoverTimeoutId === null) {
+        this.mouseoverTimeoutId = setTimeout(() => {
+          this.showSplitWindowComponent = true;
+        }, 500);
+      }
+    },
+    onMouseleaveMaximizeSvg() {
+      clearTimeout(this.mouseoverTimeoutId);
+      this.mouseoverTimeoutId = null;
+
+      this.mouseleaveTimeoutId = setTimeout(() => {
+        if (this.mouseOnSplitWindowComponent === false) {
+          this.showSplitWindowComponent = false;
+        }
+      }, 500);
+    },
+    onMouseleaveSplitWindowComponent() {
+      if (this.showSplitWindowComponent === true) {
+        this.showSplitWindowComponent = false;
+      }
+
+      this.mouseOnSplitWindowComponent = false;
     },
     setOutOfBoundsValues(xPositive, xNegative, yPositive, yNegative) {
       this.moveWindowVariables.xOutOfBoundsPositive = xPositive;
@@ -450,9 +536,9 @@ export default {
   display: flex;
   flex-direction: column;
   overflow: auto;
-  position: absolute;
+  position: relative;
   background-color: var(--background-color-window);
-  border: black 1px solid;
+  border: var(--font-color) 8px solid;
 }
 
 .window-content {
@@ -462,7 +548,6 @@ export default {
 
 .window-header {
   display: flex;
-  justify-content: space-between;
   flex-direction: row;
   height: 30px;
   position: sticky;
@@ -487,12 +572,33 @@ export default {
 
 .window-state-control {
   display: flex;
-  flex-direction: row;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  margin-right: 8px;
   gap: 10px;
   height: 100%;
+}
+
+.svg-wrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: end;
+  height: 100%;
+  width: auto;
+}
+
+.svg-wrapper button {
+  background-color: transparent;
+  border: none;
+  padding: 8px;
+  width: 60px;
+}
+
+.close-button:hover {
+  background-color: red;
+}
+
+.maximize-button:hover, .minimize-button:hover {
+  background-color: black;
 }
 
 path {

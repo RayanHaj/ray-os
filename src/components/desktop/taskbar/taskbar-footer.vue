@@ -1,5 +1,5 @@
 <template>
-  <div class="taskbar" :style="{ height: `${height}px` }">
+  <div class="taskbar" ref="taskbar" :style="{ height: `${height}px` }">
     <div class="taskbar-items-left">
       <div class="app-icon" :class="iconImageName" v-for="(iconImageName, index) in applicationNames"
            :key="iconImageName"
@@ -19,8 +19,8 @@
           <div class="open-window-preview"></div>
         </div>
         <div>
-          <ImgComponent @clicked="emitApplicationName(iconImageName)" :image-name="iconImageName" :custom-width="25"
-                        :custom-height="25"/>
+          <ImgComponent @clicked="emitApplicationName(iconImageName)" :image-name="iconImageName" :custom-width="ICON_IMG_WIDTH"
+                        :custom-height="ICON_IMG_HEIGHT"/>
           <div :class="openWindows.find(openWindow => openWindow.windowName === iconImageName) &&
                        openWindows.find(openWindow => openWindow.windowName === iconImageName).minimized === true ?
                        'horizontal-line-minimized' :
@@ -33,20 +33,20 @@
       </div>
     </div>
     <div class="taskbar-items-right">
-      <div class="show-hidden-icons-wrapper taskbar-right-item">
+      <div v-show="setTaskbarElementsVisibility.ARROW_OPEN_WINDOWS_BUTTON" class="show-hidden-icons-wrapper taskbar-right-item">
         <SvgComponent :svg-type="'arrowUp'" :custom-height="15" :custom-width="15"/>
       </div>
-      <div class="keyboard-layout-wrapper taskbar-right-item">
+      <div v-show="setTaskbarElementsVisibility.KEYBOARD_LAYOUT_BUTTON" class="keyboard-layout-wrapper taskbar-right-item">
         <span>ENG</span>
         <span>US</span>
       </div>
-      <div ref="quickSettingsMenuButton" class="wifi-sound-battery-wrapper taskbar-right-item"
+      <div v-show="setTaskbarElementsVisibility.QUICK_SETTINGS_BUTTON" ref="quickSettingsMenuButton" class="wifi-sound-battery-wrapper taskbar-right-item"
            @click="emitQuickSettingMenuClicked">
         <SvgComponent :svg-type="'wifi'" :custom-height="15" :custom-width="15"/>
         <SvgComponent :svg-type="'volume'" :custom-height="15" :custom-width="15"/>
         <SvgComponent :svg-type="'battery'" :custom-height="15" :custom-width="15"/>
       </div>
-      <div class="date-time-notification-wrapper taskbar-right-item">
+      <div v-show="setTaskbarElementsVisibility.DATE_TIME_NOTIFICATION" class="date-time-notification-wrapper taskbar-right-item">
         <div class="date-time-wrapper">
           <div class="time">{{ time }}</div>
           <div class="date">{{ date }}</div>
@@ -76,6 +76,14 @@ export default {
       quickSettingMenuIsOpen: false,
       isHoveringOnOpenWindowImage: false,
       isHoveringOnOpenWindowPreview: false,
+      ICON_IMG_WIDTH: 25,
+      ICON_IMG_HEIGHT: 25,
+      setTaskbarElementsVisibility: {
+        DATE_TIME_NOTIFICATION: true,
+        QUICK_SETTINGS_BUTTON: true,
+        KEYBOARD_LAYOUT_BUTTON: true,
+        ARROW_OPEN_WINDOWS_BUTTON: true
+      },
       applicationNames: json.applicationNames
     };
   },
@@ -92,6 +100,19 @@ export default {
       this.date = `${addLeadingZero((now.getMonth() + 1))}/${addLeadingZero(now.getUTCDate())}/${now.getFullYear()}`;
       this.time = now.toLocaleString('en-US', {hour: 'numeric', minute: 'numeric', hour12: true});
     }, 1000);
+
+    const resizeObserver = new ResizeObserver(() => {
+      if (this.$refs.taskbar) {
+        let width = this.$refs.taskbar.offsetWidth;
+        if (width < 500) {
+          this.setTaskbarSmallSize();
+        } else {
+          this.setTaskbarNormalSize();
+        }
+      }
+    });
+
+    resizeObserver.observe(this.$refs.taskbar);
   },
   props: {
     openWindows: {
@@ -163,7 +184,25 @@ export default {
     onMouseleaveOpenWindow() {
       this.isHoveringOnOpenWindowPreview = false;
       this.currentIconHover = '';
-    }
+    },
+    setTaskbarSmallSize() {
+      this.setTaskbarElementsVisibility.QUICK_SETTINGS_BUTTON = true;
+      this.setTaskbarElementsVisibility.ARROW_OPEN_WINDOWS_BUTTON = false;
+      this.setTaskbarElementsVisibility.KEYBOARD_LAYOUT_BUTTON = false;
+      this.setTaskbarElementsVisibility.DATE_TIME_NOTIFICATION = false;
+
+      this.ICON_IMG_WIDTH = 20;
+      this.ICON_IMG_HEIGHT = 20;
+    },
+    setTaskbarNormalSize() {
+      this.setTaskbarElementsVisibility.ARROW_OPEN_WINDOWS_BUTTON = true;
+      this.setTaskbarElementsVisibility.KEYBOARD_LAYOUT_BUTTON = true;
+      this.setTaskbarElementsVisibility.QUICK_SETTINGS_BUTTON = true;
+      this.setTaskbarElementsVisibility.DATE_TIME_NOTIFICATION = true;
+
+      this.ICON_IMG_WIDTH = 25;
+      this.ICON_IMG_HEIGHT = 25;
+    },
   },
   watch: {
     previewApplicationWindow(newValue) {

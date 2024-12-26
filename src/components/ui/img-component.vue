@@ -34,6 +34,14 @@ export default {
       height: undefined
     };
   },
+  watch: {
+    customWidth(newValue) {
+      this.width = newValue;
+    },
+    customHeight(newValue) {
+      this.height = newValue;
+    }
+  },
   beforeMount() {
     if (this.customWidth) {
       this.width = this.customWidth;

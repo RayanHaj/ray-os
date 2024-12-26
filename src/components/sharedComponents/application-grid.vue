@@ -1,5 +1,5 @@
 <template>
-  <div class="grid-container" @click="onClickContainer">
+  <div class="grid-container" ref="gridContainer" @click="onClickContainer">
     <div class="grid" v-if="GRID_HEIGHT > 0"
          @dragover.prevent="dragAndDropEventListenersDesktop($event, 'dragover')"
          @touchover.prevent="dragAndDropEventListenersDesktop($event, 'touchover')"
@@ -79,6 +79,20 @@ export default {
       this.init();
       window.addEventListener('keydown', this.onKeydownTile);
     });
+
+    const resizeObserver = new ResizeObserver(() => {
+      if (this.$refs.gridContainer) {
+        let width = this.$refs.gridContainer.offsetWidth;
+        let height = this.$refs.gridContainer.offsetHeight;
+        if (width < 500 || height < 400) {
+          this.setTilesSmallSize();
+        } else {
+          this.setTilesNormalSize();
+        }
+      }
+    });
+
+    resizeObserver.observe(this.$refs.gridContainer);
   },
 
   beforeUnmount() {
@@ -325,6 +339,20 @@ export default {
       setTimeout(() => {
         this.$el.removeChild(imgClone);
       }, 0)
+    },
+    setTilesSmallSize() {
+      this.IMAGE_WIDTH = 40;
+      this.IMAGE_HEIGHT = 40;
+      this.TILE_WIDTH = 62;
+      this.TILE_HEIGHT = 62;
+      this.GRID_FIELD_TEXT_FONT_SIZE = 7;
+    },
+    setTilesNormalSize() {
+      this.IMAGE_WIDTH = 50;
+      this.IMAGE_HEIGHT = 50;
+      this.TILE_WIDTH = 82;
+      this.TILE_HEIGHT = 82;
+      this.GRID_FIELD_TEXT_FONT_SIZE = 10;
     }
   },
 }
