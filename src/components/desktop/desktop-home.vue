@@ -257,11 +257,6 @@ export default {
   z-index: 1;
 }
 
-.desktop-grid {
-  height: auto;
-  overflow: hidden;
-}
-
 .window {
   position: absolute;
   width: 100%;
