@@ -11,7 +11,7 @@
              @dragstart="dragAndDropEventListenersDesktop($event, 'dragstart')"
              @touchstart="dragAndDropEventListenersDesktop($event, 'touchstart')"
              @mouseover="onMouseOverTile" @touchover="onMouseOverTile"
-             @dblclick="onDoubleClick"
+             @dblclick="openApplication($event.currentTarget.querySelector('.application-name').innerText)"
              @contextmenu.prevent="onRightClickTile"
              tabindex="0"
              :style="{
@@ -31,7 +31,7 @@
               <img :src="getImgUrl(listApplicationElements[indexX * GRID_HEIGHT + indexY].name)" :width="IMAGE_WIDTH"
                    :height="IMAGE_HEIGHT" :alt="listApplicationElements[indexX * GRID_HEIGHT + indexY].name">
             </div>
-            <div class="application-name" ref="applicationName" :style="{fontSize: `${GRID_FIELD_TEXT_FONT_SIZE}px`}">
+            <div class="application-name" ref="applicationName" :style="{fontSize: `${TILE_NAME_FONT_SIZE}px`}">
               {{ listApplicationElements[indexX * GRID_HEIGHT + indexY].name }}
             </div>
           </div>
@@ -39,7 +39,7 @@
       </div>
     </div>
 
-    <div v-show="contextMenuActive === true" class="context-menu" ref="contextMenu">
+    <div v-show="contextMenuActive === true" class="context-menu" ref="contextMenu" :style="{ width:`${CONTEXT_MENU_WIDTH}px`, height: `${CONTEXT_MENU_HEIGHT}px`}">
       <div class="context-actions-wrapper">
         <div v-if="tileOnRightClickIsFilled" class="context-action" title="copy">
           <SvgComponent svg-type="copy" :custom-height="CONTEXT_MENU_SVG_HEIGHT" :custom-width="CONTEXT_MENU_SVG_WIDTH"
@@ -56,8 +56,8 @@
       </div>
       <hr style="width: 90%; margin-top: 5px; margin-bottom: 5px;"/>
       <div class="context-other-actions-wrapper">
-        <div class="context-action">Open</div>
-        <div class="context-action">Open file location</div>
+        <div v-if="tileOnRightClick?.classList.contains('filled')" class="context-action" @click="openApplication(tileOnRightClick?.querySelector('.application-name').innerText)">Open</div>
+        <div v-if="tileOnRightClick?.classList.contains('filled')" class="context-action">Open file location</div>
         <div class="context-action" @click="init()">Restore applications</div>
       </div>
     </div>
@@ -97,6 +97,8 @@ export default {
       GRID_FIELD_TEXT_FONT_SIZE: 10,
       CONTEXT_MENU_SVG_WIDTH: 20,
       CONTEXT_MENU_SVG_HEIGHT: 20,
+      CONTEXT_MENU_WIDTH: 140,
+      CONTEXT_MENU_HEIGHT: 115,
       contextMenuActive: false,
       draggedTile: null,
       tileOnRightClick: null,
@@ -206,6 +208,10 @@ export default {
           break;
         }
         case 'drop': {
+          if (currentTile.classList.contains('filled')) {
+            return;
+          }
+
           const index = this.listApplicationElements.findIndex(element => {
             return element.index === this.draggedTile.index;
           });
@@ -223,7 +229,7 @@ export default {
       )
     },
     onClickContainer() {
-      this.contextMenuActive === true ? this.contextMenuActive = false : null;
+      this.contextMenuActive === true ? this.contextMenuActive = false : null
       this.$emit('clicked');
     },
     onKeydownTile(e) {
@@ -248,22 +254,26 @@ export default {
       const contextMenu = this.$refs.contextMenu;
       this.tileOnRightClick = e.currentTarget;
 
-      this.tileOnRightClickIsFilled = !!this.tileOnRightClick.querySelector('.tile-content-wrapper');
+      this.tileOnRightClickIsFilled = this.tileOnRightClick.classList.contains('filled');
 
       if (this.contextMenuActive === false) {
         this.contextMenuActive = true;
       }
 
-      contextMenu.style.left = `${e.clientX}px`;
-      contextMenu.style.top = `${e.clientY}px`;
+      const conditionWidth = (e.clientX + this.CONTEXT_MENU_WIDTH + 25) > this.windowSize[0];
+      const conditionHeight = (e.clientY + this.CONTEXT_MENU_HEIGHT + 20) > this.windowSize[1];
+
+      const leftValue = conditionWidth ? `${this.windowSize[0] - this.CONTEXT_MENU_WIDTH - 25}px` : `${e.clientX}px`;
+      const topValue = conditionHeight ? `${this.windowSize[1] - this.CONTEXT_MENU_HEIGHT - 25}px` : `${e.clientY}px`;
+
+      contextMenu.style.left = leftValue;
+      contextMenu.style.top = topValue;
     },
     onMouseOverTile(e) {
       this.tileOnHover = e.currentTarget;
     },
-    onDoubleClick(e) {
-      const tile = e.currentTarget;
-      if (!tile.querySelector('.tile-content-wrapper')) return;
-      this.$emit('applicationName', tile.querySelector('.application-name').innerText);
+    openApplication(applicationName) {
+      this.$emit('applicationName', applicationName);
     },
     deleteTile(index) {
       if (typeof this.listApplicationElements[index] !== 'undefined' && this.listApplicationElements[index].name !== null) {
@@ -309,14 +319,14 @@ export default {
       this.IMAGE_HEIGHT = 40;
       this.TILE_WIDTH = 62;
       this.TILE_HEIGHT = 62;
-      this.GRID_FIELD_TEXT_FONT_SIZE = 7;
+      this.TILE_NAME_FONT_SIZE = 7;
     },
     setTilesNormalSize() {
       this.IMAGE_WIDTH = 50;
       this.IMAGE_HEIGHT = 50;
       this.TILE_WIDTH = 82;
       this.TILE_HEIGHT = 82;
-      this.GRID_FIELD_TEXT_FONT_SIZE = 10;
+      this.TILE_NAME_FONT_SIZE = 10;
     }
   },
 }
@@ -325,6 +335,7 @@ export default {
 <style scoped>
 .grid-container {
   display: grid;
+  position: relative;
   grid-auto-flow: row;
   grid-template-columns: auto;
   grid-template-rows: auto;
