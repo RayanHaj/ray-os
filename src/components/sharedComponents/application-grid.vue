@@ -1,11 +1,11 @@
 <template>
   <div class="grid-container" ref="gridContainer" @click="onClickContainer">
-    <div class="grid" v-if="GRID_HEIGHT > 0"
+    <div class="grid" ref="grid" v-if="GRID_HEIGHT > 0"
          @dragover.prevent="dragAndDropEventListenersDesktop($event, 'dragover')"
-         @touchover.prevent="dragAndDropEventListenersDesktop($event, 'touchover')"
-         @mousemove="mousePositions = {x: $event.clientX, y: $event.clientY}">
-      <div v-for="(numX, indexX) in GRID_WIDTH" :key="numX" class="tile-column">
-        <div v-for="(numY, indexY) in GRID_HEIGHT" :key="numY" class="tile"
+         @touchover.prevent="dragAndDropEventListenersDesktop($event, 'touchover')">
+      <div v-for="(numX, indexX) in GRID_WIDTH" :key="numX" class="tile-column" ref="tileColumn">
+        <div v-for="(numY, indexY) in GRID_HEIGHT" :key="numY" class="tile" ref="tile"
+             :id="indexX * GRID_HEIGHT + indexY"
              :class="{'filled': isTileFillable(indexX, indexY) }"
              @drop="dragAndDropEventListenersDesktop($event, 'drop')"
              @dragstart="dragAndDropEventListenersDesktop($event, 'dragstart')"
@@ -23,16 +23,16 @@
         >
           <div
               v-if="isTileFillable(indexX, indexY)"
-              class="tile-content-wrapper"
+              class="tile-content-wrapper" ref="tileContentWrapper"
               :style="{width: `${TILE_WIDTH}px`, height: `${TILE_HEIGHT}px`, maxWidth: `${TILE_WIDTH}px`, maxHeight: `${TILE_HEIGHT}px`}"
-              draggable="true"
+              :draggable="applicationWindowIsResizing === false"
           >
-            <div class="application-img">
-              <ImgComponent :image-name="applicationNames[indexX * GRID_HEIGHT + indexY]" :custom-width="IMAGE_WIDTH"
-                            :custom-height="IMAGE_HEIGHT"/>
+            <div class="application-img" ref="applicationImg">
+              <img :src="getImgUrl(listApplicationElements[indexX * GRID_HEIGHT + indexY].name)" :width="IMAGE_WIDTH"
+                   :height="IMAGE_HEIGHT" :alt="listApplicationElements[indexX * GRID_HEIGHT + indexY].name">
             </div>
-            <div class="application-name" :style="{fontSize: `${GRID_FIELD_TEXT_FONT_SIZE}px`}">
-              {{ applicationNames[indexX * GRID_HEIGHT + indexY] }}
+            <div class="application-name" ref="applicationName" :style="{fontSize: `${GRID_FIELD_TEXT_FONT_SIZE}px`}">
+              {{ listApplicationElements[indexX * GRID_HEIGHT + indexY].name }}
             </div>
           </div>
         </div>
@@ -58,41 +58,28 @@
       <div class="context-other-actions-wrapper">
         <div class="context-action">Open</div>
         <div class="context-action">Open file location</div>
+        <div class="context-action" @click="init()">Restore applications</div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import {compareArrays} from "@/utils/util";
+import {compareArrays, parseApplicationNameToImageNameFormat} from "@/utils/util";
 import {enableDragDropTouch} from "@/assets/libraries/drag-drop-touch.esm.min";
 import json from "@/assets/json/config.json"
 import SvgComponent from "@/components/ui/svg-component";
-import ImgComponent from "@/components/ui/img-component";
 
 export default {
   name: "application-grid",
-  components: {ImgComponent, SvgComponent},
+  components: {SvgComponent},
+
   mounted() {
     this.$nextTick(() => {
       enableDragDropTouch();
       this.init();
       window.addEventListener('keydown', this.onKeydownTile);
     });
-
-    const resizeObserver = new ResizeObserver(() => {
-      if (this.$refs.gridContainer) {
-        let width = this.$refs.gridContainer.offsetWidth;
-        let height = this.$refs.gridContainer.offsetHeight;
-        if (width < 500 || height < 400) {
-          this.setTilesSmallSize();
-        } else {
-          this.setTilesNormalSize();
-        }
-      }
-    });
-
-    resizeObserver.observe(this.$refs.gridContainer);
   },
 
   beforeUnmount() {
@@ -112,14 +99,12 @@ export default {
       CONTEXT_MENU_SVG_HEIGHT: 20,
       contextMenuActive: false,
       draggedTile: null,
-      draggedTileContentClone: null,
       tileOnRightClick: null,
       tileOnHover: null,
       tileOnRightClickIsFilled: false,
-      copiedApplication: null,
+      applicationWindowIsResizing: false,
       listApplicationElements: [],
       applicationNames: json.applicationNames,
-      mousePositions: {x: 0, y: 0},
     }
   },
   emits: ['clicked', 'applicationName'],
@@ -138,76 +123,125 @@ export default {
       if (compareArrays(oldSize, newSize) === false) {
         this.init();
 
-        this.$el.querySelectorAll('.tile').forEach(tile => {
-          if (tile.children.length !== 0) {
-            tile.removeChild(tile.querySelector('.tile-content-wrapper'));
+        // IMPLEMENT
 
-            if (tile.classList.contains('filled')) {
-              tile.classList.remove('filled');
-            }
-          }
-        });
-        this.addApplicationsToGrid();
+        // const width = this.$refs.gridContainer.clientWidth;
+        // const height = this.$refs.gridContainer.clientHeight;
+        // if (width < 500 || height < 400) {
+        //   this.setTilesSmallSize();
+        // } else {
+        //   this.setTilesNormalSize();
+        // }
       }
     },
     windowResizing(newValue) {
-      this.$el.querySelectorAll('.tile').forEach(tile => {
-        const contentWrapper = tile.querySelector('.tile-content-wrapper');
-        const image = tile.querySelector('.image');
-
-        if (contentWrapper && image) {
-          contentWrapper.draggable = !newValue;
-          image.draggable = !newValue;
-        }
-      });
+      this.applicationWindowIsResizing = newValue;
     }
   },
   methods: {
     init() {
-      this.$el.querySelectorAll('.tile').forEach(tile => {
-        if (tile.children.length !== 0) {
-          const tileContentWrapper = tile.querySelector('.tile-content-wrapper');
-          const applicationName = tile.querySelector('.application-name').innerText;
-          this.listApplicationElements[this.applicationNames.indexOf(applicationName)] = tileContentWrapper;
-        }
-      });
-
       if (this.windowSize[0] !== null && this.windowSize[1] !== null) {
         this.GRID_WIDTH = Math.floor(this.windowSize[0] / this.TILE_WIDTH);
         this.GRID_HEIGHT = Math.floor((this.windowSize[1] / this.TILE_HEIGHT));
       }
+
+      for (let i = 0; i < this.GRID_WIDTH * this.GRID_HEIGHT; i++) {
+        if (this.applicationNames.length - 1 >= i) {
+          this.listApplicationElements[i] = {
+            'index': i,
+            'name': this.applicationNames[i]
+          };
+        } else {
+          this.listApplicationElements[i] = {
+            'index': i,
+            'name': null
+          };
+        }
+      }
+    },
+    contextMenuActions(e, action) {
+      switch (action) {
+        case 'copy': {
+          if (this.tileOnRightClick.querySelector('.tile-content-wrapper')) {
+            this.copiedApplication = this.tileOnRightClick
+          }
+          break;
+        }
+        case 'paste': {
+          if (this.tileOnRightClick && this.copiedApplication) {
+            this.insertTile(Number(this.tileOnRightClick.id), this.copiedApplication.querySelector('.application-name').innerText);
+          }
+          break;
+        }
+        case 'delete': {
+          if (this.tileOnRightClick.querySelector('.tile-content-wrapper')) {
+            this.deleteTile(this.tileOnRightClick.id);
+          }
+        }
+      }
+
+      this.contextMenuActive = false;
+    },
+    dragAndDropEventListenersDesktop(event, type) {
+      const currentTile = event.currentTarget;
+
+      switch (type) {
+        case 'dragstart':
+        case 'touchstart': {
+          if (currentTile.children.length === 0) {
+            return;
+          }
+
+          this.draggedTile = {
+            'index': Number(currentTile.id),
+            'name': currentTile.querySelector('.application-name').innerText
+          }
+
+          this.createDragImage(currentTile.querySelector('.application-img'), event);
+          break;
+        }
+        case 'dragover':
+        case 'touchover': {
+          event.preventDefault();
+          break;
+        }
+        case 'drop': {
+          const index = this.listApplicationElements.findIndex(element => {
+            return element.index === this.draggedTile.index;
+          });
+
+          this.deleteTile(index);
+          this.insertTile(Number(currentTile.id), this.draggedTile.name)
+          break;
+        }
+      }
+    },
+    isTileFillable(indexX, indexY) {
+      return (
+          this.listApplicationElements[indexX * this.GRID_HEIGHT + indexY] !== null &&
+          this.listApplicationElements[indexX * this.GRID_HEIGHT + indexY].name !== null
+      )
     },
     onClickContainer() {
       this.contextMenuActive === true ? this.contextMenuActive = false : null;
       this.$emit('clicked');
     },
-    onKeydownTile(event) {
-      event.preventDefault();
-      if (event.key === 'Delete') {
+    onKeydownTile(e) {
+      e.preventDefault();
+      if (e.key === 'Delete') {
         if (this.tileOnHover) {
-          this.tileOnHover.classList.remove('filled');
-          this.tileOnHover.innerHTML = '';
+          this.deleteTile(this.tileOnHover.id);
         }
       }
-      if (event.ctrlKey && event.code === 'KeyC') {
+      if (e.ctrlKey && e.code === 'KeyC') {
         if (this.tileOnHover.querySelector('.tile-content-wrapper')) {
           this.copiedApplication = this.tileOnHover;
         }
       }
-      if (event.ctrlKey && event.code === 'KeyV') {
-        const tileAtMousePosition = this.getTileByPosition(this.mousePositions.x, this.mousePositions.y);
-
-        if (!tileAtMousePosition ||
-            this.copiedApplication === null ||
-            tileAtMousePosition.classList.contains('filled')) {
-          return;
+      if (e.ctrlKey && e.code === 'KeyV') {
+        if (this.tileOnHover && this.copiedApplication) {
+          this.insertTile(Number(this.tileOnHover.id), this.copiedApplication.querySelector('.application-name').innerText);
         }
-
-        const parentClone = this.copiedApplication.cloneNode(true);
-        parentClone.classList.remove('selected')
-
-        const childClone = parentClone.children[0];
-        this.fillTile(childClone, tileAtMousePosition);
       }
     },
     onRightClickTile(e) {
@@ -226,100 +260,26 @@ export default {
     onMouseOverTile(e) {
       this.tileOnHover = e.currentTarget;
     },
-    onDoubleClick(event) {
-      const tile = event.currentTarget;
+    onDoubleClick(e) {
+      const tile = e.currentTarget;
       if (!tile.querySelector('.tile-content-wrapper')) return;
       this.$emit('applicationName', tile.querySelector('.application-name').innerText);
     },
-    contextMenuActions(e, action) {
-      switch (action) {
-        case 'copy': {
-          this.copiedApplication = this.tileOnRightClick.cloneNode(true);
-          break;
-        }
-        case 'paste': {
-          if (this.copiedApplication === null || this.tileOnRightClick === null) {
-            return;
-          }
-          const currentTileContent = this.tileOnRightClick.querySelector('.tile-content-wrapper');
-          const copiedTileContent = this.copiedApplication.querySelector('.tile-content-wrapper');
-          if (copiedTileContent !== null && currentTileContent === null) {
-            this.tileOnRightClick.innerHTML = '';
-            this.tileOnRightClick.classList.add('filled');
-            this.tileOnRightClick.appendChild(copiedTileContent.cloneNode(true));
-          }
-          break;
-        }
-        case 'delete': {
-          if (this.tileOnRightClick.querySelector('.tile-content-wrapper')) {
-            this.tileOnRightClick.classList.remove('filled');
-            this.tileOnRightClick.innerHTML = '';
-          }
-        }
-      }
-
-      this.contextMenuActive = false;
-    },
-    dragAndDropEventListenersDesktop(event, type) {
-      const currentTile = event.currentTarget;
-
-      switch (type) {
-        case 'dragstart':
-        case 'touchstart': {
-          if (currentTile.children.length === 0) {
-            return;
-          }
-
-          this.draggedTile = currentTile;
-          this.draggedTileContentClone = currentTile.querySelector('.tile-content-wrapper').cloneNode(true);
-
-          this.createDragImage(this.draggedTile.querySelector('.application-img'), event);
-          break;
-        }
-        case 'dragover':
-        case 'touchover': {
-          event.preventDefault();
-          break;
-        }
-        case 'drop': {
-          if (this.draggedTileContentClone === null || currentTile.children.length !== 0) {
-            return;
-          }
-
-          currentTile.classList.add('filled');
-          currentTile.appendChild(this.draggedTileContentClone);
-          this.draggedTile.innerHTML = "";
-          this.draggedTile.classList.remove('filled');
-
-          break;
+    deleteTile(index) {
+      if (typeof this.listApplicationElements[index] !== 'undefined' && this.listApplicationElements[index].name !== null) {
+        this.listApplicationElements[index] = {
+          'index': index,
+          'name': null
         }
       }
     },
-    getTileByPosition(xPos, yPos) {
-      const element = document.elementFromPoint(xPos, yPos);
-      if (!element.classList.contains('tile')) {
-        return;
-      }
-
-      return element;
-    },
-    fillTile(tileContent, tile) {
-      tile.appendChild(tileContent);
-      tile.classList.add('filled');
-    },
-    addApplicationsToGrid() {
-      this.$el.querySelectorAll('.tile').forEach((tile, index) => {
-        if (typeof this.listApplicationElements[index] !== 'undefined') {
-          this.fillTile(this.listApplicationElements[index], tile);
+    insertTile(index, name) {
+      if (typeof this.listApplicationElements[index] !== 'undefined') {
+        this.listApplicationElements[index] = {
+          'index': index,
+          'name': name
         }
-      });
-    },
-    isTileFillable(indexX, indexY) {
-      return (
-          indexY < this.applicationNames.length &&
-          indexX <= Math.floor(this.applicationNames.length / this.GRID_HEIGHT) &&
-          typeof this.applicationNames[indexX * this.GRID_HEIGHT + indexY] !== 'undefined'
-      )
+      }
     },
     createDragImage(imgElement, event) {
       if (event.type !== 'dragstart') {
@@ -339,6 +299,10 @@ export default {
       setTimeout(() => {
         this.$el.removeChild(imgClone);
       }, 0)
+    },
+    getImgUrl(name) {
+      const parsedName = parseApplicationNameToImageNameFormat(name);
+      return require(`@/assets/images/applicationImages/${parsedName}.png`);
     },
     setTilesSmallSize() {
       this.IMAGE_WIDTH = 40;

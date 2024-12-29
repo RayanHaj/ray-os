@@ -17,6 +17,10 @@ export function compareArrays(arrayOne, arrayTwo) {
 }
 
 export function parseApplicationNameToImageNameFormat(name) {
+    if (name === null) {
+        return;
+    }
+    console.log(name)
     name = name.replaceAll(' ', '');
     let parsedName = '';
     for (let i = 0; i < name.length; i++) {

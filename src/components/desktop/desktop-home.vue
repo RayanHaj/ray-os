@@ -1,6 +1,5 @@
 <template>
-  <div v-if="activatedEasterEgg === null"
-       class="desktop"
+  <div class="desktop"
        :style="{ filter: `brightness(${desktopBrightnessValue}%)`}">
     <div class="main-screen">
       <MainWindow
