@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 
 export const useGlobalState = defineStore('globalState', {
     state: () => ({
+        copiedApplications: [],
         openWindows: [],
         backgroundColor: '',
         wallpaper: '',
@@ -29,10 +30,11 @@ export const useGlobalState = defineStore('globalState', {
         },
         getWallpaper() {
             const wallpaperLS = window.localStorage.getItem('wallpaper');
+            const backgroundColorLS = window.localStorage.getItem('backgroundColor');
 
             if (this.wallpaper === '' && wallpaperLS) {
                 this.wallpaper = wallpaperLS;
-            } else if (this.wallpaper === '' && wallpaperLS === null) {
+            } else if (this.wallpaper === '' && wallpaperLS === null && this.backgroundColor === '' && backgroundColorLS === null) {
                 this.setWallpaper('wallpaper_01.png');
             }
 

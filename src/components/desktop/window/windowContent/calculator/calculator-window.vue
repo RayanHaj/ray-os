@@ -20,10 +20,6 @@
           <button class="calculator-button" v-for="operator in column" :key="operator"
                   :disabled="isNaN(Number(operator)) && disableButtons === true"
                   @click="onClickOperatorButton(operator)"
-                  :style="{
-                      fontSize: containerHeight < 414 ? '20px' : containerHeight < 438 ? '25px' : containerHeight < 532 ? '30px' : '35px',
-                      height: containerHeight < 414 ? '25px' : containerHeight < 438 ? '40px' : containerHeight < 532 ? '45px' : '60px'
-                    }"
           >
             <SvgComponent svg-type="backspace" :custom-width="25" :custom-height="25"
                           v-if="operator === 'backspace'"></SvgComponent>
@@ -40,7 +36,7 @@
         <div class="history-list-item" v-for="element in calculationHistory" :key="element">
           <div class="history-list-item-content" @click="restorePastCalculation(element)">
             <div class="history-list-item-calculation">{{ element.calculation }}</div>
-            <div class="answer" style="color: var(--hover-color)">{{ element.answer }}</div>
+            <div class="answer" style="color: var(--font-color)">{{ element.answer }}</div>
           </div>
         </div>
       </div>
@@ -290,9 +286,9 @@ export default {
 .calculator-container {
   display: flex;
   flex-direction: row;
+  position: relative;
   height: 100%;
   width: 100%;
-  overflow-y: auto;
 }
 
 .calculator-header {
@@ -335,8 +331,8 @@ export default {
 .calculator {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   width: 70%;
+  height: 100%;
 }
 
 .calculator-answer {
@@ -347,6 +343,7 @@ export default {
 }
 
 .calculator-actions {
+  height: 100%;
   margin: 3px;
 }
 
@@ -354,10 +351,12 @@ export default {
   display: flex;
   flex-direction: row;
   width: 100%;
+  height: calc(100% / 6);
 }
 
 .calculator-button {
-  background-color: var(--hover-color);
+  background-color: var(--background-color-input);
+  color: var(--font-color);;
   border: none;
   border-radius: 5px;
   width: 100%;

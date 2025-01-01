@@ -550,7 +550,7 @@ export default {
   overflow: auto;
   position: relative;
   background-color: var(--background-color-window);
-  border: var(--font-color) 8px solid;
+  border: var(--border-window-color) 8px solid;
 }
 
 .window-content {

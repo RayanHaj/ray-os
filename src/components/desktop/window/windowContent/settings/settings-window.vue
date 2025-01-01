@@ -21,14 +21,14 @@
       <div v-show="selectedOption === 'background color'" class="background-color-wrapper">
         <div class="background-color-title-selected-wrapper">
           <div class="background-color-title">{{ selectedOption }}</div>
-          <div class="selected-background-color">{{ globalState.backgroundColor.name }}</div>
+          <div class="selected-background-color">{{ globalState.getBackgroundColor().name }}</div>
         </div>
         <div class="color-grid" ref="colorGrid">
           <div class="background-color-list-item-wrapper" v-for="object in colors" :key="object.color">
             <div :id="object.name" class="background-color" ref="backgroundColor"
                  :style="{ 'background-color': object.color }"
-                 :class="{ 'selected': globalState.backgroundColor.color === object.color }" @click="updateBackgroundColor(object)">
-              <div class="color-name" ref="colorName"> {{ object.name }} ({{ object.color }}) </div>
+                 :class="{ 'selected': globalState.getBackgroundColor() === object }" @click="updateBackgroundColor(object)">
+              <div class="color-name" ref="colorName"> {{ object.name }} </div>
             </div>
           </div>
         </div>
@@ -42,7 +42,7 @@
                ref="wallpaper"
                v-for="wallpaper in wallpapers"
                :key="wallpaper"
-               :class="{ 'selected': globalState.wallpaper === wallpaper }"
+               :class="{ 'selected': globalState.getWallpaper() === wallpaper }"
                @click="updateWallpaper(wallpaper)">
             <img class="wallpaper-image" :src="getImgUrl(wallpaper)" :alt="wallpaper" draggable="false">
           </div>
@@ -146,6 +146,7 @@ export default {
       this.selectedOption = option;
     },
     updateBackgroundColor(newValue) {
+      console.log(newValue)
       this.globalState.removeWallpaper();
       this.globalState.setBackgroundColor(newValue);
     },
@@ -195,8 +196,7 @@ export default {
 
 .window-content {
   display: flex;
-  padding: 10px;
-  gap: 10px;
+  gap: 5px;
 }
 
 .sidebar {
@@ -206,7 +206,7 @@ export default {
   min-width: 20%;
   top: 0;
   z-index: 1000;
-  padding: 20px;
+  padding: 10px 0 0 10px;
   border-radius: 5px;
 }
 
@@ -227,18 +227,19 @@ export default {
   border-radius: 5px;
   width: 300px;
   height: 150px;
-  border: 5px var(--border-color) solid;
+  border: 5px var(--border-input-color) solid;
 }
 
 .background-color.selected {
-  border-color: var(--highlight-color);
+  border-color: var(--border-input-selected-color);
 }
 
 .color-name {
   position: absolute;
-  text-align: end;
-  background-color: black;
-  padding: 20px;
+  text-align: center;
+  background-color: var(--background-color-input);
+  padding: 10px;
+  margin: 10px;
   border-radius: 5px;
   width: 200px;
   font-size: 14px;
@@ -289,11 +290,11 @@ export default {
 
 .wallpaper {
   position: relative;
-  border: 2px solid var(--border-color);
+  border: 2px solid var(--border-input-color);
 }
 
 .wallpaper.selected {
-  border-color: var(--highlight-color);
+  border-color: var(--border-input-selected-color);
 }
 
 .wallpaper-image {
@@ -317,15 +318,15 @@ li {
   gap: 10px;
   align-items: center;
   width: 100%;
-  padding: 7px;
-  border: 2px solid var(--border-color);
+  padding: 5px;
+  border: 2px solid var(--border-input-color);
   background-color: var(--taskbar-color);
   border-radius: 5px;
   user-select: none;
 }
 
 li.selected {
-  border-color: var(--highlight-color);
+  border-color: var(--border-input-selected-color);
 }
 
 .wrap-search {
@@ -341,7 +342,7 @@ li.selected {
 .searchbar {
   width: 100%;
   padding: 7px;
-  border: 2px solid var(--border-color);
+  border: 2px solid var(--border-input-color);
   background-color: var(--taskbar-color);
   border-radius: 5px;
   font-size: 15px;
@@ -349,26 +350,30 @@ li.selected {
 
 .searchbar:focus {
   outline: none;
-  border-color: var(--highlight-color);
+  border-color: var(--border-input-selected-color);
 }
 .theme-wrapper {
   display: flex;
   flex-direction: column;
   gap: 10px;
   padding-bottom: 10px;
-  width: 100%;
+  text-align: start;
+  align-items: center;
+  width: 90%;
   height: 100%;
 }
 .theme-title-wrapper {
   font-size: 30px;
+  width: 100%;
+  text-align: start;
 }
 .theme-picker {
   width: 100%;
+  min-height: 40px;
   height: 10%;
   border-radius: 10px;
   background-color: var(--background-color-input);
-  border-color: var(--border-color);
-  padding: 10px;
+  border-color: var(--border-input-color);
   font-size: 25px;
 }
 </style>
