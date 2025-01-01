@@ -36,7 +36,8 @@
     <div @click="$emit('clicked', $event)" class="window-content">
       <WindowContent :window-name="windowName"
                      :disable-pointer-events="disablePointerEvents"
-                     @theme-changed="$emit('themeChanged')"
+                     :application-window-size="applicationWindowSize"
+                     @update-settings="$emit('updateSettings')"
                      @move-calculator-window-to-top-corner="setSplitWindowValues(0, '40%', '30%', 0)"
       />
     </div>
@@ -71,6 +72,7 @@ export default {
         top: 10,
         bottom: 10
       },
+      applicationWindowSize: null,
       disablePointerEvents: false,
       showSplitWindowComponent: false,
       mouseOnSplitWindowComponent: false,
@@ -114,6 +116,17 @@ export default {
   },
   mounted() {
     enableDragDropTouch();
+    this.applicationWindowSize = {
+      width: this.$el.clientWidth,
+      height: this.$el.clientHeight
+    }
+
+    new ResizeObserver((entries) => {
+      this.applicationWindowSize = {
+        width: entries[0].contentRect.width,
+        height: entries[0].contentRect.height
+      }
+    }).observe(this.$refs.window)
   },
   props: {
     windowSize: {
@@ -141,7 +154,7 @@ export default {
       required: false
     }
   },
-  emits: ['splitOtherWindow', 'minimizeWindow', 'rendered', 'closeWindow', 'clicked', 'previewApplicationWindow', 'windowResizing'],
+  emits: ['splitOtherWindow', 'minimizeWindow', 'rendered', 'closeWindow', 'clicked', 'previewApplicationWindow', 'windowResizing', 'updateSettings'],
   watch: {
     windowSize(newSize) {
       this.MAXIMUM_WIDTH = newSize[0];

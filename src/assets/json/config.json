@@ -6,6 +6,124 @@
     "Serene Sounds",
     "Calculator"
   ],
+  "themes": [
+    "default",
+    "blue-sea",
+    "sunset-beach",
+    "forest-dream",
+    "cyberpunk-night",
+    "satisfying-sky",
+    "modern-elegance",
+    "blue-sea-remastered",
+    "elegant-black-white"
+  ],
+  "wallpapers": [
+    "wallpaper_01.png",
+    "wallpaper_02.png",
+    "wallpaper_03.png",
+    "wallpaper_04.jpg",
+    "wallpaper_05.jpg",
+    "wallpaper_06.jpg",
+    "wallpaper_07.jpg"
+  ],
+  "colors": [
+    {
+      "name": "ElectricBlue",
+      "color": "#00BFFF"
+    },
+    {
+      "name": "RoyalBlue",
+      "color": "#4169E1"
+    },
+    {
+      "name": "SteelBlue",
+      "color": "#4682B4"
+    },
+    {
+      "name": "SoftIndigo",
+      "color": "#4B0082"
+    },
+    {
+      "name": "SlateBlue",
+      "color": "#6A5ACD"
+    },
+    {
+      "name": "MidnightBlue",
+      "color": "#2C3E50"
+    },
+    {
+      "name": "CoolCyan",
+      "color": "#16A085"
+    },
+    {
+      "name": "OceanTeal",
+      "color": "#00796B"
+    },
+    {
+      "name": "PineGreen",
+      "color": "#01796F"
+    },
+    {
+      "name": "EmeraldGreen",
+      "color": "#2ECC71"
+    },
+    {
+      "name": "ForestGreen",
+      "color": "#228B22"
+    },
+    {
+      "name": "CrimsonRed",
+      "color": "#E74C3C"
+    },
+    {
+      "name": "BurgundyRed",
+      "color": "#800020"
+    },
+    {
+      "name": "VelvetWine",
+      "color": "#8B0000"
+    },
+    {
+      "name": "RichGold",
+      "color": "#F39C12"
+    },
+    {
+      "name": "BurntSienna",
+      "color": "#E67E22"
+    },
+    {
+      "name": "RustOrange",
+      "color": "#D35400"
+    },
+    {
+      "name": "DeepPurple",
+      "color": "#673AB7"
+    },
+    {
+      "name": "PlumBerry",
+      "color": "#8E44AD"
+    },
+    {
+      "name": "DarkSlateGray",
+      "color": "#34495E"
+    },
+    {
+      "name": "AshGray",
+      "color": "#2F4F4F"
+    },
+    {
+      "name": "GraphiteGray",
+      "color": "#3A3A3A"
+    },
+    {
+      "name": "CharcoalBlack",
+      "color": "#212121"
+    },
+    {
+      "name": "DarkChocolate",
+      "color": "#5D4037"
+    }
+  ],
   "sounds": [
     {
       "id": 456123,

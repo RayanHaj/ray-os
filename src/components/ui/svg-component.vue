@@ -4,7 +4,8 @@
     <path v-if="customColor" :fill="customColor" d="M3 11h18v2H3z"/>
     <path v-else class="default-path-fill" d="M3 11h18v2H3z"/>
   </svg>
-  <svg v-if="svgType === 'maximize'" @click="$emit('clicked')" @mouseenter="$emit('onMouseenter')" @mouseleave="$emit('onMouseleave')" :width="width" :height="height"
+  <svg v-if="svgType === 'maximize'" @click="$emit('clicked')" @mouseenter="$emit('onMouseenter')"
+       @mouseleave="$emit('onMouseleave')" :width="width" :height="height"
        xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
     <path v-if="customColor" :fill="customColor"
           d="M6 3h12a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3Zm0 2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1H6Z"/>
@@ -101,11 +102,46 @@
           d="M8 2h5a1 1 0 0 1 1 1v5H9a1 1 0 0 1-1-1zM3 1h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2m0 1a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1z"/>
   </svg>
   <svg v-if="svgType === 'backspace'" @click="$emit('clicked')" :width="width" :height="height"
-      xmlns="http://www.w3.org/2000/svg" viewBox="0 0 21 21">
+       xmlns="http://www.w3.org/2000/svg" viewBox="0 0 21 21">
     <path v-if="customColor" fill="none" :stroke="customColor" stroke-linecap="round" stroke-linejoin="round"
           d="M8.328 15.5H15.5a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H8.328a2 2 0 0 0-1.414.586L3.207 9.793a1 1 0 0 0 0 1.414l3.707 3.707a2 2 0 0 0 1.414.586zm1.172-3l4-4m-4 0l4 4"/>
     <path v-else class="default-path-stroke" fill="none" stroke-linecap="round" stroke-linejoin="round"
           d="M8.328 15.5H15.5a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H8.328a2 2 0 0 0-1.414.586L3.207 9.793a1 1 0 0 0 0 1.414l3.707 3.707a2 2 0 0 0 1.414.586zm1.172-3l4-4m-4 0l4 4"/>
+  </svg>
+  <svg v-if="svgType === 'search'" @click="$emit('clicked')" :width="width" :height="height"
+       xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1664 1664">
+    <path v-if="customColor" :fill="customColor"
+          d="M1152 704q0-185-131.5-316.5T704 256T387.5 387.5T256 704t131.5 316.5T704 1152t316.5-131.5T1152 704zm512 832q0 52-38 90t-90 38q-54 0-90-38l-343-342q-179 124-399 124q-143 0-273.5-55.5t-225-150t-150-225T0 704t55.5-273.5t150-225t225-150T704 0t273.5 55.5t225 150t150 225T1408 704q0 220-124 399l343 343q37 37 37 90z"/>
+    <path v-else class="default-path-fill"
+          d="M1152 704q0-185-131.5-316.5T704 256T387.5 387.5T256 704t131.5 316.5T704 1152t316.5-131.5T1152 704zm512 832q0 52-38 90t-90 38q-54 0-90-38l-343-342q-179 124-399 124q-143 0-273.5-55.5t-225-150t-150-225T0 704t55.5-273.5t150-225t225-150T704 0t273.5 55.5t225 150t150 225T1408 704q0 220-124 399l343 343q37 37 37 90z"/>
+  </svg>
+  <svg v-if="svgType === 'background color'" @click="$emit('clicked')" :width="width" :height="height"
+       xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+    <path v-if="customColor" :fill="customColor"
+          d="M13 11c1.334 1.393 2 2.435 2 3.125C15 15.161 14.105 16 13 16c-1.104 0-2-.84-2-1.875c0-.69.667-1.732 2-3.125M5.857.15l6.34 6.45l.016.02l.324.321a1.5 1.5 0 0 1 .11 2.006l-.103.114l-4.474 4.513a1.5 1.5 0 0 1-2.123.008L1.464 9.06a1.5 1.5 0 0 1 .007-2.12l4.472-4.45c.145-.146.313-.254.492-.327L5.144.85a.5.5 0 0 1 .713-.7m1.496 3.049a.5.5 0 0 0-.705 0L2.177 7.65a.498.498 0 0 0-.148.35h9.95a.498.498 0 0 0-.148-.35L7.353 3.2z"/>
+    <path v-else class="default-path-fill"
+          d="M13 11c1.334 1.393 2 2.435 2 3.125C15 15.161 14.105 16 13 16c-1.104 0-2-.84-2-1.875c0-.69.667-1.732 2-3.125M5.857.15l6.34 6.45l.016.02l.324.321a1.5 1.5 0 0 1 .11 2.006l-.103.114l-4.474 4.513a1.5 1.5 0 0 1-2.123.008L1.464 9.06a1.5 1.5 0 0 1 .007-2.12l4.472-4.45c.145-.146.313-.254.492-.327L5.144.85a.5.5 0 0 1 .713-.7m1.496 3.049a.5.5 0 0 0-.705 0L2.177 7.65a.498.498 0 0 0-.148.35h9.95a.498.498 0 0 0-.148-.35L7.353 3.2z"/>
+  </svg>
+  <svg v-if="svgType === 'wallpaper'" @click="$emit('clicked')" :width="width" :height="height"
+       xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path v-if="customColor" :fill="customColor"
+          d="M17 8q-.425 0-.713-.288T16 7q0-.425.288-.713T17 6q.425 0 .713.288T18 7q0 .425-.288.713T17 8Zm-8 6l2.7-3.5l1.55 2l2.3-3L19 14H9Zm-7 8V6h2v14h14v2H2ZM6 9.375V2h7v2H8v5.375H6ZM6 18v-6.625h2V16h5v2H6Zm9 0v-2h5v-4.625h2V18h-7Zm5-8.625V4h-5V2h7v7.375h-2Z"/>
+    <path v-else class="default-path-fill"
+          d="M17 8q-.425 0-.713-.288T16 7q0-.425.288-.713T17 6q.425 0 .713.288T18 7q0 .425-.288.713T17 8Zm-8 6l2.7-3.5l1.55 2l2.3-3L19 14H9Zm-7 8V6h2v14h14v2H2ZM6 9.375V2h7v2H8v5.375H6ZM6 18v-6.625h2V16h5v2H6Zm9 0v-2h5v-4.625h2V18h-7Zm5-8.625V4h-5V2h7v7.375h-2Z"/>
+  </svg>
+  <svg v-if="svgType === 'theme'" @click="$emit('clicked')" :width="width" :height="height"
+       xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path v-if="customColor" :fill="customColor"
+          d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2S2 6.477 2 12s4.477 10 10 10Zm0-2V4a8 8 0 1 1 0 16Z"/>
+    <path v-else class="default-path-fill"
+          d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2S2 6.477 2 12s4.477 10 10 10Zm0-2V4a8 8 0 1 1 0 16Z"/>
+  </svg>
+  <svg v-if="svgType === 'home'" @click="$emit('clicked')"  :width="width" :height="height"
+       xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path v-if="customColor" :fill="customColor"
+          d="M11.336 2.253a1 1 0 0 1 1.328 0l9 8a1 1 0 0 1-1.328 1.494L20 11.45V19a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-7.55l-.336.297a1 1 0 0 1-1.328-1.494l9-8zM6 9.67V19h3v-5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v5h3V9.671l-6-5.333l-6 5.333zM13 19v-4h-2v4h2z"/>
+    <path v-else class="default-path-fill"
+          d="M11.336 2.253a1 1 0 0 1 1.328 0l9 8a1 1 0 0 1-1.328 1.494L20 11.45V19a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-7.55l-.336.297a1 1 0 0 1-1.328-1.494l9-8zM6 9.67V19h3v-5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v5h3V9.671l-6-5.333l-6 5.333zM13 19v-4h-2v4h2z"/>
   </svg>
 </template>
 
@@ -156,6 +192,7 @@ export default {
 .default-path-fill {
   fill: var(--font-color);
 }
+
 .default-path-stroke {
   stroke: var(--font-color);
 }

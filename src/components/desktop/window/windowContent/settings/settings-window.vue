@@ -1,259 +1,367 @@
 <template>
-  <div class="window-content">
-    <div class="settings">
-      <div ref="backgroundPreference" class="background-preference" :class="{ 'small-layout': windowSmall }">
-        <div class="prefer-color-container">
-          <div id="preferColor" class="preference-button preference-background">Prefer color</div>
-          <div class="color-picker" :class="{ disabled: backgroundPreference === 2 }">
-            <div id="mountbattenPink" class="static-color option" style="background-color: #A97882"></div>
-            <div id="thistle" class="static-color option" style="background-color: #CDB4DB"></div>
-            <div id="uranianBlue" class="static-color option" style="background-color: #BDE0FE"></div>
-            <div id="beaver" class="static-color option" style="background-color: #AC7E6E"></div>
-            <div id="tickleMePink" class="static-color option" style="background-color: #FF91B9"></div>
-            <div id="oxfordBlue" class="static-color option" style="background-color: #0A162C"></div>
-          </div>
+  <div class="window-content" ref="container">
+    <nav class="sidebar" ref="sidebar">
+      <div class="wrap-search">
+        <input v-model="searchbarInput" class="searchbar" type="text" placeholder="Find a setting">
+        <div class="search-svg">
+          <svg-component :svg-type="'search'" :custom-width="20" :custom-height="20"/>
         </div>
-        <div class="vl"/>
-        <div class="prefer-image-container">
-          <div id="preferImage" class="preference-button preference-background">Prefer image</div>
-          <div class="background-image-picker" :class="{ disabled: backgroundPreference === 1 }">
-            <img id="bg1" class="static-background option" src="../../../../../assets/images/desktopWallpapers/wallpaper_01.png" width="250" height="100" alt="wallpaper_01">
-            <img id="bg2" class="static-background option" src="../../../../../assets/images/desktopWallpapers/wallpaper_02.png" width="250" height="100" alt="wallpaper_02">
-            <img id="bg3" class="static-background option" src="../../../../../assets/images/desktopWallpapers/wallpaper_03.png" width="250" height="100" alt="wallpaper_03">
+      </div>
+      <ul>
+        <li v-for="option in getOptions" ref="sidebarOptions" :key="option" tabindex="0" @click="onClickOption(option)"
+            :class="{ 'selected': selectedOption === option && option !== 'no matches' }">
+          <div>
+            <svg-component :svg-type="option" :custom-width="15" :custom-height="15"/>
+          </div>
+          {{ option }}
+        </li>
+      </ul>
+    </nav>
+    <div class="settings" :style="selectedOption === 'theme' ? { justifyContent: 'center', alignItems: 'center' } : null">
+      <div v-show="selectedOption === 'background color'" class="background-color-wrapper">
+        <div class="background-color-title-selected-wrapper">
+          <div class="background-color-title">{{ selectedOption }}</div>
+          <div class="selected-background-color">{{ selectedColor.name }}</div>
+        </div>
+        <div class="color-grid" ref="colorGrid">
+          <div class="background-color-list-item-wrapper" v-for="object in colors" :key="object.color">
+            <div :id="object.name" class="background-color" ref="backgroundColor"
+                 :style="{ 'background-color': object.color }"
+                 :class="{ 'selected': selectedColor.color === object.color }" @click="updateColor(object)">
+              <div class="color-name" ref="colorName"> {{ object.name }} ({{ object.color }}) </div>
+            </div>
           </div>
         </div>
       </div>
-      <select @change="handlePickedTheme" id="theme-picker">
-        <option>default</option>
-        <option>blue-sea</option>
-        <option>sunset-beach</option>
-        <option>forest-dream</option>
-        <option>cyberpunk-night</option>
-        <option>satisfying-sky</option>
-        <option>modern-elegance</option>
-        <option>blue-sea-remastered</option>
-        <option>elegant-black-white</option>
+      <div v-show="selectedOption === 'wallpaper'" class="wallpaper-wrapper" ref="wallpaperWrapper">
+        <div class="wallpaper-title-wrapper">
+          <div class="wallpaper-title">{{ selectedOption }}</div>
+        </div>
+        <div class="wallpaper-grid" ref="wallpaperGrid">
+          <div class="wallpaper"
+               ref="wallpaper"
+               v-for="wallpaper in wallpapers"
+               :key="wallpaper"
+               :class="{ 'selected': selectedWallpaper === wallpaper }"
+               @click="updateWallpaper(wallpaper)">
+            <img loading="lazy" class="wallpaper-image" :src="getImgUrl(wallpaper)" :alt="wallpaper" draggable="false">
+          </div>
+        </div>
+      </div>
+      <select v-show="selectedOption === 'theme'" @click="updateTheme($event.target.value)" class="theme-picker" id="theme-picker">
+        <option v-for="theme in themes" :key="theme">{{ theme }}</option>
       </select>
     </div>
   </div>
 </template>
 
 <script>
+import json from '@/assets/json/config.json'
+import SvgComponent from "@/components/ui/svg-component";
+
 export default {
   name: "settings-window",
-
+  components: {SvgComponent},
+  emits: ['updateSettings'],
   data() {
     return {
-      backgroundPreference: 0,
-      colorPickerValue: '',
-      selectedBackgroundImage: 0,
-      windowSmall: false,
+      themes: json.themes,
+      colors: json.colors,
+      wallpapers: json.wallpapers,
+      options: ['home', 'theme', 'background color', 'wallpaper'],
+      searchbarInput: '',
+      selectedOption: '',
+      selectedColor: '',
+      selectedWallpaper: '',
+      selectedTheme: '',
+      FLEX_DIRECTION_CONTAINER: 'row',
+      sidebarElement: {
+        FONT_SIZE_NAV_ITEMS: 20
+      }
     }
   },
-
-  mounted() {
-    const backgroundPreferenceElement = this.$refs.backgroundPreference
-    const resizeObserver = new ResizeObserver(entries => {
-      requestAnimationFrame(() => {
-        for (let entry of entries) {
-          const width = entry.contentRect.width;
-          this.windowSmall = width <= 1225;
-        }
-      });
-    });
-    resizeObserver.observe(backgroundPreferenceElement)
-
-    const backgroundImage = Number(localStorage.getItem('background-image'));
-    if (backgroundImage !== 0) {
-      const radioButtons = document.querySelectorAll("input[name='wallpaper']");
-      radioButtons.forEach(radioButton => {
-        if (backgroundImage === Number(radioButton.value)) {
-          radioButton.checked = true;
-        }
-      })
-    }
-
-    const colorOptionButtons = this.$el.querySelectorAll('.static-color');
-    colorOptionButtons.forEach(button => {
-      const backgroundColor = localStorage.getItem('background-color');
-      if (backgroundColor === this.convertRgbToHex(button.style.backgroundColor)) {
-        this.createColorSelectedHeaderElement(button);
-      }
-      button.addEventListener('click', () => {
-        colorOptionButtons.forEach(button2 => {
-          const removeValue = button2.children.item(0);
-          if (removeValue) {
-            removeValue.remove();
-          }
-        });
-        this.createColorSelectedHeaderElement(button);
-        this.colorPickerValue = this.convertRgbToHex(button.style.backgroundColor);
-      });
-    });
-
-    const imageOptionButtons = this.$el.querySelectorAll('.static-background');
-    imageOptionButtons.forEach(button => {
-      const backgroundImage = localStorage.getItem('background-image');
-      if (backgroundImage === button.id[2]) {
-        this.selectedBackgroundImage = backgroundImage;
-        button.style.border = '2px black solid';
-      }
-      button.addEventListener('click', () => {
-        imageOptionButtons.forEach(button2 => {
-          button2.style.border = '';
-        });
-        this.selectedBackgroundImage = button.id[2];
-        button.style.border = '2px black solid';
-      })
-    });
-
-    const backgroundPreference = Number(localStorage.getItem('background-preference'));
-    const preferColorElement = this.$el.querySelector('#preferColor');
-    const preferImageElement = this.$el.querySelector('#preferImage');
-    if (backgroundPreference === 1) {
-      this.backgroundPreference = 1;
-      preferColorElement.style.backgroundColor = 'var(--hover-color)';
-    } else {
-      this.backgroundPreference = 2;
-      preferImageElement.style.backgroundColor = 'var(--hover-color)';
-    }
-    backgroundPreference === 1 ? this.backgroundPreference = 1 : this.backgroundPreference = 2;
-
-    const preferButtons = Array.from(this.$el.querySelectorAll('.preference-background'));
-    for (let i = 0; i < preferButtons.length; i++) {
-      preferButtons[i].addEventListener('click', () => {
-        if (preferButtons[i].id === 'preferImage') {
-          preferButtons[i].style.backgroundColor = 'var(--hover-color)';
-          preferButtons.at(preferButtons.indexOf(preferColorElement)).style.backgroundColor = 'var(--background-color-input)';
-          this.backgroundPreference = 2;
-        } else {
-          preferButtons[i].style.backgroundColor = 'var(--hover-color)';
-          preferButtons.at(preferButtons.indexOf(preferImageElement)).style.backgroundColor = 'var(--background-color-input)';
-          this.backgroundPreference = 1;
-        }
-      })
+  props: {
+    applicationWindowSize: {
+      type: Object,
+      required: true
     }
   },
-
   watch: {
-    colorPickerValue(newValue) {
-      localStorage.setItem('background-color', newValue);
-    },
-    selectedBackgroundImage(newValue) {
-      localStorage.setItem('background-image', newValue);
-    },
-    backgroundPreference(newValue) {
-      localStorage.setItem('background-preference', newValue);
+    applicationWindowSize(newValue) {
+      const container = () => {
+        this.$refs.container.style.flexDirection = newValue.width <= 840 ? 'column' : 'row';
+        this.$refs.container.style.alignItems = newValue.width <= 840 ? 'center' : 'unset';
+      }
+
+      const backgroundColor = () => {
+        this.$refs.backgroundColor.forEach((element) => {
+          element.style.width = `${ Math.max(100, newValue.width / 7) }px`;
+        });
+
+        this.$refs.colorGrid.style.gridTemplateColumns =
+            newValue.width <= 255 ? 'auto' : newValue.width <= 505 ? 'auto auto' : 'auto auto auto auto';
+
+        this.$refs.colorName.forEach((element) => {
+          element.style.width = `${ Math.max(70, newValue.width / 10) }px`;
+          element.style.fontSize = `${ Math.max(7, newValue.width / 100) }px`;
+        });
+      }
+
+      const wallpaper = () => {
+        this.$refs.wallpaper.forEach(element => {
+          element.style.width = `${ Math.max(100, newValue.width / 5) }px`;
+        })
+      }
+
+      const sidebar = () => {
+        this.$refs.sidebar.style.width = newValue.width <= 840 ? '100%' : '20%';
+        this.$refs.sidebar.style.backgroundColor = newValue.width <= 840 ? 'rgba(0, 0, 0, 0.9)' : 'transparent';
+
+        this.$refs.sidebarOptions.forEach(element => {
+          element.style.fontSize = `${Math.max(12, newValue.width / 100)}px`;
+        })
+      }
+
+      container();
+      backgroundColor();
+      wallpaper();
+      sidebar();
     }
   },
-
+  mounted() {
+  },
   methods: {
-    handlePickedTheme(theme) {
-      localStorage.setItem('theme', theme.target.value);
-      this.$emit('themeChanged');
+    getImgUrl(name) {
+      return require(`@/assets/images/desktopWallpapers/${name}`);
     },
-
-    convertRgbToHex(value) {
-      const ctx = document.createElement("canvas").getContext("2d");
-      ctx.strokeStyle = value;
-      return ctx.strokeStyle;
+    onClickOption(option) {
+      this.selectedOption = option;
     },
+    updateColor(newValue) {
+      this.selectedColor = newValue;
 
-    createColorSelectedHeaderElement(button) {
-      const element = document.createElement('div');
-      element.classList.add('color-selected-header');
-      element.innerText = button.id;
-      element.style.textAlign = 'center';
-      element.style.width = '100%';
-      element.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
-      element.style.fontSize = '12px';
-      element.style.paddingTop = '10px';
-      element.style.paddingBottom = '10px';
-      button.appendChild(element);
+      window.localStorage.removeItem('wallpaper');
+      this.selectedWallpaper = '';
+
+      window.localStorage.setItem('backgroundColor', JSON.stringify(newValue));
+
+      this.$emit('updateSettings');
+    },
+    updateWallpaper(newValue) {
+      this.selectedWallpaper = newValue;
+
+      window.localStorage.removeItem('backgroundColor');
+      this.selectedColor = '';
+
+      window.localStorage.setItem('wallpaper', newValue);
+
+      this.$emit('updateSettings');
+    },
+    updateTheme(newValue) {
+      console.log(newValue)
+      if (newValue === window.localStorage.getItem('theme')) {
+        return;
+      }
+
+      window.localStorage.setItem('theme', newValue);
+      this.$emit('updateSettings');
+    },
+  },
+  computed: {
+    getOptions() {
+      const filter = () => {
+        return this.options.filter((option) => {
+          return option.includes(this.searchbarInput)
+        });
+      }
+
+      if (filter().length === 0) {
+        return ['no matches'];
+      }
+
+      if (this.searchbarInput.length !== 0) {
+        return filter();
+      }
+
+      return this.options;
     }
   }
 }
 </script>
 
 <style scoped>
-.preference-button {
-  cursor: pointer;
-  background-color: var(--background-color-input);
+* {
+  box-sizing: border-box;
+  color: var(--font-color);
+}
+
+.window-content {
+  display: flex;
   padding: 10px;
+  gap: 10px;
 }
-.preference-button:hover {
-  background-color: var(--hover-color);
+
+.sidebar {
+  display: flex;
+  position: sticky;
+  flex-direction: column;
+  min-width: 20%;
+  top: 0;
+  z-index: 1000;
+  padding: 20px;
+  border-radius: 5px;
 }
-  .option {
-    cursor: pointer;
-    user-select: none;
-    padding: 10px;
-  }
-  .option:hover {
-    background-color: var(--hover-color);
-  }
-  .prefer-color-container, .prefer-image-container {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    width: 50%;
-  }
-  .static-color {
-    width: 100px;
-    height: 100px;
-  }
 
-  .color-picker {
-    display: grid;
-    grid-template-rows: auto auto auto auto;
-    grid-template-columns: auto auto auto auto;
-    gap: 20px;
-    flex-direction: column;
-    justify-content: center;
-  }
-
-  .background-image-picker {
-    display: grid;
-    grid-template-rows: auto auto;
-    grid-template-columns: auto auto;
-    gap: 20px;
-    flex-direction: column;
-    justify-content: center;
-  }
-
-  .settings {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-
-  .background-preference {
-    display: flex;
-    flex-direction: row;
-    text-align: center;
-    font-size: 20px;
-  }
-
-  .vl {
-    border-left: 1px solid black;
-    height: auto;
-  }
-
-  .disabled {
-    pointer-events: none;
-    opacity: 0.5;
-  }
-
-.small-layout {
+.settings {
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 80%;
 }
 
-  @media screen and (max-width: 1225px) {
-    .background-preference {
-      flex-direction: column;
-      align-items: center;
-    }
-  }
+.option {
+  cursor: pointer;
+  user-select: none;
+}
+
+.background-color {
+  position: relative;
+  border-radius: 5px;
+  width: 300px;
+  height: 150px;
+  border: 5px var(--border-color) solid;
+}
+
+.background-color.selected {
+  border-color: var(--highlight-color);
+}
+
+.color-name {
+  position: absolute;
+  text-align: end;
+  background-color: black;
+  padding: 20px;
+  border-radius: 5px;
+  width: 200px;
+  font-size: 14px;
+}
+
+.color-grid {
+  display: grid;
+  grid-template-columns: auto auto auto auto;
+  gap: 20px;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.background-color-title-selected-wrapper {
+  display: flex;
+  justify-content: space-between;
+  font-size: 30px;
+  font-weight: bold;
+}
+
+.background-color-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-bottom: 10px;
+}
+
+.wallpaper-title-wrapper {
+  display: flex;
+  justify-content: space-between;
+  font-size: 30px;
+  font-weight: bold;
+}
+
+.wallpaper-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-bottom: 10px;
+}
+
+.wallpaper-grid {
+  display: grid;
+  grid-template-columns: auto auto auto;
+  gap: 20px;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.wallpaper {
+  position: relative;
+  border: 2px solid var(--border-color);
+}
+
+.wallpaper.selected {
+  border-color: var(--highlight-color);
+}
+
+.wallpaper-image {
+  width: 100%;
+  height: 100%;
+}
+
+
+ul {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  width: 100%;
+  list-style: none;
+  gap: 10px;
+}
+
+li {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+  padding: 7px;
+  border: 2px solid var(--border-color);
+  background-color: var(--taskbar-color);
+  border-radius: 5px;
+  user-select: none;
+}
+
+li.selected {
+  border-color: var(--highlight-color);
+}
+
+.wrap-search {
+  position: relative;
+}
+
+.search-svg {
+  position: absolute;
+  top: calc(50% - 10px);
+  right: 8px;
+}
+
+.searchbar {
+  width: 100%;
+  padding: 7px;
+  border: 2px solid var(--border-color);
+  background-color: var(--taskbar-color);
+  border-radius: 5px;
+  font-size: 15px;
+}
+
+.searchbar:focus {
+  outline: none;
+  border-color: var(--highlight-color);
+}
+
+.theme-picker {
+  width: 50%;
+  height: 10%;
+  border-radius: 10px;
+  background-color: var(--background-color-input);
+  border-color: var(--border-color);
+  padding: 10px;
+  font-size: 25px;
+}
 </style>

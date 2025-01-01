@@ -1,5 +1,6 @@
 <template>
   <div class="desktop"
+       ref="desktop"
        :style="{ filter: `brightness(${desktopBrightnessValue}%)`}">
     <div class="main-screen">
       <MainWindow
@@ -12,7 +13,7 @@
           @clicked="onClickWindow($event, window)"
           @battery-easter-egg-activated="activatedEasterEgg = $event"
           @rendered="windowIsRendered = !windowIsRendered"
-          @theme-changed="$emit('themeChanged')"
+          @update-settings="updateSettings"
           @close-window="closeWindow"
           @minimize-window="minimizeWindow"
           @split-other-window="splitOtherWindow = $event"
@@ -84,7 +85,7 @@ export default {
   props: {
     backgroundImageId: Number
   },
-  emits: ['themeChanged', 'clicked'],
+  emits: ['updateSettings', 'clicked'],
   mounted() {
     if (deviceIsMobile() === true) {
       this.$router.push('/');
@@ -181,32 +182,18 @@ export default {
       this.windowDimensions = [window.innerWidth, (window.innerHeight - this.TASKBAR_HEIGHT)];
     },
     updateSettings() {
-      const desktopElement = this.$el;
+      const wallpaper = window.localStorage.getItem('wallpaper');
+      const backgroundColor = window.localStorage.getItem('backgroundColor');
 
-      const desktopBrightness = localStorage.getItem('brightnessValue');
-      if (desktopBrightness) {
-        this.desktopBrightnessValue = desktopBrightness;
+      if (wallpaper !== null) {
+        this.$refs.desktop.style.backgroundImage = `url(${require(`@/assets/images/desktopWallpapers/${wallpaper}`)})`;
+        this.$refs.desktop.style.backgroundColor = 'none';
+      } else if (backgroundColor !== null && JSON.parse(backgroundColor) !== null) {
+        this.$refs.desktop.style.backgroundImage = 'none'
+        this.$refs.desktop.style.backgroundColor = JSON.parse(backgroundColor).color;
       }
 
-      const backgroundPreference = localStorage.getItem('background-preference');
-
-      if (Number(backgroundPreference) === 1) {
-        const backgroundColor = localStorage.getItem('background-color');
-        if (backgroundColor) {
-          this.backgroundColor = backgroundColor;
-          desktopElement.style.backgroundColor = this.backgroundColor;
-          desktopElement.style.backgroundImage = null;
-        } else {
-          this.backgroundColor = '#0A162C'
-          desktopElement.style.backgroundColor = this.backgroundColor;
-          desktopElement.style.backgroundImage = null;
-        }
-      } else {
-        let backgroundImage = Number(localStorage.getItem('background-image')) ? Number(localStorage.getItem('background-image')) : 1;
-        if (backgroundImage !== 0) {
-          desktopElement.style.backgroundImage = `url(${require(`@/assets/images/desktopWallpapers/wallpaper_0${backgroundImage}.png`)})`;
-        }
-      }
+      this.$emit('updateSettings');
     },
     activateQuickSettingsMenu(quickSettingsMenuButtonClicked) {
       if (quickSettingsMenuButtonClicked) {

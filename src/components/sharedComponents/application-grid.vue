@@ -65,8 +65,8 @@
 </template>
 
 <script>
-import {compareArrays, parseApplicationNameToImageNameFormat} from "@/utils/util";
-import {enableDragDropTouch} from "@/assets/libraries/drag-drop-touch.esm.min";
+import { parseApplicationNameToImageNameFormat } from "@/utils/util";
+import { enableDragDropTouch } from "@/assets/libraries/drag-drop-touch.esm.min";
 import json from "@/assets/json/config.json"
 import SvgComponent from "@/components/ui/svg-component";
 
@@ -94,7 +94,7 @@ export default {
       IMAGE_HEIGHT: 50,
       TILE_WIDTH: 82,
       TILE_HEIGHT: 82,
-      GRID_FIELD_TEXT_FONT_SIZE: 10,
+      TILE_NAME_FONT_SIZE: 10,
       CONTEXT_MENU_SVG_WIDTH: 20,
       CONTEXT_MENU_SVG_HEIGHT: 20,
       CONTEXT_MENU_WIDTH: 140,
@@ -121,20 +121,8 @@ export default {
     }
   },
   watch: {
-    windowSize(newSize, oldSize) {
-      if (compareArrays(oldSize, newSize) === false) {
-        this.init();
-
-        // IMPLEMENT
-
-        // const width = this.$refs.gridContainer.clientWidth;
-        // const height = this.$refs.gridContainer.clientHeight;
-        // if (width < 500 || height < 400) {
-        //   this.setTilesSmallSize();
-        // } else {
-        //   this.setTilesNormalSize();
-        // }
-      }
+    windowSize() {
+      this.init();
     },
     windowResizing(newValue) {
       this.applicationWindowIsResizing = newValue;
@@ -233,7 +221,6 @@ export default {
       this.$emit('clicked');
     },
     onKeydownTile(e) {
-      e.preventDefault();
       if (e.key === 'Delete') {
         if (this.tileOnHover) {
           this.deleteTile(this.tileOnHover.id);

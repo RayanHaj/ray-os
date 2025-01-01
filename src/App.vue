@@ -1,6 +1,6 @@
 <template>
   <div :class="theme">
-    <RouterView @theme-changed="updateTheme"/>
+    <RouterView @update-settings="updateSettings"/>
   </div>
 </template>
 
@@ -20,7 +20,7 @@ export default {
     }
   },
   methods: {
-    updateTheme() {
+    updateSettings() {
       const theme = localStorage.getItem('theme');
       if (theme) {
         this.theme = theme;
