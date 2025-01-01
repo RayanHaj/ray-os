@@ -13,7 +13,6 @@
           @clicked="onClickWindow($event, window)"
           @battery-easter-egg-activated="activatedEasterEgg = $event"
           @rendered="windowIsRendered = !windowIsRendered"
-          @update-settings="updateSettings"
           @close-window="closeWindow"
           @minimize-window="minimizeWindow"
           @split-other-window="splitOtherWindow = $event"
@@ -37,7 +36,6 @@
                     ref="settingsMenu"
                     class="quick-settings-menu"
                     @brightness-value-changed="updateBrightnessValue"
-                    @clicked="console.log('settings menu clicked')"
       />
       <taskbar ref="taskbar"
                class="taskbar"
@@ -58,6 +56,7 @@ import taskbarFooter from "@/components/desktop/taskbar/taskbar-footer";
 import ApplicationGrid from "@/components/sharedComponents/application-grid";
 import ApplicationWindow from "@/components/desktop/window/application-window";
 import SettingsMenu from "@/components/desktop/taskbar/taskbarComponents/settings-menu";
+import {useGlobalState} from "@/stores/globalState";
 import {deviceIsMobile} from "@/utils/util";
 
 export default {
@@ -85,13 +84,19 @@ export default {
   props: {
     backgroundImageId: Number
   },
-  emits: ['updateSettings', 'clicked'],
+  emits: ['clicked'],
   mounted() {
     if (deviceIsMobile() === true) {
       this.$router.push('/');
     }
 
-    this.updateSettings();
+    if (this.globalState.getBackgroundColor() !== '') {
+      this.setBackgroundColor();
+    } else if (this.globalState.getWallpaper() !== '') {
+      this.setWallpaper();
+    } else {
+      this.setWallpaper();
+    }
 
     window.addEventListener('resize', this.updateWindowDimensions);
   },
@@ -105,9 +110,23 @@ export default {
     windowIsRendered() {
       this.updateWindowDimensions();
     },
-
     activatedEasterEgg() {
       console.log(this.activatedEasterEgg);
+    },
+    'globalState.backgroundColor'() {
+      if (this.globalState.backgroundColor !== '') {
+        this.setBackgroundColor();
+      }
+    },
+    'globalState.wallpaper'() {
+      if (this.globalState.wallpaper !== '') {
+        this.setWallpaper();
+      }
+    },
+  },
+  computed: {
+    globalState() {
+      return useGlobalState();
     }
   },
   methods: {
@@ -137,6 +156,22 @@ export default {
         window.minimized = false;
       }
     },
+    setBackgroundColor() {
+      let backgroundColor = this.globalState.getBackgroundColor();
+
+      this.globalState.removeWallpaper();
+
+      this.$refs.desktop.style.backgroundImage = 'none'
+      this.$refs.desktop.style.backgroundColor = backgroundColor.color;
+    },
+    setWallpaper() {
+      let wallpaper = this.globalState.getWallpaper();
+
+      this.globalState.removeBackgroundColor();
+
+      this.$refs.desktop.style.backgroundImage = `url(${require(`@/assets/images/desktopWallpapers/${wallpaper}`)})`;
+      this.$refs.desktop.style.backgroundColor = 'none';
+    },
     updateBrightnessValue() {
       const value = localStorage.getItem('brightnessValue');
       if (value !== null) {
@@ -148,8 +183,6 @@ export default {
         const closeWindowId = this.openWindows.findIndex(window => window.windowName === value);
         this.openWindows.splice(closeWindowId, 1);
 
-        console.log(this.openWindows)
-
         if (this.openWindows[closeWindowId]) {
           this.openWindows[closeWindowId].windowName !== value ? resolve() : reject();
         } else {
@@ -157,14 +190,9 @@ export default {
         }
       }).then((error) => {
         if (error) {
-          console.log('error closing window');
           return;
         }
-        console.log('closeWindow')
         this.sortWindowArray();
-        if (value === 'settings') {
-          this.updateSettings();
-        }
         this.applicationName = '';
       });
     },
@@ -180,20 +208,6 @@ export default {
     },
     updateWindowDimensions() {
       this.windowDimensions = [window.innerWidth, (window.innerHeight - this.TASKBAR_HEIGHT)];
-    },
-    updateSettings() {
-      const wallpaper = window.localStorage.getItem('wallpaper');
-      const backgroundColor = window.localStorage.getItem('backgroundColor');
-
-      if (wallpaper !== null) {
-        this.$refs.desktop.style.backgroundImage = `url(${require(`@/assets/images/desktopWallpapers/${wallpaper}`)})`;
-        this.$refs.desktop.style.backgroundColor = 'none';
-      } else if (backgroundColor !== null && JSON.parse(backgroundColor) !== null) {
-        this.$refs.desktop.style.backgroundImage = 'none'
-        this.$refs.desktop.style.backgroundColor = JSON.parse(backgroundColor).color;
-      }
-
-      this.$emit('updateSettings');
     },
     activateQuickSettingsMenu(quickSettingsMenuButtonClicked) {
       if (quickSettingsMenuButtonClicked) {

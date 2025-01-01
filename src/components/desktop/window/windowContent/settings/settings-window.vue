@@ -21,13 +21,13 @@
       <div v-show="selectedOption === 'background color'" class="background-color-wrapper">
         <div class="background-color-title-selected-wrapper">
           <div class="background-color-title">{{ selectedOption }}</div>
-          <div class="selected-background-color">{{ selectedColor.name }}</div>
+          <div class="selected-background-color">{{ globalState.backgroundColor.name }}</div>
         </div>
         <div class="color-grid" ref="colorGrid">
           <div class="background-color-list-item-wrapper" v-for="object in colors" :key="object.color">
             <div :id="object.name" class="background-color" ref="backgroundColor"
                  :style="{ 'background-color': object.color }"
-                 :class="{ 'selected': selectedColor.color === object.color }" @click="updateColor(object)">
+                 :class="{ 'selected': globalState.backgroundColor.color === object.color }" @click="updateBackgroundColor(object)">
               <div class="color-name" ref="colorName"> {{ object.name }} ({{ object.color }}) </div>
             </div>
           </div>
@@ -42,15 +42,20 @@
                ref="wallpaper"
                v-for="wallpaper in wallpapers"
                :key="wallpaper"
-               :class="{ 'selected': selectedWallpaper === wallpaper }"
+               :class="{ 'selected': globalState.wallpaper === wallpaper }"
                @click="updateWallpaper(wallpaper)">
-            <img loading="lazy" class="wallpaper-image" :src="getImgUrl(wallpaper)" :alt="wallpaper" draggable="false">
+            <img class="wallpaper-image" :src="getImgUrl(wallpaper)" :alt="wallpaper" draggable="false">
           </div>
         </div>
       </div>
-      <select v-show="selectedOption === 'theme'" @click="updateTheme($event.target.value)" class="theme-picker" id="theme-picker">
-        <option v-for="theme in themes" :key="theme">{{ theme }}</option>
-      </select>
+      <div v-show="selectedOption === 'theme'" class="theme-wrapper">
+        <div class="theme-title-wrapper">
+          <div class="theme-title">{{ selectedOption }}</div>
+        </div>
+        <select @click="updateTheme($event.target.value)" class="theme-picker" id="theme-picker">
+          <option ref="themePickerOptions" v-for="theme in themes" :key="theme">{{ theme }}</option>
+        </select>
+      </div>
     </div>
   </div>
 </template>
@@ -58,11 +63,11 @@
 <script>
 import json from '@/assets/json/config.json'
 import SvgComponent from "@/components/ui/svg-component";
+import { useGlobalState } from "@/stores/globalState";
 
 export default {
   name: "settings-window",
   components: {SvgComponent},
-  emits: ['updateSettings'],
   data() {
     return {
       themes: json.themes,
@@ -71,9 +76,6 @@ export default {
       options: ['home', 'theme', 'background color', 'wallpaper'],
       searchbarInput: '',
       selectedOption: '',
-      selectedColor: '',
-      selectedWallpaper: '',
-      selectedTheme: '',
       FLEX_DIRECTION_CONTAINER: 'row',
       sidebarElement: {
         FONT_SIZE_NAV_ITEMS: 20
@@ -85,6 +87,14 @@ export default {
       type: Object,
       required: true
     }
+  },
+  mounted() {
+    this.$refs.themePickerOptions.forEach(element => {
+      const theme = this.globalState.getTheme();
+      if (theme === element.value) {
+        element.selected = true;
+      }
+    });
   },
   watch: {
     applicationWindowSize(newValue) {
@@ -128,44 +138,29 @@ export default {
       sidebar();
     }
   },
-  mounted() {
-  },
   methods: {
-    getImgUrl(name) {
-      return require(`@/assets/images/desktopWallpapers/${name}`);
+    getImgUrl(wallpaper) {
+      return require(`@/assets/images/desktopWallpapers/${wallpaper}`);
     },
     onClickOption(option) {
       this.selectedOption = option;
     },
-    updateColor(newValue) {
-      this.selectedColor = newValue;
-
-      window.localStorage.removeItem('wallpaper');
-      this.selectedWallpaper = '';
-
-      window.localStorage.setItem('backgroundColor', JSON.stringify(newValue));
-
-      this.$emit('updateSettings');
+    updateBackgroundColor(newValue) {
+      this.globalState.removeWallpaper();
+      this.globalState.setBackgroundColor(newValue);
     },
     updateWallpaper(newValue) {
-      this.selectedWallpaper = newValue;
-
-      window.localStorage.removeItem('backgroundColor');
-      this.selectedColor = '';
-
-      window.localStorage.setItem('wallpaper', newValue);
-
-      this.$emit('updateSettings');
+      this.globalState.removeBackgroundColor();
+      this.globalState.setWallpaper(newValue);
     },
     updateTheme(newValue) {
-      console.log(newValue)
-      if (newValue === window.localStorage.getItem('theme')) {
-        return;
-      }
-
-      window.localStorage.setItem('theme', newValue);
-      this.$emit('updateSettings');
+      this.globalState.setTheme(newValue);
     },
+    imageLoading(setLoading, event) {
+      if (setLoading) {
+        console.log(event)
+      }
+    }
   },
   computed: {
     getOptions() {
@@ -184,7 +179,10 @@ export default {
       }
 
       return this.options;
-    }
+    },
+    globalState() {
+      return useGlobalState();
+    },
   }
 }
 </script>
@@ -272,7 +270,6 @@ export default {
   display: flex;
   justify-content: space-between;
   font-size: 30px;
-  font-weight: bold;
 }
 
 .wallpaper-wrapper {
@@ -354,9 +351,19 @@ li.selected {
   outline: none;
   border-color: var(--highlight-color);
 }
-
+.theme-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-bottom: 10px;
+  width: 100%;
+  height: 100%;
+}
+.theme-title-wrapper {
+  font-size: 30px;
+}
 .theme-picker {
-  width: 50%;
+  width: 100%;
   height: 10%;
   border-radius: 10px;
   background-color: var(--background-color-input);

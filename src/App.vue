@@ -1,28 +1,37 @@
 <template>
   <div :class="theme">
-    <RouterView @update-settings="updateSettings"/>
+    <RouterView/>
   </div>
 </template>
 
 <script>
 
+import { useGlobalState } from "@/stores/globalState";
+
 export default {
   name: 'App',
   mounted() {
-    const theme = localStorage.getItem('theme');
-    if (theme) {
-      this.theme = theme;
-    }
+    this.setOrUpdateTheme();
   },
   data() {
     return {
       theme: 'default',
     }
   },
+  computed: {
+    globalState() {
+      return useGlobalState();
+    }
+  },
+  watch: {
+    'globalState.theme'() {
+      this.setOrUpdateTheme();
+    }
+  },
   methods: {
-    updateSettings() {
-      const theme = localStorage.getItem('theme');
-      if (theme) {
+    setOrUpdateTheme() {
+      const theme = this.globalState.getTheme();
+      if (theme !== '') {
         this.theme = theme;
       }
     }

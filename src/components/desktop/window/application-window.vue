@@ -37,7 +37,6 @@
       <WindowContent :window-name="windowName"
                      :disable-pointer-events="disablePointerEvents"
                      :application-window-size="applicationWindowSize"
-                     @update-settings="$emit('updateSettings')"
                      @move-calculator-window-to-top-corner="setSplitWindowValues(0, '40%', '30%', 0)"
       />
     </div>
@@ -154,7 +153,7 @@ export default {
       required: false
     }
   },
-  emits: ['splitOtherWindow', 'minimizeWindow', 'rendered', 'closeWindow', 'clicked', 'previewApplicationWindow', 'windowResizing', 'updateSettings'],
+  emits: ['splitOtherWindow', 'minimizeWindow', 'rendered', 'closeWindow', 'clicked', 'previewApplicationWindow', 'windowResizing'],
   watch: {
     windowSize(newSize) {
       this.MAXIMUM_WIDTH = newSize[0];

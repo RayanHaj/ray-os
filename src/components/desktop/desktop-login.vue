@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container" ref="container">
     <div class="profile-wrapper">
       <div class="img-wrapper">
         <img src="@/assets/images/default-image.png" width="220" height="220" alt="profile-picture">
@@ -21,6 +21,8 @@
 </template>
 
 <script>
+import { useGlobalState } from "@/stores/globalState";
+
 export default {
   name: "desktop-login",
   data() {
@@ -33,37 +35,22 @@ export default {
     this.updateSettings();
     this.sound = new Audio(require(`@/assets/audio/typing-sound.mp3`));
   },
+  computed: {
+    globalState() {
+      return useGlobalState();
+    },
+  },
   methods: {
     updateSettings() {
-      const loginScreenElement = this.$el;
+      const backgroundColor = this.globalState.getBackgroundColor();
+      const wallpaper = this.globalState.getWallpaper();
 
-      const backgroundPreference = localStorage.getItem('background-preference');
-
-      if (backgroundPreference === null) {
-        localStorage.setItem('background-preference', '2');
-        loginScreenElement.style.backgroundImage = `url(${require(`@/assets/images/desktopWallpapers/wallpaper_01.png`)})`;
-        loginScreenElement.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';  // Apply a dark color overlay
-        loginScreenElement.style.backgroundBlendMode = 'darken';
-      }
-
-      if (Number(backgroundPreference) === 1) {
-        const backgroundColor = localStorage.getItem('background-color');
-        console.log(backgroundColor)
-        if (backgroundColor) {
-          loginScreenElement.style.backgroundColor = `${backgroundColor}`;
-          loginScreenElement.style.backgroundImage = null;
-        } else {
-          this.backgroundColor = '#0A162C'
-          loginScreenElement.style.backgroundColor = this.backgroundColor;
-          loginScreenElement.style.backgroundImage = null;
-        }
-      } else {
-        let backgroundImage = Number(localStorage.getItem('background-image')) ? Number(localStorage.getItem('background-image')) : 1;
-        if (backgroundImage !== 0) {
-          loginScreenElement.style.backgroundImage = `url(${require(`@/assets/images/desktopWallpapers/wallpaper_0${backgroundImage}.png`)})`;
-          loginScreenElement.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';  // Apply a dark color overlay
-          loginScreenElement.style.backgroundBlendMode = 'darken';
-        }
+      if (wallpaper) {
+        this.$refs.container.style.backgroundImage = `url(${require(`@/assets/images/desktopWallpapers/${wallpaper}`)})`;
+        this.$refs.container.style.backgroundColor = 'none';
+      } else if (backgroundColor) {
+        this.$refs.container.style.backgroundColor = backgroundColor.color;
+        this.$refs.container.style.backgroundImage = 'none';
       }
     },
   },

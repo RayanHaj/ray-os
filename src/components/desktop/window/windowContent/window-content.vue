@@ -2,7 +2,6 @@
   <component :is="windowName.replace(' ', '')"
              :disable-pointer-events="disablePointerEvents"
              :application-window-size="applicationWindowSize"
-             @update-settings="$emit('updateSettings')"
              @move-calculator-window-to-top-corner="$emit('moveCalculatorWindowToTopCorner')"
   />
 </template>
@@ -23,7 +22,7 @@ export default {
     FileExplorer,
     Calculator
   },
-  emits: ['updateSettings', 'moveCalculatorWindowToTopCorner'],
+  emits: ['moveCalculatorWindowToTopCorner'],
   props: {
     windowName: {
       type: String,
