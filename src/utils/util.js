@@ -20,7 +20,7 @@ export function parseApplicationNameToImageNameFormat(name) {
     if (name === null) {
         return;
     }
-    console.log(name)
+
     name = name.replaceAll(' ', '');
     let parsedName = '';
     for (let i = 0; i < name.length; i++) {
@@ -37,7 +37,6 @@ export function parseApplicationNameToImageNameFormat(name) {
 }
 
 export function parseCalculationString(calculation) {
-    console.log(calculation)
     for (let i = 0; i < calculation.length; i++) {
         if (isNaN(Number(calculation[i]))) {
             switch (calculation[i]) {
@@ -54,7 +53,6 @@ export function parseCalculationString(calculation) {
                     return Number(calculation[i - 1]) / Number(calculation[i + 1]);
                 }
                 case '√': {
-                    console.log(calculation)
                     return Math.sqrt(Number(calculation[0]));
                 }
                 case 'x²': {
@@ -66,4 +64,20 @@ export function parseCalculationString(calculation) {
             }
         }
     }
+}
+
+export function parseFileToDbObject(file) {
+    let object = null;
+    switch (file.type) {
+        case 'video/mp4': {
+            object = {
+                name: file.name,
+                type: file.type,
+                createdAt: new Date(),
+                file: file
+            }
+        }
+    }
+
+    return object;
 }

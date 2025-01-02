@@ -22,6 +22,8 @@ export default class IndexedDb {
                     const store = this.db.createObjectStore('videos', { keyPath: 'name' });
                     store.createIndex('name', 'name');
                     store.createIndex('type', 'type');
+                    store.createIndex('createdAt', 'createdAt');
+                    store.createIndex('file', 'file');
                 }
             };
 

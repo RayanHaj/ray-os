@@ -72,13 +72,14 @@
 import {parseApplicationNameToImageNameFormat} from "@/utils/util";
 import {enableDragDropTouch} from "@/assets/libraries/drag-drop-touch.esm.min";
 import json from "@/assets/json/config.json"
+// import { parseFileToDbObject } from "@/utils/util"
 import SvgComponent from "@/components/ui/svg-component";
 import {useGlobalState} from "@/stores/globalState";
 
 export default {
   name: "application-grid",
   components: {SvgComponent},
-
+  inject: ['db'],
   mounted() {
     this.showTileBorders = this.globalState.getShowGridOutlineDesktop();
     enableDragDropTouch();
@@ -185,7 +186,7 @@ export default {
 
       this.contextMenuActive = false;
     },
-    dragAndDropEventListenersDesktop(event, type) {
+    async dragAndDropEventListenersDesktop(event, type) {
       const currentTile = event.currentTarget;
 
       switch (type) {
@@ -209,6 +210,19 @@ export default {
           break;
         }
         case 'drop': {
+          // let items = event.dataTransfer.items;
+          // if (items[0].type !== 'text/plain') {
+          //   if (items.length !== 0) {
+          //     for (let i = 0; i < items.length; i++) {
+          //       const file = items[i].getAsFile();
+          //       const object = parseFileToDbObject(file);
+          //       await this.db.postElement('videos', object);
+          //       this.insertTile(Number(currentTile.id), object.name);
+          //     }
+          //     return;
+          //   }
+          // }
+
           if (currentTile.classList.contains('filled')) {
             return;
           }
