@@ -56,6 +56,12 @@
           <option ref="themePickerOptions" v-for="theme in themes" :key="theme">{{ theme }}</option>
         </select>
       </div>
+      <div v-show="selectedOption === 'desktop grid'" class="desktop-grid-options-wrapper">
+        <input type="checkbox"
+               :checked="globalState.getShowGridOutlineDesktop() === true"
+               @change="globalState.setShowGridOutlineDesktop($event.target.checked)"
+        >
+      </div>
     </div>
   </div>
 </template>
@@ -73,7 +79,7 @@ export default {
       themes: json.themes,
       colors: json.colors,
       wallpapers: json.wallpapers,
-      options: ['home', 'theme', 'background color', 'wallpaper'],
+      options: ['home', 'theme', 'background color', 'wallpaper', 'desktop grid'],
       searchbarInput: '',
       selectedOption: '',
       FLEX_DIRECTION_CONTAINER: 'row',
@@ -129,7 +135,7 @@ export default {
 
         this.$refs.sidebarOptions.forEach(element => {
           element.style.fontSize = `${Math.max(12, newValue.width / 100)}px`;
-        })
+        });
       }
 
       container();

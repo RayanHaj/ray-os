@@ -11,14 +11,15 @@
              @dragstart="dragAndDropEventListenersDesktop($event, 'dragstart')"
              @touchstart="dragAndDropEventListenersDesktop($event, 'touchstart')"
              @mouseover="onMouseOverTile" @touchover="onMouseOverTile"
-             @dblclick="openApplication($event.currentTarget.querySelector('.application-name').innerText)"
+             @dblclick="openApplication($event.currentTarget.querySelector('.application-name')?.innerText)"
              @contextmenu.prevent="onRightClickTile"
              tabindex="0"
              :style="{
               width: `${TILE_WIDTH}px`,
               height: `${TILE_HEIGHT}px`,
               maxWidth: `${TILE_WIDTH}px`,
-              maxHeight: `${TILE_HEIGHT}px`
+              maxHeight: `${TILE_HEIGHT}px`,
+              border: `${ this.showTileBorders ? '1px solid white' : 'none' }`
             }"
         >
           <div
@@ -39,7 +40,8 @@
       </div>
     </div>
 
-    <div v-show="contextMenuActive === true" class="context-menu" ref="contextMenu" :style="{ width:`${CONTEXT_MENU_WIDTH}px`, height: `${CONTEXT_MENU_HEIGHT}px`}">
+    <div v-show="contextMenuActive === true" class="context-menu" ref="contextMenu"
+         :style="{ width:`${CONTEXT_MENU_WIDTH}px`, height: `${CONTEXT_MENU_HEIGHT}px`}">
       <div class="context-actions-wrapper">
         <div v-if="tileOnRightClickIsFilled" class="context-action" title="copy">
           <SvgComponent svg-type="copy" :custom-height="CONTEXT_MENU_SVG_HEIGHT" :custom-width="CONTEXT_MENU_SVG_WIDTH"
@@ -56,7 +58,9 @@
       </div>
       <hr style="width: 90%; margin-top: 5px; margin-bottom: 5px;"/>
       <div class="context-other-actions-wrapper">
-        <div v-if="tileOnRightClick?.classList.contains('filled')" class="context-action" @click="openApplication(tileOnRightClick?.querySelector('.application-name').innerText)">Open</div>
+        <div v-if="tileOnRightClick?.classList.contains('filled')" class="context-action"
+             @click="openApplication(tileOnRightClick?.querySelector('.application-name').innerText)">Open
+        </div>
         <div v-if="tileOnRightClick?.classList.contains('filled')" class="context-action">Open file location</div>
         <div class="context-action" @click="init()">Restore applications</div>
       </div>
@@ -65,21 +69,21 @@
 </template>
 
 <script>
-import { parseApplicationNameToImageNameFormat } from "@/utils/util";
-import { enableDragDropTouch } from "@/assets/libraries/drag-drop-touch.esm.min";
+import {parseApplicationNameToImageNameFormat} from "@/utils/util";
+import {enableDragDropTouch} from "@/assets/libraries/drag-drop-touch.esm.min";
 import json from "@/assets/json/config.json"
 import SvgComponent from "@/components/ui/svg-component";
+import {useGlobalState} from "@/stores/globalState";
 
 export default {
   name: "application-grid",
   components: {SvgComponent},
 
   mounted() {
-    this.$nextTick(() => {
-      enableDragDropTouch();
-      this.init();
-      window.addEventListener('keydown', this.onKeydownTile);
-    });
+    this.showTileBorders = this.globalState.getShowGridOutlineDesktop();
+    enableDragDropTouch();
+    this.init();
+    window.addEventListener('keydown', this.onKeydownTile);
   },
 
   beforeUnmount() {
@@ -100,6 +104,7 @@ export default {
       CONTEXT_MENU_WIDTH: 140,
       CONTEXT_MENU_HEIGHT: 115,
       contextMenuActive: false,
+      showTileBorders: false,
       draggedTile: null,
       tileOnRightClick: null,
       tileOnHover: null,
@@ -126,6 +131,14 @@ export default {
     },
     windowResizing(newValue) {
       this.applicationWindowIsResizing = newValue;
+    },
+    'globalState.showGridOutlineDesktop'() {
+      this.showTileBorders = this.globalState.getShowGridOutlineDesktop();
+    }
+  },
+  computed: {
+    globalState() {
+      return useGlobalState();
     }
   },
   methods: {
@@ -260,6 +273,10 @@ export default {
       this.tileOnHover = e.currentTarget;
     },
     openApplication(applicationName) {
+      if (applicationName === undefined) {
+        return;
+      }
+
       this.$emit('applicationName', applicationName);
     },
     deleteTile(index) {
@@ -320,29 +337,19 @@ export default {
 </script>
 
 <style scoped>
-.grid-container {
-  display: grid;
-  position: relative;
-  grid-auto-flow: row;
-  grid-template-columns: auto;
-  grid-template-rows: auto;
-  align-items: center;
-  justify-items: center;
+* {
+  box-sizing: border-box;
 }
 
 .grid {
   display: flex;
   flex-direction: row;
-  position: relative;
 }
 
 .tile {
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
   font-size: 10px;
-  color: white;
+  color: var(--font-color);
   user-select: none;
 }
 
@@ -354,11 +361,7 @@ export default {
 }
 
 .tile.filled:hover {
-  background-color: rgba(190, 190, 190, 0.5);
-}
-
-.tile.filled.selected {
-  background-color: rgba(190, 190, 190, 0.5);
+  background-color: var(--hover-color);
 }
 
 .tile:focus {

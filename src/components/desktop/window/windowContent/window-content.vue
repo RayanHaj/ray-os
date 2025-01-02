@@ -12,6 +12,7 @@ import Settings from "@/components/desktop/window/windowContent/settings/setting
 import Browser from "@/components/desktop/window/windowContent/browser/browser-window";
 import SereneSounds from "@/components/desktop/window/windowContent/sereneSounds/serene-sounds-window";
 import Calculator from "@/components/desktop/window/windowContent/calculator/calculator-window";
+import VideoPlayer from "@/components/desktop/window/windowContent/videoPlayer/video-player-window";
 
 export default {
   name: "window-content",
@@ -20,7 +21,8 @@ export default {
     Browser,
     Settings,
     FileExplorer,
-    Calculator
+    Calculator,
+    VideoPlayer
   },
   emits: ['moveCalculatorWindowToTopCorner'],
   props: {

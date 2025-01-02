@@ -2,21 +2,35 @@ import { defineStore } from "pinia";
 
 export const useGlobalState = defineStore('globalState', {
     state: () => ({
+        showGridOutlineDesktop: false,
         copiedApplications: [],
         openWindows: [],
         backgroundColor: '',
         wallpaper: '',
-        theme: '',
+        theme: ''
     }),
     actions: {
+        getShowGridOutlineDesktop() {
+            const showGridOutlineDesktopLS = window.localStorage.getItem('showGridOutlineDesktop');
+
+            if (this.showGridOutlineDesktop === false && showGridOutlineDesktopLS) {
+                this.showGridOutlineDesktop = showGridOutlineDesktopLS;
+            }
+
+            return JSON.parse(this.showGridOutlineDesktop);
+        },
+        setShowGridOutlineDesktop(value) {
+            this.showGridOutlineDesktop = value;
+            window.localStorage.setItem('showGridOutlineDesktop', value);
+        },
         getBackgroundColor() {
-          const backgroundColorLS = window.localStorage.getItem('backgroundColor');
+            const backgroundColorLS = window.localStorage.getItem('backgroundColor');
 
-          if (this.backgroundColor === '' && backgroundColorLS) {
-              this.backgroundColor = JSON.parse(backgroundColorLS);
-          }
+            if (this.backgroundColor === '' && backgroundColorLS) {
+                this.backgroundColor = JSON.parse(backgroundColorLS);
+            }
 
-          return this.backgroundColor;
+            return this.backgroundColor;
         },
         setBackgroundColor(value) {
             this.backgroundColor = value;
