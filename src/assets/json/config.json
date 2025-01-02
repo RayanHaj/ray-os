@@ -1,5 +1,5 @@
 {
-  "applicationNames": [
+  "defaultApplicationNames": [
     "Browser",
     "File Explorer",
     "Settings",

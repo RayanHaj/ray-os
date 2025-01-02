@@ -1,5 +1,6 @@
 <template>
-  <div class="grid-container" ref="gridContainer" @click="onClickContainer">
+  <div v-if="isLoading">Loading...</div>
+  <div v-else class="grid-container" ref="gridContainer" @click="onClickContainer">
     <div class="grid" ref="grid" v-if="GRID_HEIGHT > 0"
          @dragover.prevent="dragAndDropEventListenersDesktop($event, 'dragover')"
          @touchover.prevent="dragAndDropEventListenersDesktop($event, 'touchover')">
@@ -29,11 +30,11 @@
               :draggable="applicationWindowIsResizing === false"
           >
             <div class="application-img" ref="applicationImg">
-              <img :src="getImgUrl(listApplicationElements[indexX * GRID_HEIGHT + indexY].name)" :width="IMAGE_WIDTH"
-                   :height="IMAGE_HEIGHT" :alt="listApplicationElements[indexX * GRID_HEIGHT + indexY].name">
+              <img :src="listApplicationElements[indexX * GRID_HEIGHT + indexY]?.imageUrl" :width="IMAGE_WIDTH"
+                   :height="IMAGE_HEIGHT" :alt="listApplicationElements[indexX * GRID_HEIGHT + indexY]?.imageUrl">
             </div>
             <div class="application-name" ref="applicationName" :style="{fontSize: `${TILE_NAME_FONT_SIZE}px`}">
-              {{ listApplicationElements[indexX * GRID_HEIGHT + indexY].name }}
+              {{ listApplicationElements[indexX * GRID_HEIGHT + indexY]?.name }}
             </div>
           </div>
         </div>
@@ -69,10 +70,7 @@
 </template>
 
 <script>
-import {parseApplicationNameToImageNameFormat} from "@/utils/util";
 import {enableDragDropTouch} from "@/assets/libraries/drag-drop-touch.esm.min";
-import json from "@/assets/json/config.json"
-// import { parseFileToDbObject } from "@/utils/util"
 import SvgComponent from "@/components/ui/svg-component";
 import {useGlobalState} from "@/stores/globalState";
 
@@ -80,6 +78,9 @@ export default {
   name: "application-grid",
   components: {SvgComponent},
   inject: ['db'],
+  beforeMount() {
+    this.isLoading = true;
+  },
   mounted() {
     this.showTileBorders = this.globalState.getShowGridOutlineDesktop();
     enableDragDropTouch();
@@ -103,7 +104,7 @@ export default {
       CONTEXT_MENU_SVG_WIDTH: 20,
       CONTEXT_MENU_SVG_HEIGHT: 20,
       CONTEXT_MENU_WIDTH: 140,
-      CONTEXT_MENU_HEIGHT: 115,
+      CONTEXT_MENU_HEIGHT: 133,
       contextMenuActive: false,
       showTileBorders: false,
       draggedTile: null,
@@ -111,8 +112,8 @@ export default {
       tileOnHover: null,
       tileOnRightClickIsFilled: false,
       applicationWindowIsResizing: false,
+      isLoading: false,
       listApplicationElements: [],
-      applicationNames: json.applicationNames,
     }
   },
   emits: ['clicked', 'applicationName'],
@@ -143,25 +144,32 @@ export default {
     }
   },
   methods: {
-    init() {
+    async init() {
       if (this.windowSize[0] !== null && this.windowSize[1] !== null) {
         this.GRID_WIDTH = Math.floor(this.windowSize[0] / this.TILE_WIDTH);
         this.GRID_HEIGHT = Math.floor((this.windowSize[1] / this.TILE_HEIGHT));
       }
 
+      const elements = await this.db.getAllElements('files');
+
       for (let i = 0; i < this.GRID_WIDTH * this.GRID_HEIGHT; i++) {
-        if (this.applicationNames.length - 1 >= i) {
+        if (elements[i] !== undefined) {
+          const imgUrl = URL.createObjectURL(elements[i].image);
           this.listApplicationElements[i] = {
-            'index': i,
-            'name': this.applicationNames[i]
+            'index': elements[i].gridIndex,
+            'name': elements[i].name,
+            'imageUrl': imgUrl
           };
         } else {
           this.listApplicationElements[i] = {
             'index': i,
-            'name': null
+            'name': null,
+            'imageUrl': null
           };
         }
       }
+      this.listApplicationElements = this.listApplicationElements.sort((a, b) => a.index - b.index);
+      this.isLoading = false;
     },
     contextMenuActions(e, action) {
       switch (action) {
@@ -227,9 +235,14 @@ export default {
             return;
           }
 
+          console.log(this.draggedTile);
+          console.log(this.listApplicationElements)
+
           const index = this.listApplicationElements.findIndex(element => {
             return element.index === this.draggedTile.index;
           });
+
+          console.log(index)
 
           this.deleteTile(index);
           this.insertTile(Number(currentTile.id), this.draggedTile.name)
@@ -240,7 +253,8 @@ export default {
     isTileFillable(indexX, indexY) {
       return (
           this.listApplicationElements[indexX * this.GRID_HEIGHT + indexY] !== null &&
-          this.listApplicationElements[indexX * this.GRID_HEIGHT + indexY].name !== null
+          this.listApplicationElements[indexX * this.GRID_HEIGHT + indexY]?.name !== null &&
+          this.listApplicationElements[indexX * this.GRID_HEIGHT + indexY]?.imageUrl !== null
       )
     },
     onClickContainer() {
@@ -297,16 +311,20 @@ export default {
       if (typeof this.listApplicationElements[index] !== 'undefined' && this.listApplicationElements[index].name !== null) {
         this.listApplicationElements[index] = {
           'index': index,
-          'name': null
+          'name': null,
+          'imageUrl': null
         }
       }
     },
     insertTile(index, name) {
       if (typeof this.listApplicationElements[index] !== 'undefined') {
-        this.listApplicationElements[index] = {
-          'index': index,
-          'name': name
-        }
+        this.db.getElementByName('files', name).then(element => {
+          this.listApplicationElements[index] = {
+            'index': index,
+            'name': name,
+            'imageUrl': URL.createObjectURL(element.image)
+          }
+        });
       }
     },
     createDragImage(imgElement, event) {
@@ -327,10 +345,6 @@ export default {
       setTimeout(() => {
         this.$el.removeChild(imgClone);
       }, 0)
-    },
-    getImgUrl(name) {
-      const parsedName = parseApplicationNameToImageNameFormat(name);
-      return require(`@/assets/images/applicationImages/${parsedName}.png`);
     },
     setTilesSmallSize() {
       this.IMAGE_WIDTH = 40;

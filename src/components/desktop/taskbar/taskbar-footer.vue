@@ -84,7 +84,7 @@ export default {
         KEYBOARD_LAYOUT_BUTTON: true,
         ARROW_OPEN_WINDOWS_BUTTON: true
       },
-      applicationNames: json.applicationNames
+      applicationNames: json.defaultApplicationNames
     };
   },
   mounted() {

@@ -8,7 +8,7 @@ const app = createApp(App);
 const pinia = createPinia();
 
 async function initDb() {
-    const dbInstance = new IndexedDb("myDatabase", 1);
+    const dbInstance = new IndexedDb("store", 1);
     await dbInstance.init();
     app.provide('db', dbInstance);
 }
