@@ -187,5 +187,4 @@ html, body {
   --border-window-color: #FFD700; /* Same as font color */
 }
 
-
 </style>

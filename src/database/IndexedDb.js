@@ -21,7 +21,27 @@ export default class IndexedDb {
                 this.db = event.target.result;
 
                 if (!this.db.objectStoreNames.contains('files')) {
-                    const store = this.db.createObjectStore('files', { keyPath: 'name' });
+                    const store = this.db.createObjectStore('files', { keyPath: 'name', autoIncrement: true });
+                    store.createIndex('name', 'name');
+                    store.createIndex('type', 'type');
+                    store.createIndex('createdAt', 'createdAt');
+                    store.createIndex('gridIndex', 'gridIndex');
+                    store.createIndex('image', 'image');
+                    store.createIndex('file', 'file');
+                }
+
+                if (!this.db.objectStoreNames.contains('desktopFiles')) {
+                    const store = this.db.createObjectStore('desktopFiles', { keyPath: 'name', autoIncrement: true });
+                    store.createIndex('name', 'name');
+                    store.createIndex('type', 'type');
+                    store.createIndex('createdAt', 'createdAt');
+                    store.createIndex('gridIndex', 'gridIndex');
+                    store.createIndex('image', 'image');
+                    store.createIndex('file', 'file');
+                }
+
+                if (!this.db.objectStoreNames.contains('taskbarFiles')) {
+                    const store = this.db.createObjectStore('taskbarFiles', { keyPath: 'name', autoIncrement: true });
                     store.createIndex('name', 'name');
                     store.createIndex('type', 'type');
                     store.createIndex('createdAt', 'createdAt');
@@ -49,7 +69,9 @@ export default class IndexedDb {
                                     file: null
                                 }
 
-                                await this.postElement('files', object)
+                                await this.postElement('files', object);
+                                await this.postElement('desktopFiles', object);
+                                await this.postElement('taskbarFiles', object);
                             });
                     }
                 }
@@ -82,6 +104,24 @@ export default class IndexedDb {
         });
     }
 
+    async getElementByType(storeName, type) {
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction([storeName], 'readonly');
+            const store = transaction.objectStore(storeName);
+            const index = store.index('type');
+
+            const request = index.getAll(type);
+
+            request.onsuccess = event => {
+                resolve(event.target.result);
+            }
+
+            request.onerror = event => {
+                reject(event.target.error);
+            }
+        });
+    }
+
     async getElementByName(storeName, name) {
         return new Promise((resolve, reject) => {
            const transaction = this.db.transaction([storeName], 'readonly');
@@ -100,6 +140,15 @@ export default class IndexedDb {
         });
     }
 
+    async getImageByFileType(filetype) {
+        switch (filetype) {
+            case 'video/mp4': {
+                const object = await this.getElementByName('files', 'Video Player');
+                return object.image;
+            }
+        }
+    }
+
     async postElement(storeName, element) {
         return new Promise((resolve, reject) => {
             const transaction = this.db.transaction([storeName], 'readwrite');
@@ -113,14 +162,23 @@ export default class IndexedDb {
     }
 
     async removeElement(storeName, id) {
-        return new Promise((resolve, reject) => {
+        try {
             const transaction = this.db.transaction([storeName], 'readwrite');
             const store = transaction.objectStore(storeName);
 
-            transaction.oncomplete = () => resolve();
-            transaction.onerror = event => reject(event.target.error);
+            await new Promise((resolve, reject) => {
+                store.delete(id);
 
-            store.delete(id);
-        });
+                transaction.oncomplete = () => resolve();
+                transaction.onerror = event => reject(event.target.error);
+            });
+
+            if (storeName === 'files') {
+                await this.removeElement('desktopFiles', id);
+                await this.removeElement('taskbarFiles', id);
+            }
+        } catch (error) {
+            console.error('error while removing file: ' + error);
+        }
     }
 }

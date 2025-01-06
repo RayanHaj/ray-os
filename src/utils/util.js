@@ -66,7 +66,7 @@ export function parseCalculationString(calculation) {
     }
 }
 
-export function parseFileToDbObject(file) {
+export function parseFileToDbObject(file, index, image) {
     let object = null;
     switch (file.type) {
         case 'video/mp4': {
@@ -74,6 +74,8 @@ export function parseFileToDbObject(file) {
                 name: file.name,
                 type: file.type,
                 createdAt: new Date(),
+                gridIndex: index,
+                image: image,
                 file: file
             }
         }

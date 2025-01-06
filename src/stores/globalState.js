@@ -1,10 +1,16 @@
-import { defineStore } from "pinia";
+import {defineStore} from "pinia";
 
 export const useGlobalState = defineStore('globalState', {
     state: () => ({
         showGridOutlineDesktop: false,
-        copiedApplications: [],
         openWindows: [],
+        desktopFiles: [],
+        taskbarFiles: null,
+        browserWindowSize: {
+            HEIGHT_TASKBAR_EXCLUDED: 0,
+            HEIGHT: 0,
+            WIDTH: 0,
+        },
         backgroundColor: '',
         wallpaper: '',
         theme: ''
@@ -81,6 +87,44 @@ export const useGlobalState = defineStore('globalState', {
                 window.localStorage.removeItem('theme');
                 this.theme = '';
             }
+        },
+        pushOpenWindow(object) {
+            let id = 0;
+            if (this.openWindows.length > 0) {
+                id = this.openWindows.length;
+            }
+
+            let windowName = object.name;
+            if (object.type !== 'Application') {
+                windowName = returnApplicationForFileType(object.type);
+            }
+
+            console.log(id, windowName)
+
+            const newWindowObject = {
+                'id': id,
+                'name': windowName,
+                'zIndex': null,
+                'minimized': false,
+                'values': object
+            }
+
+            this.openWindows.push(newWindowObject);
+
+            function returnApplicationForFileType(type) {
+                let returnValue = null;
+                switch (type) {
+                    case 'video/mp4': {
+                        returnValue = 'Video Player';
+                        break;
+                    }
+                }
+
+                return returnValue;
+            }
+        },
+        closeOpenWindowByWindowId(id) {
+            this.openWindows = this.openWindows.filter(window => window.id !== id);
         },
     }
 })

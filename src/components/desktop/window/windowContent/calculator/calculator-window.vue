@@ -1,13 +1,13 @@
 <template>
   <div class="calculator-container" ref="calculatorContainer">
     <section class="calculator">
-      <div class="calculator-header">
+      <header class="calculator-header">
         <SvgComponent @clicked="$emit('moveCalculatorWindowToTopCorner')"
                       svg-type="moveWindowToTopCorner"
                       :custom-width="20"
                       :custom-height="20"
         />
-      </div>
+      </header>
       <div class="calculator-answer">
         <div class="full-sum-preview">{{ calculationList.join(' ') }}</div>
         <div class="display-input-value"
@@ -15,31 +15,24 @@
           {{ inputNumber }}
         </div>
       </div>
-      <div class="calculator-actions">
-        <div class="col" v-for="(column, index) in characterList" :key="index">
-          <button class="calculator-button" v-for="operator in column" :key="operator"
-                  :disabled="isNaN(Number(operator)) && disableButtons === true"
-                  @click="onClickOperatorButton(operator)"
-          >
-            <SvgComponent svg-type="backspace" :custom-width="25" :custom-height="25"
-                          v-if="operator === 'backspace'"></SvgComponent>
+      <div class="calculator-buttons">
+        <div v-for="(column, index) in characterList" :key="index" class="column">
+          <button v-for="operator in column" @click="onClickOperatorButton(operator)"
+                  :disabled="isNaN(Number(operator)) && disableButtons === true" :key="operator" class="calculator-button">
+            <SvgComponent v-if="operator === 'backspace'" svg-type="backspace" :custom-width="25" :custom-height="25"/>
             {{ operator !== 'backspace' ? operator : null }}
           </button>
         </div>
       </div>
     </section>
     <section class="calculation-history">
-      <div class="calculation-history-header">
-        <label>History</label>
-      </div>
-      <div class="history-list-wrapper">
-        <div class="history-list-item" v-for="element in calculationHistory" :key="element">
-          <div class="history-list-item-content" @click="restorePastCalculation(element)">
-            <div class="history-list-item-calculation">{{ element.calculation }}</div>
-            <div class="answer" style="color: var(--font-color)">{{ element.answer }}</div>
-          </div>
-        </div>
-      </div>
+      <h1>History</h1>
+      <ul class="calculation-history-list">
+        <li class="calculation-history-list-item" v-for="element in calculationHistory" @click="restorePastCalculation(element)" :key="element">
+          <div class="calculation">{{ element.calculation }}</div>
+          <div class="answer" style="color: var(--font-color)">{{ element.answer }}</div>
+        </li>
+      </ul>
     </section>
   </div>
 </template>
@@ -74,7 +67,6 @@ export default {
     const resizeObserver = new ResizeObserver(() => {
       if (this.$refs.calculatorContainer) {
         this.containerHeight = this.$refs.calculatorContainer.offsetHeight;
-        console.log(this.containerHeight)
         this.containerWidth = this.$refs.calculatorContainer.offsetWidth;
       }
     });
@@ -199,7 +191,6 @@ export default {
         return;
       }
       if (this.startCalculate) {
-        console.log(this.calculationList)
         this.calculationList.push(this.inputNumber);
         this.calculationAfterOperator = true;
         this.calculate('=', true);
@@ -222,7 +213,6 @@ export default {
       }
 
       this.inputNumber = parseCalculationString([this.inputNumber, operator]);
-      console.log(this.inputNumber)
     },
     handleBackspace() {
       if (this.inputNumber.length !== 0) {
@@ -301,12 +291,7 @@ export default {
   width: 30%;
 }
 
-.calculation-history-header {
-  font-size: 20px;
-  padding: 15px;
-}
-
-.history-list-wrapper {
+.calculation-history-list {
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -314,17 +299,16 @@ export default {
   overflow-y: auto;
 }
 
-.history-list-item {
+.calculation-history-list-item {
   text-align: end;
   font-size: 20px;
-  width: 99%;
-}
-
-.history-list-item-content {
   padding-right: 10px;
+  width: 99%;
+  list-style-type: none;
 }
 
-.history-list-item-content:hover {
+
+.calculation-history-list-item:hover {
   background-color: rgba(0, 0, 0, 0.2);
 }
 
@@ -342,12 +326,12 @@ export default {
   padding: 10px;
 }
 
-.calculator-actions {
+.calculator-buttons {
   height: 100%;
   margin: 3px;
 }
 
-.col {
+.column {
   display: flex;
   flex-direction: row;
   width: 100%;
@@ -377,7 +361,7 @@ export default {
   font-size: 40px;
 }
 
-.history-list-item-calculation {
+.calculation {
   font-size: 12px;
 }
 </style>

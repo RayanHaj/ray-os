@@ -63,8 +63,6 @@ export default {
         "previews": sound.previews
       })
     });
-
-    console.log(array)
   },
 
   methods: {
@@ -101,13 +99,9 @@ export default {
             return;
           }
 
-          console.log(elementOnMousePosition)
-
           if (elementOnMousePosition.classList.contains('card-child') && this.playlistSounds.length > 0) {
             elementOnMousePosition = elementOnMousePosition.parentElement;
           }
-
-          console.log(elementOnMousePosition)
 
           if (!elementOnMousePosition.classList.contains('playlist-audio-card') && this.playlistSounds.length > 0) {
             return;

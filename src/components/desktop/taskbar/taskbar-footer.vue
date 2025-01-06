@@ -5,7 +5,7 @@
            :key="iconImageName"
            @mouseenter="onMouseoverApplicationIcon(iconImageName)" @mouseleave="onMouseleaveApplicationIcon">
         <div
-            v-if="currentIconHover.name === iconImageName && currentIconHover.hasHoverState && openWindows.some(openWindow => openWindow.windowName === iconImageName)"
+            v-if="currentIconHover.name === iconImageName && currentIconHover.hasHoverState && this.globalState.openWindows.some(openWindow => openWindow.name === iconImageName)"
             :style="{ left: index === 0 ? '0' : (index === 1 ? '-45px' : undefined)  }"
             @mouseover.once="onMouseoverOpenWindow" @mouseleave="onMouseleaveOpenWindow"
             class="open-window-preview-wrapper">
@@ -21,11 +21,11 @@
         <div>
           <ImgComponent @clicked="emitApplicationName(iconImageName)" :image-name="iconImageName" :custom-width="ICON_IMG_WIDTH"
                         :custom-height="ICON_IMG_HEIGHT"/>
-          <div :class="openWindows.find(openWindow => openWindow.windowName === iconImageName) &&
-                       openWindows.find(openWindow => openWindow.windowName === iconImageName).minimized === true ?
+          <div :class="this.globalState.openWindows.find(openWindow => openWindow.name === iconImageName) &&
+                       this.globalState.openWindows.find(openWindow => openWindow.name === iconImageName).minimized === true ?
                        'horizontal-line-minimized' :
                        'horizontal-line'"
-               :style="{ visibility: openWindows.some(openWindow => openWindow.windowName === iconImageName) ?
+               :style="{ visibility: this.globalState.openWindows.some(openWindow => openWindow.name === iconImageName) ?
                'visible' :
                'hidden' }"
           />
@@ -63,10 +63,12 @@
 import SvgComponent from "@/components/ui/svg-component";
 import ImgComponent from "@/components/ui/img-component";
 import json from "@/assets/json/config.json";
+import {useGlobalState} from "@/stores/globalState";
 
 export default {
   name: "taskbarFooter",
-  emits: ['closeWindow', 'applicationName', 'quickSettingsMenuOpen', 'hoveringOnWindowImageTaskbar', 'clicked'],
+  emits: ['closeWindow', 'quickSettingsMenuOpen', 'hoveringOnWindowImageTaskbar', 'clicked'],
+  inject: ['db'],
   data() {
     return {
       date: '',
@@ -87,12 +89,19 @@ export default {
       applicationNames: json.defaultApplicationNames
     };
   },
+  computed: {
+    globalState() {
+      return useGlobalState();
+    }
+  },
   mounted() {
     function addLeadingZero(number) {
       return ('0' + number).slice(-2);
     }
 
     this.previewImageCache = new Map();
+
+
 
     setInterval(() => {
       const now = new Date();
@@ -115,10 +124,6 @@ export default {
     resizeObserver.observe(this.$refs.taskbar);
   },
   props: {
-    openWindows: {
-      type: Array,
-      required: false
-    },
     height: {
       type: Number,
       required: true
@@ -131,7 +136,17 @@ export default {
   components: {ImgComponent, SvgComponent},
   methods: {
     emitApplicationName(applicationName) {
-      this.$emit('applicationName', applicationName)
+      if (applicationName === undefined) {
+        return;
+      }
+
+      if (this.globalState.openWindows.some(window => window.name === applicationName)) {
+        return;
+      }
+
+      this.db.getElementByName('files', applicationName).then(element => {
+        this.globalState.pushOpenWindow(element);
+      });
     },
     emitQuickSettingMenuClicked() {
       this.quickSettingMenuIsOpen = !this.quickSettingMenuIsOpen;
@@ -141,7 +156,7 @@ export default {
       return this.$refs.quickSettingsMenuButton;
     },
     onMouseoverApplicationIcon(name) {
-      if (this.openWindows.some(window => window.windowName === name)) {
+      if (this.globalState.openWindows.some(window => window.name === name)) {
         this.isHoveringOnOpenWindowImage = true;
 
         this.currentIconHover = {

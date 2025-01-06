@@ -4,30 +4,26 @@
        :style="{ filter: `brightness(${desktopBrightnessValue}%)`}">
     <div class="main-screen">
       <MainWindow
-          v-for="window in openWindows"
+          v-for="window in this.globalState.openWindows"
           class="window"
-          :key="window.windowName"
-          :ref="window.windowName"
-          :style="{zIndex: openWindows.find(openWindow => openWindow.windowName === window.windowName).zIndex}"
-          :window-name="window.windowName"
+          :ref="window.name"
+          :key="window.name"
+          :id="window.id"
+          :style="{zIndex: this.globalState.openWindows.find(openWindow => openWindow.id === window.id).zIndex}"
+          :window-id="window.id"
+          :window-size="windowDimensions"
+          :split-other-window="splitOtherWindow"
+          :taskbar-height="TASKBAR_HEIGHT"
+          :current-hovered-image-taskbar-name="currentHoveredImageTaskbarName"
           @clicked="onClickWindow($event, window)"
-          @battery-easter-egg-activated="activatedEasterEgg = $event"
           @rendered="windowIsRendered = !windowIsRendered"
-          @close-window="closeWindow"
           @minimize-window="minimizeWindow"
           @split-other-window="splitOtherWindow = $event"
           @preview-application-window="this.previewApplicationWindow = $event"
           @window-resizing="windowIsResizing = $event"
-          :window-size="windowDimensions"
-          :open-windows="openWindows"
-          :split-other-window="splitOtherWindow"
-          :taskbar-height="TASKBAR_HEIGHT"
-          :current-hovered-image-taskbar-name="currentHoveredImageTaskbarName"
       />
       <DesktopGrid
-          @application-name="setApplicationNameVariable"
           @clicked="activateQuickSettingsMenu(false)"
-          :window-size="windowDimensions"
           :window-resizing="windowIsResizing"
           class="desktop-grid"/>
     </div>
@@ -39,11 +35,8 @@
       />
       <taskbar ref="taskbar"
                class="taskbar"
-               @application-name="setApplicationNameVariable"
                @quick-settings-menu-open="activateQuickSettingsMenu(true)"
-               @close-window="closeWindow"
                @hovering-on-window-image-taskbar="currentHoveredImageTaskbarName = $event"
-               :open-windows="openWindows"
                :height="TASKBAR_HEIGHT"
                :preview-application-window="previewApplicationWindow"
       />
@@ -68,7 +61,6 @@ export default {
       windowIsResizing: false,
       quickSettingMenuIsOpen: false,
       closingWindow: false,
-      activatedEasterEgg: null,
       currentHoveredImageTaskbarName: null,
       previewApplicationWindow: null,
       applicationName: '',
@@ -98,10 +90,11 @@ export default {
       this.setWallpaper();
     }
 
+    this.globalState.browserWindowSize.WIDTH = this.$el.getBoundingClientRect().width;
+    this.globalState.browserWindowSize.HEIGHT = this.$el.getBoundingClientRect().height;
+    this.globalState.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED = this.$el.getBoundingClientRect().height - this.TASKBAR_HEIGHT;
+
     window.addEventListener('resize', this.updateWindowDimensions);
-  },
-  created() {
-    this.windowDimensions = [window.innerWidth, (window.innerHeight - this.TASKBAR_HEIGHT)];
   },
   beforeUnmount() {
     window.removeEventListener('resize', this.updateWindowDimensions);
@@ -109,9 +102,6 @@ export default {
   watch: {
     windowIsRendered() {
       this.updateWindowDimensions();
-    },
-    activatedEasterEgg() {
-      console.log(this.activatedEasterEgg);
     },
     'globalState.backgroundColor'() {
       if (this.globalState.backgroundColor !== '') {
@@ -123,6 +113,19 @@ export default {
         this.setWallpaper();
       }
     },
+    'globalState.openWindows.length'(newValue, oldValue) {
+      if (newValue > oldValue) {
+        const newElement = this.globalState.openWindows[this.globalState.openWindows.length - 1];
+        this.$nextTick(() => {
+          const windowElement = this.$refs[newElement.name][0];
+          if (Number(windowElement.$el.id) === newElement.id) {
+            windowElement.$el.style.height = `calc(100% - ${this.TASKBAR_HEIGHT}px)`;
+            windowElement.$el.style.display = 'flex';
+            window.minimized = false;
+          }
+        });
+      }
+    },
   },
   computed: {
     globalState() {
@@ -130,31 +133,8 @@ export default {
     }
   },
   methods: {
-    setApplicationNameVariable(name) {
-      const window = this.openWindows.find(window => window.windowName === name);
-      if (!window) {
-        this.openWindows.push({'windowName': name, 'zIndex': this.highestZIndex, 'minimized': false});
-        this.applicationName = name;
-        this.highestZIndex++;
-
-        this.$nextTick(() => {
-          this.$el.querySelectorAll('.window').forEach(element => {
-            console.log(element)
-            if (name === element.querySelector('.window-name').innerText) {
-              element.style.height = `calc(100% - ${this.TASKBAR_HEIGHT}px)`;
-            }
-          });
-        });
-
-        return;
-      }
-
-      const windowComponent = this.$refs[name][0];
-
-      if (windowComponent) {
-        windowComponent.$el.style.display = 'flex';
-        window.minimized = false;
-      }
+    setApplicationNameVariable(object) {
+      this.globalState.pushOpenWindow(object);
     },
     setBackgroundColor() {
       let backgroundColor = this.globalState.getBackgroundColor();
@@ -178,36 +158,19 @@ export default {
         this.desktopBrightnessValue = value;
       }
     },
-    closeWindow(value) {
-      new Promise((resolve, reject) => {
-        const closeWindowId = this.openWindows.findIndex(window => window.windowName === value);
-        this.openWindows.splice(closeWindowId, 1);
-
-        if (this.openWindows[closeWindowId]) {
-          this.openWindows[closeWindowId].windowName !== value ? resolve() : reject();
-        } else {
-          resolve();
-        }
-      }).then((error) => {
-        if (error) {
-          return;
-        }
-        this.sortWindowArray();
-        this.applicationName = '';
-      });
-    },
     onClickWindow(e, window) {
       this.activateQuickSettingsMenu(false);
       const mouseTarget = e.target.parentNode;
       if (this.closingWindow !== true && mouseTarget.classList[0] !== 'window-state-control') {
-        const windowIndex = this.openWindows.findIndex(openWindow => openWindow.windowName === window.windowName);
-        this.openWindows.splice(windowIndex, 1);
-        this.openWindows.push(window);
+        const windowIndex = this.globalState.openWindows.findIndex(openWindow => openWindow.name === window.name);
+        this.globalState.openWindows.splice(windowIndex, 1);
+        this.globalState.openWindows.push(window);
         this.sortWindowArray();
       }
     },
     updateWindowDimensions() {
-      this.windowDimensions = [window.innerWidth, (window.innerHeight - this.TASKBAR_HEIGHT)];
+      this.globalState.browserWindowSize.WIDTH = this.$el.getBoundingClientRect().width;
+      this.globalState.browserWindowSize.HEIGHT = this.$el.getBoundingClientRect().height;
     },
     activateQuickSettingsMenu(quickSettingsMenuButtonClicked) {
       if (quickSettingsMenuButtonClicked) {
@@ -220,9 +183,9 @@ export default {
         }
       }
     },
-    minimizeWindow(windowName) {
-      const window = this.openWindows.find(window => window.windowName === windowName);
-      const windowComponent = this.$refs[windowName][0];
+    minimizeWindow(windowId) {
+      const window = this.globalState.openWindows.find(window => window.id === windowId);
+      const windowComponent = this.$refs[window.name][0];
 
       if (windowComponent) {
         windowComponent.$el.style.display = 'none';
@@ -230,9 +193,9 @@ export default {
       }
     },
     sortWindowArray() {
-      if (this.openWindows.length > 0) {
+      if (this.globalState.openWindows.length > 0) {
         let counter = 2;
-        this.openWindows.forEach(window => {
+        this.globalState.openWindows.forEach(window => {
           window.zIndex = counter++;
         });
         this.highestZIndex = counter;
@@ -246,6 +209,7 @@ export default {
 <style scoped>
 * {
   color: var(--font-color);
+  box-sizing: border-box;
 }
 
 .desktop {
@@ -262,20 +226,11 @@ export default {
   width: 100%;
 }
 
-.taskbar {
-  z-index: 2;
-}
 
 .quick-settings-menu {
   position: fixed;
   right: 20px;
   bottom: 60px;
   width: 350px;
-}
-
-.footer-container {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
 }
 </style>

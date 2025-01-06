@@ -152,7 +152,6 @@ export default {
       this.selectedOption = option;
     },
     updateBackgroundColor(newValue) {
-      console.log(newValue)
       this.globalState.removeWallpaper();
       this.globalState.setBackgroundColor(newValue);
     },
@@ -162,11 +161,6 @@ export default {
     },
     updateTheme(newValue) {
       this.globalState.setTheme(newValue);
-    },
-    imageLoading(setLoading, event) {
-      if (setLoading) {
-        console.log(event)
-      }
     }
   },
   computed: {

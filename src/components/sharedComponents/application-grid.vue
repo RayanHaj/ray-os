@@ -12,29 +12,30 @@
              @dragstart="dragAndDropEventListenersDesktop($event, 'dragstart')"
              @touchstart="dragAndDropEventListenersDesktop($event, 'touchstart')"
              @mouseover="onMouseOverTile" @touchover="onMouseOverTile"
-             @dblclick="openApplication($event.currentTarget.querySelector('.application-name')?.innerText)"
+             @dblclick="openApplication(globalState.desktopFiles[indexX * GRID_HEIGHT + indexY]?.name)"
              @contextmenu.prevent="onRightClickTile"
              tabindex="0"
              :style="{
-              width: `${TILE_WIDTH}px`,
-              height: `${TILE_HEIGHT}px`,
-              maxWidth: `${TILE_WIDTH}px`,
-              maxHeight: `${TILE_HEIGHT}px`,
               border: `${ this.showTileBorders ? '1px solid white' : 'none' }`
             }"
         >
           <div
               v-if="isTileFillable(indexX, indexY)"
+              @mouseenter="globalState.desktopFiles[indexX * GRID_HEIGHT + indexY].hovering = true"
+              @mouseleave="globalState.desktopFiles[indexX * GRID_HEIGHT + indexY].hovering = false"
               class="tile-content-wrapper" ref="tileContentWrapper"
               :style="{width: `${TILE_WIDTH}px`, height: `${TILE_HEIGHT}px`, maxWidth: `${TILE_WIDTH}px`, maxHeight: `${TILE_HEIGHT}px`}"
               :draggable="applicationWindowIsResizing === false"
           >
             <div class="application-img" ref="applicationImg">
-              <img :src="listApplicationElements[indexX * GRID_HEIGHT + indexY]?.imageUrl" :width="IMAGE_WIDTH"
-                   :height="IMAGE_HEIGHT" :alt="listApplicationElements[indexX * GRID_HEIGHT + indexY]?.imageUrl">
+              <img :src="globalState.desktopFiles[indexX * GRID_HEIGHT + indexY]?.imageUrl" :width="IMAGE_WIDTH"
+                   :height="IMAGE_HEIGHT" :alt="globalState.desktopFiles[indexX * GRID_HEIGHT + indexY]?.imageUrl">
             </div>
-            <div class="application-name" ref="applicationName" :style="{fontSize: `${TILE_NAME_FONT_SIZE}px`}">
-              {{ listApplicationElements[indexX * GRID_HEIGHT + indexY]?.name }}
+            <div class="application-name" ref="applicationName"
+                 :class="{overflowing: globalState.desktopFiles[indexX * GRID_HEIGHT + indexY]?.overflowing}"
+                 :style="{ fontSize: `${TILE_NAME_FONT_SIZE}px` }"
+            >
+              {{ globalState.desktopFiles[indexX * GRID_HEIGHT + indexY]?.overflowing === false ? globalState.desktopFiles[indexX * GRID_HEIGHT + indexY]?.name : `${globalState.desktopFiles[indexX * GRID_HEIGHT + indexY]?.name.substring(0, 13)}...` }}
             </div>
           </div>
         </div>
@@ -60,7 +61,7 @@
       <hr style="width: 90%; margin-top: 5px; margin-bottom: 5px;"/>
       <div class="context-other-actions-wrapper">
         <div v-if="tileOnRightClick?.classList.contains('filled')" class="context-action"
-             @click="openApplication(tileOnRightClick?.querySelector('.application-name').innerText)">Open
+             @click="openApplication(globalState.desktopFiles[tileOnRightClick.id]?.name)">Open
         </div>
         <div v-if="tileOnRightClick?.classList.contains('filled')" class="context-action">Open file location</div>
         <div class="context-action" @click="init()">Restore applications</div>
@@ -73,6 +74,7 @@
 import {enableDragDropTouch} from "@/assets/libraries/drag-drop-touch.esm.min";
 import SvgComponent from "@/components/ui/svg-component";
 import {useGlobalState} from "@/stores/globalState";
+import {parseFileToDbObject} from "@/utils/util";
 
 export default {
   name: "application-grid",
@@ -81,15 +83,17 @@ export default {
   beforeMount() {
     this.isLoading = true;
   },
-  mounted() {
+  async mounted() {
     this.showTileBorders = this.globalState.getShowGridOutlineDesktop();
     enableDragDropTouch();
-    this.init();
+    await this.init();
     window.addEventListener('keydown', this.onKeydownTile);
+    window.addEventListener('resize', this.checkApplicationNameOverflow);
   },
 
   beforeUnmount() {
     window.removeEventListener('keydown', this.onKeydownTile);
+    window.removeEventListener('resize', this.checkApplicationNameOverflow);
   },
 
   data() {
@@ -112,11 +116,11 @@ export default {
       tileOnHover: null,
       tileOnRightClickIsFilled: false,
       applicationWindowIsResizing: false,
+      applicationNameIsOverflowing: false,
       isLoading: false,
-      listApplicationElements: [],
     }
   },
-  emits: ['clicked', 'applicationName'],
+  emits: ['clicked'],
   props: {
     windowSize: {
       type: Array,
@@ -128,14 +132,25 @@ export default {
     }
   },
   watch: {
-    windowSize() {
-      this.init();
+    'globalState.browserWindowSize': {
+      async handler() {
+        await this.init();
+      },
+      deep: true
     },
     windowResizing(newValue) {
       this.applicationWindowIsResizing = newValue;
     },
     'globalState.showGridOutlineDesktop'() {
       this.showTileBorders = this.globalState.getShowGridOutlineDesktop();
+    },
+    'globalState.desktopFiles': {
+      handler() {
+        this.$nextTick(() => {
+          this.checkApplicationNameOverflow();
+        });
+      },
+      deep: true
     }
   },
   computed: {
@@ -145,48 +160,53 @@ export default {
   },
   methods: {
     async init() {
-      if (this.windowSize[0] !== null && this.windowSize[1] !== null) {
-        this.GRID_WIDTH = Math.floor(this.windowSize[0] / this.TILE_WIDTH);
-        this.GRID_HEIGHT = Math.floor((this.windowSize[1] / this.TILE_HEIGHT));
+      const browserWindowSize = this.globalState.browserWindowSize;
+      if (browserWindowSize.WIDTH !== null && browserWindowSize.HEIGHT !== null) {
+        this.GRID_WIDTH = Math.floor(browserWindowSize.WIDTH / this.TILE_WIDTH);
+        this.GRID_HEIGHT = Math.floor((browserWindowSize.HEIGHT / this.TILE_HEIGHT) - 0.5);
       }
 
-      const elements = await this.db.getAllElements('files');
+      const elements = await this.db.getAllElements('desktopFiles');
 
       for (let i = 0; i < this.GRID_WIDTH * this.GRID_HEIGHT; i++) {
         if (elements[i] !== undefined) {
           const imgUrl = URL.createObjectURL(elements[i].image);
-          this.listApplicationElements[i] = {
+          this.globalState.desktopFiles[i] = {
             'index': elements[i].gridIndex,
             'name': elements[i].name,
-            'imageUrl': imgUrl
+            'imageUrl': imgUrl,
+            'overflowing': false,
+            'hovering': false
           };
         } else {
-          this.listApplicationElements[i] = {
+          this.globalState.desktopFiles[i] = {
             'index': i,
             'name': null,
-            'imageUrl': null
+            'imageUrl': null,
+            'overflowing': false,
+            'hovering': false
           };
         }
       }
-      this.listApplicationElements = this.listApplicationElements.sort((a, b) => a.index - b.index);
+      this.globalState.desktopFiles = this.globalState.desktopFiles.sort((a, b) => a.index - b.index);
       this.isLoading = false;
     },
     contextMenuActions(e, action) {
       switch (action) {
         case 'copy': {
-          if (this.tileOnRightClick.querySelector('.tile-content-wrapper')) {
+          if (this.tileOnRightClick.children.length > 0) {
             this.copiedApplication = this.tileOnRightClick
           }
           break;
         }
         case 'paste': {
           if (this.tileOnRightClick && this.copiedApplication) {
-            this.insertTile(Number(this.tileOnRightClick.id), this.copiedApplication.querySelector('.application-name').innerText);
+            this.insertTile(Number(this.tileOnRightClick.id), this.globalState.desktopFiles[this.copiedApplication.id].name);
           }
           break;
         }
         case 'delete': {
-          if (this.tileOnRightClick.querySelector('.tile-content-wrapper')) {
+          if (this.tileOnRightClick.children.length > 0) {
             this.deleteTile(this.tileOnRightClick.id);
           }
         }
@@ -206,7 +226,7 @@ export default {
 
           this.draggedTile = {
             'index': Number(currentTile.id),
-            'name': currentTile.querySelector('.application-name').innerText
+            'name': this.globalState.desktopFiles[currentTile.id].name
           }
 
           this.createDragImage(currentTile.querySelector('.application-img'), event);
@@ -218,31 +238,27 @@ export default {
           break;
         }
         case 'drop': {
-          // let items = event.dataTransfer.items;
-          // if (items[0].type !== 'text/plain') {
-          //   if (items.length !== 0) {
-          //     for (let i = 0; i < items.length; i++) {
-          //       const file = items[i].getAsFile();
-          //       const object = parseFileToDbObject(file);
-          //       await this.db.postElement('videos', object);
-          //       this.insertTile(Number(currentTile.id), object.name);
-          //     }
-          //     return;
-          //   }
-          // }
-
+          event.preventDefault();
           if (currentTile.classList.contains('filled')) {
             return;
           }
+          let items = event.dataTransfer.items;
+          if (items[0]?.type !== 'text/plain') {
+            if (items.length !== 0) {
+              for (let i = 0; i < items.length; i++) {
+                const file = items[i].getAsFile();
+                const image = await this.db.getImageByFileType(file.type);
+                const object = parseFileToDbObject(file, Number(currentTile.id), image);
+                await this.db.postElement('files', object);
+                this.insertTile(object.gridIndex, object.name);
+              }
+              return;
+            }
+          }
 
-          console.log(this.draggedTile);
-          console.log(this.listApplicationElements)
-
-          const index = this.listApplicationElements.findIndex(element => {
+          const index = this.globalState.desktopFiles.findIndex(element => {
             return element.index === this.draggedTile.index;
           });
-
-          console.log(index)
 
           this.deleteTile(index);
           this.insertTile(Number(currentTile.id), this.draggedTile.name)
@@ -252,9 +268,9 @@ export default {
     },
     isTileFillable(indexX, indexY) {
       return (
-          this.listApplicationElements[indexX * this.GRID_HEIGHT + indexY] !== null &&
-          this.listApplicationElements[indexX * this.GRID_HEIGHT + indexY]?.name !== null &&
-          this.listApplicationElements[indexX * this.GRID_HEIGHT + indexY]?.imageUrl !== null
+          this.globalState.desktopFiles[indexX * this.GRID_HEIGHT + indexY] !== null &&
+          this.globalState.desktopFiles[indexX * this.GRID_HEIGHT + indexY]?.name !== null &&
+          this.globalState.desktopFiles[indexX * this.GRID_HEIGHT + indexY]?.imageUrl !== null
       )
     },
     onClickContainer() {
@@ -268,13 +284,13 @@ export default {
         }
       }
       if (e.ctrlKey && e.code === 'KeyC') {
-        if (this.tileOnHover.querySelector('.tile-content-wrapper')) {
+        if (this.tileOnHover.children.length > 0) {
           this.copiedApplication = this.tileOnHover;
         }
       }
       if (e.ctrlKey && e.code === 'KeyV') {
         if (this.tileOnHover && this.copiedApplication) {
-          this.insertTile(Number(this.tileOnHover.id), this.copiedApplication.querySelector('.application-name').innerText);
+          this.insertTile(Number(this.tileOnHover.id), this.globalState.desktopFiles[this.copiedApplication.id].name);
         }
       }
     },
@@ -288,11 +304,11 @@ export default {
         this.contextMenuActive = true;
       }
 
-      const conditionWidth = (e.clientX + this.CONTEXT_MENU_WIDTH + 25) > this.windowSize[0];
-      const conditionHeight = (e.clientY + this.CONTEXT_MENU_HEIGHT + 20) > this.windowSize[1];
+      const conditionWidth = (e.clientX + this.CONTEXT_MENU_WIDTH + 25) > this.globalState.browserWindowSize.WIDTH;
+      const conditionHeight = (e.clientY + this.CONTEXT_MENU_HEIGHT + 20) > this.globalState.browserWindowSize.HEIGHT;
 
-      const leftValue = conditionWidth ? `${this.windowSize[0] - this.CONTEXT_MENU_WIDTH - 25}px` : `${e.clientX}px`;
-      const topValue = conditionHeight ? `${this.windowSize[1] - this.CONTEXT_MENU_HEIGHT - 25}px` : `${e.clientY}px`;
+      const leftValue = conditionWidth ? `${this.globalState.browserWindowSize.WIDTH - this.CONTEXT_MENU_WIDTH - 25}px` : `${e.clientX}px`;
+      const topValue = conditionHeight ? `${this.globalState.browserWindowSize.HEIGHT - this.CONTEXT_MENU_HEIGHT - 25}px` : `${e.clientY}px`;
 
       contextMenu.style.left = leftValue;
       contextMenu.style.top = topValue;
@@ -305,24 +321,30 @@ export default {
         return;
       }
 
-      this.$emit('applicationName', applicationName);
+      this.db.getElementByName('files', applicationName).then(element => {
+        this.globalState.pushOpenWindow(element);
+      });
     },
     deleteTile(index) {
-      if (typeof this.listApplicationElements[index] !== 'undefined' && this.listApplicationElements[index].name !== null) {
-        this.listApplicationElements[index] = {
+      if (typeof this.globalState.desktopFiles[index] !== 'undefined' && this.globalState.desktopFiles[index].name !== null) {
+        this.globalState.desktopFiles[index] = {
           'index': index,
           'name': null,
-          'imageUrl': null
+          'imageUrl': null,
+          'overflowing': false,
+          'hovering': false
         }
       }
     },
     insertTile(index, name) {
-      if (typeof this.listApplicationElements[index] !== 'undefined') {
+      if (typeof this.globalState.desktopFiles[index] !== 'undefined') {
         this.db.getElementByName('files', name).then(element => {
-          this.listApplicationElements[index] = {
+          this.globalState.desktopFiles[index] = {
             'index': index,
             'name': name,
-            'imageUrl': URL.createObjectURL(element.image)
+            'imageUrl': URL.createObjectURL(element.image),
+            'overflowing': false,
+            'hovering': false
           }
         });
       }
@@ -345,6 +367,20 @@ export default {
       setTimeout(() => {
         this.$el.removeChild(imgClone);
       }, 0)
+    },
+    checkApplicationNameOverflow() {
+      if (this.$refs.tile?.length > 0) {
+        this.$refs.tile.forEach(tile => {
+          const applicationNameElement = tile.querySelector('.application-name');
+          if (applicationNameElement && applicationNameElement.clientWidth > tile.clientWidth) {
+            this.globalState.desktopFiles.map(element => {
+              if (element.name === applicationNameElement.innerText) {
+                element.overflowing = true;
+              }
+            });
+          }
+        });
+      }
     },
     setTilesSmallSize() {
       this.IMAGE_WIDTH = 40;
@@ -379,6 +415,9 @@ export default {
   font-size: 10px;
   color: var(--font-color);
   user-select: none;
+  overflow: hidden;
+  width: 82px;
+  height: 82px;
 }
 
 .tile-content-wrapper {

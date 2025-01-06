@@ -29,7 +29,8 @@ export default {
 
 <style scoped>
 .split-window-grid {
-  position: sticky;
+  position: absolute;
+  top: 30px;
   display: grid;
   grid-template-rows: auto auto;
   gap: 5px;
