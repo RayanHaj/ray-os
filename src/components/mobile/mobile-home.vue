@@ -7,7 +7,7 @@
 </template>
 
 <script>
-import DesktopGrid from "@/components/sharedComponents/application-grid";
+import DesktopGrid from "@/components/desktop/desktop-grid";
 export default {
   name: "mobile-home",
   components: {DesktopGrid},

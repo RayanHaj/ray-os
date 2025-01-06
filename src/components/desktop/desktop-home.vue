@@ -46,7 +46,7 @@
 
 <script>
 import taskbarFooter from "@/components/desktop/taskbar/taskbar-footer";
-import ApplicationGrid from "@/components/sharedComponents/application-grid";
+import DesktopGrid from "@/components/desktop/desktop-grid";
 import ApplicationWindow from "@/components/desktop/window/application-window";
 import SettingsMenu from "@/components/desktop/taskbar/taskbarComponents/settings-menu";
 import {useGlobalState} from "@/stores/globalState";
@@ -72,7 +72,7 @@ export default {
       desktopBrightnessValue: 100,
     }
   },
-  components: {SettingsMenu, MainWindow: ApplicationWindow, DesktopGrid: ApplicationGrid, taskbar: taskbarFooter},
+  components: {SettingsMenu, MainWindow: ApplicationWindow, DesktopGrid: DesktopGrid, taskbar: taskbarFooter},
   props: {
     backgroundImageId: Number
   },

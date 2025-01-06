@@ -77,7 +77,7 @@ import {useGlobalState} from "@/stores/globalState";
 import {parseFileToDbObject} from "@/utils/util";
 
 export default {
-  name: "application-grid",
+  name: "desktop-grid",
   components: {SvgComponent},
   inject: ['db'],
   beforeMount() {
