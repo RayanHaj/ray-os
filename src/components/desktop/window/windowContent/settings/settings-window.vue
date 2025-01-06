@@ -197,6 +197,7 @@ export default {
 .window-content {
   display: flex;
   gap: 5px;
+  container-type: inline-size;
 }
 
 .sidebar {

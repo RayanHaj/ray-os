@@ -172,6 +172,7 @@ export default {
     updateWindowDimensions() {
       this.globalState.browserWindowSize.WIDTH = this.$el.getBoundingClientRect().width;
       this.globalState.browserWindowSize.HEIGHT = this.$el.getBoundingClientRect().height;
+      this.globalState.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED = this.$el.getBoundingClientRect().height - this.TASKBAR_HEIGHT;
     },
     activateQuickSettingsMenu(quickSettingsMenuButtonClicked) {
       if (quickSettingsMenuButtonClicked) {

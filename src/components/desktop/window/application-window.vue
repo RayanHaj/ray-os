@@ -70,6 +70,7 @@ export default {
       mouseoverTimeoutId: null,
       mouseleaveTimeoutId: null,
       applicationWindowSize: null,
+      lastWindowSplitPosition: null,
       windowIsMoving: false,
       windowIsResizing: false,
       mouseOnResizeSpace: false,
@@ -112,13 +113,6 @@ export default {
       width: this.$el.clientWidth,
       height: this.$el.clientHeight
     }
-
-    new ResizeObserver((entries) => {
-      this.applicationWindowSize = {
-        width: entries[0].contentRect.width,
-        height: entries[0].contentRect.height
-      }
-    }).observe(this.$refs.window);
   },
   props: {
     windowSize: {
@@ -161,6 +155,13 @@ export default {
           this.$emit('previewApplicationWindow', canvas);
         })
       }
+    },
+    'globalState.browserWindowSize': {
+      handler() {
+        this.splitWindow();
+        this.splitCurrentWindow(this.lastWindowSplitPosition ?? null)
+      },
+      deep: true
     }
   },
   computed: {
@@ -414,18 +415,23 @@ export default {
       document.removeEventListener('touchend', this.onMouseUpHeader);
     },
     splitWindow() {
-      const height = this.globalState.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED;
+      const height = this.globalState.browserWindowSize.HEIGHT;
+      const heightTaskbarExcluded = this.globalState.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED;
+      const heightInPercentage = (heightTaskbarExcluded / height) * 100;
+      const halfHeightInPercentage = ((heightTaskbarExcluded / 2) / height) * 100;
       if (this.windowOutOfBounds.xPositive) {
-        this.setSplitWindowValues('50%', '50%', `${height}px`, 0);
+        this.setSplitWindowValues('50%', '50%', `${heightInPercentage}%`, 0);
         return 'positive-x';
       } else if (this.windowOutOfBounds.xNegative) {
-        this.setSplitWindowValues(0, '50%', `${height}px`, 0);
+        this.setSplitWindowValues(0, '50%', `${heightInPercentage}%`, 0);
         return 'negative-x';
       } else if (this.windowOutOfBounds.yPositive) {
-        this.setSplitWindowValues(0, '100%', `${height / 2}px`, 0);
+        this.setSplitWindowValues(0, '100%', `${halfHeightInPercentage}%`, 0);
         return 'positive-y';
       } else if (this.windowOutOfBounds.yNegative) {
-        this.setSplitWindowValues(0, '100%', `${height / 2}px`, `${height / 2}px`);
+        console.log(halfHeightInPercentage);
+        console.log(heightInPercentage);
+        this.setSplitWindowValues(0, '100%', `${halfHeightInPercentage}%`, `${halfHeightInPercentage}%`);
         return 'negative-y';
       }
 
@@ -438,38 +444,42 @@ export default {
       this.$el.style.top = top;
     },
     splitCurrentWindow(position) {
-      const height = this.globalState.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED;
+      const height = this.globalState.browserWindowSize.HEIGHT;
+      const heightTaskbarExcluded = this.globalState.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED;
+      const heightInPercentage = (heightTaskbarExcluded / height) * 100;
+      const halfHeightInPercentage = ((heightTaskbarExcluded / 2) / height) * 100;
+      this.lastWindowSplitPosition = position;
       switch (position) {
         case 'topLeft': {
-          this.setSplitWindowValues(0, '50%', `${height / 2}px`, 0);
+          this.setSplitWindowValues(0, '50%', `${halfHeightInPercentage}%`, 0);
           break;
         }
         case 'topRight': {
-          this.setSplitWindowValues('50%', '50%', `${height / 2}px`, 0);
+          this.setSplitWindowValues('50%', '50%', `${halfHeightInPercentage}%`, 0);
           break;
         }
         case 'bottomLeft': {
-          this.setSplitWindowValues(0, '50%', `${height / 2}px`, `${height / 2}px`);
+          this.setSplitWindowValues(0, '50%', `${halfHeightInPercentage}%`, `${halfHeightInPercentage}%`);
           break;
         }
         case 'bottomRight': {
-          this.setSplitWindowValues('50%', '50%', `${height / 2}px`, `${height / 2}px`);
+          this.setSplitWindowValues('50%', '50%', `${halfHeightInPercentage}%`, `${halfHeightInPercentage}%`);
           break;
         }
         case 'left': {
-          this.setSplitWindowValues(0, '50%', `${height}px`, 0);
+          this.setSplitWindowValues(0, '50%', `${heightInPercentage}%`, 0);
           break;
         }
         case 'right': {
-          this.setSplitWindowValues('50%', '50%', `${height}px`, 0)
+          this.setSplitWindowValues('50%', '50%', `${heightInPercentage}%`, 0)
           break;
         }
         case 'top': {
-          this.setSplitWindowValues(0, '100%', `${height / 2}px`, 0);
+          this.setSplitWindowValues(0, '100%', `${halfHeightInPercentage}%`, 0);
           break;
         }
         case 'bottom': {
-          this.setSplitWindowValues(0, '100%', `${height / 2}px`, `${height / 2}px`);
+          this.setSplitWindowValues(0, '100%', `${halfHeightInPercentage}%`, `${halfHeightInPercentage}%`);
           break;
         }
       }

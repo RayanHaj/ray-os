@@ -109,19 +109,6 @@ export default {
       this.date = `${addLeadingZero((now.getMonth() + 1))}/${addLeadingZero(now.getUTCDate())}/${now.getFullYear()}`;
       this.time = now.toLocaleString('en-US', {hour: 'numeric', minute: 'numeric', hour12: true});
     }, 1000);
-
-    const resizeObserver = new ResizeObserver(() => {
-      if (this.$refs.taskbar) {
-        let width = this.$refs.taskbar.offsetWidth;
-        if (width < 500) {
-          this.setTaskbarSmallSize();
-        } else {
-          this.setTaskbarNormalSize();
-        }
-      }
-    });
-
-    resizeObserver.observe(this.$refs.taskbar);
   },
   props: {
     height: {

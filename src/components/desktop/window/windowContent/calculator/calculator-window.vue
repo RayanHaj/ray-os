@@ -63,16 +63,6 @@ export default {
       containerWidth: 0
     }
   },
-  mounted() {
-    const resizeObserver = new ResizeObserver(() => {
-      if (this.$refs.calculatorContainer) {
-        this.containerHeight = this.$refs.calculatorContainer.offsetHeight;
-        this.containerWidth = this.$refs.calculatorContainer.offsetWidth;
-      }
-    });
-
-    resizeObserver.observe(this.$refs.calculatorContainer);
-  },
   methods: {
     calculate(operator, afterCalcClearList) {
       if (this.calculationList[1] === '÷' && this.calculationList[2] === '0') {
@@ -279,6 +269,7 @@ export default {
   position: relative;
   height: 100%;
   width: 100%;
+  container-type: size;
 }
 
 .calculator-header {
@@ -363,5 +354,14 @@ export default {
 
 .calculation {
   font-size: 12px;
+}
+
+@container (max-height: 460px) {
+  .calculator-button {
+    font-size: 16px;
+  }
+  h1 {
+    font-size: 20px;
+  }
 }
 </style>
