@@ -1,19 +1,33 @@
 <template>
   <div class="video-player-container">
-    <video v-if="videoSrc" :src="videoSrc" class="video" ref="video" @loadedmetadata="initVideoData"/>
+    <video v-if="videoSrc" :src="videoSrc" class="video" ref="video" @loadedmetadata="initVideoData" @timeupdate="videoCurrentTime = $event.currentTarget.currentTime"/>
     <section v-if="videoSrc" class="video-controls">
-      <button>
-        <svg-component svg-type="play" custom-width="25" custom-height="25"/>
+      <button @click="playVideo">
+        <svg-component v-if="videoPlaying" svg-type="pause" custom-width="25" custom-height="15"/>
+        <svg-component v-else svg-type="play" custom-width="25" custom-height="25"/>
       </button>
       <div class="video-progress">
-        <div>{{ videoCurrentTime }}</div>
-
-        <input v-model="videoCurrentTime" type="range" min="0.00" :max="videoLength" step="0.01" class="video-progress-range">
-        <div>{{ videoLength.toFixed(2) }}</div>
+        <input v-model="videoCurrentTime" @mouseover.stop @mousemove.stop @input="updateVideoTime"
+               type="range" :min="0.00" :max="videoLength" step="0.01" class="video-progress-range" ref="videoProgressRange">
       </div>
       <div class="video-buttons-right">
-        <button v-for="type in ['volume', 'in picture', 'fullscreen']" :key="type">
-          <svg-component :svg-type="type" custom-width="25" custom-height="25"/>
+        <div class="volume-wrapper">
+          <div v-show="soundButtonClicked" class="volume-menu">
+            <button v-for="i in Array.from({ length: 6 }, (_, index) => 5 - index)"
+                    :key="i" @click="onClickSoundLevel(i)" style="user-select: none"
+            >
+              {{ i === 0 ? '0' : '|'.repeat(Number(i)) }}
+            </button>
+          </div>
+          <button @click="rightVideoButtonsClickHandler($event, 'volume')">
+            <svg-component svg-type="volume" custom-width="25" custom-height="25"/>
+          </button>
+        </div>
+        <button @click="rightVideoButtonsClickHandler($event, 'in picture')">
+          <svg-component svg-type="in picture" custom-width="25" custom-height="25"/>
+        </button>
+        <button @click="rightVideoButtonsClickHandler($event, 'fullscreen')">
+          <svg-component svg-type="fullscreen" custom-width="25" custom-height="25"/>
         </button>
       </div>
     </section>
@@ -51,6 +65,8 @@ export default {
       videoList: [],
       videoCurrentTime: 0.00,
       videoLength: 0.00,
+      videoPlaying: false,
+      soundButtonClicked: false,
     }
   },
   inject: ['db', 'provide'],
@@ -58,6 +74,14 @@ export default {
     globalState() {
       return useGlobalState();
     },
+  },
+  watch: {
+    videoCurrentTime(newValue) {
+      if (newValue === this.videoLength) {
+        this.videoCurrentTime = 0;
+        this.videoPlaying = false;
+      }
+    }
   },
   beforeMount() {
     this.windowObject = this.globalState.openWindows.find(window => window.id === this.windowId);
@@ -90,20 +114,42 @@ export default {
     openVideo(video) {
       this.videoSrc = video.videoUrl;
     },
-    pauseVideo() {
-      const videoElement = this.$refs.video;
-      if (videoElement) {
-        videoElement.pause();
-      }
-    },
     playVideo() {
       const videoElement = this.$refs.video;
-      if (videoElement) {
-        videoElement.play();
+
+      if (videoElement && this.videoPlaying === true) {
+        videoElement.pause();
+        this.videoPlaying = false;
+        return;
+      }
+
+      videoElement.play();
+      this.videoPlaying = true;
+    },
+    rightVideoButtonsClickHandler(event, type) {
+      const videoElement = this.$refs.video;
+      if (videoElement === null) {
+        return;
+      }
+      switch (type) {
+        case 'fullscreen': {
+          videoElement.requestFullscreen();
+          break;
+        }
+        case 'volume': {
+          this.soundButtonClicked = !this.soundButtonClicked;
+          break;
+        }
       }
     },
-    updateVideoTime(newTime) {
-      console.log(newTime)
+    updateVideoTime() {
+      this.$refs.video.currentTime = this.videoCurrentTime;
+    },
+    onClickSoundLevel(level) {
+      const videoElement = this.$refs.video;
+      if (videoElement) {
+        videoElement.volume = level === 0 ? 0 : (level / 10)
+      }
     }
   }
 }
@@ -202,6 +248,23 @@ button {
   bottom: 0;
   background-color: var(--background-color);
   object-fit: contain;
+}
+
+.video-buttons-right {
+  display: flex;
+  flex-direction: row;
+}
+
+.volume-wrapper {
+  position: relative;
+}
+
+.volume-menu {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  bottom: 100%;
+  width: 100%;
 }
 
 </style>

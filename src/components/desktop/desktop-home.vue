@@ -160,13 +160,14 @@ export default {
     },
     onClickWindow(e, window) {
       this.activateQuickSettingsMenu(false);
-      const mouseTarget = e.target.parentNode;
-      if (this.closingWindow !== true && mouseTarget.classList[0] !== 'window-state-control') {
-        const windowIndex = this.globalState.openWindows.findIndex(openWindow => openWindow.name === window.name);
-        this.globalState.openWindows.splice(windowIndex, 1);
-        this.globalState.openWindows.push(window);
-        this.sortWindowArray();
-      }
+      console.log(window)
+      // const mouseTarget = e.target.parentNode;
+      // if (this.closingWindow !== true && mouseTarget.classList && mouseTarget.classList[0] !== 'window-state-control') {
+      //   const windowIndex = this.globalState.openWindows.findIndex(openWindow => openWindow.name === window.name);
+      //   this.globalState.openWindows.splice(windowIndex, 1);
+      //   this.globalState.openWindows.push(window);
+      //   this.sortWindowArray();
+      // }
     },
     updateWindowDimensions() {
       this.globalState.browserWindowSize.WIDTH = this.$el.getBoundingClientRect().width;

@@ -150,6 +150,13 @@
     <path v-else class="default-path-fill"
           d="M15.544 9.59a1 1 0 0 1-.053 1.728L6.476 16.2A1 1 0 0 1 5 15.321V4.804a1 1 0 0 1 1.53-.848l9.014 5.634Z"/>
   </svg>
+  <svg v-if="svgType === 'pause'" @click="$emit('clicked')" :width="width" :height="height"
+       xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 24">
+    <path v-if="customColor" :fill="customColor"
+          d="M4.801 23.999h-3.6a1.202 1.202 0 0 1-1.2-1.2v-21.6c0-.663.537-1.2 1.2-1.201h3.6a1.202 1.202 0 0 1 1.2 1.2v21.6c0 .663-.537 1.2-1.2 1.201zm11.999 0h-3.6a1.2 1.2 0 0 1-1.2-1.2V1.198a1.2 1.2 0 0 1 1.2-1.2h3.6a1.2 1.2 0 0 1 1.2 1.2v21.6a1.2 1.2 0 0 1-1.2 1.2z"/>
+    <path v-else class="default-path-fill"
+          d="M4.801 23.999h-3.6a1.202 1.202 0 0 1-1.2-1.2v-21.6c0-.663.537-1.2 1.2-1.201h3.6a1.202 1.202 0 0 1 1.2 1.2v21.6c0 .663-.537 1.2-1.2 1.201zm11.999 0h-3.6a1.2 1.2 0 0 1-1.2-1.2V1.198a1.2 1.2 0 0 1 1.2-1.2h3.6a1.2 1.2 0 0 1 1.2 1.2v21.6a1.2 1.2 0 0 1-1.2 1.2z"/>
+  </svg>
   <svg v-if="svgType === 'in picture'" @click="$emit('clicked')" :width="width" :height="height"
        xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
     <path v-if="customColor" :fill="customColor"

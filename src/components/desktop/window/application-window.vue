@@ -1,7 +1,7 @@
 <template>
   <div class="window"
        ref="window"
-       :style="{ minWidth: MINIMUM_WIDTH_WINDOW, minHeight: MINIMUM_HEIGHT_WINDOW }"
+       :style="{ minWidth: MINIMUM_WIDTH_WINDOW, minHeight: MINIMUM_HEIGHT_WINDOW, transition: windowIsMoving || windowIsResizing ? undefined : 'width 0.5s, height 0.5s, left 0.5s, top 0.5s'}"
        @mousemove="mouseOverEventListeners"
        @mousedown="moveWindowOnMouseDownWindowCorners"
        @touchover="mouseOverEventListeners"
@@ -69,7 +69,7 @@ export default {
       mouseleaveTimeoutId: null,
       applicationWindowSize: null,
       windowIsMoving: false,
-      mousePressedDown: false,
+      windowIsResizing: false,
       mouseOnResizeSpace: false,
       disablePointerEvents: false,
       showSplitWindowComponent: false,
@@ -205,7 +205,7 @@ export default {
         this.mouseOnResizeSpace = true;
       }
 
-      if (this.mouseOnResizeSpace === false && this.mousePressedDown === false) {
+      if (this.mouseOnResizeSpace === false && this.windowIsResizing === false) {
         this.$el.style.cursor = 'auto';
         this.$el.style.userSelect = 'auto';
         this.mouseOnResizeSpace = false;
@@ -226,7 +226,7 @@ export default {
       const onMove = (event) => {
         event.preventDefault();
         this.$emit('windowResizing', true);
-        this.mousePressedDown = true;
+        this.windowIsResizing = true;
 
         const minWidthPercentage = parseFloat(this.MINIMUM_WIDTH_WINDOW);
         const minWidthPixels = (minWidthPercentage / 100) * this.globalState.browserWindowSize.WIDTH;
@@ -310,7 +310,7 @@ export default {
 
       const onUp = () => {
         this.disablePointerEvents = false;
-        this.mousePressedDown = false;
+        this.windowIsResizing = false;
         this.$emit('windowResizing', false);
 
         document.removeEventListener('mousemove', onMove);
