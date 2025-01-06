@@ -10,7 +10,8 @@
     <div class="window-header">
       <div class="top-header" @click="$emit('clicked', $event)" @mousedown.prevent="onMouseDownHeader($event)"
            @touchstart.prevent="onMouseDownHeader($event)">
-        <ImgComponent :image-name="windowObject.name" :custom-width="20" :custom-height="20" class="window-img"></ImgComponent>
+        <ImgComponent :image-name="windowObject.name" :custom-width="20" :custom-height="20"
+                      class="window-img"></ImgComponent>
         <div class="window-name"> {{ windowObject.name }}</div>
       </div>
       <div class="window-state-control">
@@ -18,7 +19,8 @@
           <button class="minimize-button" @click="minimizeWindow">
             <SvgComponent :svg-type="'minimize'"/>
           </button>
-          <button class="maximize-button" @click="maximizeWindow" @mouseenter="onMouseoverMaximizeSvg" @mouseleave="onMouseleaveMaximizeSvg">
+          <button class="maximize-button" @click="maximizeWindow" @mouseenter="onMouseoverMaximizeSvg"
+                  @mouseleave="onMouseleaveMaximizeSvg">
             <SvgComponent :svg-type="'maximize'"/>
           </button>
           <button class="close-button" @click="closeWindow">
@@ -47,7 +49,7 @@
 import SvgComponent from "@/components/ui/svg-component";
 import WindowContent from "@/components/desktop/window/windowContent/window-content";
 import {enableDragDropTouch} from "@/assets/libraries/drag-drop-touch.esm.min";
-import { useGlobalState } from "@/stores/globalState";
+import {useGlobalState} from "@/stores/globalState";
 import html2canvas from "html2canvas";
 import ImgComponent from "@/components/ui/img-component";
 import SplitWindowsComponent from "@/components/ui/split-windows-component";
@@ -172,6 +174,8 @@ export default {
       const windowHeight = this.$el.getBoundingClientRect().height;
       const browserWindowWidth = this.globalState.browserWindowSize.WIDTH;
       const browserWindowHeight = this.globalState.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED
+
+      this.showSplitWindowComponent = false;
 
       if (windowWidth === browserWindowWidth && windowHeight === browserWindowHeight) {
         this.$el.style.width = '60%';
@@ -359,14 +363,12 @@ export default {
       let windowWidth = this.$el.getBoundingClientRect().width;
       let windowHeight = this.$el.getBoundingClientRect().height;
 
-      for (let i = 0; i <= 2; i++) {
-        if (windowWidth === this.globalState.browserWindowSize.WIDTH && windowHeight === this.globalState.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED) {
-          this.$el.style.left = `${this.mouseDownWindowVariables.oldPositionX - (windowWidth / 3)}px`;
-          this.$el.style.top = `${this.mouseDownWindowVariables.oldPositionY}px`;
-          this.$el.style.width = '60%';
-          this.$el.style.height = '80%';
-          break;
-        }
+      if (windowWidth === this.globalState.browserWindowSize.WIDTH && windowHeight === this.globalState.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED) {
+        this.$el.style.left = `${event.clientX / 2}px`;
+        this.$el.style.top = `${event.clientY / 2}px`;
+        this.$el.style.width = '60%';
+        this.$el.style.height = '80%';
+        return;
       }
 
       const newX = event.clientX;
@@ -539,6 +541,7 @@ export default {
   width: 100%;
   background-color: var(--background-color-window);
   border: var(--border-window-color) 8px solid;
+  scrollbar-color: var(--font-color) var(--background-color-input);
 }
 
 .window-content {
@@ -553,6 +556,7 @@ export default {
   position: sticky;
   top: 0;
   background-color: var(--taskbar-color);
+  z-index: 1000;
 }
 
 .top-header {
