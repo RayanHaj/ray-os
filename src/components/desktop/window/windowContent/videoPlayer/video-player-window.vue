@@ -1,7 +1,7 @@
 <template>
   <div class="video-player-container">
-    <video v-if="videoSrc" :src="videoSrc" class="video" ref="video" @loadedmetadata="initVideoData" @timeupdate="videoCurrentTime = $event.currentTarget.currentTime"/>
-    <section v-if="videoSrc" class="video-controls">
+    <video v-if="videoSrc !== null" :src="videoSrc" class="video" ref="video" @loadedmetadata="initVideoData" @timeupdate="videoCurrentTime = $event.currentTarget.currentTime"/>
+    <section v-if="videoSrc !== null" class="video-controls">
       <button @click="playVideo">
         <svg-component v-if="videoPlaying" svg-type="pause" custom-width="25" custom-height="15"/>
         <svg-component v-else svg-type="play" custom-width="25" custom-height="25"/>
@@ -83,6 +83,16 @@ export default {
       }
     }
   },
+  props: {
+    fileObject: {
+      type: File,
+      required: false
+    },
+    windowId: {
+      type: Number,
+      required: true
+    }
+  },
   beforeMount() {
     this.windowObject = this.globalState.openWindows.find(window => window.id === this.windowId);
 
@@ -93,18 +103,8 @@ export default {
       })
     });
 
-    if (this.windowObject.values.files) {
+    if (this.windowObject.values.file) {
       this.videoSrc = URL.createObjectURL(this.windowObject.values.file);
-    }
-  },
-  props: {
-    fileObject: {
-      type: File,
-      required: false
-    },
-    windowId: {
-      type: Number,
-      required: true
     }
   },
   methods: {
