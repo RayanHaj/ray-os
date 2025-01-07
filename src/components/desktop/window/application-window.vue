@@ -138,9 +138,7 @@ export default {
   emits: ['splitOtherWindow', 'minimizeWindow', 'rendered', 'clicked', 'previewApplicationWindow', 'windowResizing'],
   watch: {
     splitOtherWindow(newWindow) {
-      console.log('newWindow: ' + newWindow.window.id)
-      console.log('currentWindow: ' + this.windowObject.id)
-      if (newWindow.window.name === this.windowObject.name) {
+      if (newWindow.window.id === this.windowObject.id) {
         this.setOutOfBoundsValues(
             newWindow.xOutOfBoundsPositive === 'negative-x',
             newWindow.xOutOfBoundsPositive === 'positive-x',
