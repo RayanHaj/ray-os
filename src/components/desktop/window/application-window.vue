@@ -110,9 +110,12 @@ export default {
   mounted() {
     enableDragDropTouch();
     this.applicationWindowSize = {
-      width: this.$el.clientWidth,
-      height: this.$el.clientHeight
+      width: this.globalState.browserWindowSize.WIDTH,
+      height: this.globalState.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED
     }
+
+    this.$el.style.width = `${this.applicationWindowSize.width}px`;
+    this.$el.style.height = `${this.applicationWindowSize.height}px`;
   },
   props: {
     windowSize: {
@@ -444,6 +447,9 @@ export default {
       this.$el.style.top = top;
     },
     splitCurrentWindow(position) {
+      if (position === null) {
+        return;
+      }
       const height = this.globalState.browserWindowSize.HEIGHT;
       const heightTaskbarExcluded = this.globalState.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED;
       const heightInPercentage = (heightTaskbarExcluded / height) * 100;
@@ -548,10 +554,10 @@ export default {
   flex-direction: column;
   overflow: auto;
   position: absolute;
-  width: 100%;
   background-color: var(--background-color-window);
   border: var(--border-window-color) 8px solid;
   scrollbar-color: var(--font-color) var(--background-color-input);
+  z-index: 1
 }
 
 .window-content {
@@ -566,7 +572,7 @@ export default {
   position: sticky;
   top: 0;
   background-color: var(--taskbar-color);
-  z-index: 1000;
+  z-index: 2;
 }
 
 .top-header {

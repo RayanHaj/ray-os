@@ -9,7 +9,6 @@
           :ref="window.name"
           :key="window.name"
           :id="window.id"
-          :style="{zIndex: this.globalState.openWindows.find(openWindow => openWindow.id === window.id).zIndex}"
           :window-id="window.id"
           :window-size="windowDimensions"
           :split-other-window="splitOtherWindow"
@@ -193,16 +192,6 @@ export default {
         windowComponent.$el.style.display = 'none';
         window.minimized = true;
       }
-    },
-    sortWindowArray() {
-      if (this.globalState.openWindows.length > 0) {
-        let counter = 2;
-        this.globalState.openWindows.forEach(window => {
-          window.zIndex = counter++;
-        });
-        this.highestZIndex = counter;
-        this.$el.querySelector('.taskbar').style.zIndex = this.highestZIndex + 1;
-      }
     }
   }
 }
@@ -220,7 +209,7 @@ export default {
   width: 100%;
   background-size: cover;
   background-position: center;
-  z-index: 1;
+  z-index: 0;
 }
 
 .window {

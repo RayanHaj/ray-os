@@ -206,7 +206,6 @@ export default {
   flex-direction: column;
   min-width: 20%;
   top: 0;
-  z-index: 0;
   padding: 10px 0 0 10px;
   border-radius: 5px;
 }

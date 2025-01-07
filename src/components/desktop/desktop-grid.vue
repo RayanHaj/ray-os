@@ -317,7 +317,7 @@ export default {
       this.tileOnHover = e.currentTarget;
     },
     openApplication(applicationName) {
-      if (applicationName === undefined) {
+      if (applicationName === null) {
         return;
       }
 

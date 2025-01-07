@@ -259,6 +259,7 @@ export default {
   background-color: var(--background-color);
   color: var(--font-color);
   bottom: 50px;
+  z-index: 2;
 }
 
 .open-window-preview {
@@ -277,7 +278,6 @@ export default {
   justify-content: space-between;
   width: 100%;
   align-self: end;
-  z-index: 10;
 }
 
 .open-window-name {
