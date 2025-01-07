@@ -7,7 +7,7 @@
           v-for="window in this.globalState.openWindows"
           class="window"
           :ref="window.name"
-          :key="window.name"
+          :key="window.id"
           :id="window.id"
           :window-id="window.id"
           :window-size="windowDimensions"
@@ -66,7 +66,6 @@ export default {
       splitOtherWindow: {},
       openWindows: [],
       windowDimensions: [],
-      highestZIndex: 1,
       backgroundColor: 'black',
       desktopBrightnessValue: 100,
     }
@@ -157,9 +156,8 @@ export default {
         this.desktopBrightnessValue = value;
       }
     },
-    onClickWindow(e, window) {
+    onClickWindow() {
       this.activateQuickSettingsMenu(false);
-      console.log(window)
       // const mouseTarget = e.target.parentNode;
       // if (this.closingWindow !== true && mouseTarget.classList && mouseTarget.classList[0] !== 'window-state-control') {
       //   const windowIndex = this.globalState.openWindows.findIndex(openWindow => openWindow.name === window.name);

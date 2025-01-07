@@ -259,7 +259,7 @@ export default {
   background-color: var(--background-color);
   color: var(--font-color);
   bottom: 50px;
-  z-index: 2;
+  z-index: 9999;
 }
 
 .open-window-preview {
@@ -294,6 +294,7 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  z-index: 9999;
 }
 
 .taskbar-items-left {

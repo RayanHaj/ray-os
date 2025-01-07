@@ -1,11 +1,17 @@
 <template>
   <div class="window"
        ref="window"
-       :style="{ minWidth: MINIMUM_WIDTH_WINDOW, minHeight: MINIMUM_HEIGHT_WINDOW, transition: windowIsMoving || windowIsResizing ? undefined : 'width 0.5s, height 0.5s, left 0.5s, top 0.5s'}"
+       :style="{
+       minWidth: MINIMUM_WIDTH_WINDOW,
+       minHeight: MINIMUM_HEIGHT_WINDOW,
+       transition: windowIsMoving || windowIsResizing ? undefined : 'width 0.5s, height 0.5s, left 0.5s, top 0.5s',
+       zIndex: globalState.openWindows.findIndex(window => Number(window.id) === windowId) + 2
+       }"
        @mousemove="mouseOverEventListeners"
        @mousedown="moveWindowOnMouseDownWindowCorners"
        @touchover="mouseOverEventListeners"
        @touchstart="moveWindowOnMouseDownWindowCorners"
+       @click="onClickWindow"
   >
     <div class="window-header">
       <div class="top-header" @click="$emit('clicked', $event)" @mousedown.prevent="onMouseDownHeader($event)"
@@ -430,8 +436,6 @@ export default {
         this.setSplitWindowValues(0, '100%', `${halfHeightInPercentage}%`, 0);
         return 'positive-y';
       } else if (this.windowOutOfBounds.yNegative) {
-        console.log(halfHeightInPercentage);
-        console.log(heightInPercentage);
         this.setSplitWindowValues(0, '100%', `${halfHeightInPercentage}%`, `${halfHeightInPercentage}%`);
         return 'negative-y';
       }
@@ -527,6 +531,9 @@ export default {
     },
     closeWindow() {
       this.globalState.closeOpenWindowByWindowId(this.windowObject.id);
+    },
+    onClickWindow(event) {
+      this.globalState.pushToTopOpenWindows(event.currentTarget.id);
     }
   }
 }
@@ -555,7 +562,6 @@ export default {
   background-color: var(--background-color-window);
   border: var(--border-window-color) 8px solid;
   scrollbar-color: var(--font-color) var(--background-color-input);
-  z-index: 1
 }
 
 .window-content {

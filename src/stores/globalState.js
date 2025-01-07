@@ -99,12 +99,9 @@ export const useGlobalState = defineStore('globalState', {
                 windowName = returnApplicationForFileType(object.type);
             }
 
-            console.log(id, windowName)
-
             const newWindowObject = {
                 'id': id,
                 'name': windowName,
-                'zIndex': null,
                 'minimized': false,
                 'values': object
             }
@@ -123,8 +120,17 @@ export const useGlobalState = defineStore('globalState', {
                 return returnValue;
             }
         },
+        pushToTopOpenWindows(windowId) {
+            if (!windowId) return;
+            const windowIndex = this.openWindows.findIndex(window => Number(window.id) === Number(windowId));
+            if (windowIndex !== -1) {
+                const window = this.openWindows[windowIndex];
+                this.openWindows.splice(windowIndex, 1);
+                this.openWindows.push(window);
+            }
+        },
         closeOpenWindowByWindowId(id) {
             this.openWindows = this.openWindows.filter(window => window.id !== id);
-        },
+        }
     }
 })
