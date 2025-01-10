@@ -2,7 +2,8 @@
   <div class="desktop"
        ref="desktop"
        :style="{ filter: `brightness(${desktopBrightnessValue}%)`}">
-    <div class="main-screen">
+    <OsLoader v-if="osLoaderFinished === false" @finished="osLoaderFinished = true"/>
+    <div v-show="osLoaderFinished === true" class="main-screen">
       <MainWindow
           v-for="window in this.globalState.openWindows"
           class="window"
@@ -21,13 +22,16 @@
           @preview-application-window="this.previewApplicationWindow = $event"
           @window-resizing="windowIsResizing = $event"
       />
-      <DesktopGrid
-          @clicked="activateQuickSettingsMenu(false)"
-          :window-resizing="windowIsResizing"
-          class="desktop-grid"/>
+      <transition name="slide">
+        <DesktopGrid v-show="osLoaderFinished === true && this.startBlockGame === false"
+            @clicked="activateQuickSettingsMenu(false)"
+            :window-resizing="windowIsResizing"
+            class="desktop-grid"/>
+      </transition>
+      <DesktopGridBlockGame v-if="this.startBlockGame === true"/>
     </div>
-    <div class="footer-container">
-      <SettingsMenu v-if="quickSettingMenuIsOpen"
+    <div v-show="osLoaderFinished === true" class="footer-container">
+      <SettingsMenu v-show="quickSettingMenuIsOpen"
                     ref="settingsMenu"
                     class="quick-settings-menu"
                     @brightness-value-changed="updateBrightnessValue"
@@ -48,8 +52,10 @@ import taskbarFooter from "@/components/desktop/taskbar/taskbar-footer";
 import DesktopGrid from "@/components/desktop/desktop-grid";
 import ApplicationWindow from "@/components/desktop/window/application-window";
 import SettingsMenu from "@/components/desktop/taskbar/taskbarComponents/settings-menu";
+import OsLoader from "@/components/desktop/os-loader";
 import {useGlobalState} from "@/stores/globalState";
 import {deviceIsMobile} from "@/utils/util";
+import DesktopGridBlockGame from "@/components/desktop/desktop-grid-block-game";
 
 export default {
   name: "desktop-home",
@@ -68,9 +74,18 @@ export default {
       windowDimensions: [],
       backgroundColor: 'black',
       desktopBrightnessValue: 100,
+      osLoaderFinished: false,
+      startBlockGame: true
     }
   },
-  components: {SettingsMenu, MainWindow: ApplicationWindow, DesktopGrid: DesktopGrid, taskbar: taskbarFooter},
+  components: {
+    DesktopGridBlockGame,
+    SettingsMenu,
+    MainWindow: ApplicationWindow,
+    DesktopGrid: DesktopGrid,
+    taskbar: taskbarFooter,
+    OsLoader: OsLoader
+  },
   props: {
     backgroundImageId: Number
   },
@@ -80,19 +95,7 @@ export default {
       this.$router.push('/');
     }
 
-    if (this.globalState.getBackgroundColor() !== '') {
-      this.setBackgroundColor();
-    } else if (this.globalState.getWallpaper() !== '') {
-      this.setWallpaper();
-    } else {
-      this.setWallpaper();
-    }
-
-    this.globalState.browserWindowSize.WIDTH = this.$el.getBoundingClientRect().width;
-    this.globalState.browserWindowSize.HEIGHT = this.$el.getBoundingClientRect().height;
-    this.globalState.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED = this.$el.getBoundingClientRect().height - this.TASKBAR_HEIGHT;
-
-    window.addEventListener('resize', this.updateWindowDimensions);
+    this.init();
   },
   beforeUnmount() {
     window.removeEventListener('resize', this.updateWindowDimensions);
@@ -110,6 +113,10 @@ export default {
       if (this.globalState.wallpaper !== '') {
         this.setWallpaper();
       }
+    },
+    'globalState.startBlockGame'(newValue) {
+      console.log(newValue)
+      this.startBlockGame = this.globalState.startBlockGame;
     },
     'globalState.openWindows.length'(newValue, oldValue) {
       if (newValue > oldValue) {
@@ -131,6 +138,21 @@ export default {
     }
   },
   methods: {
+    init() {
+      if (this.globalState.getBackgroundColor() !== '') {
+        this.setBackgroundColor();
+      } else if (this.globalState.getWallpaper() !== '') {
+        this.setWallpaper();
+      } else {
+        this.setWallpaper();
+      }
+
+      this.globalState.browserWindowSize.WIDTH = this.$el.getBoundingClientRect().width;
+      this.globalState.browserWindowSize.HEIGHT = this.$el.getBoundingClientRect().height;
+      this.globalState.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED = this.$el.getBoundingClientRect().height - this.TASKBAR_HEIGHT;
+
+      window.addEventListener('resize', this.updateWindowDimensions);
+    },
     setApplicationNameVariable(object) {
       this.globalState.pushOpenWindow(object);
     },
@@ -215,11 +237,23 @@ export default {
   width: 100%;
 }
 
-
 .quick-settings-menu {
   position: fixed;
   right: 20px;
   bottom: 60px;
   width: 350px;
+}
+
+.slide-enter-active,
+.slide-leave-active {
+  transition: transform 0.5s ease;
+}
+
+.slide-enter-from {
+  transform: translateX(-100%);
+}
+
+.slide-leave-to {
+  transform: translateX(100%);
 }
 </style>

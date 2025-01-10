@@ -1,16 +1,16 @@
 <template>
-  <MobileLogin v-if="isMobile"></MobileLogin>
-  <DesktopLogin v-else></DesktopLogin>
+  <transition name="fade">
+    <DesktopHome/>
+  </transition>
 </template>
 
 <script>
-import DesktopLogin from "@/components/desktop/desktop-login";
-import MobileLogin from "@/components/mobile/mobile-login";
 import {deviceIsMobile} from "@/utils/util";
+import DesktopHome from "@/components/desktop/desktop-home";
 
 export default {
   name: "app-entry-point",
-  components: {MobileLogin, DesktopLogin},
+  components: { DesktopHome },
   data() {
     return {
       isMobile: deviceIsMobile(),
@@ -20,4 +20,17 @@ export default {
 </script>
 
 <style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease, filter 0.5s ease;
+}
+.fade-enter-from {
+  opacity: 0;
+  filter: blur(5px);
+}
+.fade-leave-to {
+  opacity: 0;
+  filter: blur(5px);
+}
+
 </style>

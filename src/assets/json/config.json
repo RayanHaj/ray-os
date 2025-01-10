@@ -1,4 +1,34 @@
 {
+  "blockPiecesPositions": [
+    {
+      "name": "OPiece",
+      "startPositions": [0, 1, -20, -19]
+    },
+    {
+      "name": "SPiece",
+      "startPositions": [20, 0, 1, -19]
+    },
+    {
+      "name": "ZPiece",
+      "startPositions": [-20, 0, 1, 21]
+    },
+    {
+      "name": "TPiece",
+      "startPositions": [0, -19, 1, 21]
+    },
+    {
+      "name": "IPiece",
+      "startPositions": [0, 1, 2, 3]
+    },
+    {
+      "name": "LPiece",
+      "startPositions": [20, -19, 1, 21]
+    },
+    {
+      "name": "JPiece",
+      "startPositions": [-20, -19, 1, 21]
+    }
+  ],
   "defaultApplicationNames": [
     "Browser",
     "File Explorer",

@@ -11,6 +11,7 @@ export const useGlobalState = defineStore('globalState', {
             HEIGHT: 0,
             WIDTH: 0,
         },
+        startBlockGame: false,
         backgroundColor: '',
         wallpaper: '',
         theme: ''

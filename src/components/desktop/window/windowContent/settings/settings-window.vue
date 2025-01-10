@@ -62,6 +62,12 @@
                @change="globalState.setShowGridOutlineDesktop($event.target.checked)"
         >
       </div>
+      <div v-show="selectedOption === 'enable block game'" class="desktop-grid-options-wrapper">
+        <input type="checkbox"
+               :checked="globalState.startBlockGame === true"
+               @change="globalState.startBlockGame = $event.target.checked"
+        >
+      </div>
     </div>
   </div>
 </template>
@@ -79,7 +85,7 @@ export default {
       themes: json.themes,
       colors: json.colors,
       wallpapers: json.wallpapers,
-      options: ['home', 'theme', 'background color', 'wallpaper', 'desktop grid'],
+      options: ['home', 'theme', 'background color', 'wallpaper', 'desktop grid', 'enable block game'],
       searchbarInput: '',
       selectedOption: '',
       FLEX_DIRECTION_CONTAINER: 'row',
