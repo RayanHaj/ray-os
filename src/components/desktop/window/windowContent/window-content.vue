@@ -14,6 +14,7 @@ import Browser from "@/components/desktop/window/windowContent/browser/browser-w
 import SereneSounds from "@/components/desktop/window/windowContent/sereneSounds/serene-sounds-window";
 import Calculator from "@/components/desktop/window/windowContent/calculator/calculator-window";
 import VideoPlayer from "@/components/desktop/window/windowContent/videoPlayer/video-player-window";
+import BlockGame from "@/components/desktop/window/windowContent/games/block-game";
 import { useGlobalState } from "@/stores/globalState";
 
 export default {
@@ -24,7 +25,8 @@ export default {
     Settings,
     FileExplorer,
     Calculator,
-    VideoPlayer
+    VideoPlayer,
+    BlockGame
   },
   emits: ['moveCalculatorWindowToTopCorner'],
   data() {

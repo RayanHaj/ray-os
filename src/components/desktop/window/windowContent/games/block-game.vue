@@ -1,6 +1,6 @@
 <template>
   <div v-if="isLoading">Loading...</div>
-  <div v-else class="grid-container" ref="gridContainer">
+  <div v-else class="grid-container" ref="gridContainer" @keydown="handleKeyPresses($event)" tabindex="0">
     <div class="grid" ref="grid">
       <div v-for="(numX, indexX) in GRID_WIDTH" :key="numX" class="tile-column" ref="tileColumn">
         <div v-for="(numY, indexY) in GRID_HEIGHT" :key="numY" class="tile" ref="tile"
@@ -8,7 +8,8 @@
              :style="{
               border: `${ '1px solid white' }`
             }">
-          <div v-if="blockPositions.find(position => position.index === (indexX * GRID_HEIGHT + indexY))" class="tile-content-wrapper" ref="tileContentWrapper"
+          <div v-if="blockPositions.find(position => position.index === (indexX * GRID_HEIGHT + indexY))"
+               class="tile-content-wrapper" ref="tileContentWrapper"
                :style="{width: `${TILE_WIDTH}px`, height: `${TILE_HEIGHT}px`, maxWidth: `${TILE_WIDTH}px`, maxHeight: `${TILE_HEIGHT}px`,
               backgroundColor: blockPositions.find(position => position.index === (indexX * GRID_HEIGHT + indexY)).backgroundColor}"
           >
@@ -24,8 +25,7 @@ import {useGlobalState} from "@/stores/globalState";
 import json from "@/assets/json/config.json"
 
 export default {
-  name: "desktop-grid-block-game",
-  inject: ['db'],
+  name: "block-game",
   data() {
     return {
       GRID_WIDTH: 10,
@@ -42,7 +42,6 @@ export default {
       reachedBottom: false,
     }
   },
-  emits: ['clicked'],
   computed: {
     globalState() {
       return useGlobalState();
@@ -56,6 +55,7 @@ export default {
       this.centerTileId = Math.floor(this.GRID_WIDTH / 2) * this.GRID_HEIGHT;
       this.spawnPieceStartPos('OPiece', 'red');
     });
+
     setInterval(() => {
       const canMoveDown = this.movePiece(this.currentBlockIndexes, 'down');
       if (canMoveDown === false) {
@@ -66,11 +66,11 @@ export default {
   methods: {
     async init() {
       for (let i = 0; i < this.GRID_WIDTH * this.GRID_HEIGHT; i++) {
-          this.blockPositions[i] = {
-            'name': null,
-            'index': i,
-            'backgroundColor': null
-          };
+        this.blockPositions[i] = {
+          'name': null,
+          'index': i,
+          'backgroundColor': null
+        };
       }
 
       this.calculateBottomTileIds();
@@ -99,6 +99,10 @@ export default {
       return returnValue;
     },
     spawnPieceStartPos(name, color) {
+      if (this.currentBlockIndexes.length > 0) {
+        this.currentBlockIndexes = [];
+      }
+
       const piece = json.blockPiecesPositions.find(piece => piece.name === name);
       const positions = piece.startPositions;
       const tilesAreNotOccupied = this.tilesAreNotAccupied(positions);
@@ -117,16 +121,27 @@ export default {
       const removedPieces = this.removePiece(indexes);
       switch (direction) {
         case 'down': {
-          removedPieces.forEach(piece => {
-            this.blockPositions[piece.index + 1].name = piece.name;
-            this.blockPositions[piece.index + 1].backgroundColor = piece.backgroundColor;
-            this.currentBlockIndexes.push(piece.index + 1);
-          });
+          this.movePieceByIndex(removedPieces, 1);
+          break;
+        }
+        case 'left': {
+          this.movePieceByIndex(removedPieces, -20);
+          break;
+        }
+        case 'right': {
+          this.movePieceByIndex(removedPieces, 20);
           break;
         }
       }
 
       return true;
+    },
+    movePieceByIndex(pieces, increment) {
+      pieces.forEach(piece => {
+        this.blockPositions[piece.index + increment].name = piece.name;
+        this.blockPositions[piece.index + increment].backgroundColor = piece.backgroundColor;
+        this.currentBlockIndexes.push(piece.index + increment);
+      });
     },
     removePiece(indexes) {
       let returnArray = [];
@@ -158,6 +173,18 @@ export default {
 
       return returnValue;
     },
+    handleKeyPresses(event) {
+      switch (event.key) {
+        case 'a': {
+          this.movePiece(this.currentBlockIndexes, 'left');
+          break;
+        }
+        case 'd': {
+          this.movePiece(this.currentBlockIndexes, 'right');
+          break;
+        }
+      }
+    }
   },
 }
 </script>

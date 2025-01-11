@@ -23,12 +23,11 @@
           @window-resizing="windowIsResizing = $event"
       />
       <transition name="slide">
-        <DesktopGrid v-show="osLoaderFinished === true && this.startBlockGame === false"
+        <DesktopGrid v-show="osLoaderFinished === true"
             @clicked="activateQuickSettingsMenu(false)"
             :window-resizing="windowIsResizing"
             class="desktop-grid"/>
       </transition>
-      <DesktopGridBlockGame v-if="this.startBlockGame === true"/>
     </div>
     <div v-show="osLoaderFinished === true" class="footer-container">
       <SettingsMenu v-show="quickSettingMenuIsOpen"
@@ -55,7 +54,6 @@ import SettingsMenu from "@/components/desktop/taskbar/taskbarComponents/setting
 import OsLoader from "@/components/desktop/os-loader";
 import {useGlobalState} from "@/stores/globalState";
 import {deviceIsMobile} from "@/utils/util";
-import DesktopGridBlockGame from "@/components/desktop/desktop-grid-block-game";
 
 export default {
   name: "desktop-home",
@@ -74,12 +72,10 @@ export default {
       windowDimensions: [],
       backgroundColor: 'black',
       desktopBrightnessValue: 100,
-      osLoaderFinished: false,
-      startBlockGame: true
+      osLoaderFinished: false
     }
   },
   components: {
-    DesktopGridBlockGame,
     SettingsMenu,
     MainWindow: ApplicationWindow,
     DesktopGrid: DesktopGrid,
