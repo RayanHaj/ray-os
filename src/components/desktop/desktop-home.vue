@@ -36,6 +36,7 @@
       <taskbar ref="taskbar"
                class="taskbar"
                @quick-settings-menu-open="activateQuickSettingsMenu(true)"
+               @remove-minimize-window="minimizeWindow"
                :height="TASKBAR_HEIGHT"
                :preview-application-window="previewApplicationWindow"
       />
@@ -118,7 +119,7 @@ export default {
           if (Number(windowElement.$el.id) === newElement.id) {
             windowElement.$el.style.height = `calc(100% - ${this.TASKBAR_HEIGHT}px)`;
             windowElement.$el.style.display = 'flex';
-            window.minimized = false;
+            newElement.minimized = false;
           }
         });
       }
@@ -190,12 +191,21 @@ export default {
       }
     },
     minimizeWindow(windowId) {
+      const window = this.globalState.openWindows.find(window => window.id === windowId);
       const windowComponent = this.$refs[windowId][0];
 
-      if (windowComponent) {
-        windowComponent.$el.style.display = 'none';
-        window.minimized = true;
+      if (!windowComponent || !window) {
+        return;
       }
+
+      if (windowComponent.$el.style.display === 'none' && window.minimized === true) {
+        windowComponent.$el.style.display = 'block';
+        window.minimized = false;
+        return;
+      }
+
+      windowComponent.$el.style.display = 'none';
+      window.minimized = true;
     }
   }
 }

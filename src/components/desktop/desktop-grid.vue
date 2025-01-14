@@ -21,8 +21,8 @@
         >
           <div
               v-if="isTileFillable(indexX, indexY)"
-              @mouseenter="globalState.desktopFiles[indexX * GRID_HEIGHT + indexY].hovering = true"
-              @mouseleave="globalState.desktopFiles[indexX * GRID_HEIGHT + indexY].hovering = false"
+              @mouseenter="onMouseenterTileWrapper(indexX, indexY)"
+              @mouseleave="onMouseleaveTileWrapper(indexX, indexY)"
               class="tile-content-wrapper" ref="tileContentWrapper"
               :style="{width: `${TILE_WIDTH}px`, height: `${TILE_HEIGHT}px`, maxWidth: `${TILE_WIDTH}px`, maxHeight: `${TILE_HEIGHT}px`}"
               :draggable="applicationWindowIsResizing === false"
@@ -190,6 +190,16 @@ export default {
       }
       this.globalState.desktopFiles = this.globalState.desktopFiles.sort((a, b) => a.index - b.index);
       this.isLoading = false;
+    },
+    onMouseenterTileWrapper(x, y) {
+      const element = this.globalState.desktopFiles[x * this.GRID_HEIGHT + y];
+      if (typeof element === undefined) return;
+      element.hovering = true;
+    },
+    onMouseleaveTileWrapper(x, y) {
+      const element = this.globalState.desktopFiles[x * this.GRID_HEIGHT + y];
+      if (typeof element === undefined) return;
+      element.hovering = false;
     },
     contextMenuActions(e, action) {
       switch (action) {

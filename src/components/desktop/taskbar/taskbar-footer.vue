@@ -6,18 +6,21 @@
              class="open-tabs"
              @mouseenter="mouseOnOpenTabs = true"
              @mouseleave="onMouseleaveOpenTabs">
-          <div class="open-tab" v-for="tab in openTabs" :key="tab.id">
+          <div class="open-tab" @click="onClickTab(tab.id)" v-for="tab in openTabs" :key="tab.id">
             <div class="open-tab-name">
               {{ tab.name }}
             </div>
-            <div class="open-tab-close">
+            <div class="open-tab-close" @click="onClickTabClose(tab.id)">
               <svg-component svg-type="close" :custom-width="18" :custom-height="18"/>
             </div>
           </div>
         </div>
-        <div class="app-icon" @mouseenter="onMouseenterApplicationIcon(iconImageName)"
-             @mouseleave="onMouseleaveApplicationIcon">
-          <ImgComponent @clicked="emitApplicationName(iconImageName)" :image-name="iconImageName"
+        <div class="app-icon"
+             @mouseenter="onMouseenterApplicationIcon(iconImageName)"
+             @mouseleave="onMouseleaveApplicationIcon"
+             @click="emitApplicationName(iconImageName)"
+        >
+          <ImgComponent :image-name="iconImageName"
                         :custom-width="ICON_IMG_WIDTH"
                         :custom-height="ICON_IMG_HEIGHT"/>
           <div :class="getHorizontalLineClass(iconImageName)"
@@ -65,7 +68,7 @@ import {useGlobalState} from "@/stores/globalState";
 
 export default {
   name: "taskbarFooter",
-  emits: ['closeWindow', 'quickSettingsMenuOpen', 'hoveringOnWindowImageTaskbar', 'clicked'],
+  emits: ['closeWindow', 'quickSettingsMenuOpen', 'hoveringOnWindowImageTaskbar', 'clicked', 'removeMinimizeWindow'],
   inject: ['db'],
   data() {
     return {
@@ -134,6 +137,7 @@ export default {
       }
 
       if (this.globalState.openWindows.some(window => window.name === applicationName)) {
+        this.showOpenTabs = true;
         return;
       }
 
@@ -187,6 +191,23 @@ export default {
         this.showOpenTabs = false;
       }
       this.mouseOnOpenTabs = false;
+    },
+    onClickTab(id) {
+      const window = this.globalState.openWindows.find(window => window.id === id);
+      if (!window) return;
+
+      console.log(this.globalState.openWindows)
+
+      this.$emit('removeMinimizeWindow', window.id);
+
+      this.globalState.pushToTopOpenWindows(window.id);
+      console.log(this.globalState.openWindows);
+
+      this.showOpenTabs = false;
+    },
+    onClickTabClose(id) {
+      this.globalState.openWindows.splice(id, 1);
+      this.showOpenTabs = false;
     },
     setOpenTabs(tabs) {
       if (tabs.length === this.openTabs.length) return;

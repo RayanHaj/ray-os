@@ -187,4 +187,65 @@ html, body {
   --border-window-color: #FFD700; /* Same as font color */
 }
 
+.terminal-dark {
+  --background-color: #000000; /* Pure black for the terminal background */
+  --taskbar-color: #1A1A1A; /* Dark gray for the taskbar */
+  --background-color-window: #121212; /* Slightly lighter black for windows */
+  --background-color-input: #000000; /* Consistent with terminal background */
+  --font-color: #00FF00; /* Bright green for terminal text */
+  --hover-color: #003300; /* Dark green for hover effects */
+  --border-input-color: #004400; /* Subtle green for input borders */
+  --border-input-selected-color: #00FF00; /* Same bright green for selected input */
+  --border-window-color: #00FF00; /* Matches font color for consistency */
+}
+
+.synthwave-neon {
+  --background-color: #1A0023; /* Diep paars als een nachtelijke basis */
+  --taskbar-color: #2C003E; /* Donker neonpaars voor de taskbar */
+  --background-color-window: #FF0080; /* Fel neonroze voor ramen */
+  --background-color-input: #7600FF; /* Neonpaars voor invoervelden */
+  --font-color: #00FFFF; /* Neonblauw voor tekst */
+  --hover-color: #FF4500; /* Neonoranje voor hover-effecten */
+  --border-input-color: #FF00FF; /* Felroze als rand voor inputvelden */
+  --border-input-selected-color: #00FF80; /* Neon-groen voor geselecteerde invoer */
+  --border-window-color: #FF0080; /* Neonroze als rand voor ramen */
+}
+
+.cosmic-glow {
+  --background-color: #0D0221; /* Diep donkerblauw, zoals de kosmos */
+  --taskbar-color: #1A0535; /* Iets lichter paarsblauw voor een galactische uitstraling */
+  --background-color-window: #3D087B; /* Intens paars voor een nevelachtige sfeer */
+  --background-color-input: #251351; /* Donkerpaars voor invoervelden */
+  --font-color: #FFFFFF; /* Helder wit, zoals sterrenlicht */
+  --hover-color: #FF66FF; /* Neonroze, als de glans van een verre ster */
+  --border-input-color: #4B0082; /* Indigo voor een subtiele kosmische rand */
+  --border-input-selected-color: #FFD700; /* Goud, als een stralende ster */
+  --border-window-color: #00FFFF; /* Neonblauw, geïnspireerd door verre planeten */
+  --highlight-color: #9400D3; /* Diep violet als accentkleur voor knoppen of highlights */
+}
+
+.fantasy-theme {
+  --background-color: #1A2B44; /* Deep, dark blue like a midnight sky */
+  --taskbar-color: #4A5B7E; /* Soft grayish-blue, like twilight */
+  --background-color-window: #3B4A5E; /* Muted slate blue for window backgrounds */
+  --background-color-input: #7D8A9C; /* Misty gray-blue for input fields */
+  --font-color: #F4E1A1; /* Soft golden yellow, like light from a lantern */
+  --hover-color: #9FAE99; /* Soft green glow, like a mystical aura */
+  --border-input-color: #A7B0C0; /* Light silver-gray for input borders */
+  --border-input-selected-color: #FFD700; /* Bright gold for selected input fields */
+  --border-window-color: #C1C9D4; /* Light silver for window borders */
+  --highlight-color: #9ACB88; /* Enchanted green for highlighted elements */
+}
+.midnight-theme {
+  --background-color: #1B2631; /* Deep, dark midnight blue for the background */
+  --taskbar-color: #0A0F12; /* Darker blackish shade for the taskbar */
+  --background-color-window: #2D3B48; /* Muted charcoal blue for window backgrounds */
+  --background-color-input: #4A5860; /* Dark slate gray for input fields */
+  --font-color: #E1E8F0; /* Soft pale blue for text, like moonlight */
+  --hover-color: #3C4F5C; /* Darkened teal blue for hover effects */
+  --border-input-color: #4F6771; /* Faded greenish-gray for input borders */
+  --border-input-selected-color: #A8C9E8; /* Light blue glow when focused */
+  --border-window-color: #3E4D58; /* Subtle grayish-blue for window borders */
+  --highlight-color: #FFB6C1; /* Soft pinkish hue, like distant stars */
+}
 </style>
