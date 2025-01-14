@@ -4,7 +4,7 @@
        :style="{
        minWidth: MINIMUM_WIDTH_WINDOW,
        minHeight: MINIMUM_HEIGHT_WINDOW,
-       transition: windowIsMoving || windowIsResizing ? undefined : 'width 0.5s, height 0.5s, left 0.5s, top 0.5s',
+       transition: windowIsResizing ? undefined : 'width 1s, height 1s, left 1s, top 1s',
        zIndex: getZIndex
        }"
        @mousemove="mouseOverEventListeners"
@@ -444,6 +444,8 @@ export default {
       this.$el.style.width = width;
       this.$el.style.height = height;
       this.$el.style.top = top;
+
+      this.globalState.pushToTopOpenWindows(this.windowId);
     },
     splitCurrentWindow(position) {
       if (position === null) {
