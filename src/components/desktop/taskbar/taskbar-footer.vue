@@ -1,52 +1,45 @@
 <template>
-  <div class="taskbar" ref="taskbar" :style="{ height: `${height}px` }">
+  <footer class="taskbar" ref="taskbar" :style="{ height: `${height}px` }">
     <div class="taskbar-items-left">
-      <div class="app-icon" :class="iconImageName" v-for="(iconImageName, index) in applicationNames"
-           :key="iconImageName"
-           @mouseenter="onMouseoverApplicationIcon(iconImageName)" @mouseleave="onMouseleaveApplicationIcon">
-        <div
-            v-if="currentIconHover.name === iconImageName && currentIconHover.hasHoverState && this.globalState.openWindows.some(openWindow => openWindow.name === iconImageName)"
-            :style="{ left: index === 0 ? '0' : (index === 1 ? '-45px' : undefined)  }"
-            @mouseover.once="onMouseoverOpenWindow" @mouseleave="onMouseleaveOpenWindow"
-            class="open-window-preview-wrapper">
-          <div class="close-window" :style="{ visibility: isHoveringOnOpenWindowPreview ? 'visible' : 'hidden' }">
-            <div class="open-window-img-name-wrapper">
-              <ImgComponent :image-name="iconImageName" :custom-width="18" :custom-height="18"/>
-              <div class="open-window-name">{{ iconImageName }}</div>
+      <div class="app-icons" :class="iconImageName" v-for="(iconImageName) in applicationNames" :key="iconImageName">
+        <div v-show="openTabs.length > 0 && openTabs[0].name === iconImageName" class="open-tabs">
+          <div class="open-tab" v-for="tab in openTabs" :key="tab.id">
+            <div>
+              {{ tab.name }}
             </div>
-            <SvgComponent :svg-type="'close'" @clicked="$emit('closeWindow', iconImageName)"/>
+            <svg-component svg-type="close" custom-width="18" custom-height="18"/>
           </div>
-          <div class="open-window-preview"></div>
         </div>
-        <div>
-          <ImgComponent @clicked="emitApplicationName(iconImageName)" :image-name="iconImageName" :custom-width="ICON_IMG_WIDTH"
+        <div class="app-icon" @mouseenter="onMouseoverApplicationIcon(iconImageName)"
+             @mouseleave="onMouseleaveApplicationIcon">
+          <ImgComponent @clicked="emitApplicationName(iconImageName)" :image-name="iconImageName"
+                        :custom-width="ICON_IMG_WIDTH"
                         :custom-height="ICON_IMG_HEIGHT"/>
-          <div :class="this.globalState.openWindows.find(openWindow => openWindow.name === iconImageName) &&
-                       this.globalState.openWindows.find(openWindow => openWindow.name === iconImageName).minimized === true ?
-                       'horizontal-line-minimized' :
-                       'horizontal-line'"
-               :style="{ visibility: this.globalState.openWindows.some(openWindow => openWindow.name === iconImageName) ?
-               'visible' :
-               'hidden' }"
+          <div :class="getHorizontalLineClass(iconImageName)"
+               :style="{ visibility: this.globalState.openWindows.some(openWindow => openWindow.name === iconImageName) ? 'visible' : 'hidden' }"
           />
         </div>
       </div>
     </div>
     <div class="taskbar-items-right">
-      <div v-show="setTaskbarElementsVisibility.ARROW_OPEN_WINDOWS_BUTTON" class="show-hidden-icons-wrapper taskbar-right-item">
+      <div v-show="setTaskbarElementsVisibility.ARROW_OPEN_WINDOWS_BUTTON"
+           class="show-hidden-icons-wrapper taskbar-right-item">
         <SvgComponent :svg-type="'arrowUp'" :custom-height="15" :custom-width="15"/>
       </div>
-      <div v-show="setTaskbarElementsVisibility.KEYBOARD_LAYOUT_BUTTON" class="keyboard-layout-wrapper taskbar-right-item">
+      <div v-show="setTaskbarElementsVisibility.KEYBOARD_LAYOUT_BUTTON"
+           class="keyboard-layout-wrapper taskbar-right-item">
         <span>ENG</span>
         <span>US</span>
       </div>
-      <div v-show="setTaskbarElementsVisibility.QUICK_SETTINGS_BUTTON" ref="quickSettingsMenuButton" class="wifi-sound-battery-wrapper taskbar-right-item"
+      <div v-show="setTaskbarElementsVisibility.QUICK_SETTINGS_BUTTON" ref="quickSettingsMenuButton"
+           class="wifi-sound-battery-wrapper taskbar-right-item"
            @click="emitQuickSettingMenuClicked">
         <SvgComponent :svg-type="'wifi'" :custom-height="15" :custom-width="15"/>
         <SvgComponent :svg-type="'volume'" :custom-height="15" :custom-width="15"/>
         <SvgComponent :svg-type="'battery'" :custom-height="15" :custom-width="15"/>
       </div>
-      <div v-show="setTaskbarElementsVisibility.DATE_TIME_NOTIFICATION" class="date-time-notification-wrapper taskbar-right-item">
+      <div v-show="setTaskbarElementsVisibility.DATE_TIME_NOTIFICATION"
+           class="date-time-notification-wrapper taskbar-right-item">
         <div class="date-time-wrapper">
           <div class="time">{{ time }}</div>
           <div class="date">{{ date }}</div>
@@ -56,7 +49,7 @@
         </div>
       </div>
     </div>
-  </div>
+  </footer>
 </template>
 
 <script>
@@ -73,20 +66,18 @@ export default {
     return {
       date: '',
       time: '',
-      currentIconHover: {},
-      previewImageCache: null,
       quickSettingMenuIsOpen: false,
-      isHoveringOnOpenWindowImage: false,
-      isHoveringOnOpenWindowPreview: false,
       ICON_IMG_WIDTH: 25,
       ICON_IMG_HEIGHT: 25,
+      openTabs: [],
       setTaskbarElementsVisibility: {
         DATE_TIME_NOTIFICATION: true,
         QUICK_SETTINGS_BUTTON: true,
         KEYBOARD_LAYOUT_BUTTON: true,
         ARROW_OPEN_WINDOWS_BUTTON: true
       },
-      applicationNames: json.defaultApplicationNames
+      applicationNames: json.defaultApplicationNames,
+      showWindowsPreview: false
     };
   },
   computed: {
@@ -100,7 +91,6 @@ export default {
     }
 
     this.previewImageCache = new Map();
-
 
 
     setInterval(() => {
@@ -121,6 +111,13 @@ export default {
     }
   },
   components: {ImgComponent, SvgComponent},
+  watch: {
+    'globalState.openTabs': {
+      handler(newValue) {
+        this.setOpenTabs(newValue);
+      },
+    }
+  },
   methods: {
     emitApplicationName(applicationName) {
       if (applicationName === undefined) {
@@ -139,88 +136,36 @@ export default {
       this.quickSettingMenuIsOpen = !this.quickSettingMenuIsOpen;
       this.$emit('quickSettingsMenuOpen', this.quickSettingMenuIsOpen)
     },
-    getRefQuickSettingsMenuButton() {
-      return this.$refs.quickSettingsMenuButton;
+    getHorizontalLineClass(name) {
+      let counter = 0;
+      this.globalState.openWindows.forEach(window => {
+        if (window.name === name && window.minimized === false) {
+          counter += 1;
+        }
+      });
+
+      if (counter === 0) {
+        return 'horizontal-line-minimized';
+      }
+
+      return 'horizontal-line';
     },
     onMouseoverApplicationIcon(name) {
-      if (this.globalState.openWindows.some(window => window.name === name)) {
-        this.isHoveringOnOpenWindowImage = true;
+      this.globalState.openWindows.some(window => window.name === name) ? this.globalState.openTabsName = name : this.openTabs = [];
 
-        this.currentIconHover = {
-          name: name,
-          hasHoverState: true
-        }
-
-        const cachedImage = this.previewImageCache.get(name);
-        if (cachedImage) {
-          this.$nextTick(() => {
-            const openWindowPreview = this.$el.querySelector('.open-window-preview');
-            openWindowPreview.appendChild(cachedImage);
-          })
-          return;
-        }
-
-        console.log('emitted')
-        this.$emit('hoveringOnWindowImageTaskbar', name);
-      }
+      setTimeout(() => {
+        this.openTabs.forEach(openTab => console.log(openTab.name))
+      }, 500)
     },
-    onMouseleaveApplicationIcon(e) {
-      if (this.isHoveringOnOpenWindowImage === true) {
-        this.isHoveringOnOpenWindowImage = false;
-      }
-
-      if (e.offsetY > -1) {
-        this.currentIconHover = {}
-      } else {
-        setTimeout(() => {
-          if (!this.isHoveringOnOpenWindowPreview) {
-            this.isHoveringOnOpenWindowPreview = false;
-            this.currentIconHover = '';
-          }
-        }, 1000);
-      }
+    onMouseleaveApplicationIcon() {
+      this.globalState.openTabsName = '';
+      this.openTabs = [];
     },
-    onMouseoverOpenWindow() {
-      this.isHoveringOnOpenWindowPreview = true;
-    },
-    onMouseleaveOpenWindow() {
-      this.isHoveringOnOpenWindowPreview = false;
-      this.currentIconHover = '';
-    },
-    setTaskbarSmallSize() {
-      this.setTaskbarElementsVisibility.QUICK_SETTINGS_BUTTON = true;
-      this.setTaskbarElementsVisibility.ARROW_OPEN_WINDOWS_BUTTON = false;
-      this.setTaskbarElementsVisibility.KEYBOARD_LAYOUT_BUTTON = false;
-      this.setTaskbarElementsVisibility.DATE_TIME_NOTIFICATION = false;
-
-      this.ICON_IMG_WIDTH = 20;
-      this.ICON_IMG_HEIGHT = 20;
-    },
-    setTaskbarNormalSize() {
-      this.setTaskbarElementsVisibility.ARROW_OPEN_WINDOWS_BUTTON = true;
-      this.setTaskbarElementsVisibility.KEYBOARD_LAYOUT_BUTTON = true;
-      this.setTaskbarElementsVisibility.QUICK_SETTINGS_BUTTON = true;
-      this.setTaskbarElementsVisibility.DATE_TIME_NOTIFICATION = true;
-
-      this.ICON_IMG_WIDTH = 25;
-      this.ICON_IMG_HEIGHT = 25;
-    },
-  },
-  watch: {
-    previewApplicationWindow(newValue) {
-      const openWindowPreview = this.$el.querySelector('.open-window-preview');
-      if (openWindowPreview) {
-        openWindowPreview.innerHTML = '';
-
-        newValue.style.position = 'relative';
-        newValue.style.width = '100%';
-        newValue.style.height = '100%';
-
-        openWindowPreview.appendChild(newValue);
-        this.previewImageCache.set(this.currentIconHover.name, newValue);
-      }
+    setOpenTabs(tabs) {
+      if (tabs.length === this.openTabs.length) return;
+      this.openTabs = tabs;
     }
-  }
+  },
 }
 </script>
 
@@ -247,19 +192,25 @@ export default {
   gap: 5px;
 }
 
-.open-window-preview-wrapper {
+.open-tabs {
   position: absolute;
   display: flex;
   flex-direction: column;
   align-items: center;
-  height: 150px;
-  width: 200px;
+  bottom: 40px;
+  z-index: 9999;
+  border: var(--border-window-color) 2px solid;
+}
+
+.open-tab {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 20px;
   padding: 10px;
-  border-radius: 10px;
+  font-size: 11px;
   background-color: var(--background-color);
   color: var(--font-color);
-  bottom: 50px;
-  z-index: 9999;
 }
 
 .open-window-preview {
@@ -321,7 +272,7 @@ export default {
   border-radius: 5px;
 }
 
-.app-icon {
+.app-icons {
   display: flex;
   padding: 5px 6px 0;
   transition: 0.3s;
@@ -329,7 +280,7 @@ export default {
   position: relative;
 }
 
-.app-icon:hover {
+.app-icons:hover {
   background-color: var(--hover-color);
   border-radius: 5px;
 }

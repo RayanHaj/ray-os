@@ -2,34 +2,32 @@
   <div class="desktop"
        ref="desktop"
        :style="{ filter: `brightness(${desktopBrightnessValue}%)`}">
-    <OsLoader v-if="osLoaderFinished === false" @finished="osLoaderFinished = true"/>
-    <div v-show="osLoaderFinished === true" class="main-screen">
+    <OsLoader v-if="osLoaderFinished === false && this.globalState.DISABLE_START_ANIMATION === false" @finished="osLoaderFinished = true"/>
+    <div v-show="osLoaderFinished === true || this.globalState.DISABLE_START_ANIMATION === true" class="main-screen">
       <MainWindow
           v-for="window in this.globalState.openWindows"
-          class="window"
-          :ref="window.name"
           :key="window.id"
+          class="window"
+          :ref="window.id"
           :id="window.id"
           :window-id="window.id"
           :window-size="windowDimensions"
           :split-other-window="splitOtherWindow"
           :taskbar-height="TASKBAR_HEIGHT"
-          :current-hovered-image-taskbar-name="currentHoveredImageTaskbarName"
           @clicked="onClickWindow($event, window)"
           @rendered="windowIsRendered = !windowIsRendered"
           @minimize-window="minimizeWindow"
           @split-other-window="splitOtherWindow = $event"
-          @preview-application-window="this.previewApplicationWindow = $event"
           @window-resizing="windowIsResizing = $event"
       />
       <transition name="slide">
-        <DesktopGrid v-show="osLoaderFinished === true"
+        <DesktopGrid v-show="osLoaderFinished === true || this.globalState.DISABLE_START_ANIMATION === true"
             @clicked="activateQuickSettingsMenu(false)"
             :window-resizing="windowIsResizing"
             class="desktop-grid"/>
       </transition>
     </div>
-    <div v-show="osLoaderFinished === true" class="footer-container">
+    <div v-show="osLoaderFinished === true || this.globalState.DISABLE_START_ANIMATION === true" class="footer-container">
       <SettingsMenu v-show="quickSettingMenuIsOpen"
                     ref="settingsMenu"
                     class="quick-settings-menu"
@@ -38,7 +36,6 @@
       <taskbar ref="taskbar"
                class="taskbar"
                @quick-settings-menu-open="activateQuickSettingsMenu(true)"
-               @hovering-on-window-image-taskbar="currentHoveredImageTaskbarName = $event"
                :height="TASKBAR_HEIGHT"
                :preview-application-window="previewApplicationWindow"
       />
@@ -64,7 +61,6 @@ export default {
       windowIsResizing: false,
       quickSettingMenuIsOpen: false,
       closingWindow: false,
-      currentHoveredImageTaskbarName: null,
       previewApplicationWindow: null,
       applicationName: '',
       splitOtherWindow: {},
@@ -118,7 +114,7 @@ export default {
       if (newValue > oldValue) {
         const newElement = this.globalState.openWindows[this.globalState.openWindows.length - 1];
         this.$nextTick(() => {
-          const windowElement = this.$refs[newElement.name][0];
+            const windowElement = this.$refs[newElement.id][0];
           if (Number(windowElement.$el.id) === newElement.id) {
             windowElement.$el.style.height = `calc(100% - ${this.TASKBAR_HEIGHT}px)`;
             windowElement.$el.style.display = 'flex';
@@ -176,13 +172,6 @@ export default {
     },
     onClickWindow() {
       this.activateQuickSettingsMenu(false);
-      // const mouseTarget = e.target.parentNode;
-      // if (this.closingWindow !== true && mouseTarget.classList && mouseTarget.classList[0] !== 'window-state-control') {
-      //   const windowIndex = this.globalState.openWindows.findIndex(openWindow => openWindow.name === window.name);
-      //   this.globalState.openWindows.splice(windowIndex, 1);
-      //   this.globalState.openWindows.push(window);
-      //   this.sortWindowArray();
-      // }
     },
     updateWindowDimensions() {
       this.globalState.browserWindowSize.WIDTH = this.$el.getBoundingClientRect().width;
@@ -201,8 +190,7 @@ export default {
       }
     },
     minimizeWindow(windowId) {
-      const window = this.globalState.openWindows.find(window => window.id === windowId);
-      const windowComponent = this.$refs[window.name][0];
+      const windowComponent = this.$refs[windowId][0];
 
       if (windowComponent) {
         windowComponent.$el.style.display = 'none';

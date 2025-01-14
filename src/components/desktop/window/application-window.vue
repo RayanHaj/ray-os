@@ -5,7 +5,7 @@
        minWidth: MINIMUM_WIDTH_WINDOW,
        minHeight: MINIMUM_HEIGHT_WINDOW,
        transition: windowIsMoving || windowIsResizing ? undefined : 'width 0.5s, height 0.5s, left 0.5s, top 0.5s',
-       zIndex: globalState.openWindows.findIndex(window => Number(window.id) === windowId) + 2
+       zIndex: getZIndex
        }"
        @mousemove="mouseOverEventListeners"
        @mousedown="moveWindowOnMouseDownWindowCorners"
@@ -128,20 +128,16 @@ export default {
       type: Array,
       required: false
     },
-    windowId: {
-      type: Number,
-      required: true
-    },
     splitOtherWindow: {
       type: Object,
       required: true
     },
-    currentHoveredImageTaskbarName: {
-      type: String,
-      required: false
+    windowId: {
+      type: Number,
+      required: true
     }
   },
-  emits: ['splitOtherWindow', 'minimizeWindow', 'rendered', 'clicked', 'previewApplicationWindow', 'windowResizing'],
+  emits: ['splitOtherWindow', 'minimizeWindow', 'rendered', 'clicked', 'windowResizing'],
   watch: {
     splitOtherWindow(newWindow) {
       if (newWindow.window.id === this.windowObject.id) {
@@ -154,27 +150,28 @@ export default {
         this.splitWindow();
       }
     },
-    currentHoveredImageTaskbarName(newValue) {
-      if (this.windowObject.name === newValue) {
-        html2canvas(this.$el).then((canvas) => {
-          canvas.style.transform = "scale(1)";
-          canvas.style.transformOrigin = "center center";
-          this.$emit('previewApplicationWindow', canvas);
-        })
-      }
-    },
     'globalState.browserWindowSize': {
       handler() {
         this.splitWindow();
         this.splitCurrentWindow(this.lastWindowSplitPosition ?? null)
       },
       deep: true
+    },
+    'globalState.openTabsName': {
+      handler(newValue) {
+        if (this.windowObject.name === newValue) {
+            this.globalState.pushToOpenTabs(newValue);
+        }
+      }
     }
   },
   computed: {
     globalState() {
       return useGlobalState();
-    }
+    },
+    getZIndex() {
+      return this.globalState.openWindows.findIndex(window => Number(window.id) === Number(this.windowId)) + 2;
+    },
   },
   methods: {
     maximizeWindow() {
@@ -526,8 +523,19 @@ export default {
       this.windowOutOfBounds.yPositive = yPositive;
       this.windowOutOfBounds.yNegative = yNegative;
     },
+    async createWindowScreenshot() {
+      let returnValue = 'a';
+
+      await html2canvas(this.$el).then((canvas) => {
+        canvas.style.transform = "scale(1)";
+        canvas.style.transformOrigin = "center center";
+        returnValue = canvas;
+      })
+
+      return returnValue;
+    },
     minimizeWindow() {
-      this.$emit('minimizeWindow', this.windowObject.id);
+      this.$emit('minimizeWindow', Number(this.windowId));
     },
     closeWindow() {
       this.globalState.closeOpenWindowByWindowId(this.windowObject.id);

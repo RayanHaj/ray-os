@@ -5,6 +5,7 @@ export const useGlobalState = defineStore('globalState', {
         showGridOutlineDesktop: false,
         openWindows: [],
         desktopFiles: [],
+        openTabs: [],
         taskbarFiles: null,
         browserWindowSize: {
             HEIGHT_TASKBAR_EXCLUDED: 0,
@@ -12,9 +13,13 @@ export const useGlobalState = defineStore('globalState', {
             WIDTH: 0,
         },
         startBlockGame: false,
+        openTabsName: '',
         backgroundColor: '',
         wallpaper: '',
-        theme: ''
+        theme: '',
+
+        //DEBUG
+        DISABLE_START_ANIMATION: true
     }),
     actions: {
         getShowGridOutlineDesktop() {
@@ -129,6 +134,17 @@ export const useGlobalState = defineStore('globalState', {
                 this.openWindows.splice(windowIndex, 1);
                 this.openWindows.push(window);
             }
+        },
+        pushToOpenTabs(name) {
+            this.openTabs = [];
+            this.openWindows.forEach(window => {
+                if (window.name === name) {
+                    this.openTabs.push({
+                        id: window.id,
+                        name: window.name
+                    });
+                }
+            });
         },
         closeOpenWindowByWindowId(id) {
             this.openWindows = this.openWindows.filter(window => window.id !== id);
