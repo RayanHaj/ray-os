@@ -2,15 +2,20 @@
   <footer class="taskbar" ref="taskbar" :style="{ height: `${height}px` }">
     <div class="taskbar-items-left">
       <div class="app-icons" :class="iconImageName" v-for="(iconImageName) in applicationNames" :key="iconImageName">
-        <div v-show="openTabs.length > 0 && openTabs[0].name === iconImageName" class="open-tabs">
+        <div v-show="showOpenTabs && openTabs[0]?.name === iconImageName"
+             class="open-tabs"
+             @mouseenter="mouseOnOpenTabs = true"
+             @mouseleave="onMouseleaveOpenTabs">
           <div class="open-tab" v-for="tab in openTabs" :key="tab.id">
-            <div>
+            <div class="open-tab-name">
               {{ tab.name }}
             </div>
-            <svg-component svg-type="close" custom-width="18" custom-height="18"/>
+            <div class="open-tab-close">
+              <svg-component svg-type="close" :custom-width="18" :custom-height="18"/>
+            </div>
           </div>
         </div>
-        <div class="app-icon" @mouseenter="onMouseoverApplicationIcon(iconImageName)"
+        <div class="app-icon" @mouseenter="onMouseenterApplicationIcon(iconImageName)"
              @mouseleave="onMouseleaveApplicationIcon">
           <ImgComponent @clicked="emitApplicationName(iconImageName)" :image-name="iconImageName"
                         :custom-width="ICON_IMG_WIDTH"
@@ -70,6 +75,10 @@ export default {
       ICON_IMG_WIDTH: 25,
       ICON_IMG_HEIGHT: 25,
       openTabs: [],
+      mouseoverTimeoutId: null,
+      mouseleaveTimeoutId: null,
+      showOpenTabs: false,
+      mouseOnOpenTabs: false,
       setTaskbarElementsVisibility: {
         DATE_TIME_NOTIFICATION: true,
         QUICK_SETTINGS_BUTTON: true,
@@ -150,16 +159,34 @@ export default {
 
       return 'horizontal-line';
     },
-    onMouseoverApplicationIcon(name) {
+    onMouseenterApplicationIcon(name) {
       this.globalState.openWindows.some(window => window.name === name) ? this.globalState.openTabsName = name : this.openTabs = [];
-
-      setTimeout(() => {
-        this.openTabs.forEach(openTab => console.log(openTab.name))
-      }, 500)
+      if (this.mouseleaveTimeoutId) {
+        clearTimeout(this.mouseleaveTimeoutId);
+        this.mouseleaveTimeoutId = null;
+      }
+      if (this.mouseoverTimeoutId === null) {
+        this.mouseoverTimeoutId = setTimeout(() => {
+          this.showOpenTabs = true;
+        }, 500);
+      }
     },
     onMouseleaveApplicationIcon() {
-      this.globalState.openTabsName = '';
-      this.openTabs = [];
+      clearTimeout(this.mouseoverTimeoutId);
+      this.mouseoverTimeoutId = null;
+
+      this.mouseleaveTimeoutId = setTimeout(() => {
+        if (this.mouseOnOpenTabs === true) return;
+        this.globalState.openTabsName = '';
+        this.openTabs = [];
+        this.showOpenTabs = false;
+      }, 500);
+    },
+    onMouseleaveOpenTabs() {
+      if (this.showOpenTabs === true) {
+        this.showOpenTabs = false;
+      }
+      this.mouseOnOpenTabs = false;
     },
     setOpenTabs(tabs) {
       if (tabs.length === this.openTabs.length) return;
@@ -197,20 +224,32 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  bottom: 40px;
+  bottom: 45px;
   z-index: 9999;
   border: var(--border-window-color) 2px solid;
+  border-radius: 10px;
+  overflow: hidden;
 }
 
 .open-tab {
   display: flex;
   flex-direction: row;
+  justify-content: space-between;
   align-items: center;
   gap: 20px;
   padding: 10px;
   font-size: 11px;
+  width: 130px;
   background-color: var(--background-color);
   color: var(--font-color);
+}
+
+.open-tab:hover {
+  background-color: var(--hover-color);
+}
+
+.open-tab-close {
+  padding-top: 5px;
 }
 
 .open-window-preview {

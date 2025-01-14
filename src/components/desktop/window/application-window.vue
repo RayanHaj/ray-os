@@ -25,7 +25,7 @@
           <button class="minimize-button" @click="minimizeWindow">
             <SvgComponent :svg-type="'minimize'"/>
           </button>
-          <button class="maximize-button" @click="maximizeWindow" @mouseenter="onMouseoverMaximizeSvg"
+          <button class="maximize-button" @click="maximizeWindow" @mouseenter="onMouseenterMaximizeSvg"
                   @mouseleave="onMouseleaveMaximizeSvg">
             <SvgComponent :svg-type="'maximize'"/>
           </button>
@@ -489,7 +489,7 @@ export default {
         }
       }
     },
-    onMouseoverMaximizeSvg() {
+    onMouseenterMaximizeSvg() {
       if (this.mouseleaveTimeoutId) {
         clearTimeout(this.mouseleaveTimeoutId);
         this.mouseleaveTimeoutId = null;
@@ -568,7 +568,7 @@ export default {
   overflow: auto;
   position: absolute;
   background-color: var(--background-color-window);
-  border: var(--border-window-color) 8px solid;
+  border: var(--border-window-color) 2px solid;
   scrollbar-color: var(--font-color) var(--background-color-input);
 }
 
