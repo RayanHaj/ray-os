@@ -2,13 +2,13 @@
   <footer class="taskbar" ref="taskbar" :style="{ height: `${height}px` }">
     <div class="taskbar-items-left">
       <div class="app-icons" :class="iconImageName" v-for="(iconImageName) in applicationNames" :key="iconImageName">
-        <div v-show="showOpenTabs && openTabs[0]?.name === iconImageName"
+        <div v-show="showOpenTabs && openTabs.some(openTab => openTab.name === iconImageName)"
              class="open-tabs"
              @mouseenter="mouseOnOpenTabs = true"
              @mouseleave="onMouseleaveOpenTabs">
           <div class="open-tab" @click="onClickTab(tab.id)" v-for="tab in openTabs" :key="tab.id">
             <div class="open-tab-name">
-              {{ tab.name }}
+              {{ tab.name }} {{ tab.id }}
             </div>
             <div class="open-tab-close" @click="onClickTabClose(tab.id)">
               <svg-component svg-type="close" :custom-width="18" :custom-height="18"/>
@@ -164,7 +164,8 @@ export default {
       return 'horizontal-line';
     },
     onMouseenterApplicationIcon(name) {
-      this.globalState.openWindows.some(window => window.name === name) ? this.globalState.openTabsName = name : this.openTabs = [];
+      this.showOpenTabs = false;
+      this.globalState.openTabsName = name;
       if (this.mouseleaveTimeoutId) {
         clearTimeout(this.mouseleaveTimeoutId);
         this.mouseleaveTimeoutId = null;
@@ -181,6 +182,7 @@ export default {
 
       this.mouseleaveTimeoutId = setTimeout(() => {
         if (this.mouseOnOpenTabs === true) return;
+        console.log(this.mouseOnOpenTabs)
         this.globalState.openTabsName = '';
         this.openTabs = [];
         this.showOpenTabs = false;
@@ -196,12 +198,8 @@ export default {
       const window = this.globalState.openWindows.find(window => window.id === id);
       if (!window) return;
 
-      console.log(this.globalState.openWindows)
-
-      this.$emit('removeMinimizeWindow', window.id);
-
       this.globalState.pushToTopOpenWindows(window.id);
-      console.log(this.globalState.openWindows);
+      this.$emit('removeMinimizeWindow', window.id);
 
       this.showOpenTabs = false;
     },
@@ -210,8 +208,7 @@ export default {
       this.showOpenTabs = false;
     },
     setOpenTabs(tabs) {
-      if (tabs.length === this.openTabs.length) return;
-      this.openTabs = tabs;
+      this.openTabs = tabs.sort((a, b) => a.id - b.id);
     }
   },
 }
@@ -220,9 +217,9 @@ export default {
 <style scoped>
 @font-face {
   font-family: 'Segoe UI Variable';
-  src: url('@/assets/fonts/Segoe-UI-Variable-Static-Text.ttf') format('truetype'); /* Use the correct path */
-  font-weight: 400; /* Default weight */
-  font-style: normal; /* Normal style */
+  src: url('@/assets/fonts/Segoe-UI-Variable-Static-Text.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
 }
 
 * {

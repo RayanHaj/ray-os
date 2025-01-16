@@ -88,12 +88,6 @@ export const useGlobalState = defineStore('globalState', {
             this.theme = value;
             window.localStorage.setItem('theme', value);
         },
-        removeTheme() {
-            if (this.theme !== '') {
-                window.localStorage.removeItem('theme');
-                this.theme = '';
-            }
-        },
         pushOpenWindow(object) {
             let id = 0;
             if (this.openWindows.length > 0) {
@@ -127,7 +121,6 @@ export const useGlobalState = defineStore('globalState', {
             }
         },
         pushToTopOpenWindows(windowId) {
-            if (!windowId) return;
             const windowIndex = this.openWindows.findIndex(window => Number(window.id) === Number(windowId));
             if (windowIndex !== -1) {
                 const window = this.openWindows[windowIndex];

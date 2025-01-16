@@ -56,7 +56,6 @@ import SvgComponent from "@/components/ui/svg-component";
 import WindowContent from "@/components/desktop/window/windowContent/window-content";
 import {enableDragDropTouch} from "@/assets/libraries/drag-drop-touch.esm.min";
 import {useGlobalState} from "@/stores/globalState";
-import html2canvas from "html2canvas";
 import ImgComponent from "@/components/ui/img-component";
 import SplitWindowsComponent from "@/components/ui/split-windows-component";
 
@@ -436,7 +435,6 @@ export default {
         this.setSplitWindowValues(0, '100%', `${halfHeightInPercentage}%`, `${halfHeightInPercentage}%`);
         return 'negative-y';
       }
-
       return false;
     },
     setSplitWindowValues(left, width, height, top) {
@@ -444,13 +442,12 @@ export default {
       this.$el.style.width = width;
       this.$el.style.height = height;
       this.$el.style.top = top;
-
-      this.globalState.pushToTopOpenWindows(this.windowId);
     },
     splitCurrentWindow(position) {
       if (position === null) {
         return;
       }
+      console.log(this.windowIsMoving)
       const height = this.globalState.browserWindowSize.HEIGHT;
       const heightTaskbarExcluded = this.globalState.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED;
       const heightInPercentage = (heightTaskbarExcluded / height) * 100;
@@ -524,17 +521,6 @@ export default {
       this.windowOutOfBounds.xNegative = xNegative;
       this.windowOutOfBounds.yPositive = yPositive;
       this.windowOutOfBounds.yNegative = yNegative;
-    },
-    async createWindowScreenshot() {
-      let returnValue = 'a';
-
-      await html2canvas(this.$el).then((canvas) => {
-        canvas.style.transform = "scale(1)";
-        canvas.style.transformOrigin = "center center";
-        returnValue = canvas;
-      })
-
-      return returnValue;
     },
     minimizeWindow() {
       this.$emit('minimizeWindow', Number(this.windowId));
