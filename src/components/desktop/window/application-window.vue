@@ -169,7 +169,8 @@ export default {
       return useGlobalState();
     },
     getZIndex() {
-      return this.globalState.openWindows.findIndex(window => Number(window.id) === Number(this.windowId)) + 2;
+      const window = this.globalState.openWindows.find(window => Number(window.id) === Number(this.windowId));
+      return window.zIndex;
     },
   },
   methods: {
@@ -397,17 +398,18 @@ export default {
       this.windowIsMoving = false;
       const returnPosOutOfBoundsPositiveOrNegative = this.splitWindow();
       if (this.globalState.openWindows.length > 1) {
-        const currentWindowIndex = this.globalState.openWindows.findIndex(window => window.id === this.windowObject.id);
+        const window = this.globalState.openWindows.find(element => element.id === this.windowId);
+        if (window === undefined) {
+          return;
+        }
 
-        let nextWindow = '';
-        if (this.globalState.openWindows.length - 1 >= currentWindowIndex + 1) {
-          nextWindow = this.globalState.openWindows[currentWindowIndex + 1];
-        } else if (this.globalState.openWindows.length - 1 >= currentWindowIndex - 1) {
-          nextWindow = this.globalState.openWindows[currentWindowIndex - 1];
+        const splitWindow = this.globalState.openWindows.find(element => element.zIndex === (window.zIndex + 1) || element.zIndex === (window.zIndex - 1));
+        if (splitWindow === undefined) {
+          return;
         }
 
         this.$emit('splitOtherWindow', {
-          'window': nextWindow,
+          'window': splitWindow,
           'xOutOfBoundsPositive': returnPosOutOfBoundsPositiveOrNegative
         });
       }
@@ -442,12 +444,12 @@ export default {
       this.$el.style.width = width;
       this.$el.style.height = height;
       this.$el.style.top = top;
+      this.globalState.pushToTopOpenWindows(this.windowId);
     },
     splitCurrentWindow(position) {
       if (position === null) {
         return;
       }
-      console.log(this.windowIsMoving)
       const height = this.globalState.browserWindowSize.HEIGHT;
       const heightTaskbarExcluded = this.globalState.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED;
       const heightInPercentage = (heightTaskbarExcluded / height) * 100;

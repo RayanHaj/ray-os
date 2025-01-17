@@ -90,8 +90,10 @@ export const useGlobalState = defineStore('globalState', {
         },
         pushOpenWindow(object) {
             let id = 0;
+            let zIndex = 0;
             if (this.openWindows.length > 0) {
                 id = this.openWindows.length;
+                zIndex = this.getHighestZIndex() + 1;
             }
 
             let windowName = object.name;
@@ -101,6 +103,7 @@ export const useGlobalState = defineStore('globalState', {
 
             const newWindowObject = {
                 'id': id,
+                "zIndex": zIndex,
                 'name': windowName,
                 'minimized': false,
                 'values': object
@@ -121,12 +124,32 @@ export const useGlobalState = defineStore('globalState', {
             }
         },
         pushToTopOpenWindows(windowId) {
-            const windowIndex = this.openWindows.findIndex(window => Number(window.id) === Number(windowId));
-            if (windowIndex !== -1) {
-                const window = this.openWindows[windowIndex];
-                this.openWindows.splice(windowIndex, 1);
-                this.openWindows.push(window);
+            const window = this.openWindows.find(window => Number(window.id) === Number(windowId));
+            if (window !== undefined) {
+                window.zIndex = this.openWindows.length + 1;
+                this.openWindows.forEach(element => {
+                    if (element.zIndex === this.openWindows.length) {
+                        return;
+                    }
+                    if (element.zIndex === 0) {
+                        return;
+                    }
+                    if (element.id === window.id) {
+                        return;
+                    }
+
+                    element.zIndex -= 1;
+                });
             }
+        },
+        getHighestZIndex() {
+          let zIndex = 0;
+          this.openWindows.forEach(element => {
+              if (element.zIndex > zIndex) {
+                  zIndex = element.zIndex;
+              }
+          });
+          return zIndex;
         },
         pushToOpenTabs(name) {
             this.openTabs = [];
