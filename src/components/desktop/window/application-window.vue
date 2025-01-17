@@ -4,8 +4,9 @@
        :style="{
        minWidth: MINIMUM_WIDTH_WINDOW,
        minHeight: MINIMUM_HEIGHT_WINDOW,
-       transition: windowIsResizing ? undefined : 'width 1s, height 1s, left 1s, top 1s',
-       zIndex: getZIndex
+       transition: windowIsResizing ? undefined : 'width 1s, height 1s, left 1s, top 1s, border-radius 0.3s',
+       zIndex: getZIndex,
+       borderRadius: windowIsMaximized === false ? `${BORDER_RADIUS}px` : undefined,
        }"
        @mousemove="mouseOverEventListeners"
        @mousedown="moveWindowOnMouseDownWindowCorners"
@@ -71,13 +72,16 @@ export default {
     return {
       MINIMUM_WIDTH_WINDOW: '40%',
       MINIMUM_HEIGHT_WINDOW: '45%',
+      BORDER_RADIUS: 10,
       windowObject: null,
+      resizeObserver: null,
       mouseoverTimeoutId: null,
       mouseleaveTimeoutId: null,
       applicationWindowSize: null,
       lastWindowSplitPosition: null,
       windowIsMoving: false,
       windowIsResizing: false,
+      windowIsMaximized: false,
       mouseOnResizeSpace: false,
       disablePointerEvents: false,
       showSplitWindowComponent: false,
@@ -121,6 +125,16 @@ export default {
 
     this.$el.style.width = `${this.applicationWindowSize.width}px`;
     this.$el.style.height = `${this.applicationWindowSize.height}px`;
+
+    this.resizeObserver = new ResizeObserver(() => {
+      this.windowIsMaximized = this.getWindowIsMaximizedOrSplit();
+    });
+    this.resizeObserver.observe(this.$el);
+  },
+  beforeUnmount() {
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+    }
   },
   props: {
     windowSize: {
@@ -152,7 +166,7 @@ export default {
     'globalState.browserWindowSize': {
       handler() {
         this.splitWindow();
-        this.splitCurrentWindow(this.lastWindowSplitPosition ?? null)
+        this.splitCurrentWindow(this.lastWindowSplitPosition ?? null);
       },
       deep: true
     },
@@ -171,7 +185,7 @@ export default {
     getZIndex() {
       const window = this.globalState.openWindows.find(window => Number(window.id) === Number(this.windowId));
       return window.zIndex;
-    },
+    }
   },
   methods: {
     maximizeWindow() {
@@ -192,6 +206,22 @@ export default {
       this.$el.style.height = `${browserWindowHeight}px`;
       this.$el.style.left = `0`;
       this.$el.style.top = `0`;
+    },
+    getWindowIsMaximizedOrSplit() {
+      if (!this.$el) {
+        return;
+      }
+      const windowWidth = this.$el.getBoundingClientRect().width;
+      const windowHeight = this.$el.getBoundingClientRect().height;
+      const browserWindowWidth = this.globalState.browserWindowSize.WIDTH;
+      const browserWindowHeight = this.globalState.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED;
+
+      return (
+          (windowWidth === browserWindowWidth && windowHeight === browserWindowHeight) ||
+          (windowWidth === browserWindowWidth / 2 && windowHeight === browserWindowHeight) ||
+          (windowWidth === browserWindowWidth && windowHeight === browserWindowHeight / 2) ||
+          (windowWidth === browserWindowWidth / 2 && windowHeight === browserWindowHeight / 2)
+      );
     },
     mouseOverEventListeners(event) {
       event.preventDefault();
@@ -236,7 +266,6 @@ export default {
         event.preventDefault();
         this.$emit('windowResizing', true);
         this.windowIsResizing = true;
-
         const minWidthPercentage = parseFloat(this.MINIMUM_WIDTH_WINDOW);
         const minWidthPixels = (minWidthPercentage / 100) * this.globalState.browserWindowSize.WIDTH;
 
@@ -313,7 +342,6 @@ export default {
             break;
           }
         }
-
         this.disablePointerEvents = true;
       }
 
