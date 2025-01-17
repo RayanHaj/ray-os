@@ -356,12 +356,12 @@ export default {
   font-size: 12px;
 }
 
-@container (max-height: 460px) {
+@container (max-height: 480px) {
   .calculator-button {
-    font-size: 16px;
+    font-size: 14px;
   }
   h1 {
-    font-size: 20px;
+    font-size: 18px;
   }
 }
 </style>
