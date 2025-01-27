@@ -1,5 +1,6 @@
 import json from "@/assets/json/config.json";
 import {parseApplicationNameToImageNameFormat} from "@/utils/util";
+
 export default class IndexedDb {
     constructor(name, version) {
         this.db = null;
@@ -8,7 +9,7 @@ export default class IndexedDb {
     }
 
     async init() {
-        return new Promise( (resolve, reject) => {
+        return new Promise((resolve, reject) => {
             const openRequest = indexedDB.open(this.name, this.version);
 
             openRequest.onsuccess = event => {
@@ -21,7 +22,7 @@ export default class IndexedDb {
                 this.db = event.target.result;
 
                 if (!this.db.objectStoreNames.contains('files')) {
-                    const store = this.db.createObjectStore('files', { keyPath: 'name', autoIncrement: true });
+                    const store = this.db.createObjectStore('files', {keyPath: 'name', autoIncrement: true});
                     store.createIndex('name', 'name');
                     store.createIndex('type', 'type');
                     store.createIndex('createdAt', 'createdAt');
@@ -31,7 +32,7 @@ export default class IndexedDb {
                 }
 
                 if (!this.db.objectStoreNames.contains('desktopFiles')) {
-                    const store = this.db.createObjectStore('desktopFiles', { keyPath: 'name', autoIncrement: true });
+                    const store = this.db.createObjectStore('desktopFiles', {keyPath: 'name', autoIncrement: true});
                     store.createIndex('name', 'name');
                     store.createIndex('type', 'type');
                     store.createIndex('createdAt', 'createdAt');
@@ -41,7 +42,7 @@ export default class IndexedDb {
                 }
 
                 if (!this.db.objectStoreNames.contains('taskbarFiles')) {
-                    const store = this.db.createObjectStore('taskbarFiles', { keyPath: 'name', autoIncrement: true });
+                    const store = this.db.createObjectStore('taskbarFiles', {keyPath: 'name', autoIncrement: true});
                     store.createIndex('name', 'name');
                     store.createIndex('type', 'type');
                     store.createIndex('createdAt', 'createdAt');
@@ -50,10 +51,17 @@ export default class IndexedDb {
                     store.createIndex('file', 'file');
                 }
 
+                if (!this.db.objectStoreNames.contains('fileSystem')) {
+                    const store = this.db.createObjectStore('fileSystem', {keyPath: 'id', autoIncrement: true});
+                    store.createIndex('directoryName', 'directoryName');
+                    store.createIndex('parentDirectories', 'parentDirectories');
+                    store.createIndex('children', 'children');
+                }
+
                 const transaction = event.target.transaction;
-                transaction.oncomplete = () => {
+                transaction.oncomplete = async () => {
                     let index = -1;
-                    for(let name of json.defaultApplicationNames) {
+                    for (let name of json.defaultApplicationNames) {
                         const parsedName = parseApplicationNameToImageNameFormat(name);
                         const imgPath = require(`@/assets/images/applicationImages/${parsedName}.png`);
 
@@ -74,15 +82,49 @@ export default class IndexedDb {
                                 await this.postElement('taskbarFiles', object);
                             });
                     }
+
+                    // creates root directory
+                    const rootDirectory = await this.postElement('fileSystem', {
+                        directoryName: json.initFileSystem[0],
+                        parentDirectories: [],
+                        children: []
+                    });
+
+                    let defaultDirectories = [];
+
+                    // creates default directories in the root
+                    for (let name of json.initFileSystem) {
+                        if (name !== 'My Files') {
+                            const directory = await this.postElement('fileSystem', {
+                                directoryName: name,
+                                parentDirectories: [{
+                                    id: rootDirectory.id,
+                                    name: json.initFileSystem[0]
+                                }],
+                                children: []
+                            })
+
+                            if (directory) {
+                                defaultDirectories.push({
+                                    id: directory.id,
+                                    name: directory.directoryName
+                                });
+                            }
+                        }
+                    }
+
+                    await this.updateElement('fileSystem', 'children', defaultDirectories, rootDirectory.id)
+                        .then(error => {
+                            console.error(error);
+                        });
                 }
             };
 
             openRequest.onerror = event => {
-                reject(event.target.error); // Reject on error
+                reject(event.target.error);
             };
         });
     }
-
 
     async getAllElements(storeName) {
         return new Promise((resolve, reject) => {
@@ -101,6 +143,47 @@ export default class IndexedDb {
                     resolve(elements);
                 }
             };
+        });
+    }
+
+    async postElement(storeName, element) {
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction([storeName], 'readwrite');
+            const store = transaction.objectStore(storeName);
+
+            const request = store.add(element);
+
+            request.onsuccess = event => {
+                resolve({
+                    id: event.target.result,
+                    directoryName: element.directoryName
+                });
+            };
+
+            transaction.onerror = event => reject(event.target.error);
+            request.onerror = event => reject(event.target.error);
+        });
+    }
+
+    async updateElement(storeName, key, value, id) {
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction([storeName], 'readwrite');
+            const store = transaction.objectStore(storeName);
+            console.log('getting id: ' + id);
+            const request = store.get(id);
+
+            request.onsuccess = event => {
+                const element = event.target.result;
+                if (element) {
+                    element[key] = value;
+                    const updateRequest = store.put(element);
+                    updateRequest.onsuccess = () => resolve();
+                    updateRequest.onerror = event => reject(event.target.error);
+                }
+            }
+
+            request.onerror = event => reject(event.target.error);
+            transaction.onerror = event => reject(event.target.error);
         });
     }
 
@@ -124,19 +207,19 @@ export default class IndexedDb {
 
     async getElementByName(storeName, name) {
         return new Promise((resolve, reject) => {
-           const transaction = this.db.transaction([storeName], 'readonly');
-           const store = transaction.objectStore(storeName);
-           const index = store.index('name');
+            const transaction = this.db.transaction([storeName], 'readonly');
+            const store = transaction.objectStore(storeName);
+            const index = store.index('name');
 
-           const request = index.get(name);
+            const request = index.get(name);
 
-           request.onsuccess = event => {
-               resolve(event.target.result);
-           }
+            request.onsuccess = event => {
+                resolve(event.target.result);
+            }
 
-           request.onerror = event => {
-               reject(event.target.error);
-           }
+            request.onerror = event => {
+                reject(event.target.error);
+            }
         });
     }
 
@@ -149,36 +232,87 @@ export default class IndexedDb {
         }
     }
 
-    async postElement(storeName, element) {
+    async getFilesByDirectoryFromFileSystem(directory) {
+        const transaction = this.db.transaction(['fileSystem'], 'readonly');
+        const store = transaction.objectStore('fileSystem');
+        const index = store.index('parentDirectories');
+
         return new Promise((resolve, reject) => {
-            const transaction = this.db.transaction([storeName], 'readwrite');
-            const store = transaction.objectStore(storeName);
+            const openCursor = index.openCursor();
 
-            transaction.oncomplete = () => resolve();
-            transaction.onerror = event => reject(event.target.error);
+            let returnArray = [];
+            openCursor.onsuccess = (event) => {
+                const cursor = event.target.result;
 
-            store.add(element);
+                if (cursor) {
+                    if (cursor.value.parentDirectories.includes(directory)) {
+                        returnArray.push(cursor.value);
+                    }
+                    cursor.continue();
+                } else {
+                    resolve(returnArray);
+                }
+            };
+
+            openCursor.onerror = (event) => {
+                reject('Error occurred while accessing cursor: ' + event.target.error);
+            };
         });
     }
 
-    async removeElement(storeName, id) {
-        try {
-            const transaction = this.db.transaction([storeName], 'readwrite');
-            const store = transaction.objectStore(storeName);
+    async getDirectoriesByNameFileSystem(name) {
+        const transaction = this.db.transaction(['fileSystem'], 'readonly');
+        const store = transaction.objectStore('fileSystem');
+        const index = store.index('directoryName');
 
-            await new Promise((resolve, reject) => {
-                store.delete(id);
+        return new Promise((resolve, reject) => {
+            const openCursor = index.openCursor();
 
-                transaction.oncomplete = () => resolve();
-                transaction.onerror = event => reject(event.target.error);
-            });
-
-            if (storeName === 'files') {
-                await this.removeElement('desktopFiles', id);
-                await this.removeElement('taskbarFiles', id);
+            let returnArray = [];
+            openCursor.onsuccess = (event) => {
+                const cursor = event.target.result;
+                if (cursor) {
+                    if (cursor.value.directoryName === name) {
+                        returnArray.push(cursor.value);
+                    }
+                    cursor.continue();
+                } else {
+                    resolve(returnArray);
+                }
             }
-        } catch (error) {
-            console.error('error while removing file: ' + error);
-        }
+
+            openCursor.onerror = (event) => {
+                reject('Error occurred while accessing cursor: ' + event.target.error);
+            }
+        });
+    }
+
+    async getDirectoryById(id) {
+        if (!id) return;
+
+        const transaction = this.db.transaction(['fileSystem'], 'readonly');
+        const store = transaction.objectStore('fileSystem');
+        const index = store.index('id');
+
+        return new Promise((resolve, reject) => {
+            const openCursor = index.openCursor();
+
+            let returnValue = null;
+            openCursor.onsuccess = (event) => {
+                const cursor = event.target.result;
+                if (cursor) {
+                    if (cursor.value.id === id) {
+                        returnValue = cursor.value;
+                    }
+                    cursor.continue();
+                } else {
+                    resolve(returnValue);
+                }
+            }
+
+            openCursor.onerror = (event) => {
+                reject('Error occurred while accessing cursor: ' + event.target.error);
+            }
+        });
     }
 }

@@ -38,6 +38,12 @@
     "Video Player",
     "Block Game"
   ],
+  "initFileSystem": [
+    "My Files",
+    "Videos",
+    "Pictures",
+    "Documents"
+  ],
   "videos": [
     "video_1.mp4"
   ],

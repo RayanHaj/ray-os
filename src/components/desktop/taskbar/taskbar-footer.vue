@@ -102,9 +102,6 @@ export default {
       return ('0' + number).slice(-2);
     }
 
-    this.previewImageCache = new Map();
-
-
     setInterval(() => {
       const now = new Date();
 
@@ -164,12 +161,14 @@ export default {
       return 'horizontal-line';
     },
     onMouseenterApplicationIcon(name) {
-      this.showOpenTabs = false;
+      if (this.globalState.openTabsName !== '') return;
       this.globalState.openTabsName = name;
+
       if (this.mouseleaveTimeoutId) {
         clearTimeout(this.mouseleaveTimeoutId);
         this.mouseleaveTimeoutId = null;
       }
+
       if (this.mouseoverTimeoutId === null) {
         this.mouseoverTimeoutId = setTimeout(() => {
           this.showOpenTabs = true;
@@ -182,10 +181,9 @@ export default {
 
       this.mouseleaveTimeoutId = setTimeout(() => {
         if (this.mouseOnOpenTabs === true) return;
-        console.log(this.mouseOnOpenTabs)
         this.globalState.openTabsName = '';
-        this.openTabs = [];
         this.showOpenTabs = false;
+        this.openTabs = [];
       }, 500);
     },
     onMouseleaveOpenTabs() {
