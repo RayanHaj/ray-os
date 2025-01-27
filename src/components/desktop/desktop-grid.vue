@@ -84,11 +84,9 @@ export default {
     this.isLoading = true;
   },
   async mounted() {
-    this.showTileBorders = this.globalState.getShowGridOutlineDesktop();
-    enableDragDropTouch();
-    await this.init();
-    window.addEventListener('keydown', this.onKeydownTile);
-    window.addEventListener('resize', this.checkApplicationNameOverflow);
+    this.$nextTick().then(async () => {
+      await this.init();
+    })
   },
 
   beforeUnmount() {
@@ -160,6 +158,9 @@ export default {
   },
   methods: {
     async init() {
+      this.showTileBorders = this.globalState.getShowGridOutlineDesktop();
+      enableDragDropTouch();
+
       const browserWindowSize = this.globalState.browserWindowSize;
       if (browserWindowSize.WIDTH !== null && browserWindowSize.HEIGHT !== null) {
         this.GRID_WIDTH = Math.floor(browserWindowSize.WIDTH / this.TILE_WIDTH);
@@ -190,6 +191,9 @@ export default {
       }
       this.globalState.desktopFiles = this.globalState.desktopFiles.sort((a, b) => a.index - b.index);
       this.isLoading = false;
+
+      window.addEventListener('keydown', this.onKeydownTile);
+      window.addEventListener('resize', this.checkApplicationNameOverflow);
     },
     onMouseenterTileWrapper(x, y) {
       const element = this.globalState.desktopFiles[x * this.GRID_HEIGHT + y];
