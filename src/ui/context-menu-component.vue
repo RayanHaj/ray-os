@@ -14,7 +14,7 @@
 </template>
 
 <script>
-import SvgComponent from "@/components/ui/svg-component";
+import SvgComponent from "@/ui/svg-component";
 export default {
   name: "context-menu-component",
   components: {SvgComponent},
