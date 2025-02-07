@@ -32,18 +32,12 @@
       </div>
     </section>
     <section v-else class="video-library">
-      <h1>Video's</h1>
-      <div v-if="videoList.length === 0">
-        <p>No videos found</p>
-      </div>
-      <ul v-else class="video-list-wrapper">
-        <li v-for="video in videoList" @dblclick="openVideo(video)" :key="video.name" class="video-element">
-          <video :src="video.videoUrl" :id="video" class="video-thumbnail"></video>
-          <div class="video-name">
-            {{ video.name.length > 70 ? `${video.name.substring(0, 70)}...` : video.name }}
-          </div>
-        </li>
-      </ul>
+      <ContentGrid
+          class="video-library"
+          name="video's"
+          :list="videoList"
+          @file-dbl-clicked="openVideo($event)"
+      />
     </section>
   </div>
 </template>
@@ -52,10 +46,11 @@
 import json from '@/assets/json/config'
 import {useGlobalState} from "@/stores/globalState";
 import SvgComponent from "@/ui/svg-component";
+import ContentGrid from "@/ui/ContentGrid";
 
 export default {
   name: "video-player-window",
-  components: {SvgComponent},
+  components: {ContentGrid, SvgComponent},
   data() {
     return {
       videos: json.videos,
@@ -168,9 +163,6 @@ export default {
 }
 
 .video-library {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   width: 100%;
   height: 100%;
 }
@@ -199,7 +191,7 @@ export default {
   background-color: rgba(0, 0, 0, 0.5);
 }
 
-.video-name {
+.name {
   overflow-wrap: anywhere;
 }
 

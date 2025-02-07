@@ -1,5 +1,5 @@
 import json from "@/assets/json/config.json";
-import {parseApplicationNameToImageNameFormat} from "@/utils/util";
+import { parseApplicationNameToImageNameFormat } from "@/utils/util";
 
 export default class IndexedDb {
     constructor(name, version) {

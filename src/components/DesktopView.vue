@@ -1,8 +1,8 @@
 <template>
-  <div class="desktop"
-       ref="desktop"
-       :style="{ filter: `brightness(${desktopBrightnessValue}%)`}">
-    <OsLoader v-if="osLoaderFinished === false && this.globalState.DISABLE_START_ANIMATION === false" @finished="osLoaderFinished = true"/>
+  <div class="desktop" ref="desktop" :style="{ filter: `brightness(${desktopBrightnessValue}%)`}">
+    <OsLoader v-if="osLoaderFinished === false && this.globalState.DISABLE_START_ANIMATION === false"
+              @finished="osLoaderFinished = true"
+    />
     <div v-show="osLoaderFinished === true || this.globalState.DISABLE_START_ANIMATION === true" class="main-screen">
       <MainWindow
           v-for="window in this.globalState.openWindows"
