@@ -1,7 +1,14 @@
 <template>
   <footer class="taskbar" ref="taskbar" :style="{ height: `${height}px` }">
     <div class="taskbar-items-left">
-      <div class="app-icons" :class="iconImageName" v-for="(iconImageName) in applicationNames" :key="iconImageName">
+      <div class="app-icons"
+           :class="iconImageName"
+           v-for="(iconImageName) in applicationNames"
+           :key="iconImageName"
+           @mouseenter="onMouseenterApplicationIcon(iconImageName)"
+           @mouseleave="onMouseleaveApplicationIcon"
+           @click="emitApplicationName(iconImageName)"
+      >
         <div v-show="showOpenTabs && openTabs.some(openTab => openTab.name === iconImageName)"
              class="open-tabs"
              @mouseenter="mouseOnOpenTabs = true"
@@ -15,11 +22,7 @@
             </div>
           </div>
         </div>
-        <div class="app-icon"
-             @mouseenter="onMouseenterApplicationIcon(iconImageName)"
-             @mouseleave="onMouseleaveApplicationIcon"
-             @click="emitApplicationName(iconImageName)"
-        >
+        <div class="app-icon">
           <ImgComponent :image-name="iconImageName"
                         :custom-width="ICON_IMG_WIDTH"
                         :custom-height="ICON_IMG_HEIGHT"/>
