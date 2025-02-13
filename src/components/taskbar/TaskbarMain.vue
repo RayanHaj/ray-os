@@ -1,7 +1,7 @@
 <template>
   <footer class="taskbar" ref="taskbar" :style="{ height: `${height}px` }">
     <div class="taskbar-items-left">
-      <div class="app-icons"
+      <div class="app-icon"
            :class="iconImageName"
            v-for="(iconImageName) in applicationNames"
            :key="iconImageName"
@@ -22,7 +22,7 @@
             </div>
           </div>
         </div>
-        <div class="app-icon">
+        <div class="img-line-wrapper">
           <ImgComponent :image-name="iconImageName"
                         :custom-width="ICON_IMG_WIDTH"
                         :custom-height="ICON_IMG_HEIGHT"/>
@@ -34,23 +34,23 @@
     </div>
     <div class="taskbar-items-right">
       <div v-show="setTaskbarElementsVisibility.ARROW_OPEN_WINDOWS_BUTTON"
-           class="show-hidden-icons-wrapper taskbar-right-item">
+           class="show-hidden-icons-wrapper app-icon">
         <SvgComponent :svg-type="'arrowUp'" :custom-height="15" :custom-width="15"/>
       </div>
       <div v-show="setTaskbarElementsVisibility.KEYBOARD_LAYOUT_BUTTON"
-           class="keyboard-layout-wrapper taskbar-right-item">
+           class="keyboard-layout-wrapper app-icon">
         <span>ENG</span>
         <span>US</span>
       </div>
       <div v-show="setTaskbarElementsVisibility.QUICK_SETTINGS_BUTTON" ref="quickSettingsMenuButton"
-           class="wifi-sound-battery-wrapper taskbar-right-item"
+           class="wifi-sound-battery-wrapper app-icon"
            @click="emitQuickSettingMenuClicked">
         <SvgComponent :svg-type="'wifi'" :custom-height="15" :custom-width="15"/>
         <SvgComponent :svg-type="'volume'" :custom-height="15" :custom-width="15"/>
         <SvgComponent :svg-type="'battery'" :custom-height="15" :custom-width="15"/>
       </div>
       <div v-show="setTaskbarElementsVisibility.DATE_TIME_NOTIFICATION"
-           class="date-time-notification-wrapper taskbar-right-item">
+           class="date-time-notification-wrapper app-icon">
         <div class="date-time-wrapper">
           <div class="time">{{ time }}</div>
           <div class="date">{{ date }}</div>
@@ -230,24 +230,16 @@ export default {
   user-select: none;
 }
 
-.open-window-img-name-wrapper {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  gap: 5px;
-}
-
 .open-tabs {
   position: absolute;
   display: flex;
   flex-direction: column;
   align-items: center;
   bottom: 45px;
-  z-index: 9999;
   border: var(--border-window-color) 2px solid;
   border-radius: 10px;
   overflow: hidden;
+  z-index: 9999;
 }
 
 .open-tab {
@@ -259,6 +251,7 @@ export default {
   padding: 10px;
   font-size: 11px;
   width: 130px;
+  z-index: 9999;
   background-color: var(--background-color);
   color: var(--font-color);
 }
@@ -279,20 +272,6 @@ export default {
   width: 200px;
   height: 200px;
   overflow: hidden;
-}
-
-.close-window {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  width: 100%;
-  align-self: end;
-}
-
-.open-window-name {
-  font-size: 10px;
-  font-style: italic;
-  font-weight: bolder;
 }
 
 .taskbar {
@@ -316,31 +295,28 @@ export default {
 .taskbar-items-right {
   margin-right: 8px;
   display: flex;
+  gap: 10px;
   flex-direction: row;
 }
 
-.taskbar-right-item {
-  padding: 4px 8px 4px 8px;
-  transition: 0.3s;
-  cursor: default;
-}
-
-.taskbar-right-item:hover {
-  background-color: var(--hover-color);
-  border-radius: 5px;
-}
-
-.app-icons {
+.app-icon {
   display: flex;
-  padding: 5px 6px 0;
+  padding: 2px 3px;
   transition: 0.3s;
   justify-content: center;
+  align-items: center;
   position: relative;
 }
 
-.app-icons:hover {
+.app-icon:hover {
   background-color: var(--hover-color);
   border-radius: 5px;
+}
+
+.img-line-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .date-time-notification-wrapper {
@@ -384,7 +360,7 @@ export default {
   padding: 1px;
   border-radius: 20px;
   background-color: var(--font-color);
-  bottom: -1px;
+  bottom: -5px;
   position: absolute;
   transition: width 0.5s;
 }
@@ -395,9 +371,9 @@ export default {
   padding: 1px;
   border-radius: 20px;
   background-color: var(--font-color);
-  bottom: -1px;
+  bottom: -5px;
   position: absolute;
-  left: 14px;
+  left: 12px;
   transition: width 0.5s;
 }
 </style>
