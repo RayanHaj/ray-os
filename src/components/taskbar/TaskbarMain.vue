@@ -200,7 +200,7 @@ export default {
       this.showOpenTabs = false;
     },
     onClickCloseTab(id) {
-      this.globalState.openWindows.splice(id, 1);
+      this.globalState.closeOpenWindowByWindowId(id)
       this.showOpenTabs = false;
     },
     setOpenTabs(tabs) {

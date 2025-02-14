@@ -2,20 +2,16 @@
   <li class="tab"
       v-for="tab in tabs"
       :key="tab.id"
-      @click="onClickTab(tab.id)"
+      @click.stop="onClickTab(tab.id)"
   >
     <p class="open-tab-name">{{ tab.name }} {{ tab.id }}</p>
-    <div class="open-tab-close"
-         @click="closeTab(tab.id)"
-    >
-      <button class="close-tab-button">
-        <svg-component
-            svg-type="close"
-            :custom-width="18"
-            :custom-height="18"
-        />
-      </button>
-    </div>
+    <button class="close-tab-button" @click="closeTab(tab.id)">
+      <svg-component
+          svg-type="close"
+          :custom-width="18"
+          :custom-height="18"
+      />
+    </button>
   </li>
 </template>
 <script>
@@ -54,12 +50,15 @@ export default {
   background-color: var(--background-color);
   color: var(--font-color);
 }
+
 .tab:hover {
   background-color: var(--hover-color);
 }
+
 .open-tab-close {
   padding-top: 5px;
 }
+
 .close-tab-button {
   display: flex;
   justify-content: center;
