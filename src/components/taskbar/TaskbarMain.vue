@@ -150,7 +150,7 @@ export default {
 
       this.db.getElementByName('files', applicationName).then(element => {
         this.globalState.pushOpenWindow(element);
-      });
+      }).finally(() => this.showTabs(applicationName));
     },
     emitQuickSettingMenuClicked() {
       this.quickSettingMenuIsOpen = !this.quickSettingMenuIsOpen;
@@ -169,17 +169,14 @@ export default {
     onMouseenterApplicationIcon(name) {
       if (this.windowIsOpenByName(name)) {
         clearTimeout(this.mouseleaveTimeoutId);
-        this.globalState.openTabsName = name;
-        this.showOpenTabs = true;
+        this.showTabs(name)
       }
     },
     onMouseleaveApplicationIcon() {
       clearTimeout(this.mouseleaveTimeoutId);
       this.mouseleaveTimeoutId = setTimeout(() => {
         if (this.mouseOnOpenTabs) return;
-        this.globalState.openTabsName = '';
-        this.showOpenTabs = false;
-        this.openTabs = [];
+        this.removeTabs();
       }, 500);
     },
     onMouseenterOpenTabs() {
@@ -189,6 +186,16 @@ export default {
     onMouseleaveOpenTabs() {
       this.showOpenTabs = false;
       this.mouseOnOpenTabs = false;
+    },
+    showTabs(name) {
+      clearTimeout(this.mouseleaveTimeoutId);
+      this.globalState.openTabsName = name;
+      this.showOpenTabs = true;
+    },
+    removeTabs() {
+      this.globalState.openTabsName = '';
+      this.showOpenTabs = false;
+      this.openTabs = [];
     },
     onClickTab(id) {
       const window = this.getWindowById(id);
