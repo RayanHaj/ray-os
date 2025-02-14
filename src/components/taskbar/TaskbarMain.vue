@@ -1,33 +1,39 @@
 <template>
-  <footer class="taskbar" ref="taskbar" :style="{ height: `${height}px` }">
+  <footer class="taskbar"
+          ref="taskbar"
+          :style="{ height: `${height}px` }"
+  >
     <div class="taskbar-items-left">
       <div class="app-icon"
-           :class="iconImageName"
-           v-for="(iconImageName) in applicationNames"
-           :key="iconImageName"
-           @mouseenter="onMouseenterApplicationIcon(iconImageName)"
+           :class="applicationName"
+           v-for="(applicationName) in applicationNames"
+           :key="applicationName"
+           @mouseenter="onMouseenterApplicationIcon(applicationName)"
            @mouseleave="onMouseleaveApplicationIcon"
-           @click="emitApplicationName(iconImageName)"
+           @click="emitApplicationName(applicationName)"
       >
-        <div v-show="showOpenTabs && openTabs.some(openTab => openTab.name === iconImageName)"
+
+        <!--START-- CONDITIONAL OPEN TABS ON HOVER APPLICATION ICON -->
+        <div v-show="showOpenTabs && openTabs.some(openTab => openTab.name === applicationName)"
              class="open-tabs"
-             @mouseenter="mouseOnOpenTabs = true"
-             @mouseleave="onMouseleaveOpenTabs">
-          <div class="open-tab" @click="onClickTab(tab.id)" v-for="tab in openTabs" :key="tab.id">
-            <div class="open-tab-name">
-              {{ tab.name }} {{ tab.id }}
-            </div>
-            <div class="open-tab-close" @click="onClickTabClose(tab.id)">
-              <svg-component svg-type="close" :custom-width="18" :custom-height="18"/>
-            </div>
-          </div>
+             @mouseenter="onMouseenterOpenTabs"
+             @mouseleave="onMouseleaveOpenTabs"
+        >
+          <open-tabs :tabs="openTabs"
+                     @clicked="onClickTab($event)"
+                     @closed="onClickCloseTab($event)"
+          />
         </div>
+        <!--END-- CONDITIONAL OPEN TABS ON HOVER APPLICATION ICON -->
+
         <div class="img-line-wrapper">
-          <ImgComponent :image-name="iconImageName"
-                        :custom-width="ICON_IMG_WIDTH"
-                        :custom-height="ICON_IMG_HEIGHT"/>
-          <div :class="getHorizontalLineClass(iconImageName)"
-               :style="{ visibility: this.globalState.openWindows.some(openWindow => openWindow.name === iconImageName) ? 'visible' : 'hidden' }"
+          <ImgComponent
+              :image-name="applicationName"
+              :custom-width="ICON_IMG_WIDTH"
+              :custom-height="ICON_IMG_HEIGHT"
+          />
+          <div :class="getHorizontalLineClass(applicationName)"
+               :style="{ visibility: windowIsOpenByName(applicationName) ? 'visible' : 'hidden' }"
           />
         </div>
       </div>
@@ -68,6 +74,7 @@ import SvgComponent from "@/ui/svg-component";
 import ImgComponent from "@/ui/img-component";
 import json from "@/assets/json/config.json";
 import {useGlobalState} from "@/stores/globalState";
+import OpenTabs from "@/components/taskbar/segments/OpenTabs";
 
 export default {
   name: "taskbarFooter",
@@ -122,7 +129,7 @@ export default {
       required: false
     }
   },
-  components: {ImgComponent, SvgComponent},
+  components: {OpenTabs, ImgComponent, SvgComponent},
   watch: {
     'globalState.openTabs': {
       handler(newValue) {
@@ -164,39 +171,31 @@ export default {
       return 'horizontal-line';
     },
     onMouseenterApplicationIcon(name) {
-      if (this.globalState.openTabsName !== '') return;
-      this.globalState.openTabsName = name;
-
-      if (this.mouseleaveTimeoutId) {
+      if (this.windowIsOpenByName(name)) {
         clearTimeout(this.mouseleaveTimeoutId);
-        this.mouseleaveTimeoutId = null;
-      }
-
-      if (this.mouseoverTimeoutId === null) {
-        this.mouseoverTimeoutId = setTimeout(() => {
-          this.showOpenTabs = true;
-        }, 500);
+        this.globalState.openTabsName = name;
+        this.showOpenTabs = true;
       }
     },
     onMouseleaveApplicationIcon() {
-      clearTimeout(this.mouseoverTimeoutId);
-      this.mouseoverTimeoutId = null;
-
+      clearTimeout(this.mouseleaveTimeoutId);
       this.mouseleaveTimeoutId = setTimeout(() => {
-        if (this.mouseOnOpenTabs === true) return;
+        if (this.mouseOnOpenTabs) return;
         this.globalState.openTabsName = '';
         this.showOpenTabs = false;
         this.openTabs = [];
       }, 500);
     },
+    onMouseenterOpenTabs() {
+      this.showOpenTabs = true;
+      this.mouseOnOpenTabs = true;
+    },
     onMouseleaveOpenTabs() {
-      if (this.showOpenTabs === true) {
-        this.showOpenTabs = false;
-      }
+      this.showOpenTabs = false;
       this.mouseOnOpenTabs = false;
     },
     onClickTab(id) {
-      const window = this.globalState.openWindows.find(window => window.id === id);
+      const window = this.getWindowById(id);
       if (!window) return;
 
       this.globalState.pushToTopOpenWindows(window.id);
@@ -204,12 +203,18 @@ export default {
 
       this.showOpenTabs = false;
     },
-    onClickTabClose(id) {
+    onClickCloseTab(id) {
       this.globalState.openWindows.splice(id, 1);
       this.showOpenTabs = false;
     },
     setOpenTabs(tabs) {
       this.openTabs = tabs.sort((a, b) => a.id - b.id);
+    },
+    windowIsOpenByName(name) {
+      return this.globalState.openWindows.some(window => window.name === name)
+    },
+    getWindowById(id) {
+      return this.globalState.openWindows.find(window => window.id === id)
     }
   },
 }
@@ -238,39 +243,6 @@ export default {
   bottom: 45px;
   border: var(--border-window-color) 2px solid;
   border-radius: 10px;
-  overflow: hidden;
-  z-index: 9999;
-}
-
-.open-tab {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  gap: 20px;
-  padding: 10px;
-  font-size: 11px;
-  width: 130px;
-  z-index: 9999;
-  background-color: var(--background-color);
-  color: var(--font-color);
-}
-
-.open-tab:hover {
-  background-color: var(--hover-color);
-}
-
-.open-tab-close {
-  padding-top: 5px;
-}
-
-.open-window-preview {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 200px;
-  height: 200px;
   overflow: hidden;
 }
 
