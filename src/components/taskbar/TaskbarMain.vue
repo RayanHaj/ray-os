@@ -14,7 +14,7 @@
       >
 
         <!--START-- CONDITIONAL OPEN TABS ON HOVER APPLICATION ICON -->
-        <div v-show="showOpenTabs && openTabs.some(openTab => openTab.name === applicationName)"
+        <ul v-show="showOpenTabs && openTabs.some(openTab => openTab.name === applicationName)"
              class="open-tabs"
              @mouseenter="onMouseenterOpenTabs"
              @mouseleave="onMouseleaveOpenTabs"
@@ -23,7 +23,7 @@
                      @clicked="onClickTab($event)"
                      @closed="onClickCloseTab($event)"
           />
-        </div>
+        </ul>
         <!--END-- CONDITIONAL OPEN TABS ON HOVER APPLICATION ICON -->
 
         <div class="img-line-wrapper">
@@ -157,18 +157,14 @@ export default {
       this.$emit('quickSettingsMenuOpen', this.quickSettingMenuIsOpen)
     },
     getHorizontalLineClass(name) {
-      let counter = 0;
+      let returnString = 'horizontal-line-minimized';
       this.globalState.openWindows.forEach(window => {
         if (window.name === name && window.minimized === false) {
-          counter += 1;
+          returnString = 'horizontal-line';
         }
       });
 
-      if (counter === 0) {
-        return 'horizontal-line-minimized';
-      }
-
-      return 'horizontal-line';
+      return returnString;
     },
     onMouseenterApplicationIcon(name) {
       if (this.windowIsOpenByName(name)) {
@@ -238,6 +234,8 @@ export default {
 .open-tabs {
   position: absolute;
   display: flex;
+  padding: 0;
+  margin: 0;
   flex-direction: column;
   align-items: center;
   bottom: 45px;
@@ -338,14 +336,12 @@ export default {
 }
 
 .horizontal-line-minimized {
-  display: flex;
   width: 5px;
   padding: 1px;
   border-radius: 20px;
   background-color: var(--font-color);
   bottom: -5px;
   position: absolute;
-  left: 12px;
   transition: width 0.5s;
 }
 </style>
