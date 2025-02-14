@@ -13,7 +13,7 @@
            @click="emitApplicationName(applicationName)"
       >
 
-        <!--START-- CONDITIONAL OPEN TABS ON HOVER APPLICATION ICON -->
+        <!--START-- CONDITIONAL OPEN TABS ON TASKBAR APPLICATION HOVER -->
         <ul v-show="showOpenTabs && openTabs.some(openTab => openTab.name === applicationName)"
              class="open-tabs"
              @mouseenter="onMouseenterOpenTabs"
@@ -24,7 +24,7 @@
                      @closed="onClickCloseTab($event)"
           />
         </ul>
-        <!--END-- CONDITIONAL OPEN TABS ON HOVER APPLICATION ICON -->
+        <!--END-- CONDITIONAL OPEN TABS ON TASKBAR APPLICATION HOVER -->
 
         <div class="img-line-wrapper">
           <ImgComponent
@@ -39,30 +39,10 @@
       </div>
     </div>
     <div class="taskbar-items-right">
-      <div v-show="setTaskbarElementsVisibility.ARROW_OPEN_WINDOWS_BUTTON"
-           class="show-hidden-icons-wrapper app-icon">
-        <SvgComponent :svg-type="'arrowUp'" :custom-height="15" :custom-width="15"/>
-      </div>
-      <div v-show="setTaskbarElementsVisibility.KEYBOARD_LAYOUT_BUTTON"
-           class="keyboard-layout-wrapper app-icon">
-        <span>ENG</span>
-        <span>US</span>
-      </div>
-      <div v-show="setTaskbarElementsVisibility.QUICK_SETTINGS_BUTTON" ref="quickSettingsMenuButton"
-           class="wifi-sound-battery-wrapper app-icon"
-           @click="emitQuickSettingMenuClicked">
-        <SvgComponent :svg-type="'wifi'" :custom-height="15" :custom-width="15"/>
-        <SvgComponent :svg-type="'volume'" :custom-height="15" :custom-width="15"/>
-        <SvgComponent :svg-type="'battery'" :custom-height="15" :custom-width="15"/>
-      </div>
-      <div v-show="setTaskbarElementsVisibility.DATE_TIME_NOTIFICATION"
-           class="date-time-notification-wrapper app-icon">
+      <div class="date-time-notification-wrapper app-icon">
         <div class="date-time-wrapper">
           <div class="time">{{ time }}</div>
           <div class="date">{{ date }}</div>
-        </div>
-        <div class="notification-icon-wrapper">
-          <SvgComponent svg-type="notification" :custom-width="16" :custom-height="16"/>
         </div>
       </div>
     </div>
@@ -70,7 +50,6 @@
 </template>
 
 <script>
-import SvgComponent from "@/ui/svg-component";
 import ImgComponent from "@/ui/img-component";
 import json from "@/assets/json/config.json";
 import {useGlobalState} from "@/stores/globalState";
@@ -92,12 +71,6 @@ export default {
       mouseleaveTimeoutId: null,
       showOpenTabs: false,
       mouseOnOpenTabs: false,
-      setTaskbarElementsVisibility: {
-        DATE_TIME_NOTIFICATION: true,
-        QUICK_SETTINGS_BUTTON: true,
-        KEYBOARD_LAYOUT_BUTTON: true,
-        ARROW_OPEN_WINDOWS_BUTTON: true
-      },
       applicationNames: json.defaultApplicationNames,
       showWindowsPreview: false
     };
@@ -108,15 +81,9 @@ export default {
     }
   },
   mounted() {
-    function addLeadingZero(number) {
-      return ('0' + number).slice(-2);
-    }
-
+    this.updateDateTime();
     setInterval(() => {
-      const now = new Date();
-
-      this.date = `${addLeadingZero((now.getMonth() + 1))}/${addLeadingZero(now.getUTCDate())}/${now.getFullYear()}`;
-      this.time = now.toLocaleString('en-US', {hour: 'numeric', minute: 'numeric', hour12: true});
+      this.updateDateTime();
     }, 1000);
   },
   props: {
@@ -129,7 +96,7 @@ export default {
       required: false
     }
   },
-  components: {OpenTabs, ImgComponent, SvgComponent},
+  components: {OpenTabs, ImgComponent},
   watch: {
     'globalState.openTabs': {
       handler(newValue) {
@@ -218,6 +185,15 @@ export default {
     },
     getWindowById(id) {
       return this.globalState.openWindows.find(window => window.id === id)
+    },
+    updateDateTime() {
+      function addLeadingZero(number) {
+        return ('0' + number).slice(-2);
+      }
+
+      const now = new Date();
+      this.date = `${addLeadingZero((now.getMonth() + 1))}/${addLeadingZero(now.getUTCDate())}/${now.getFullYear()}`;
+      this.time = now.toLocaleString('en-US', {hour: 'numeric', minute: 'numeric', hour12: true});
     }
   },
 }
@@ -305,31 +281,6 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: end;
-}
-
-.notification-icon-wrapper {
-  align-self: center;
-  margin-left: 7px;
-}
-
-.wifi-sound-battery-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-left: 3px;
-}
-
-.keyboard-layout-wrapper {
-  display: flex;
-  flex-direction: column;
-  text-align: center;
-}
-
-.show-hidden-icons-wrapper {
-  align-self: center;
-  margin-right: 3px;
-  padding-top: 10px;
-  padding-bottom: 10px;
 }
 
 .horizontal-line {

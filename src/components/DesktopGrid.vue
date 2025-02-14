@@ -469,12 +469,7 @@ export default {
   display: flex;
   align-items: center;
   padding: 5px;
-}
-
-.context-other-actions-wrapper {
-  display: flex;
-  flex-direction: column;
-  font-size: 12px;
+  border-radius: 3px;
 }
 
 .context-action:hover {
@@ -484,5 +479,11 @@ export default {
 
 .context-action path {
   fill: var(--font-color);
+}
+
+.context-other-actions-wrapper {
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
 }
 </style>
