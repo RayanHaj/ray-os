@@ -1,6 +1,8 @@
 <template>
   <div class="os-loader-container">
-    <video class="os-loader" src="@/assets/videos/os_loader.mp4" autoplay muted @ended="$emit('finished')"/>
+    <video class="os-loader" autoplay muted @ended="$emit('finished')">
+      <source src="@/assets/videos/os_loader.mp4">
+    </video>
   </div>
 </template>
 

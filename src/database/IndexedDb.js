@@ -1,5 +1,5 @@
 import json from "@/assets/json/config.json";
-import { parseApplicationNameToImageNameFormat } from "@/utils/util";
+import {parseApplicationNameToImageNameFormat} from "@/utils/util";
 
 export default class IndexedDb {
     constructor(name, version) {
@@ -117,6 +117,14 @@ export default class IndexedDb {
                         .then(error => {
                             console.error(error);
                         });
+
+                    this.getAllElements('files').then(files => {
+                        files.forEach(file => {
+                            if (file.type === 'video/mp4') {
+                                this.addFileToDirectory(file.name, 'Videos').then(() => console.log('succes'));
+                            }
+                        });
+                    });
                 }
             };
 
@@ -257,6 +265,29 @@ export default class IndexedDb {
             openCursor.onerror = (event) => {
                 reject('Error occurred while accessing cursor: ' + event.target.error);
             };
+        });
+    }
+
+    async addFileToDirectory(name, directoryName) {
+        return new Promise((resolve, reject) => {
+            this.getDirectoriesByNameFileSystem(directoryName).then(directories => {
+                const transaction = this.db.transaction(['fileSystem'], 'readwrite');
+                const store = transaction.objectStore('fileSystem');
+                const request = store.get(directories[0].id);
+
+                request.onsuccess = event => {
+                    const element = event.target.result;
+                    if (element) {
+                        element.children.push({'fileName': name});
+                        const updateRequest = store.put(element);
+                        updateRequest.onsuccess = () => resolve();
+                        updateRequest.onerror = event => reject(event.target.error);
+                    }
+                }
+
+                request.onerror = event => reject(event.target.error);
+                transaction.onerror = event => reject(event.target.error);
+            });
         });
     }
 

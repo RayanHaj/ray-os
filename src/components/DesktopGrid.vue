@@ -264,6 +264,9 @@ export default {
                 const image = await this.db.getImageByFileType(file.type);
                 const object = parseFileToDbObject(file, Number(currentTile.id), image);
                 await this.db.postElement('files', object);
+                if (file.type === 'video/mp4') {
+                  await this.db.addFileToDirectory(file.name, 'Videos');
+                }
                 this.insertTile(object.gridIndex, object.name);
               }
               return;

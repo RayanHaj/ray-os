@@ -42,7 +42,8 @@
   "initFileSystem": [
     "Videos",
     "Pictures",
-    "Documents"
+    "Documents",
+    "Applications"
   ],
   "videos": [
     "video_1.mp4"
