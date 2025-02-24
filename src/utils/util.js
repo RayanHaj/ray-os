@@ -83,3 +83,15 @@ export function parseFileToDbObject(file, index, image) {
 
     return object;
 }
+
+export function returnApplicationForFileType(type) {
+    let returnValue = null;
+    switch (type) {
+        case 'video/mp4': {
+            returnValue = 'Video Player';
+            break;
+        }
+    }
+
+    return returnValue;
+}

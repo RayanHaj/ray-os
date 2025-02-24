@@ -1,4 +1,5 @@
 import {defineStore} from "pinia";
+import {returnApplicationForFileType} from "@/utils/util";
 
 export const useGlobalState = defineStore('globalState', {
     state: () => ({
@@ -88,39 +89,31 @@ export const useGlobalState = defineStore('globalState', {
             this.theme = value;
             window.localStorage.setItem('theme', value);
         },
-        pushOpenWindow(object) {
-            let id = 0;
-            let zIndex = 0;
-            if (this.openWindows.length > 0) {
-                id = this.openWindows.length;
-                zIndex = this.getHighestZIndex() + 1;
-            }
-
-            let windowName = object.name;
-            if (object.type !== 'Application') {
-                windowName = returnApplicationForFileType(object.type);
-            }
-
-            const newWindowObject = {
-                'id': id,
-                "zIndex": zIndex,
-                'name': windowName,
-                'minimized': false,
-                'values': object
-            }
-
-            this.openWindows.push(newWindowObject);
-
-            function returnApplicationForFileType(type) {
-                let returnValue = null;
-                switch (type) {
-                    case 'video/mp4': {
-                        returnValue = 'Video Player';
-                        break;
-                    }
+        pushOpenWindow(element) {
+            if (typeof element === 'object') {
+                let id = 0;
+                let zIndex = 0;
+                if (this.openWindows.length > 0) {
+                    id = this.openWindows.length;
+                    zIndex = this.getHighestZIndex() + 1;
                 }
 
-                return returnValue;
+                let windowName = element.name;
+                if (element.type !== 'Application') {
+                    windowName = returnApplicationForFileType(element.type);
+                }
+
+                const newWindowObject = {
+                    'id': id,
+                    "zIndex": zIndex,
+                    'name': windowName,
+                    'minimized': false,
+                    'values': element
+                }
+
+                this.openWindows.push(newWindowObject);
+            } else {
+                console.error(`element: ${element} is not of type 'object'`)
             }
         },
         pushToTopOpenWindows(windowId) {
@@ -153,14 +146,14 @@ export const useGlobalState = defineStore('globalState', {
         },
         pushToOpenTabs(name) {
             this.openTabs = [];
-            this.openWindows.forEach(window => {
-                if (window.name === name) {
-                    this.openTabs.push({
-                        id: window.id,
-                        name: window.name
-                    });
-                }
-            });
+
+            const window = this.openWindows.find(window => window.name === name);
+            if (window) {
+                this.openTabs.push({
+                    id: window.id,
+                    name: window.name
+                });
+            }
         },
         closeOpenWindowByWindowId(id) {
             this.openWindows = this.openWindows.filter(window => window.id !== id);

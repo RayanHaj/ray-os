@@ -85,7 +85,7 @@ export default class IndexedDb {
 
                     // creates root directory
                     const rootDirectory = await this.postElement('fileSystem', {
-                        directoryName: json.initFileSystem[0],
+                        directoryName: json.rootDirectory,
                         parentDirectories: [],
                         children: []
                     });
@@ -99,7 +99,7 @@ export default class IndexedDb {
                                 directoryName: name,
                                 parentDirectories: [{
                                     id: rootDirectory.id,
-                                    name: json.initFileSystem[0]
+                                    name: json.rootDirectory
                                 }],
                                 children: []
                             })
@@ -292,27 +292,18 @@ export default class IndexedDb {
 
         const transaction = this.db.transaction(['fileSystem'], 'readonly');
         const store = transaction.objectStore('fileSystem');
-        const index = store.index('id');
 
         return new Promise((resolve, reject) => {
-            const openCursor = index.openCursor();
+            const request = store.get(id);  // Use the store's .get() method to retrieve by key
 
-            let returnValue = null;
-            openCursor.onsuccess = (event) => {
-                const cursor = event.target.result;
-                if (cursor) {
-                    if (cursor.value.id === id) {
-                        returnValue = cursor.value;
-                    }
-                    cursor.continue();
-                } else {
-                    resolve(returnValue);
-                }
-            }
+            request.onsuccess = (event) => {
+                resolve(event.target.result); // Return the object corresponding to the id
+            };
 
-            openCursor.onerror = (event) => {
-                reject('Error occurred while accessing cursor: ' + event.target.error);
-            }
+            request.onerror = (event) => {
+                reject('Error occurred while accessing the object: ' + event.target.error);
+            };
         });
     }
+
 }

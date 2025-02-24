@@ -38,8 +38,8 @@
     "Video Player",
     "Games"
   ],
+  "rootDirectory": "My Files",
   "initFileSystem": [
-    "My Files",
     "Videos",
     "Pictures",
     "Documents"

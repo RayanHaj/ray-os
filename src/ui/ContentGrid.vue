@@ -1,11 +1,11 @@
 <template>
   <div class="grid">
-    <h1>{{ name }}</h1>
+    <input type="text" :value="path">
     <div v-if="list.length === 0">
       <p>No {{ name }} found</p>
     </div>
     <ul v-else class="file-list-wrapper">
-      <li v-for="element in list" @dblclick="$emit('fileDblClicked', element)" :key="element.name"
+      <li v-for="element in list" @dblclick="onDblClick(element.id)" :key="element.name"
           class="list-element">
         <video v-if="element.type === 'video/mp4'" :src="element.videoUrl" :id="element" class="file-thumbnail"/>
         <img v-else src="../assets/images/applicationImages/file-explorer.png" class="file-thumbnail" :alt="`${name}-thumbnail`">
@@ -19,7 +19,12 @@
 <script>
 export default {
   name: 'ContentGrid',
+  inject: ['db'],
   props: {
+    path: {
+      default: 'My Files/',
+      required: false
+    },
     name: {
       default: 'elements',
       required: false
@@ -27,6 +32,29 @@ export default {
     list: {
       default: [],
       required: true
+    }
+  },
+  data() {
+    return {
+      contentList: []
+    }
+  },
+  mounted() {
+    this.contentList = this.list;
+    console.log(this.contentList)
+  },
+  methods: {
+    onDblClick(id) {
+      console.log(id)
+      this.db.getDirectoryById(id).then((directory) => {
+        if (directory.children.length === 0) {
+          return;
+        }
+        this.contentList = [];
+        directory.children.forEach(child => {
+          this.contentList.push(child)
+        })
+      })
     }
   }
 }

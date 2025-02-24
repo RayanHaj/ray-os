@@ -13,10 +13,9 @@
            @click="emitApplicationName(applicationName)"
       >
 
-        <!--START-- CONDITIONAL OPEN TABS ON TASKBAR APPLICATION HOVER -->
         <ul v-show="showOpenTabs && openTabs.some(openTab => openTab.name === applicationName)"
              class="open-tabs"
-             @mouseenter="onMouseenterOpenTabs"
+             @mouseenter="onMouseenterOpenTabs(applicationName)"
              @mouseleave="onMouseleaveOpenTabs"
         >
           <open-tabs :tabs="openTabs"
@@ -24,14 +23,14 @@
                      @closed="onClickCloseTab($event)"
           />
         </ul>
-        <!--END-- CONDITIONAL OPEN TABS ON TASKBAR APPLICATION HOVER -->
 
-        <div class="img-line-wrapper">
+        <div class="image-wrapper">
           <ImgComponent
               :image-name="applicationName"
               :custom-width="ICON_IMG_WIDTH"
               :custom-height="ICON_IMG_HEIGHT"
           />
+          <!-- Image underline -->
           <div :class="getHorizontalLineClass(applicationName)"
                :style="{ visibility: windowIsOpenByName(applicationName) ? 'visible' : 'hidden' }"
           />
@@ -90,10 +89,6 @@ export default {
     height: {
       type: Number,
       required: true
-    },
-    previewApplicationWindow: {
-      type: HTMLCanvasElement,
-      required: false
     }
   },
   components: {OpenTabs, ImgComponent},
@@ -110,8 +105,8 @@ export default {
         return;
       }
 
-      if (this.globalState.openWindows.some(window => window.name === applicationName)) {
-        this.showOpenTabs = true;
+      if (this.windowIsOpenByName(applicationName)) {
+        this.showTabs(applicationName);
         return;
       }
 
@@ -119,19 +114,9 @@ export default {
         this.globalState.pushOpenWindow(element);
       }).finally(() => this.showTabs(applicationName));
     },
-    emitQuickSettingMenuClicked() {
-      this.quickSettingMenuIsOpen = !this.quickSettingMenuIsOpen;
-      this.$emit('quickSettingsMenuOpen', this.quickSettingMenuIsOpen)
-    },
     getHorizontalLineClass(name) {
-      let returnString = 'horizontal-line-minimized';
-      this.globalState.openWindows.forEach(window => {
-        if (window.name === name && window.minimized === false) {
-          returnString = 'horizontal-line';
-        }
-      });
-
-      return returnString;
+      return this.globalState.openWindows.some(window => window.name === name && !window.minimized) ?
+          'horizontal-line' : 'horizontal-line-minimized';
     },
     onMouseenterApplicationIcon(name) {
       if (this.windowIsOpenByName(name)) {
@@ -146,12 +131,12 @@ export default {
         this.removeTabs();
       }, 500);
     },
-    onMouseenterOpenTabs() {
-      this.showOpenTabs = true;
+    onMouseenterOpenTabs(applicationName) {
+      this.showTabs(applicationName)
       this.mouseOnOpenTabs = true;
     },
     onMouseleaveOpenTabs() {
-      this.showOpenTabs = false;
+      this.removeTabs();
       this.mouseOnOpenTabs = false;
     },
     showTabs(name) {
@@ -165,35 +150,34 @@ export default {
       this.openTabs = [];
     },
     onClickTab(id) {
-      const window = this.getWindowById(id);
-      if (!window) return;
+      if (!this.windowIsOpenById(id)) return;
 
-      this.globalState.pushToTopOpenWindows(window.id);
-      this.$emit('removeMinimizeWindow', window.id);
+      this.globalState.pushToTopOpenWindows(id);
+      this.$emit('removeMinimizeWindow', id);
 
-      this.showOpenTabs = false;
+      this.removeTabs();
     },
     onClickCloseTab(id) {
       this.globalState.closeOpenWindowByWindowId(id)
-      this.showOpenTabs = false;
+      this.removeTabs();
     },
     setOpenTabs(tabs) {
       this.openTabs = tabs.sort((a, b) => a.id - b.id);
     },
+    windowIsOpenById(id) {
+      return this.globalState.openWindows.some(window => window.id === id);
+    },
     windowIsOpenByName(name) {
       return this.globalState.openWindows.some(window => window.name === name)
-    },
-    getWindowById(id) {
-      return this.globalState.openWindows.find(window => window.id === id)
     },
     updateDateTime() {
       function addLeadingZero(number) {
         return ('0' + number).slice(-2);
       }
 
-      const now = new Date();
-      this.date = `${addLeadingZero((now.getMonth() + 1))}/${addLeadingZero(now.getUTCDate())}/${now.getFullYear()}`;
-      this.time = now.toLocaleString('en-US', {hour: 'numeric', minute: 'numeric', hour12: true});
+      const date = new Date();
+      this.date = `${addLeadingZero((date.getMonth() + 1))}/${addLeadingZero(date.getUTCDate())}/${date.getFullYear()}`;
+      this.time = date.toLocaleString('en-US', {hour: 'numeric', minute: 'numeric', hour12: true});
     }
   },
 }
@@ -266,7 +250,7 @@ export default {
   border-radius: 5px;
 }
 
-.img-line-wrapper {
+.image-wrapper {
   display: flex;
   justify-content: center;
   align-items: center;
