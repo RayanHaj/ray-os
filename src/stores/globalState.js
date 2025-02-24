@@ -7,6 +7,7 @@ export const useGlobalState = defineStore('globalState', {
         openWindows: [],
         desktopFiles: [],
         openTabs: [],
+        playVideoObject: null,
         taskbarFiles: null,
         browserWindowSize: {
             HEIGHT_TASKBAR_EXCLUDED: 0,
@@ -112,6 +113,7 @@ export const useGlobalState = defineStore('globalState', {
                 }
 
                 this.openWindows.push(newWindowObject);
+                return newWindowObject.id;
             } else {
                 console.error(`element: ${element} is not of type 'object'`)
             }

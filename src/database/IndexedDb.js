@@ -78,8 +78,11 @@ export default class IndexedDb {
                                 }
 
                                 await this.postElement('files', object);
-                                await this.postElement('desktopFiles', object);
-                                await this.postElement('taskbarFiles', object);
+
+                                if (name !== 'Video Player') {
+                                    await this.postElement('desktopFiles', object);
+                                    await this.postElement('taskbarFiles', object);
+                                }
                             });
                     }
 
@@ -99,6 +102,7 @@ export default class IndexedDb {
                                 directoryName: name,
                                 parentDirectories: [{
                                     id: rootDirectory.id,
+                                    type: 'directory',
                                     name: json.rootDirectory
                                 }],
                                 children: []
@@ -107,6 +111,7 @@ export default class IndexedDb {
                             if (directory) {
                                 defaultDirectories.push({
                                     id: directory.id,
+                                    type: 'directory',
                                     name: directory.directoryName
                                 });
                             }
@@ -278,7 +283,10 @@ export default class IndexedDb {
                 request.onsuccess = event => {
                     const element = event.target.result;
                     if (element) {
-                        element.children.push({'fileName': name});
+                        element.children.push({
+                            'type': 'file',
+                            'name': name
+                        });
                         const updateRequest = store.put(element);
                         updateRequest.onsuccess = () => resolve();
                         updateRequest.onerror = event => reject(event.target.error);

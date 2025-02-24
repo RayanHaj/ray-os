@@ -13,12 +13,12 @@
         </button>
       </div>
     </div>
-    <div v-if="list.length === 0">
+    <div v-if="contentList.length === 0">
       <p>No {{ name }} found</p>
     </div>
     <ul v-else class="file-list-wrapper">
       <li v-for="element in contentList"
-          @dblclick="onDblClick(element.id)"
+          @dblclick="onDblClick(element)"
           :key="element.name"
           :style="{
             width: `${zoomValue}px`,
@@ -26,7 +26,8 @@
           }"
           class="list-element">
         <video v-if="element.type === 'video/mp4'" :src="element.videoUrl" :id="element" class="file-thumbnail"/>
-        <img v-else src="../assets/images/applicationImages/file-explorer.png" class="file-thumbnail" :alt="`${name}-thumbnail`">
+        <img v-else src="../assets/images/applicationImages/file-explorer.png" class="file-thumbnail"
+             :alt="`${name}-thumbnail`">
         <div class="file-name">
           {{ element.name.length > 70 ? `${element.name.substring(0, 70)}...` : element.name }}
         </div>
@@ -35,6 +36,8 @@
   </div>
 </template>
 <script>
+import {useGlobalState} from "@/stores/globalState";
+
 export default {
   name: 'ContentGrid',
   inject: ['db'],
@@ -52,6 +55,11 @@ export default {
       required: true
     }
   },
+  computed: {
+    globalState() {
+      return useGlobalState();
+    }
+  },
   data() {
     return {
       contentList: [],
@@ -63,21 +71,40 @@ export default {
   mounted() {
     this.db.getAllElements('files').then(files => console.log(files.find(file => file.name === 'Calculator')))
     this.contentList = this.list;
-    console.log(this.contentList)
   },
   methods: {
-    onDblClick(id) {
-      this.db.getDirectoryById(id).then((directory) => {
-        console.log(directory)
-        if (directory.children.length === 0) {
+    async onDblClick(element) {
+      if (element.id !== undefined) {
+        const children = await this.db.getDirectoryById(element.id).then(directory => {return directory.children});
+        if (children.length === 0) {
           return;
         }
 
         this.contentList = [];
-        directory.children.forEach(child => {
-          this.contentList.push(child)
-        })
-      })
+        children.forEach(child => {
+          this.contentList.push(child);
+        });
+      } else {
+        if (element.name !== undefined) {
+          const file = await this.db.getElementByName('files', element.name);
+
+          switch (file.type) {
+            case 'video/mp4': {
+              const videoPlayerId = this.globalState.getHighestZIndex();
+              this.globalState.playVideoObject = {
+                id: videoPlayerId,
+                video: file
+              };
+              this.db.getElementByName('files', 'Video Player').then(element => {
+                this.globalState.pushOpenWindow(element);
+              });
+            } break;
+            case 'Application': {
+              console.log('application');
+            }
+          }
+        }
+      }
     }
   }
 }
@@ -92,24 +119,30 @@ export default {
   margin-left: 0;
   padding-left: 0;
 }
+
 ul {
   padding: 0;
 }
+
 .file-search-field {
   width: 80%;
 }
+
 .zoom-buttons {
   width: 20%;
 }
+
 .zoom-in, .zoom-out {
   width: 50%;
 }
+
 .page-header {
   display: flex;
   width: 100%;
   flex-direction: row;
   justify-content: space-between;
 }
+
 .file-list-wrapper {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));

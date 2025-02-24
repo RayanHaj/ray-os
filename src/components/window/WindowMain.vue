@@ -556,6 +556,9 @@ export default {
       this.$emit('minimizeWindow', Number(this.windowId));
     },
     closeWindow() {
+      if (this.windowObject.name === 'Video Player') {
+        this.globalState.playVideoObject = null;
+      }
       this.globalState.closeOpenWindowByWindowId(this.windowObject.id);
     },
     onClickWindow(event) {

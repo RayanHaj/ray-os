@@ -56,7 +56,6 @@ export default {
       videos: json.videos,
       toggleVideoPlayerControls: false,
       videoSrc: null,
-      windowObject: null,
       videoList: [],
       videoCurrentTime: 0.00,
       videoLength: 0.00,
@@ -79,27 +78,28 @@ export default {
     }
   },
   props: {
-    fileObject: {
-      type: File,
-      required: false
-    },
     windowId: {
       type: Number,
       required: true
     }
   },
-  beforeMount() {
-    this.windowObject = this.globalState.openWindows.find(window => window.id === this.windowId);
+  mounted() {
+    const globalStoreVideoObject = this.globalState.playVideoObject;
+    if (globalStoreVideoObject?.id - 1 === this.windowId) {
+      this.videoSrc = URL.createObjectURL(this.globalState.playVideoObject.video.file);
+    } else {
+      const windowObject = this.globalState.openWindows.find(window => window.id === this.windowId);
 
-    this.db.getElementByType('files', 'video/mp4').then(elements => {
-      elements.forEach(element => {
-        element.videoUrl = URL.createObjectURL(element.file);
-        this.videoList.push(element);
-      })
-    });
+      this.db.getElementByType('files', 'video/mp4').then(elements => {
+        elements.forEach(element => {
+          element.videoUrl = URL.createObjectURL(element.file);
+          this.videoList.push(element);
+        })
+      });
 
-    if (this.windowObject.values.file) {
-      this.videoSrc = URL.createObjectURL(this.windowObject.values.file);
+      if (windowObject.values.file) {
+        this.videoSrc = URL.createObjectURL(windowObject.values.file);
+      }
     }
   },
   methods: {
