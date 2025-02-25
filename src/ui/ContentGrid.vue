@@ -2,13 +2,14 @@
   <div class="grid">
     <div class="page-header">
       <button class="back-button"
-              @click="zoomValue = zoomValue !== maximumZoomValue ? zoomValue += 10 : zoomValue">
+              @click="onClickBackButton">
         (
       </button>
         <input class="file-search-field"
                type="text"
                :placeholder="this.PREFIX"
                :value="fileSystemPath"
+               disabled
         >
       <div class="zoom-buttons">
         <button class="zoom-in-button"
@@ -74,6 +75,7 @@ export default {
     return {
       PREFIX: `C:\\`,
       contentList: [],
+      enteredDirectories: [],
       zoomValue: 150,
       fileSystemPath: '',
       minimalZoomValue: 100,
@@ -88,7 +90,7 @@ export default {
     this.contentList = this.list;
   },
   methods: {
-    async onDblClick(element) {
+    async openDirectoryOrFile(element) {
       if (element.id !== undefined) {
         const children = await this.db.getDirectoryById(element.id).then(directory => {
           return directory.children
@@ -101,6 +103,10 @@ export default {
         children.forEach(child => {
           this.contentList.push(child);
         });
+
+        if (!this.enteredDirectories.some(directory => directory.id === element.id)) {
+          this.enteredDirectories.push(element);
+        }
       } else {
         if (element.name !== undefined) {
           const file = await this.db.getElementByName('files', element.name);
@@ -125,11 +131,60 @@ export default {
           }
         }
       }
+    },
+    openFileSystemRoot() {
+      const ROOT = 1;
+      this.db.getDirectoryById(ROOT).then(directory => {
+        this.contentList = [];
+        this.contentList.push({
+          id: directory.id,
+          name: directory.directoryName
+        });
+      });
+    },
+    getPreviousDirectory() {
+      if (this.enteredDirectories.length === 0) {
+        return 'n';
+      } else if (this.enteredDirectories.length === 1) {
+        return 'root';
+      } else {
+        return this.enteredDirectories[this.enteredDirectories.length - 2];
+      }
+    },
+    onClickBackButton() {
+      const element = this.getPreviousDirectory();
 
-      // if (this.fileSystemPath.length === 0) {
-      //   this.fileSystemPath += `C:\\ ${element.name}`;
-      // }
-      this.fileSystemPath += this.fileSystemPath.length === 0 ? `C:\\ ${element.name}` : `\\${element.name}`;
+      if (element === 'root') {
+        this.openFileSystemRoot();
+      } else {
+        this.openDirectoryOrFile(element);
+
+        // const index = this.enteredDirectories.findIndex(directory => directory.id === element.id);
+        // this.enteredDirectories.splice(index, 1);
+        //
+        // console.log(this.enteredDirectories)
+      }
+
+      this.removeLastDirectoryFromFilePath();
+    },
+    onDblClick(element) {
+      if (element.id !== undefined) {
+        this.addDirectoryToFilePath(element.name);
+      }
+
+      this.openDirectoryOrFile(element)
+    },
+    addDirectoryToFilePath(name) {
+      if (this.fileSystemPath.length === 0) {
+        this.fileSystemPath = `C:\\${name}`;
+      } else {
+        this.fileSystemPath += `\\${name}`;
+      }
+    },
+    removeLastDirectoryFromFilePath() {
+      let fileSystemArray = this.fileSystemPath.split('\\');
+      fileSystemArray.splice(fileSystemArray.length - 1, 1);
+      this.fileSystemPath = fileSystemArray.join('\\');
     }
   }
 }
