@@ -112,8 +112,13 @@ export default class IndexedDb {
 
                     this.getAllElements('files').then(files => {
                         files.forEach(file => {
-                            if (file.type === 'video/mp4') {
-                                this.addFileToDirectory(file.name, 'Videos').then(() => console.log('succes'));
+                            switch(file.type) {
+                                case 'video/mp4': {
+                                    this.addFileToDirectory(file.name, 'file', 'Videos');
+                                } break;
+                                case 'Application': {
+                                    this.addFileToDirectory(file.name, 'application', 'Applications');
+                                } break;
                             }
                         });
                     });
@@ -256,7 +261,7 @@ export default class IndexedDb {
         });
     }
 
-    async addFileToDirectory(name, directoryName) {
+    async addFileToDirectory(name, type, directoryName) {
         return new Promise((resolve, reject) => {
             this.getDirectoriesByNameFileSystem(directoryName).then(directories => {
                 const transaction = this.db.transaction(['fileSystem'], 'readwrite');
@@ -267,7 +272,7 @@ export default class IndexedDb {
                     const element = event.target.result;
                     if (element) {
                         element.children.push({
-                            'type': 'file',
+                            'type': type,
                             'name': name
                         });
                         const updateRequest = store.put(element);

@@ -1,13 +1,21 @@
 <template>
   <div class="grid">
     <div class="page-header">
-      <input class="file-search-field" type="text" :value="path">
+      <button class="back-button"
+              @click="zoomValue = zoomValue !== maximumZoomValue ? zoomValue += 10 : zoomValue">
+        (
+      </button>
+        <input class="file-search-field"
+               type="text"
+               :placeholder="this.PREFIX"
+               :value="fileSystemPath"
+        >
       <div class="zoom-buttons">
-        <button class="zoom-in"
+        <button class="zoom-in-button"
                 @click="zoomValue = zoomValue !== maximumZoomValue ? zoomValue += 10 : zoomValue">
           in
         </button>
-        <button class="zoom-out"
+        <button class="zoom-out-button"
                 @click="zoomValue = zoomValue !== minimalZoomValue ? zoomValue -= 10 : zoomValue">
           out
         </button>
@@ -26,8 +34,8 @@
           }"
           class="list-element">
         <video v-if="element.type === 'video/mp4'" :src="element.videoUrl" :id="element" class="file-thumbnail"/>
-        <img v-else src="../assets/images/applicationImages/file-explorer.png" class="file-thumbnail"
-             :alt="`${name}-thumbnail`">
+        <ImgComponent v-else-if="element.type === 'application'" :image-name="element.name" class="file-thumbnail"/>
+        <SvgComponent v-else svg-type="directory" class="file-thumbnail"/>
         <div class="file-name">
           {{ element.name.length > 70 ? `${element.name.substring(0, 70)}...` : element.name }}
         </div>
@@ -37,13 +45,15 @@
 </template>
 <script>
 import {useGlobalState} from "@/stores/globalState";
+import ImgComponent from "@/ui/img-component";
+import SvgComponent from "@/ui/svg-component";
 
 export default {
   name: 'ContentGrid',
+  components: {SvgComponent, ImgComponent},
   inject: ['db'],
   props: {
     path: {
-      default: 'My Files/',
       required: false
     },
     name: {
@@ -62,20 +72,27 @@ export default {
   },
   data() {
     return {
+      PREFIX: `C:\\`,
       contentList: [],
       zoomValue: 150,
+      fileSystemPath: '',
       minimalZoomValue: 100,
       maximumZoomValue: 150
     }
   },
   mounted() {
-    this.db.getAllElements('files').then(files => console.log(files.find(file => file.name === 'Calculator')))
+    if (this.path) {
+      this.fileSystemPath = this.path;
+    }
+
     this.contentList = this.list;
   },
   methods: {
     async onDblClick(element) {
       if (element.id !== undefined) {
-        const children = await this.db.getDirectoryById(element.id).then(directory => {return directory.children});
+        const children = await this.db.getDirectoryById(element.id).then(directory => {
+          return directory.children
+        });
         if (children.length === 0) {
           return;
         }
@@ -98,13 +115,21 @@ export default {
               this.db.getElementByName('files', 'Video Player').then(element => {
                 this.globalState.pushOpenWindow(element);
               });
-            } break;
+            }
+              break;
             case 'Application': {
-              console.log('application');
+              this.db.getElementByName('files', file.name).then(element => {
+                this.globalState.pushOpenWindow(element)
+              });
             }
           }
         }
       }
+
+      // if (this.fileSystemPath.length === 0) {
+      //   this.fileSystemPath += `C:\\ ${element.name}`;
+      // }
+      this.fileSystemPath += this.fileSystemPath.length === 0 ? `C:\\ ${element.name}` : `\\${element.name}`;
     }
   }
 }
@@ -125,15 +150,19 @@ ul {
 }
 
 .file-search-field {
-  width: 80%;
+  width: 60%;
 }
 
 .zoom-buttons {
   width: 20%;
 }
 
-.zoom-in, .zoom-out {
+.zoom-in-button, .zoom-out-button {
   width: 50%;
+}
+
+.back-button {
+  width: 20%;
 }
 
 .page-header {

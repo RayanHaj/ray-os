@@ -4,7 +4,7 @@
        :style="{
        minWidth: MINIMUM_WIDTH_WINDOW,
        minHeight: MINIMUM_HEIGHT_WINDOW,
-       transition: windowIsResizing ? undefined : 'width 0.2s, height 0.2s, left 0.2s, top 0.2s, border-radius 0.2s',
+       transition: windowIsResizing ? undefined : 'width 0.2s, height 0.2s, left 0.2s, top 0.2s, border-radius 0.1s',
        zIndex: getZIndex,
        borderRadius: windowIsMaximized === false ? `${BORDER_RADIUS}px` : undefined,
        }"
@@ -43,7 +43,7 @@
       </div>
     </div>
     <div @click="$emit('clicked', $event)" class="window-content">
-      <WindowContent :window-id="windowObject.id"
+      <ContentMain :window-id="windowObject.id"
                      :disable-pointer-events="disablePointerEvents"
                      :application-window-size="applicationWindowSize"
                      @move-calculator-window-to-top-corner="setSplitWindowValues(0, '40%', '30%', 0)"
@@ -54,7 +54,7 @@
 
 <script>
 import SvgComponent from "@/ui/svg-component";
-import Content from "@/components/window/content/ContentMain";
+import ContentMain from "@/components/window/content/ContentMain";
 import { enableDragDropTouch } from "@/assets/libraries/drag-drop-touch.esm.min";
 import { useGlobalState } from "@/stores/globalState";
 import ImgComponent from "@/ui/img-component";
@@ -65,7 +65,7 @@ export default {
   components: {
     ImgComponent,
     SvgComponent,
-    WindowContent: Content,
+    ContentMain,
     SplitWindowsComponent
   },
   data() {

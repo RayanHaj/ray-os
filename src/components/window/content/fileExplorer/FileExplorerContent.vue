@@ -24,11 +24,13 @@ export default {
   },
 
   mounted() {
-    this.db.getDirectoriesByNameFileSystem(this.currentDirectory).then(elements => {
-      elements[0].children.forEach(child => {
-          this.list.push(child)
-      })
-    });
+    const rootDirectory = {
+      id: 1,
+      type: 'directory',
+      name: 'My Files'
+    }
+
+    this.list.push(rootDirectory);
   },
 
   methods: {

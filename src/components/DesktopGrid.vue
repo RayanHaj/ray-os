@@ -266,7 +266,7 @@ export default {
 
                 await this.db.postElement('files', object);
                 if (file.type === 'video/mp4') {
-                  await this.db.addFileToDirectory(file.name, 'Videos');
+                  await this.db.addFileToDirectory(file.name, 'file','Videos');
                   await this.db.postElement('desktopFiles', object);
                 }
                 this.insertTile(Number(currentTile.id), object.name);
