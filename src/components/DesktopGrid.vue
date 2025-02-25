@@ -173,7 +173,7 @@ export default {
         if (elements[i] !== undefined) {
           const imgUrl = URL.createObjectURL(elements[i].image);
           this.globalState.desktopFiles[i] = {
-            'index': elements[i].gridIndex,
+            'index': i,
             'name': elements[i].name,
             'imageUrl': imgUrl,
             'overflowing': false,
@@ -262,12 +262,14 @@ export default {
               for (let i = 0; i < items.length; i++) {
                 const file = items[i].getAsFile();
                 const image = await this.db.getImageByFileType(file.type);
-                const object = parseFileToDbObject(file, Number(currentTile.id), image);
+                const object = parseFileToDbObject(file.name, file.type, image, file);
+
                 await this.db.postElement('files', object);
                 if (file.type === 'video/mp4') {
                   await this.db.addFileToDirectory(file.name, 'Videos');
+                  await this.db.postElement('desktopFiles', object);
                 }
-                this.insertTile(object.gridIndex, object.name);
+                this.insertTile(Number(currentTile.id), object.name);
               }
               return;
             }

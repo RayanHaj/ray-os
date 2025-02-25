@@ -1,5 +1,5 @@
 import json from "@/assets/json/config.json";
-import {parseApplicationNameToImageNameFormat} from "@/utils/util";
+import {parseApplicationNameToImageNameFormat, parseFileToDbObject} from "@/utils/util";
 
 export default class IndexedDb {
     constructor(name, version) {
@@ -26,17 +26,15 @@ export default class IndexedDb {
                     store.createIndex('name', 'name');
                     store.createIndex('type', 'type');
                     store.createIndex('createdAt', 'createdAt');
-                    store.createIndex('gridIndex', 'gridIndex');
                     store.createIndex('image', 'image');
                     store.createIndex('file', 'file');
                 }
 
                 if (!this.db.objectStoreNames.contains('desktopFiles')) {
-                    const store = this.db.createObjectStore('desktopFiles', {keyPath: 'name', autoIncrement: true});
+                    const store = this.db.createObjectStore('desktopFiles', {keyPath: 'id', autoIncrement: true});
                     store.createIndex('name', 'name');
                     store.createIndex('type', 'type');
                     store.createIndex('createdAt', 'createdAt');
-                    store.createIndex('gridIndex', 'gridIndex');
                     store.createIndex('image', 'image');
                     store.createIndex('file', 'file');
                 }
@@ -46,7 +44,6 @@ export default class IndexedDb {
                     store.createIndex('name', 'name');
                     store.createIndex('type', 'type');
                     store.createIndex('createdAt', 'createdAt');
-                    store.createIndex('gridIndex', 'gridIndex');
                     store.createIndex('image', 'image');
                     store.createIndex('file', 'file');
                 }
@@ -60,7 +57,6 @@ export default class IndexedDb {
 
                 const transaction = event.target.transaction;
                 transaction.oncomplete = async () => {
-                    let index = -1;
                     for (let name of json.defaultApplicationNames) {
                         const parsedName = parseApplicationNameToImageNameFormat(name);
                         const imgPath = require(`@/assets/images/applicationImages/${parsedName}.png`);
@@ -68,21 +64,10 @@ export default class IndexedDb {
                         fetch(imgPath)
                             .then(response => response.blob())
                             .then(async blob => {
-                                const object = {
-                                    name: name,
-                                    type: 'Application',
-                                    createdAt: new Date(),
-                                    gridIndex: index += 1,
-                                    image: blob,
-                                    file: null
-                                }
-
+                                const object = parseFileToDbObject(name, 'Application', blob, null);
                                 await this.postElement('files', object);
-
-                                if (name !== 'Video Player') {
-                                    await this.postElement('desktopFiles', object);
-                                    await this.postElement('taskbarFiles', object);
-                                }
+                                await this.postElement('desktopFiles', object);
+                                await this.postElement('taskbarFiles', object);
                             });
                     }
 
@@ -143,18 +128,14 @@ export default class IndexedDb {
         return new Promise((resolve, reject) => {
             const transaction = this.db.transaction([storeName], 'readonly');
             const store = transaction.objectStore(storeName);
-            const elements = [];
 
             transaction.onerror = event => reject(event.target.error);
 
-            store.openCursor().onsuccess = e => {
-                let cursor = e.target.result;
-                if (cursor) {
-                    elements.push(cursor.value)
-                    cursor.continue();
-                } else {
-                    resolve(elements);
-                }
+            const request = store.getAll();
+
+            request.onsuccess = () => {
+                const results = request.result;
+                resolve(results);
             };
         });
     }

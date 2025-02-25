@@ -66,15 +66,15 @@ export function parseCalculationString(calculation) {
     }
 }
 
-export function parseFileToDbObject(file, index, image) {
+export function parseFileToDbObject(name, type, image, file) {
     let object = null;
-    switch (file.type) {
-        case 'video/mp4': {
+    switch (type) {
+        case 'video/mp4':
+        case 'Application': {
             object = {
-                name: file.name,
-                type: file.type,
+                name: name,
+                type: type,
                 createdAt: new Date(),
-                gridIndex: index,
                 image: image,
                 file: file
             }
@@ -82,6 +82,17 @@ export function parseFileToDbObject(file, index, image) {
     }
 
     return object;
+}
+
+
+export function parseToDesktopFileObject(index, name, imageUrl) {
+    return {
+        'index': index,
+        'name': name,
+        'imageUrl': imageUrl,
+        'overflowing': false,
+        'hovering': false
+    }
 }
 
 export function returnApplicationForFileType(type) {
