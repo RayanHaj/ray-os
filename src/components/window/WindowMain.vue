@@ -4,7 +4,7 @@
        :style="{
        minWidth: MINIMUM_WIDTH_WINDOW,
        minHeight: MINIMUM_HEIGHT_WINDOW,
-       transition: windowIsResizing ? undefined : 'width 1s, height 1s, left 1s, top 1s, border-radius 0.2s',
+       transition: windowIsResizing ? undefined : 'width 0.2s, height 0.2s, left 0.2s, top 0.2s, border-radius 0.2s',
        zIndex: getZIndex,
        borderRadius: windowIsMaximized === false ? `${BORDER_RADIUS}px` : undefined,
        }"

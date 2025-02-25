@@ -66,8 +66,10 @@ export default class IndexedDb {
                             .then(async blob => {
                                 const object = parseFileToDbObject(name, 'Application', blob, null);
                                 await this.postElement('files', object);
-                                await this.postElement('desktopFiles', object);
-                                await this.postElement('taskbarFiles', object);
+                                if (name !== 'Video Player') {
+                                    await this.postElement('desktopFiles', object);
+                                    await this.postElement('taskbarFiles', object);
+                                }
                             });
                     }
 
