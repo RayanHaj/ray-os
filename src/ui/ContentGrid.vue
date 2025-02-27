@@ -11,7 +11,7 @@
       <input class="file-search-field"
              type="text"
              :placeholder="this.PREFIX"
-             :value="fileSystemPath.map(value => `${value.name}\\`)"
+             :value="fileSystemPath.map(value => `${value.name}`).join('\\')"
              disabled
       >
       <div class="zoom-buttons">
@@ -99,7 +99,6 @@ export default {
       }
 
       if (directory && directory.children.length > 0) {
-        console.log('hello')
         const children = directory.children;
         if (children.length === 0) {
           return;
@@ -212,7 +211,7 @@ export default {
 .grid {
   display: flex;
   flex-direction: column;
-  align-items: start;
+  align-items: center;
   width: 100%;
   height: 100%;
   margin-left: 0;
@@ -247,10 +246,9 @@ ul {
 }
 
 .file-list-wrapper {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   width: 100%;
-  justify-items: center;
   user-select: none;
 }
 
@@ -268,6 +266,8 @@ ul {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  margin-left: 10px;
+  padding: 5px;
   overflow-wrap: break-word;
 }
 
