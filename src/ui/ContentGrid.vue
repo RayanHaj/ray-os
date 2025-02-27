@@ -2,15 +2,18 @@
   <div class="grid">
     <div class="page-header">
       <button class="back-button"
-              @click="onClickBackButton">
-        (
+              ref="backButton"
+              @click="onClickBackButton"
+              disabled
+      >
+        back
       </button>
-        <input class="file-search-field"
-               type="text"
-               :placeholder="this.PREFIX"
-               :value="fileSystemPath"
-               disabled
-        >
+      <input class="file-search-field"
+             type="text"
+             :placeholder="this.PREFIX"
+             :value="fileSystemPath.map(value => `${value.name}\\`)"
+             disabled
+      >
       <div class="zoom-buttons">
         <button class="zoom-in-button"
                 @click="zoomValue = zoomValue !== maximumZoomValue ? zoomValue += 10 : zoomValue">
@@ -45,7 +48,7 @@
   </div>
 </template>
 <script>
-import {useGlobalState} from "@/stores/globalState";
+import { useGlobalState } from "@/stores/globalState";
 import ImgComponent from "@/ui/img-component";
 import SvgComponent from "@/ui/svg-component";
 
@@ -75,9 +78,8 @@ export default {
     return {
       PREFIX: `C:\\`,
       contentList: [],
-      enteredDirectories: [],
       zoomValue: 150,
-      fileSystemPath: '',
+      fileSystemPath: [],
       minimalZoomValue: 100,
       maximumZoomValue: 150
     }
@@ -91,10 +93,14 @@ export default {
   },
   methods: {
     async openDirectoryOrFile(element) {
-      if (element.id !== undefined) {
-        const children = await this.db.getDirectoryById(element.id).then(directory => {
-          return directory.children
-        });
+      let directory = null;
+      if (element.id) {
+        directory = await this.db.getDirectoryById(element.id);
+      }
+
+      if (directory && directory.children.length > 0) {
+        console.log('hello')
+        const children = directory.children;
         if (children.length === 0) {
           return;
         }
@@ -104,30 +110,42 @@ export default {
           this.contentList.push(child);
         });
 
-        if (!this.enteredDirectories.some(directory => directory.id === element.id)) {
-          this.enteredDirectories.push(element);
+        if (!this.fileSystemPath.some(directory => directory.id === element.id)) {
+          this.fileSystemPath.push(element);
         }
-      } else {
-        if (element.name !== undefined) {
-          const file = await this.db.getElementByName('files', element.name);
 
-          switch (file.type) {
-            case 'video/mp4': {
-              const videoPlayerId = this.globalState.getHighestZIndex();
-              this.globalState.playVideoObject = {
-                id: videoPlayerId,
-                video: file
-              };
-              this.db.getElementByName('files', 'Video Player').then(element => {
-                this.globalState.pushOpenWindow(element);
-              });
-            }
-              break;
-            case 'Application': {
-              this.db.getElementByName('files', file.name).then(element => {
-                this.globalState.pushOpenWindow(element)
-              });
-            }
+        return;
+      } else if (directory && directory.children.length === 0) {
+        this.contentList = [];
+
+        if (!this.fileSystemPath.some(directory => directory.id === element.id)) {
+          this.fileSystemPath.push(element);
+        }
+      }
+
+      let file = null;
+
+      if (element.name) {
+        file = await this.db.getElementByName('files', element.name);
+      }
+
+      if (file) {
+        switch (file.type) {
+          case 'video/mp4': {
+            const videoPlayerId = this.globalState.getHighestZIndex();
+            this.globalState.playVideoObject = {
+              id: videoPlayerId,
+              video: file
+            };
+            this.db.getElementByName('files', 'Video Player').then(element => {
+              this.globalState.pushOpenWindow(element);
+            });
+          }
+            break;
+          case 'Application': {
+            this.db.getElementByName('files', file.name).then(element => {
+              this.globalState.pushOpenWindow(element)
+            });
           }
         }
       }
@@ -137,54 +155,55 @@ export default {
       this.db.getDirectoryById(ROOT).then(directory => {
         this.contentList = [];
         this.contentList.push({
+          name: directory.directoryName,
           id: directory.id,
-          name: directory.directoryName
+          type: 'directory'
         });
       });
     },
     getPreviousDirectory() {
-      if (this.enteredDirectories.length === 0) {
-        return 'n';
-      } else if (this.enteredDirectories.length === 1) {
-        return 'root';
-      } else {
-        return this.enteredDirectories[this.enteredDirectories.length - 2];
+      if (this.fileSystemPath.length > 1) {
+        return this.fileSystemPath[this.fileSystemPath.length - 2];
+      } else if (this.fileSystemPath.length === 1) {
+        return this.fileSystemPath[0];
       }
     },
     onClickBackButton() {
       const element = this.getPreviousDirectory();
 
-      if (element === 'root') {
+      if (element.id === 0) {
         this.openFileSystemRoot();
       } else {
         this.openDirectoryOrFile(element);
-
-        // const index = this.enteredDirectories.findIndex(directory => directory.id === element.id);
-        // this.enteredDirectories.splice(index, 1);
-        //
-        // console.log(this.enteredDirectories)
       }
-
       this.removeLastDirectoryFromFilePath();
     },
-    onDblClick(element) {
-      if (element.id !== undefined) {
-        this.addDirectoryToFilePath(element.name);
+    async onDblClick(element) {
+      if (this.$refs.backButton.disabled) {
+        this.$refs.backButton.disabled = false;
       }
 
-      this.openDirectoryOrFile(element)
+      if (element.id !== undefined) {
+        this.addDirectoryToFilePath(element);
+      }
+
+      await this.openDirectoryOrFile(element)
     },
-    addDirectoryToFilePath(name) {
+    addDirectoryToFilePath(element) {
       if (this.fileSystemPath.length === 0) {
-        this.fileSystemPath = `C:\\${name}`;
+        this.fileSystemPath.push({
+          id: 0,
+          name: 'C:'
+        });
       } else {
-        this.fileSystemPath += `\\${name}`;
+        this.fileSystemPath.push(element);
       }
     },
     removeLastDirectoryFromFilePath() {
-      let fileSystemArray = this.fileSystemPath.split('\\');
-      fileSystemArray.splice(fileSystemArray.length - 1, 1);
-      this.fileSystemPath = fileSystemArray.join('\\');
+      this.fileSystemPath.splice(this.fileSystemPath.length - 1, 1);
+      if (this.fileSystemPath.length === 1) {
+        this.$refs.backButton.disabled = true;
+      }
     }
   }
 }
