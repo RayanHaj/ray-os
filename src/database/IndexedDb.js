@@ -1,5 +1,5 @@
 import json from "@/assets/json/config.json";
-import {parseApplicationNameToImageNameFormat, parseFileToDbObject} from "@/utils/util";
+import {parseApplicationNameToImageNameFormat, parseFileToDbFileObject} from "@/utils/util";
 
 export default class IndexedDb {
     constructor(name, version) {
@@ -22,7 +22,8 @@ export default class IndexedDb {
                 this.db = event.target.result;
 
                 if (!this.db.objectStoreNames.contains('files')) {
-                    const store = this.db.createObjectStore('files', {keyPath: 'name', autoIncrement: true});
+                    const store = this.db.createObjectStore('files', {keyPath: 'id', autoIncrement: true});
+                    store.createIndex('id', 'id');
                     store.createIndex('name', 'name');
                     store.createIndex('type', 'type');
                     store.createIndex('createdAt', 'createdAt');
@@ -34,18 +35,14 @@ export default class IndexedDb {
                     const store = this.db.createObjectStore('desktopFiles', {keyPath: 'id', autoIncrement: true});
                     store.createIndex('name', 'name');
                     store.createIndex('type', 'type');
-                    store.createIndex('createdAt', 'createdAt');
-                    store.createIndex('image', 'image');
-                    store.createIndex('file', 'file');
+                    store.createIndex('id', 'id');
                 }
 
                 if (!this.db.objectStoreNames.contains('taskbarFiles')) {
-                    const store = this.db.createObjectStore('taskbarFiles', {keyPath: 'name', autoIncrement: true});
+                    const store = this.db.createObjectStore('taskbarFiles', {keyPath: 'id', autoIncrement: true});
                     store.createIndex('name', 'name');
                     store.createIndex('type', 'type');
-                    store.createIndex('createdAt', 'createdAt');
-                    store.createIndex('image', 'image');
-                    store.createIndex('file', 'file');
+                    store.createIndex('id', 'id');
                 }
 
                 if (!this.db.objectStoreNames.contains('fileSystem')) {
@@ -64,11 +61,19 @@ export default class IndexedDb {
                         fetch(imgPath)
                             .then(response => response.blob())
                             .then(async blob => {
-                                const object = parseFileToDbObject(name, 'Application', blob, null);
-                                await this.postElement('files', object);
+                                const dbFileObject = parseFileToDbFileObject(name, 'Application', blob, null, null, false);
+                                await this.postElement('files', dbFileObject);
+
                                 if (name !== 'Video Player') {
-                                    await this.postElement('desktopFiles', object);
-                                    await this.postElement('taskbarFiles', object);
+                                    this.getAllElements('files').then(async files => {
+                                        const file = files.find(file => file.name === name);
+
+                                        if (file) {
+                                            const dbFileReferenceObject = parseFileToDbFileObject(file.name, file.type, null, null, file.id, true);
+                                            await this.postElement('desktopFiles', dbFileReferenceObject);
+                                            await this.postElement('taskbarFiles', dbFileReferenceObject);
+                                        }
+                                    });
                                 }
                             });
                     }
@@ -112,13 +117,15 @@ export default class IndexedDb {
 
                     this.getAllElements('files').then(files => {
                         files.forEach(file => {
-                            switch(file.type) {
+                            switch (file.type) {
                                 case 'video/mp4': {
                                     this.addFileToDirectory(file.name, 'file', 'Videos');
-                                } break;
+                                }
+                                    break;
                                 case 'Application': {
                                     this.addFileToDirectory(file.name, 'application', 'Applications');
-                                } break;
+                                }
+                                    break;
                             }
                         });
                     });
@@ -144,6 +151,28 @@ export default class IndexedDb {
                 const results = request.result;
                 resolve(results);
             };
+        });
+    }
+
+    async getFileByReferenceId(storeName, id) {
+        return new Promise((resolve, reject) => {
+            if (storeName !== 'desktopFiles' && storeName !== 'taskbarFiles') {
+                reject(new Error('storeName must be a referring to reference store'));
+            }
+            const transaction = this.db.transaction([storeName], 'readonly');
+            const store = transaction.objectStore(storeName);
+            const index = store.index('id');
+
+            const request = index.get(id);
+
+            request.onsuccess = async () => {
+                const file = await this.getElementById('files', id);
+                resolve(file);
+            }
+
+            request.onerror = event => {
+                reject(event.target.error);
+            }
         });
     }
 
@@ -213,6 +242,26 @@ export default class IndexedDb {
             const index = store.index('name');
 
             const request = index.get(name);
+
+            request.onsuccess = event => {
+                resolve(event.target.result);
+            }
+
+            request.onerror = event => {
+                reject(event.target.error);
+            }
+        });
+    }
+
+    async getElementById(storeName, id) {
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction([storeName], 'readonly');
+            const store = transaction.objectStore(storeName);
+            const index = store.index('id');
+
+            console.log(id)
+
+            const request = index.get(id);
 
             request.onsuccess = event => {
                 resolve(event.target.result);
@@ -321,10 +370,10 @@ export default class IndexedDb {
         const store = transaction.objectStore('fileSystem');
 
         return new Promise((resolve, reject) => {
-            const request = store.get(id);  // Use the store's .get() method to retrieve by key
+            const request = store.get(id);
 
             request.onsuccess = (event) => {
-                resolve(event.target.result); // Return the object corresponding to the id
+                resolve(event.target.result);
             };
 
             request.onerror = () => {

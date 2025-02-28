@@ -75,7 +75,7 @@
 import {enableDragDropTouch} from "@/assets/libraries/drag-drop-touch.esm.min";
 import SvgComponent from "@/ui/svg-component";
 import {useGlobalState} from "@/stores/globalState";
-import {parseFileToDbObject} from "@/utils/util";
+import {parseFileToDbFileObject} from "@/utils/util";
 
 export default {
   name: "desktop-grid",
@@ -168,7 +168,13 @@ export default {
         this.GRID_HEIGHT = Math.floor((browserWindowSize.HEIGHT / this.TILE_HEIGHT) - 0.5);
       }
 
-      const elements = await this.db.getAllElements('desktopFiles');
+      const desktopFileReferences = await this.db.getAllElements('desktopFiles');
+
+      const elements = [];
+      for (let reference of desktopFileReferences) {
+        const file = await this.db.getFileByReferenceId('desktopFiles', reference.id);
+        elements.push(file);
+      }
 
       for (let i = 0; i < this.GRID_WIDTH * this.GRID_HEIGHT; i++) {
         if (elements[i] !== undefined) {
@@ -263,7 +269,7 @@ export default {
               for (let i = 0; i < items.length; i++) {
                 const file = items[i].getAsFile();
                 const image = await this.db.getImageByFileType(file.type);
-                const object = parseFileToDbObject(file.name, file.type, image, file);
+                const object = parseFileToDbFileObject(file.name, file.type, image, file);
 
                 await this.db.postElement('files', object);
                 if (file.type === 'video/mp4') {

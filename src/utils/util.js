@@ -66,17 +66,25 @@ export function parseCalculationString(calculation) {
     }
 }
 
-export function parseFileToDbObject(name, type, image, file) {
+export function parseFileToDbFileObject(name, type, image, file, id, reference) {
     let object = null;
     switch (type) {
         case 'video/mp4':
         case 'Application': {
-            object = {
-                name: name,
-                type: type,
-                createdAt: new Date(),
-                image: image,
-                file: file
+            if (reference) {
+                object = {
+                    name: name,
+                    type: type,
+                    id: id
+                }
+            } else {
+                object = {
+                    name: name,
+                    type: type,
+                    createdAt: new Date(),
+                    image: image,
+                    file: file
+                }
             }
         }
     }
