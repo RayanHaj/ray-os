@@ -327,8 +327,8 @@ export default class IndexedDb {
                 resolve(event.target.result); // Return the object corresponding to the id
             };
 
-            request.onerror = (event) => {
-                reject('Error occurred while accessing the object: ' + event.target.error);
+            request.onerror = () => {
+                reject(new Error('failed to fetch directory with the given id'));
             };
         });
     }

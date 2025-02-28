@@ -58,3 +58,10 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+component {
+  width: 100%;
+  height: 100%;
+}
+</style>

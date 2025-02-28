@@ -30,6 +30,20 @@
       </g>
     </g>
   </svg>
+  <svg v-if="svgType === 'zoomIn'" @click="$emit('clicked')" :width="width" :height="height" :style="{paddingTop: '8px'}"
+       xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+    <path v-if="customColor" :fill="customColor" fill-rule="evenodd"
+          d="M12.9 14.32a8 8 0 1 1 1.41-1.41l5.35 5.33l-1.42 1.42l-5.33-5.34zM8 14A6 6 0 1 0 8 2a6 6 0 0 0 0 12zM7 7V5h2v2h2v2H9v2H7V9H5V7h2z"/>
+    <path v-else class="default-path-fill" fill-rule="evenodd"
+          d="M12.9 14.32a8 8 0 1 1 1.41-1.41l5.35 5.33l-1.42 1.42l-5.33-5.34zM8 14A6 6 0 1 0 8 2a6 6 0 0 0 0 12zM7 7V5h2v2h2v2H9v2H7V9H5V7h2z"/>
+  </svg>
+  <svg v-if="svgType === 'zoomOut'" @click="$emit('clicked')" :width="width" :height="height" :style="{paddingTop: '8px'}"
+      xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+    <path v-if="customColor" :fill="customColor" fill-rule="evenodd"
+          d="M12.9 14.32a8 8 0 1 1 1.41-1.41l5.35 5.33l-1.42 1.42l-5.33-5.34zM8 14A6 6 0 1 0 8 2a6 6 0 0 0 0 12zM5 7h6v2H5V7z"/>
+    <path v-else class="default-path-fill" fill-rule="evenodd"
+          d="M12.9 14.32a8 8 0 1 1 1.41-1.41l5.35 5.33l-1.42 1.42l-5.33-5.34zM8 14A6 6 0 1 0 8 2a6 6 0 0 0 0 12zM5 7h6v2H5V7z"/>
+  </svg>
   <svg v-if="svgType === 'wifi'" @click="$emit('clicked')" :width="width" :height="height"
        xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512">
     <path v-if="customColor" :fill="customColor"

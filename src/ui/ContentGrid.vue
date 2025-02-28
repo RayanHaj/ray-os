@@ -1,12 +1,12 @@
 <template>
-  <div class="grid">
+  <div class="grid" @wheel="onScrollWheel">
     <div class="page-header">
       <button class="back-button"
               ref="backButton"
               @click="onClickBackButton"
               disabled
       >
-        back
+        <SvgComponent svg-type="arrowUp" :custom-height="25" :custom-width="25"/>
       </button>
       <input class="file-search-field"
              type="text"
@@ -16,12 +16,12 @@
       >
       <div class="zoom-buttons">
         <button class="zoom-in-button"
-                @click="zoomValue = zoomValue !== maximumZoomValue ? zoomValue += 10 : zoomValue">
-          in
+                @click="increaseZoomValue">
+          <SvgComponent svg-type="zoomIn" :custom-height="25" :custom-width="25"/>
         </button>
         <button class="zoom-out-button"
-                @click="zoomValue = zoomValue !== minimalZoomValue ? zoomValue -= 10 : zoomValue">
-          out
+                @click="decreaseZoomValue">
+          <SvgComponent svg-type="zoomOut" :custom-height="25" :custom-width="25"/>
         </button>
       </div>
     </div>
@@ -48,7 +48,7 @@
   </div>
 </template>
 <script>
-import { useGlobalState } from "@/stores/globalState";
+import {useGlobalState} from "@/stores/globalState";
 import ImgComponent from "@/ui/img-component";
 import SvgComponent from "@/ui/svg-component";
 
@@ -80,7 +80,7 @@ export default {
       contentList: [],
       zoomValue: 150,
       fileSystemPath: [],
-      minimalZoomValue: 100,
+      minimumZoomValue: 100,
       maximumZoomValue: 150
     }
   },
@@ -93,39 +93,33 @@ export default {
   },
   methods: {
     async openDirectoryOrFile(element) {
-      let directory = null;
-      if (element.id) {
-        directory = await this.db.getDirectoryById(element.id);
-      }
-
-      if (directory && directory.children.length > 0) {
-        const children = directory.children;
-        if (children.length === 0) {
+      await this.db.getDirectoryById(element.id).then(async directory => {
+        if (!directory) {
+          await this.openFileByName(element.name);
           return;
         }
 
         this.contentList = [];
-        children.forEach(child => {
+        if (!this.fileSystemPath.some(directory => directory.id === element.id)) {
+          this.fileSystemPath.push(element);
+        }
+
+        if (directory.children.length === 0) {
+          return;
+        }
+
+        directory.children.forEach(child => {
           this.contentList.push(child);
         });
-
-        if (!this.fileSystemPath.some(directory => directory.id === element.id)) {
-          this.fileSystemPath.push(element);
-        }
-
-        return;
-      } else if (directory && directory.children.length === 0) {
-        this.contentList = [];
-
-        if (!this.fileSystemPath.some(directory => directory.id === element.id)) {
-          this.fileSystemPath.push(element);
-        }
-      }
-
+      }).catch(error => {
+        console.error(error);
+      });
+    },
+    async openFileByName(name) {
       let file = null;
 
-      if (element.name) {
-        file = await this.db.getElementByName('files', element.name);
+      if (name) {
+        file = await this.db.getElementByName('files', name);
       }
 
       if (file) {
@@ -150,31 +144,37 @@ export default {
       }
     },
     openFileSystemRoot() {
-      const ROOT = 1;
-      this.db.getDirectoryById(ROOT).then(directory => {
+      const defaultDirectoryId = 1;
+      this.db.getDirectoryById(defaultDirectoryId).then(directory => {
         this.contentList = [];
-        this.contentList.push({
+
+        const defaultDirectoryObject = {
           name: directory.directoryName,
           id: directory.id,
           type: 'directory'
-        });
+        }
+
+        this.contentList.push(defaultDirectoryObject);
       });
     },
     getPreviousDirectory() {
       if (this.fileSystemPath.length > 1) {
         return this.fileSystemPath[this.fileSystemPath.length - 2];
-      } else if (this.fileSystemPath.length === 1) {
+      }
+      if (this.fileSystemPath.length === 1) {
         return this.fileSystemPath[0];
       }
     },
     onClickBackButton() {
       const element = this.getPreviousDirectory();
 
-      if (element.id === 0) {
+      const rootId = 0;
+      if (element.id === rootId) {
         this.openFileSystemRoot();
       } else {
         this.openDirectoryOrFile(element);
       }
+
       this.removeLastDirectoryFromFilePath();
     },
     async onDblClick(element) {
@@ -182,7 +182,7 @@ export default {
         this.$refs.backButton.disabled = false;
       }
 
-      if (element.id !== undefined) {
+      if (element.type === 'directory') {
         this.addDirectoryToFilePath(element);
       }
 
@@ -190,19 +190,38 @@ export default {
     },
     addDirectoryToFilePath(element) {
       if (this.fileSystemPath.length === 0) {
-        this.fileSystemPath.push({
+        const root = {
           id: 0,
           name: 'C:'
-        });
+        }
+        this.fileSystemPath.push(root);
       } else {
         this.fileSystemPath.push(element);
       }
     },
     removeLastDirectoryFromFilePath() {
       this.fileSystemPath.splice(this.fileSystemPath.length - 1, 1);
+
+      // disable button because it reached root
       if (this.fileSystemPath.length === 1) {
         this.$refs.backButton.disabled = true;
       }
+    },
+    onScrollWheel(e) {
+      switch (e.deltaY) {
+        case -100:
+          this.increaseZoomValue();
+          break;
+        case 100:
+          this.decreaseZoomValue();
+          break;
+      }
+    },
+    increaseZoomValue() {
+      this.zoomValue = this.zoomValue !== this.maximumZoomValue ? this.zoomValue += 10 : this.zoomValue
+    },
+    decreaseZoomValue() {
+      this.zoomValue = this.zoomValue !== this.minimumZoomValue ? this.zoomValue -= 10 : this.zoomValue
     }
   }
 }
@@ -216,6 +235,15 @@ export default {
   height: 100%;
   margin-left: 0;
   padding-left: 0;
+}
+
+button {
+  background-color: var(--border-input-color);
+}
+
+button:disabled, SvgComponent {
+  fill: rgba(0, 0, 0, 0.1);
+  background-color: rgba(0, 0, 0, 0.1);
 }
 
 ul {

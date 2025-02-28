@@ -24,13 +24,13 @@ export default {
   },
 
   mounted() {
-    const rootDirectory = {
+    const defaultDirectory = {
       id: 1,
       type: 'directory',
       name: 'My Files'
     }
 
-    this.list.push(rootDirectory);
+    this.list.push(defaultDirectory);
   },
 
   methods: {
@@ -40,5 +40,12 @@ export default {
 }
 </script>
 <style>
-
+  .content {
+    width: 100%;
+    height: 100%;
+  }
+  content-grid {
+    width: 100%;
+    height: 100%;
+  }
 </style>
