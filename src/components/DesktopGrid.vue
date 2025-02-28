@@ -26,6 +26,7 @@
               class="tile-content-wrapper" ref="tileContentWrapper"
               :style="{width: `${TILE_WIDTH}px`, height: `${TILE_HEIGHT}px`, maxWidth: `${TILE_WIDTH}px`, maxHeight: `${TILE_HEIGHT}px`}"
               :draggable="applicationWindowIsResizing === false"
+              :title="globalState.desktopFiles[indexX * GRID_HEIGHT + indexY]?.overflowing === true ? globalState.desktopFiles[indexX * GRID_HEIGHT + indexY].name : null"
           >
             <div class="application-img" ref="applicationImg">
               <img :src="globalState.desktopFiles[indexX * GRID_HEIGHT + indexY]?.imageUrl" :width="IMAGE_WIDTH"
