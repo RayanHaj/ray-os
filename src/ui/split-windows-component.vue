@@ -30,9 +30,9 @@ export default {
 <style scoped>
 .split-window-grid {
   position: absolute;
-  top: 30px;
-  display: grid;
-  grid-template-rows: auto auto;
+  top: 40px;
+  display: flex;
+  right: 10px;
   gap: 5px;
   background-color: black;
   padding: 10px;
@@ -59,7 +59,7 @@ export default {
 }
 
 .split-window-button-vertical {
-  height: 90px;
+  height: 95px;
   width: 45px;
 }
 
