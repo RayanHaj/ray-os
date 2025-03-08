@@ -4,7 +4,7 @@
        :style="{
        minWidth: MINIMUM_WIDTH_WINDOW,
        minHeight: MINIMUM_HEIGHT_WINDOW,
-       transition: windowIsResizing ? undefined : 'width 0.2s, height 0.2s, left 0.2s, top 0.2s, border-radius 0.1s',
+       transition: windowIsResizing ? undefined : 'width 0.2s, height 0.2s, left 0.2s, top 0.2s, border-radius 0.1s, opacity 0.3s',
        zIndex: getZIndex,
        borderRadius: windowIsMaximized === false ? `${BORDER_RADIUS}px` : undefined,
        }"
@@ -44,9 +44,9 @@
     </div>
     <div @click="$emit('clicked', $event)" class="window-content">
       <ContentMain :window-id="windowObject.id"
-                     :disable-pointer-events="disablePointerEvents"
-                     :application-window-size="applicationWindowSize"
-                     @move-calculator-window-to-top-corner="setSplitWindowValues(0, '40%', '30%', 0)"
+                   :disable-pointer-events="disablePointerEvents"
+                   :application-window-size="applicationWindowSize"
+                   @move-calculator-window-to-top-corner="setSplitWindowValues(0, '40%', '30%', 0)"
       />
     </div>
   </div>
@@ -55,8 +55,8 @@
 <script>
 import SvgComponent from "@/ui/svg-component";
 import ContentMain from "@/components/window/content/ContentMain";
-import { enableDragDropTouch } from "@/assets/libraries/drag-drop-touch.esm.min";
-import { useGlobalState } from "@/stores/globalState";
+import {enableDragDropTouch} from "@/assets/libraries/drag-drop-touch.esm.min";
+import {useGlobalState} from "@/stores/globalState";
 import ImgComponent from "@/ui/img-component";
 import SplitWindowsComponent from "@/ui/split-windows-component";
 
@@ -173,7 +173,20 @@ export default {
     'globalState.openTabsName': {
       handler(newValue) {
         if (this.windowObject.name === newValue) {
-            this.globalState.pushToOpenTabs(newValue);
+          this.globalState.pushToOpenTabs(newValue);
+        }
+      }
+    },
+    'globalState.playCloseAnimation': {
+      handler(newValue) {
+        if (newValue.id === this.windowObject.id && newValue.value === true) {
+          this.playCloseAnimation().then(() => {
+            this.globalState.playCloseAnimation = {
+              id: null,
+              value: false
+            };
+            this.globalState.closeOpenWindowByWindowId(newValue.id);
+          });
         }
       }
     }
@@ -559,10 +572,23 @@ export default {
       if (this.windowObject.name === 'Video Player') {
         this.globalState.playVideoObject = null;
       }
-      this.globalState.closeOpenWindowByWindowId(this.windowObject.id);
+
+      this.globalState.playCloseAnimation = {
+        id: this.windowObject.id,
+        value: true
+      }
     },
     onClickWindow(event) {
       this.globalState.pushToTopOpenWindows(event.currentTarget.id);
+    },
+    async playCloseAnimation() {
+      return new Promise((resolve) => {
+        this.$el.style.opacity = '0';
+
+        setTimeout(() => {
+          resolve();
+        }, 150);
+      })
     }
   }
 }
@@ -591,6 +617,7 @@ export default {
   background-color: var(--background-color-window);
   border: var(--border-window-color) 2px solid;
   scrollbar-color: var(--font-color) var(--background-color-input);
+  opacity: 100%;
 }
 
 .window-content {

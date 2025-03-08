@@ -1,18 +1,20 @@
 <template>
-  <li class="tab"
-      v-for="tab in tabs"
-      :key="tab.id"
-      @click.stop="onClickTab(tab.id)"
-  >
-    <p class="open-tab-name">{{ tab.name }} {{ tab.id }}</p>
-    <button class="close-tab-button" @click="closeTab(tab.id)">
-      <svg-component
-          svg-type="close"
-          :custom-width="18"
-          :custom-height="18"
-      />
-    </button>
-  </li>
+  <ul>
+    <li class="tab"
+        v-for="tab in tabs"
+        :key="tab.id"
+        @click.stop="onClickTab(tab.id)"
+    >
+      <p class="open-tab-name">{{ tab.name }} {{ tab.id }}</p>
+      <button class="close-tab-button" @click.stop="closeTab(tab.id)">
+        <svg-component
+            svg-type="close"
+            :custom-width="18"
+            :custom-height="18"
+        />
+      </button>
+    </li>
+  </ul>
 </template>
 <script>
 import SvgComponent from "@/ui/svg-component";
@@ -28,6 +30,7 @@ export default {
   },
   methods: {
     onClickTab(id) {
+      console.log(this.tabs)
       this.$emit('clicked', id)
     },
     closeTab(id) {
@@ -37,6 +40,18 @@ export default {
 }
 </script>
 <style scoped>
+ul {
+  position: absolute;
+  display: flex;
+  padding: 0;
+  margin: 0;
+  flex-direction: column;
+  align-items: center;
+  bottom: 45px;
+  border: var(--border-window-color) 2px solid;
+  border-radius: 10px;
+  overflow: hidden;
+}
 .tab {
   display: flex;
   flex-direction: row;

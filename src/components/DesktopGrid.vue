@@ -204,12 +204,12 @@ export default {
     },
     onMouseenterTileWrapper(x, y) {
       const element = this.globalState.desktopFiles[x * this.GRID_HEIGHT + y];
-      if (typeof element === undefined) return;
+      if (element === undefined) return;
       element.hovering = true;
     },
     onMouseleaveTileWrapper(x, y) {
       const element = this.globalState.desktopFiles[x * this.GRID_HEIGHT + y];
-      if (typeof element === undefined) return;
+      if (element === undefined) return;
       element.hovering = false;
     },
     contextMenuActions(e, action) {
@@ -409,20 +409,6 @@ export default {
           }
         });
       }
-    },
-    setTilesSmallSize() {
-      this.IMAGE_WIDTH = 40;
-      this.IMAGE_HEIGHT = 40;
-      this.TILE_WIDTH = 62;
-      this.TILE_HEIGHT = 62;
-      this.TILE_NAME_FONT_SIZE = 7;
-    },
-    setTilesNormalSize() {
-      this.IMAGE_WIDTH = 50;
-      this.IMAGE_HEIGHT = 50;
-      this.TILE_WIDTH = 82;
-      this.TILE_HEIGHT = 82;
-      this.TILE_NAME_FONT_SIZE = 10;
     }
   },
 }

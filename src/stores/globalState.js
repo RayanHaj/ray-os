@@ -15,6 +15,7 @@ export const useGlobalState = defineStore('globalState', {
             WIDTH: 0,
         },
         startBlockGame: false,
+        playCloseAnimation: {},
         openTabsName: '',
         backgroundColor: '',
         wallpaper: '',
@@ -138,23 +139,24 @@ export const useGlobalState = defineStore('globalState', {
             }
         },
         getHighestZIndex() {
-          let zIndex = 0;
-          this.openWindows.forEach(element => {
-              if (element.zIndex > zIndex) {
-                  zIndex = element.zIndex;
-              }
-          });
-          return zIndex;
+            let zIndex = 0;
+            this.openWindows.forEach(element => {
+                if (element.zIndex > zIndex) {
+                    zIndex = element.zIndex;
+                }
+            });
+            return zIndex;
         },
         pushToOpenTabs(name) {
             this.openTabs = [];
 
-            const window = this.openWindows.find(window => window.name === name);
-            if (window) {
-                this.openTabs.push({
-                    id: window.id,
-                    name: window.name
-                });
+            const filteredWindowList = this.openWindows.filter(window => window.name === name);
+            if (filteredWindowList.length > 0) {
+                filteredWindowList.forEach(window => this.openTabs.push({
+                        id: window.id,
+                        name: window.name
+                    })
+                );
             }
         },
         closeOpenWindowByWindowId(id) {

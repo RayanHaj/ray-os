@@ -13,7 +13,7 @@
            @click="emitApplicationName(applicationName)"
       >
 
-        <ul v-show="showOpenTabs && openTabs.some(openTab => openTab.name === applicationName)"
+        <div v-show="showOpenTabs && openTabs.some(openTab => openTab.name === applicationName)"
              class="open-tabs"
              @mouseenter="onMouseenterOpenTabs(applicationName)"
              @mouseleave="onMouseleaveOpenTabs"
@@ -22,7 +22,7 @@
                      @clicked="onClickTab($event)"
                      @closed="onClickCloseTab($event)"
           />
-        </ul>
+        </div>
 
         <div class="image-wrapper">
           <ImgComponent
@@ -158,7 +158,10 @@ export default {
       this.removeTabs();
     },
     onClickCloseTab(id) {
-      this.globalState.closeOpenWindowByWindowId(id)
+      this.globalState.playCloseAnimation = {
+        id: id,
+        value: true
+      };
       this.removeTabs();
     },
     setOpenTabs(tabs) {
@@ -196,19 +199,6 @@ export default {
   font-size: small;
   color: var(--font-color);
   user-select: none;
-}
-
-.open-tabs {
-  position: absolute;
-  display: flex;
-  padding: 0;
-  margin: 0;
-  flex-direction: column;
-  align-items: center;
-  bottom: 45px;
-  border: var(--border-window-color) 2px solid;
-  border-radius: 10px;
-  overflow: hidden;
 }
 
 .taskbar {
