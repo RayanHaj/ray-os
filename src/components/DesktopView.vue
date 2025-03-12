@@ -48,7 +48,7 @@
 import Taskbar from "@/components/taskbar/TaskbarMain";
 import Loader from "@/components/DesktopLoader";
 import Window from "@/components/window/WindowMain";
-import DesktopGrid from "@/components/DesktopGrid";
+import DesktopGrid from "@/components/grid/DesktopGrid";
 import QuickSettings from "@/components/taskbar/segments/QuickSettings";
 import { useGlobalState } from "@/stores/globalState";
 import { deviceIsMobile } from "@/utils/util";

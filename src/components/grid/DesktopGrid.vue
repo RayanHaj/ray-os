@@ -1,44 +1,42 @@
 <template>
-  <div v-if="isLoading">Loading...</div>
-  <div v-else class="grid-container" ref="gridContainer" @click="onClickContainer">
-    <div class="grid" ref="grid" v-if="GRID_HEIGHT > 0"
-         @dragover.prevent="dragAndDropEventListenersDesktop($event, 'dragover')"
-         @touchover.prevent="dragAndDropEventListenersDesktop($event, 'touchover')">
-      <div v-for="(numX, indexX) in GRID_WIDTH" :key="numX" class="tile-column" ref="tileColumn">
-        <div v-for="(numY, indexY) in GRID_HEIGHT" :key="numY" class="tile" ref="tile"
-             :id="indexX * GRID_HEIGHT + indexY"
-             :class="{'filled': isTileFillable(indexX, indexY) }"
-             @drop="dragAndDropEventListenersDesktop($event, 'drop')"
-             @dragstart="dragAndDropEventListenersDesktop($event, 'dragstart')"
-             @touchstart="dragAndDropEventListenersDesktop($event, 'touchstart')"
-             @mouseover="onMouseOverTile" @touchover="onMouseOverTile"
-             @dblclick="openApplication(globalState.desktopFiles[indexX * GRID_HEIGHT + indexY]?.name)"
+  <div class="loader" v-if="isLoading">
+    Loading...
+  </div>
+  <div v-else
+       class="grid-container"
+       @click="onClickContainer"
+  >
+    <div v-if="GRID_HEIGHT > 0"
+         class="grid"
+         @dragover.prevent
+         @touchover.prevent
+    >
+      <div v-for="(numX, indexX) in GRID_WIDTH"
+           :key="numX"
+           class="tile-column"
+      >
+        <div v-for="(numY, indexY) in GRID_HEIGHT"
+             :key="numY"
+             class="tile"
+             ref="tile"
+             :id="getTilePosition(indexX, indexY)"
+             :class="{ 'filled': tileIsFilled(indexX, indexY) }"
+             @drop.prevent="onDropTile"
+             @dragstart="onDragTile"
+             @touchstart="onDragTile"
+             @mouseover="onMouseoverTile"
+             @touchover="onMouseoverTile"
+             @dblclick="openApplication(getFileFromTileByPosition(indexX, indexY)?.name)"
              @contextmenu.prevent="onRightClickTile"
+             :style="{ border: `${ this.showTileBorders ? '1px solid white' : 'none' }` }"
              tabindex="0"
-             :style="{
-              border: `${ this.showTileBorders ? '1px solid white' : 'none' }`
-            }"
         >
-          <div
-              v-if="isTileFillable(indexX, indexY)"
-              @mouseenter="onMouseenterTileWrapper(indexX, indexY)"
-              @mouseleave="onMouseleaveTileWrapper(indexX, indexY)"
-              class="tile-content-wrapper" ref="tileContentWrapper"
-              :style="{width: `${TILE_WIDTH}px`, height: `${TILE_HEIGHT}px`, maxWidth: `${TILE_WIDTH}px`, maxHeight: `${TILE_HEIGHT}px`}"
-              :draggable="applicationWindowIsResizing === false"
-              :title="globalState.desktopFiles[indexX * GRID_HEIGHT + indexY]?.overflowing === true ? globalState.desktopFiles[indexX * GRID_HEIGHT + indexY].name : null"
-          >
-            <div class="application-img" ref="applicationImg">
-              <img :src="globalState.desktopFiles[indexX * GRID_HEIGHT + indexY]?.imageUrl" :width="IMAGE_WIDTH"
-                   :height="IMAGE_HEIGHT" :alt="globalState.desktopFiles[indexX * GRID_HEIGHT + indexY]?.imageUrl">
-            </div>
-            <div class="application-name" ref="applicationName"
-                 :class="{overflowing: globalState.desktopFiles[indexX * GRID_HEIGHT + indexY]?.overflowing}"
-                 :style="{ fontSize: `${TILE_NAME_FONT_SIZE}px` }"
-            >
-              {{ globalState.desktopFiles[indexX * GRID_HEIGHT + indexY]?.overflowing === false ? globalState.desktopFiles[indexX * GRID_HEIGHT + indexY]?.name : `${globalState.desktopFiles[indexX * GRID_HEIGHT + indexY]?.name.substring(0, 13)}...` }}
-            </div>
-          </div>
+          <TileContent v-if="tileIsFilled(indexX, indexY)"
+                       @mouseenter="onMouseenterTileWrapper(indexX, indexY)"
+                       @mouseleave="onMouseleaveTileWrapper(indexX, indexY)"
+                       :tile-position="getTilePosition(indexX, indexY)"
+                       :draggable="applicationWindowIsResizing === false"
+          />
         </div>
       </div>
     </div>
@@ -76,18 +74,17 @@ import {enableDragDropTouch} from "@/assets/libraries/drag-drop-touch.esm.min";
 import SvgComponent from "@/ui/svg-component";
 import {useGlobalState} from "@/stores/globalState";
 import {parseFileToDbFileObject} from "@/utils/util";
+import TileContent from "@/components/grid/TileContent";
 
 export default {
   name: "desktop-grid",
-  components: {SvgComponent},
+  components: {SvgComponent, TileContent},
   inject: ['db'],
   beforeMount() {
     this.isLoading = true;
   },
   async mounted() {
-    this.$nextTick().then(async () => {
-      await this.init();
-    })
+    await this.init();
   },
 
   beforeUnmount() {
@@ -235,66 +232,68 @@ export default {
 
       this.contextMenuActive = false;
     },
-    async dragAndDropEventListenersDesktop(event, type) {
+    async handleFileUpload(file, tile) {
+      const image = await this.db.getImageByFileType(file.type);
+      const object = parseFileToDbFileObject(file.name, file.type, image, file);
+      const postedFile = await this.db.postElement('files', object);
+      const parsedObject = parseFileToDbFileObject(file.name, file.type, null, null, postedFile.id, true);
+      await this.db.postElement('desktopFiles', parsedObject);
+      this.insertTile(Number(tile.id), object.name);
+    },
+    async onDropTile(event) {
       const currentTile = event.currentTarget;
+      if (currentTile.classList.contains('filled')) {
+        return;
+      }
 
-      switch (type) {
-        case 'dragstart':
-        case 'touchstart': {
-          if (currentTile.children.length === 0) {
-            return;
+      const items = event.dataTransfer.items;
+      if (items.length === 0) {
+        return;
+      }
+
+      if (items[0]?.type === 'text/plain') {
+        const index = this.globalState.desktopFiles.findIndex(element => {
+          return element.index === this.draggedTile.index;
+        });
+
+        this.deleteTile(index);
+        this.insertTile(Number(currentTile.id), this.draggedTile.name);
+
+        return;
+      }
+
+      for (let i = 0; i < items.length; i++) {
+        const file = items[i].getAsFile();
+
+        switch (file.type.toString()) {
+          case 'video/mp4': {
+            await this.handleFileUpload(file, currentTile);
+            await this.db.addFileToDirectory(file.name, 'file', 'Videos');
+            break;
           }
-
-          this.draggedTile = {
-            'index': Number(currentTile.id),
-            'name': this.globalState.desktopFiles[currentTile.id].name
+          case 'image/png':
+          case 'image/jpg': {
+            await this.handleFileUpload(file, currentTile);
+            await this.db.addFileToDirectory(file.name, 'file', 'Pictures');
+            break;
           }
-
-          this.createDragImage(currentTile.querySelector('.application-img'), event);
-          break;
-        }
-        case 'dragover':
-        case 'touchover': {
-          event.preventDefault();
-          break;
-        }
-        case 'drop': {
-          event.preventDefault();
-          if (currentTile.classList.contains('filled')) {
-            return;
-          }
-          let items = event.dataTransfer.items;
-          if (items[0]?.type !== 'text/plain') {
-            if (items.length !== 0) {
-              for (let i = 0; i < items.length; i++) {
-                const file = items[i].getAsFile();
-                const image = await this.db.getImageByFileType(file.type);
-                const object = parseFileToDbFileObject(file.name, file.type, image, file);
-
-                const postedFile = await this.db.postElement('files', object);
-                if (file.type === 'video/mp4') {
-                  await this.db.addFileToDirectory(file.name, 'file','Videos');
-
-                  const parsedObject = parseFileToDbFileObject(file.name, file.type, null, null, postedFile.id, true);
-                  await this.db.postElement('desktopFiles', parsedObject);
-                }
-                this.insertTile(Number(currentTile.id), object.name);
-              }
-              return;
-            }
-          }
-
-          const index = this.globalState.desktopFiles.findIndex(element => {
-            return element.index === this.draggedTile.index;
-          });
-
-          this.deleteTile(index);
-          this.insertTile(Number(currentTile.id), this.draggedTile.name)
-          break;
         }
       }
     },
-    isTileFillable(indexX, indexY) {
+    onDragTile(event) {
+      const currentTile = event.currentTarget;
+      if (currentTile.children.length === 0) {
+        return;
+      }
+
+      this.draggedTile = {
+        'index': Number(currentTile.id),
+        'name': this.globalState.desktopFiles[currentTile.id].name
+      }
+
+      this.createDragImage(currentTile.querySelector('.application-img'), event);
+    },
+    tileIsFilled(indexX, indexY) {
       return (
           this.globalState.desktopFiles[indexX * this.GRID_HEIGHT + indexY] !== null &&
           this.globalState.desktopFiles[indexX * this.GRID_HEIGHT + indexY]?.name !== null &&
@@ -341,7 +340,7 @@ export default {
       contextMenu.style.left = leftValue;
       contextMenu.style.top = topValue;
     },
-    onMouseOverTile(e) {
+    onMouseoverTile(e) {
       this.tileOnHover = e.currentTarget;
     },
     openApplication(applicationName) {
@@ -409,6 +408,18 @@ export default {
           }
         });
       }
+    },
+    getFileFromTileByPosition(x, y) {
+      const file = this.globalState.desktopFiles[this.getTilePosition(x, y)]
+
+      if (!file) {
+        return null;
+      }
+
+      return file;
+    },
+    getTilePosition(x, y) {
+      return x * this.GRID_HEIGHT + y;
     }
   },
 }
@@ -432,13 +443,6 @@ export default {
   overflow: hidden;
   width: 82px;
   height: 82px;
-}
-
-.tile-content-wrapper {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
 }
 
 .tile.filled:hover {
