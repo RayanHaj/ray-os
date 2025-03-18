@@ -1,8 +1,5 @@
 <template>
-  <div class="loader" v-if="isLoading">
-    Loading...
-  </div>
-  <section v-else
+  <section v-if="!isLoading"
            class="grid-container"
            @click="onClickContainer"
   >
@@ -21,13 +18,13 @@
              ref="tile"
              :id="getTilePosition(indexX, indexY)"
              :class="{ 'filled': tileIsFilled(indexX, indexY) }"
-             @drop.prevent="onDropTile"
-             @dragstart="onDragTile"
-             @touchstart="onDragTile"
-             @mouseover="onMouseoverTile"
-             @touchover="onMouseoverTile"
-             @mouseenter="onMouseenterTileWrapper(indexX, indexY)"
-             @mouseleave="onMouseleaveTileWrapper(indexX, indexY)"
+             @drop.prevent="onTileDrop"
+             @dragstart="onTileDrag"
+             @touchstart="onTileDrag"
+             @mouseover="onTileMouseover"
+             @touchover="onTileMouseover"
+             @mouseenter="onTileMouseenter(indexX, indexY)"
+             @mouseleave="onTileMouseleave(indexX, indexY)"
              @dblclick="openApplication(getFileFromTileByPosition(indexX, indexY)?.name)"
              @contextmenu.prevent="onRightClickTile"
              :style="{ border: `${ this.showTileBorders ? '1px solid white' : 'none' }` }"
@@ -54,9 +51,9 @@
             {name: 'Open file location', active: tileOnRightClickIsFilled},
             {name: 'Restore applications', active: true}
         ]"
-        @cm_primary_0="contextMenuActions($event, 'copy')"
-        @cm_primary_1="contextMenuActions($event, 'delete')"
-        @cm_primary_2="contextMenuActions($event, 'paste')"
+        @cm_primary_0="onContextMenuCopy"
+        @cm_primary_1="onContextMenuDelete"
+        @cm_primary_2="onContextMenuPaste"
         @cm_secondary_0="openApplication(globalState.desktopFiles[tileOnRightClick.id]?.name)"
         @cm_secondary_1="console.log('hello')"
         @cm_secondary_2="init()"
@@ -153,13 +150,19 @@ export default {
     async init() {
       this.showTileBorders = this.globalState.getShowGridOutlineDesktop();
       enableDragDropTouch();
-
+      this.updateGridWidthHeight();
+      await this.setDesktopTiles().then(() => this.isLoading = false);
+      window.addEventListener('keydown', this.onKeydownTile);
+      window.addEventListener('resize', this.checkApplicationNameOverflow);
+    },
+    updateGridWidthHeight() {
       const browserWindowSize = this.globalState.browserWindowSize;
       if (browserWindowSize.WIDTH !== null && browserWindowSize.HEIGHT !== null) {
         this.GRID_WIDTH = Math.floor(browserWindowSize.WIDTH / this.TILE_WIDTH);
         this.GRID_HEIGHT = Math.floor((browserWindowSize.HEIGHT / this.TILE_HEIGHT) - 0.5);
       }
-
+    },
+    async setDesktopTiles() {
       const desktopFileReferences = await this.db.getAllElements('desktopFiles');
 
       const elements = [];
@@ -188,41 +191,36 @@ export default {
           };
         }
       }
-      this.globalState.desktopFiles = this.globalState.desktopFiles.sort((a, b) => a.index - b.index);
-      this.isLoading = false;
 
-      window.addEventListener('keydown', this.onKeydownTile);
-      window.addEventListener('resize', this.checkApplicationNameOverflow);
+      this.globalState.desktopFiles = this.globalState.desktopFiles.sort((a, b) => a.index - b.index);
     },
-    onMouseenterTileWrapper(x, y) {
+    onTileMouseenter(x, y) {
       const element = this.globalState.desktopFiles[x * this.GRID_HEIGHT + y];
       if (element === undefined) return;
       element.hovering = true;
     },
-    onMouseleaveTileWrapper(x, y) {
+    onTileMouseleave(x, y) {
       const element = this.globalState.desktopFiles[x * this.GRID_HEIGHT + y];
       if (element === undefined) return;
       element.hovering = false;
     },
-    contextMenuActions(e, action) {
-      switch (action) {
-        case 'copy': {
-          if (this.tileOnRightClick.children.length > 0) {
-            this.copiedApplication = this.tileOnRightClick
-          }
-          break;
-        }
-        case 'paste': {
-          if (this.tileOnRightClick && this.copiedApplication) {
-            this.insertTile(Number(this.tileOnRightClick.id), this.globalState.desktopFiles[this.copiedApplication.id].name);
-          }
-          break;
-        }
-        case 'delete': {
-          if (this.tileOnRightClick.children.length > 0) {
-            this.deleteTile(this.tileOnRightClick.id);
-          }
-        }
+    onContextMenuCopy() {
+      if (this.tileOnRightClick.children.length > 0) {
+       this.copiedApplication = this.tileOnRightClick;
+      }
+
+      this.contextMenuActive = false;
+    },
+    onContextMenuPaste() {
+      if (this.tileOnRightClick && this.copiedApplication) {
+        this.insertTile(Number(this.tileOnRightClick.id), this.globalState.desktopFiles[this.copiedApplication.id].name);
+      }
+
+      this.contextMenuActive = false;
+    },
+    onContextMenuDelete() {
+      if (this.tileOnRightClick.children.length > 0) {
+        this.deleteTile(this.tileOnRightClick.id);
       }
 
       this.contextMenuActive = false;
@@ -235,7 +233,7 @@ export default {
       await this.db.postElement('desktopFiles', parsedObject);
       this.insertTile(Number(tile.id), object.name);
     },
-    async onDropTile(event) {
+    async onTileDrop(event) {
       const currentTile = event.currentTarget;
       if (currentTile.classList.contains('filled')) {
         return;
@@ -247,35 +245,33 @@ export default {
       }
 
       if (items[0]?.type === 'text/plain') {
-        const index = this.globalState.desktopFiles.findIndex(element => {
-          return element.index === this.draggedTile.index;
-        });
-
-        this.deleteTile(index);
+        this.deleteTile(this.draggedTile.index);
         this.insertTile(Number(currentTile.id), this.draggedTile.name);
-
         return;
       }
 
+      await this.handleFiles(items, currentTile);
+    },
+    async handleFiles(items, tile) {
       for (let i = 0; i < items.length; i++) {
         const file = items[i].getAsFile();
 
         switch (file.type.toString()) {
           case 'video/mp4': {
-            await this.handleFileUpload(file, currentTile);
+            await this.handleFileUpload(file, tile);
             await this.db.addFileToDirectory(file.name, 'file', 'Videos');
             break;
           }
           case 'image/png':
           case 'image/jpg': {
-            await this.handleFileUpload(file, currentTile);
+            await this.handleFileUpload(file, tile);
             await this.db.addFileToDirectory(file.name, 'file', 'Pictures');
             break;
           }
         }
       }
     },
-    onDragTile(event) {
+    onTileDrag(event) {
       const currentTile = event.currentTarget;
       if (currentTile.children.length === 0) {
         return;
@@ -336,7 +332,7 @@ export default {
       contextMenu.leftPosition = leftValue;
       contextMenu.topPosition = topValue;
     },
-    onMouseoverTile(e) {
+    onTileMouseover(e) {
       this.tileOnHover = e.currentTarget;
     },
     openApplication(applicationName) {
