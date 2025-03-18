@@ -2,9 +2,9 @@
   <div class="loader" v-if="isLoading">
     Loading...
   </div>
-  <div v-else
-       class="grid-container"
-       @click="onClickContainer"
+  <section v-else
+           class="grid-container"
+           @click="onClickContainer"
   >
     <div v-if="GRID_HEIGHT > 0"
          class="grid"
@@ -26,14 +26,14 @@
              @touchstart="onDragTile"
              @mouseover="onMouseoverTile"
              @touchover="onMouseoverTile"
+             @mouseenter="onMouseenterTileWrapper(indexX, indexY)"
+             @mouseleave="onMouseleaveTileWrapper(indexX, indexY)"
              @dblclick="openApplication(getFileFromTileByPosition(indexX, indexY)?.name)"
              @contextmenu.prevent="onRightClickTile"
              :style="{ border: `${ this.showTileBorders ? '1px solid white' : 'none' }` }"
              tabindex="0"
         >
           <TileContent v-if="tileIsFilled(indexX, indexY)"
-                       @mouseenter="onMouseenterTileWrapper(indexX, indexY)"
-                       @mouseleave="onMouseleaveTileWrapper(indexX, indexY)"
                        :tile-position="getTilePosition(indexX, indexY)"
                        :draggable="applicationWindowIsResizing === false"
           />
@@ -41,44 +41,39 @@
       </div>
     </div>
 
-    <div v-show="contextMenuActive === true" class="context-menu" ref="contextMenu"
-         :style="{ width:`${CONTEXT_MENU_WIDTH}px`, height: `${CONTEXT_MENU_HEIGHT}px`}">
-      <div class="context-actions-wrapper">
-        <div v-if="tileOnRightClickIsFilled" class="context-action" title="copy">
-          <SvgComponent svg-type="copy" :custom-height="CONTEXT_MENU_SVG_HEIGHT" :custom-width="CONTEXT_MENU_SVG_WIDTH"
-                        @clicked="contextMenuActions($event, 'copy')"/>
-        </div>
-        <div v-if="tileOnRightClickIsFilled" class="context-action" title="delete">
-          <SvgComponent svg-type="delete" :custom-height="CONTEXT_MENU_SVG_HEIGHT"
-                        :custom-width="CONTEXT_MENU_SVG_WIDTH" @clicked="contextMenuActions($event, 'delete')"/>
-        </div>
-        <div class="context-action" title="paste">
-          <SvgComponent svg-type="paste" :custom-height="CONTEXT_MENU_SVG_HEIGHT" :custom-width="CONTEXT_MENU_SVG_WIDTH"
-                        @clicked="contextMenuActions($event, 'paste')"/>
-        </div>
-      </div>
-      <hr style="width: 90%; margin-top: 5px; margin-bottom: 5px;"/>
-      <div class="context-other-actions-wrapper">
-        <div v-if="tileOnRightClick?.classList.contains('filled')" class="context-action"
-             @click="openApplication(globalState.desktopFiles[tileOnRightClick.id]?.name)">Open
-        </div>
-        <div v-if="tileOnRightClick?.classList.contains('filled')" class="context-action">Open file location</div>
-        <div class="context-action" @click="init()">Restore applications</div>
-      </div>
-    </div>
-  </div>
+    <ContextMenu
+        v-show="contextMenuActive === true"
+        ref="contextMenu"
+        :primary-context-actions="[
+            {name: 'copy', active: tileOnRightClickIsFilled},
+            {name: 'delete', active: tileOnRightClickIsFilled},
+            {name: 'paste', active: true}
+        ]"
+        :secondary-context-actions="[
+            {name: 'Open', active: tileOnRightClickIsFilled},
+            {name: 'Open file location', active: tileOnRightClickIsFilled},
+            {name: 'Restore applications', active: true}
+        ]"
+        @cm_primary_0="contextMenuActions($event, 'copy')"
+        @cm_primary_1="contextMenuActions($event, 'delete')"
+        @cm_primary_2="contextMenuActions($event, 'paste')"
+        @cm_secondary_0="openApplication(globalState.desktopFiles[tileOnRightClick.id]?.name)"
+        @cm_secondary_1="console.log('hello')"
+        @cm_secondary_2="init()"
+    />
+  </section>
 </template>
 
 <script>
 import {enableDragDropTouch} from "@/assets/libraries/drag-drop-touch.esm.min";
-import SvgComponent from "@/ui/svg-component";
 import {useGlobalState} from "@/stores/globalState";
 import {parseFileToDbFileObject} from "@/utils/util";
 import TileContent from "@/components/grid/TileContent";
+import ContextMenu from "@/ui/ContextMenu";
 
 export default {
   name: "desktop-grid",
-  components: {SvgComponent, TileContent},
+  components: {ContextMenu, TileContent},
   inject: ['db'],
   beforeMount() {
     this.isLoading = true;
@@ -323,6 +318,7 @@ export default {
     },
     onRightClickTile(e) {
       const contextMenu = this.$refs.contextMenu;
+      console.log(contextMenu)
       this.tileOnRightClick = e.currentTarget;
 
       this.tileOnRightClickIsFilled = this.tileOnRightClick.classList.contains('filled');
@@ -334,11 +330,11 @@ export default {
       const conditionWidth = (e.clientX + this.CONTEXT_MENU_WIDTH + 25) > this.globalState.browserWindowSize.WIDTH;
       const conditionHeight = (e.clientY + this.CONTEXT_MENU_HEIGHT + 20) > this.globalState.browserWindowSize.HEIGHT;
 
-      const leftValue = conditionWidth ? `${this.globalState.browserWindowSize.WIDTH - this.CONTEXT_MENU_WIDTH - 25}px` : `${e.clientX}px`;
-      const topValue = conditionHeight ? `${this.globalState.browserWindowSize.HEIGHT - this.CONTEXT_MENU_HEIGHT - 25}px` : `${e.clientY}px`;
+      const leftValue = conditionWidth ? this.globalState.browserWindowSize.WIDTH - this.CONTEXT_MENU_WIDTH - 25 : e.clientX;
+      const topValue = conditionHeight ? this.globalState.browserWindowSize.HEIGHT - this.CONTEXT_MENU_HEIGHT - 25 : e.clientY;
 
-      contextMenu.style.left = leftValue;
-      contextMenu.style.top = topValue;
+      contextMenu.leftPosition = leftValue;
+      contextMenu.topPosition = topValue;
     },
     onMouseoverTile(e) {
       this.tileOnHover = e.currentTarget;
@@ -451,43 +447,5 @@ export default {
 
 .tile:focus {
   outline: none;
-}
-
-.context-menu {
-  display: flex;
-  flex-direction: column;
-  position: absolute;
-  padding: 10px;
-  border-radius: 10px;
-  background-color: var(--background-color-window);
-}
-
-.context-actions-wrapper {
-  display: flex;
-  margin-left: 6px;
-  gap: 9px;
-  flex-direction: row;
-}
-
-.context-action {
-  display: flex;
-  align-items: center;
-  padding: 5px;
-  border-radius: 3px;
-}
-
-.context-action:hover {
-  background-color: var(--hover-color);
-  cursor: default;
-}
-
-.context-action path {
-  fill: var(--font-color);
-}
-
-.context-other-actions-wrapper {
-  display: flex;
-  flex-direction: column;
-  font-size: 12px;
 }
 </style>

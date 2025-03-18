@@ -1,0 +1,122 @@
+<template>
+  <section class="context-menu"
+           :style="{
+              width:`${CONTEXT_MENU_WIDTH}px`,
+              height: `${CONTEXT_MENU_HEIGHT}px`,
+              left: `${leftPosition}px`,
+              top: `${topPosition}px`
+           }"
+  >
+    <div class="context-primary-actions-wrapper">
+      <div v-for="(item, index) of primaryContextActions"
+           :key="item.name"
+      >
+        <div v-if="item.active"
+             class="context-action"
+             :title="item.name"
+             @click="$emit(`cm_primary_${index}`)"
+        >
+          <SvgComponent :svg-type="item.name"
+                        :custom-height="CONTEXT_MENU_SVG_HEIGHT"
+                        :custom-width="CONTEXT_MENU_SVG_WIDTH"
+          />
+        </div>
+      </div>
+    </div>
+    <hr style="width: 90%; margin-top: 5px; margin-bottom: 5px;"/>
+    <div class="context-secondary-actions-wrapper">
+      <div v-for="(item, index) of secondaryContextActions"
+           :key="item.name"
+      >
+        <div v-if="item.active"
+             class="context-action"
+             @click="$emit(`cm_secondary_${index}`)"
+        >
+          {{ item.name }}
+        </div>
+      </div>
+    </div>
+  </section>
+</template>
+
+<script>
+import {firstLetterToUpperCase} from "@/utils/util";
+import SvgComponent from "@/ui/svg-component";
+
+export default {
+  name: "ContextMenu",
+  components: {SvgComponent},
+  props: {
+    /**
+     * @type {Array<{name: string, active: boolean}>} - Array values containing an action and a boolean indicating if the action should be active
+     */
+    primaryContextActions: {
+      required: false,
+      type: Array,
+      default: () => [
+        {name: 'copy', active: true},
+        {name: 'delete', active: true},
+        {name: 'paste', active: true}
+      ]
+    },
+    /**
+     * @type {Array<{name: string, active: boolean}>} - Array values containing a secondary action and a boolean indicating if the action should be active
+     */
+    secondaryContextActions: {
+      required: false,
+      type: Array,
+      default: () => []
+    }
+  },
+  data() {
+    return {
+      CONTEXT_MENU_SVG_WIDTH: 20,
+      CONTEXT_MENU_SVG_HEIGHT: 20,
+      CONTEXT_MENU_WIDTH: 140,
+      CONTEXT_MENU_HEIGHT: 133,
+      leftPosition: 0,
+      topPosition: 0
+    }
+  },
+  methods: {
+    getEmitName(name) {
+      return `cm_${firstLetterToUpperCase(name)}`;
+    }
+  }
+}
+</script>
+
+<style scoped>
+.context-menu {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  padding: 10px;
+  border-radius: 10px;
+  background-color: var(--background-color-window);
+}
+.context-primary-actions-wrapper {
+  display: flex;
+  margin-left: 6px;
+  gap: 9px;
+  flex-direction: row;
+}
+.context-secondary-actions-wrapper {
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+}
+.context-action {
+  display: flex;
+  align-items: center;
+  padding: 5px;
+  border-radius: 3px;
+}
+.context-action:hover {
+  background-color: var(--hover-color);
+  cursor: default;
+}
+.context-action path {
+  fill: var(--font-color);
+}
+</style>
