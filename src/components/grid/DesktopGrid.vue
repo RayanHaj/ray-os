@@ -239,14 +239,15 @@ export default {
         return;
       }
 
-      const items = event.dataTransfer.items;
-      if (items.length === 0) {
+      if (this.draggedTile !== null) {
+        this.deleteTile(this.draggedTile.index);
+        this.insertTile(Number(currentTile.id), this.draggedTile.name);
+        this.draggedTile = null;
         return;
       }
 
-      if (items[0]?.type === 'text/plain') {
-        this.deleteTile(this.draggedTile.index);
-        this.insertTile(Number(currentTile.id), this.draggedTile.name);
+      const items = event.dataTransfer.items;
+      if (items.length === 0) {
         return;
       }
 
