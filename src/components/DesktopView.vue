@@ -57,7 +57,7 @@ export default {
   name: "DesktopView",
   data() {
     return {
-      TASKBAR_HEIGHT: 44,
+      TASKBAR_HEIGHT: 60,
       windowIsRendered: false,
       windowIsResizing: false,
       quickSettingMenuIsOpen: false,

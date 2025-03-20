@@ -6,7 +6,7 @@
     <div class="taskbar-items-left">
       <div class="app-icon"
            :class="applicationName"
-           v-for="(applicationName) in applicationNames"
+           v-for="(applicationName, index) in applicationNames"
            :key="applicationName"
            @mouseenter="onMouseenterApplicationIcon(applicationName)"
            @mouseleave="onMouseleaveApplicationIcon"
@@ -19,6 +19,7 @@
              @mouseleave="onMouseleaveOpenTabs"
         >
           <open-tabs :tabs="openTabs"
+                     :isFirstItem="index === 0"
                      @clicked="onClickTab($event)"
                      @closed="onClickCloseTab($event)"
           />
@@ -63,8 +64,8 @@ export default {
       date: '',
       time: '',
       quickSettingMenuIsOpen: false,
-      ICON_IMG_WIDTH: 25,
-      ICON_IMG_HEIGHT: 25,
+      ICON_IMG_WIDTH: 35,
+      ICON_IMG_HEIGHT: 35,
       openTabs: [],
       mouseoverTimeoutId: null,
       mouseleaveTimeoutId: null,
@@ -228,8 +229,8 @@ export default {
 
 .app-icon {
   display: flex;
-  padding: 2px 3px;
-  transition: 0.3s;
+  padding: 5px;
+  transition: 0.2s;
   justify-content: center;
   align-items: center;
   position: relative;
@@ -238,6 +239,7 @@ export default {
 .app-icon:hover {
   background-color: var(--hover-color);
   border-radius: 5px;
+  padding: 5px;
 }
 
 .image-wrapper {

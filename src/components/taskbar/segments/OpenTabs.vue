@@ -1,5 +1,5 @@
 <template>
-  <ul>
+  <ul :style="{right: isFirstItem ? '-108px' : '-55px' }">
     <li class="tab"
         v-for="tab in tabs"
         :key="tab.id"
@@ -26,11 +26,14 @@ export default {
     tabs: {
       type: Array,
       required: true
+    },
+    isFirstItem: {
+      type: Boolean,
+      required: true
     }
   },
   methods: {
     onClickTab(id) {
-      console.log(this.tabs)
       this.$emit('clicked', id)
     },
     closeTab(id) {
@@ -43,10 +46,9 @@ export default {
 ul {
   position: absolute;
   display: flex;
-  padding: 0;
-  margin: 0;
   flex-direction: column;
   align-items: center;
+  padding: 0;
   bottom: 45px;
   border: var(--border-window-color) 2px solid;
   border-radius: 10px;
@@ -68,10 +70,6 @@ ul {
 
 .tab:hover {
   background-color: var(--hover-color);
-}
-
-.open-tab-close {
-  padding-top: 5px;
 }
 
 .close-tab-button {

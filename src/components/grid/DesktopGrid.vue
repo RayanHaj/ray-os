@@ -200,6 +200,7 @@ export default {
       element.hovering = true;
     },
     onTileMouseleave(x, y) {
+      this.tileOnHover = null;
       const element = this.globalState.desktopFiles[x * this.GRID_HEIGHT + y];
       if (element === undefined) return;
       element.hovering = false;
