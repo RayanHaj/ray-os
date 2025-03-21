@@ -1,0 +1,11 @@
+{
+  "GRID_WIDTH": 25,
+  "GRID_HEIGHT": 25,
+  "GAME_SPEED": [
+    {
+      "fast": 500,
+      "normal": 1000,
+      "slow": 1500
+    }
+  ]
+}

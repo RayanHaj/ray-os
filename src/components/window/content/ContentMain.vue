@@ -14,7 +14,7 @@ import Browser from "@/components/window/content/browser/BrowserContent";
 import SereneSounds from "@/components/window/content/sereneSounds/SereneSoundsContent";
 import Calculator from "@/components/window/content/calculator/CalculatorContent";
 import VideoPlayer from "@/components/window/content/videoPlayer/VideoPlayerContent";
-import Games from "@/components/window/content/games/GamesContent";
+import Games from "@/components/window/content/games/GameLauncher.vue";
 import { useGlobalState } from "@/stores/globalState";
 
 export default {
