@@ -7,6 +7,7 @@
        transition: windowIsResizing ? undefined : 'width 0.2s, height 0.2s, left 0.2s, top 0.2s, border-radius 0.1s, opacity 0.3s',
        zIndex: getZIndex,
        borderRadius: windowIsMaximized === false ? `${BORDER_RADIUS}px` : undefined,
+       boxShadow: windowIsMaximized === false ? '0 0 12px 2px rgba(255, 188, 188, 0.8)' : undefined
        }"
        @mousemove="mouseOverEventListeners"
        @mousedown="moveWindowOnMouseDownWindowCorners"

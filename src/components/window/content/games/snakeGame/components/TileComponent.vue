@@ -1,10 +1,10 @@
 <template>
-  <section class="tile" ref="tile" :style="{ border: `1px solid white` }">
-
-  </section>
+  <section class="tile" ref="tile"/>
 </template>
 
 <script>
+import {Snake} from "@/components/window/content/games/snakeGame/models/snake";
+
 export default {
   name: "tile-component",
   props: {
@@ -16,48 +16,58 @@ export default {
       type: Number,
       required: true
     },
-    snakePosition: {
-      type: Array,
+    snake: {
+      type: Snake,
       required: true
     },
-    fruitPosition: {
+    fruits: {
       type: Array,
       required: true
     }
   },
   mounted() {
-    this.updatePosition(this.snakePosition, 'snake');
-    this.updatePosition(this.fruitPosition, 'fruit');
+    this.updateTile(this.snake, 'snake');
+
+    this.fruits.forEach(fruit => {
+      this.updateTile(fruit, 'fruit');
+    })
+  },
+  computed: {
+    snakePositions() {
+      return this.snake.positions;
+    }
   },
   watch: {
-    snakePosition(newPosition) {
+    snakePositions(newPositions, oldPositions) {
+      if (JSON.stringify(newPositions) === JSON.stringify(oldPositions)) {
+        return;
+      }
       if (this.$refs.tile.classList.contains('snake')) {
         this.$refs.tile.style.backgroundColor = '';
       }
-      this.updatePosition(newPosition,'snake');
+
+      this.updateTile(this.snake, 'snake');
     },
-    fruitPosition(newPosition) {
+    fruits(newFruits) {
       if (this.$refs.tile.classList.contains('fruit')) {
         this.$refs.tile.style.backgroundColor = '';
       }
-      this.updatePosition(newPosition,'fruit');
+
+      newFruits.forEach(fruit => {
+        this.updateTile(fruit, 'fruit');
+      })
     }
   },
   methods: {
-    updatePosition(positions, type) {
-      const tileAtPosition = positions.some(position => position.x === this.xPosition && position.y === this.yPosition);
-      if (tileAtPosition) {
-        switch (type) {
-          case 'snake': {
-            this.$refs.tile.style.backgroundColor = 'green';
-            this.$refs.tile.classList.add('snake');
-          } break;
-          case 'fruit': {
-            this.$refs.tile.style.backgroundColor = 'red';
-            this.$refs.tile.classList.add('fruit');
-          } break;
-        }
+    updateTile(entity, type) {
+      const tileAtPosition = entity.positions.findIndex(position => position.x === this.xPosition && position.y === this.yPosition);
+      if (tileAtPosition !== -1) {
+        this.$refs.tile.classList.add(type);
+        this.$refs.tile.style.backgroundColor = tileAtPosition === 0 && type === 'snake' ? entity.headColor : entity.color;
+        return;
       }
+
+      this.$refs.tile.classList.remove(type);
     }
   }
 }
