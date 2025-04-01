@@ -37,7 +37,7 @@
             height: `${zoomValue}px`
           }"
           class="list-element">
-        <video v-if="element.type === 'video/mp4'" :src="element.videoUrl" :id="element" class="file-thumbnail"/>
+        <ImgComponent v-if="element.type === 'video/mp4'" image-name="videoPlayer" :id="element" class="file-thumbnail"/>
         <ImgComponent v-else-if="element.type === 'application'" :image-name="element.name" class="file-thumbnail"/>
         <SvgComponent v-else svg-type="directory" class="file-thumbnail"/>
         <div class="file-name">
@@ -111,6 +111,8 @@ export default {
         directory.children.forEach(child => {
           this.contentList.push(child);
         });
+
+        console.log(this.contentList)
       }).catch(error => {
         console.error(error);
       });

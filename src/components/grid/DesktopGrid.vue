@@ -261,13 +261,13 @@ export default {
         switch (file.type.toString()) {
           case 'video/mp4': {
             await this.handleFileUpload(file, tile);
-            await this.db.addFileToDirectory(file.name, 'file', 'Videos');
+            await this.db.addFileToDirectory(file.name, file.type, 'Videos');
             break;
           }
           case 'image/png':
           case 'image/jpg': {
             await this.handleFileUpload(file, tile);
-            await this.db.addFileToDirectory(file.name, 'file', 'Pictures');
+            await this.db.addFileToDirectory(file.name, file.type, 'Pictures');
             break;
           }
         }

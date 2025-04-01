@@ -119,11 +119,11 @@ export default class IndexedDb {
                         files.forEach(file => {
                             switch (file.type) {
                                 case 'video/mp4': {
-                                    this.addFileToDirectory(file.name, 'file', 'Videos');
+                                    this.addFileToDirectory(file.name, file.type, 'Videos');
                                 }
                                     break;
                                 case 'Application': {
-                                    this.addFileToDirectory(file.name, 'application', 'Applications');
+                                    this.addFileToDirectory(file.name, file.type, 'Applications');
                                 }
                                     break;
                             }
