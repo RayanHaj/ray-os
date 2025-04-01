@@ -4,6 +4,15 @@
           :style="{ height: `${height}px` }"
   >
     <div class="taskbar-items-left">
+      <div class="app-icon">
+        <ImgComponent
+            image-name="home"
+            :custom-width="ICON_IMG_WIDTH"
+            :custom-height="ICON_IMG_HEIGHT"
+        />
+      </div>
+    </div>
+    <div class="taskbar-items-middle">
       <div class="app-icon"
            :class="applicationName"
            v-for="(applicationName, index) in applicationNames"
@@ -214,14 +223,17 @@ export default {
 }
 
 .taskbar-items-left {
+  padding-left: 8px;
+}
+
+.taskbar-items-middle {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-left: 10px;
 }
 
 .taskbar-items-right {
-  margin-right: 8px;
+  padding-right: 8px;
   display: flex;
   gap: 10px;
   flex-direction: row;
