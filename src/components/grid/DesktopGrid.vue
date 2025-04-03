@@ -39,8 +39,8 @@
     </div>
 
     <ContextMenu
-        v-show="contextMenuActive === true"
-        ref="contextMenu"
+        v-if="contextMenuActive === true"
+        :position="onRightClickMousePosition"
         :primary-context-actions="[
             {name: 'copy', active: tileOnRightClickIsFilled},
             {name: 'delete', active: tileOnRightClickIsFilled},
@@ -57,6 +57,8 @@
         @cm_secondary_0="openApplication(globalState.desktopFiles[tileOnRightClick.id]?.name)"
         @cm_secondary_1="console.log('hello')"
         @cm_secondary_2="init()"
+
+        @close="contextMenuActive = false"
     />
   </section>
 </template>
@@ -93,10 +95,6 @@ export default {
       TILE_WIDTH: 82,
       TILE_HEIGHT: 82,
       TILE_NAME_FONT_SIZE: 10,
-      CONTEXT_MENU_SVG_WIDTH: 20,
-      CONTEXT_MENU_SVG_HEIGHT: 20,
-      CONTEXT_MENU_WIDTH: 140,
-      CONTEXT_MENU_HEIGHT: 133,
       contextMenuActive: false,
       showTileBorders: false,
       draggedTile: null,
@@ -106,6 +104,7 @@ export default {
       applicationWindowIsResizing: false,
       applicationNameIsOverflowing: false,
       isLoading: false,
+      onRightClickMousePosition: null
     }
   },
   emits: ['clicked'],
@@ -294,7 +293,6 @@ export default {
       )
     },
     onClickContainer() {
-      this.contextMenuActive === true ? this.contextMenuActive = false : null
       this.$emit('clicked');
     },
     onKeydownTile(e) {
@@ -315,24 +313,17 @@ export default {
       }
     },
     onRightClickTile(e) {
-      const contextMenu = this.$refs.contextMenu;
-      console.log(contextMenu)
       this.tileOnRightClick = e.currentTarget;
-
       this.tileOnRightClickIsFilled = this.tileOnRightClick.classList.contains('filled');
+
+      this.onRightClickMousePosition = {
+        x: e.clientX,
+        y: e.clientY
+      }
 
       if (this.contextMenuActive === false) {
         this.contextMenuActive = true;
       }
-
-      const conditionWidth = (e.clientX + this.CONTEXT_MENU_WIDTH + 25) > this.globalState.browserWindowSize.WIDTH;
-      const conditionHeight = (e.clientY + this.CONTEXT_MENU_HEIGHT + 20) > this.globalState.browserWindowSize.HEIGHT;
-
-      const leftValue = conditionWidth ? this.globalState.browserWindowSize.WIDTH - this.CONTEXT_MENU_WIDTH - 25 : e.clientX;
-      const topValue = conditionHeight ? this.globalState.browserWindowSize.HEIGHT - this.CONTEXT_MENU_HEIGHT - 25 : e.clientY;
-
-      contextMenu.leftPosition = leftValue;
-      contextMenu.topPosition = topValue;
     },
     onTileMouseover(e) {
       this.tileOnHover = e.currentTarget;

@@ -6,6 +6,8 @@ export default class IndexedDb {
         this.db = null;
         this.name = name;
         this.version = version;
+        this.acceptedStoreNames = ['files', 'desktopFiles', 'taskbarFiles', 'fileSystem'];
+        this.acceptedFileTypes = ['image/png', 'image/jpeg', 'video/mp4', 'audio/mpeg']
     }
 
     async init() {
@@ -382,4 +384,13 @@ export default class IndexedDb {
         });
     }
 
+    parameterValidator(storeName, fileType) {
+        if (storeName !== null && !this.acceptedStoreNames.includes(storeName)) {
+            return `storeName: ${storeName} is not accepted`;
+        }
+
+        if (fileType !== null && !this.acceptedFileTypes.includes(fileType)) {
+            return `fileType: ${fileType} is not accepted`;
+        }
+    }
 }

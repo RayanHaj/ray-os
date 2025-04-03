@@ -1,5 +1,5 @@
 <template>
-  <section class="context-menu"
+  <section class="context-menu" ref="contextMenu"
            :style="{
               width:`${CONTEXT_MENU_WIDTH}px`,
               height: `${CONTEXT_MENU_HEIGHT}px`,
@@ -40,13 +40,29 @@
 </template>
 
 <script>
-import {firstLetterToUpperCase} from "@/utils/util";
 import SvgComponent from "@/ui/svg-component";
+import {useGlobalState} from "@/stores/globalState";
 
 export default {
   name: "ContextMenu",
   components: {SvgComponent},
+  mounted() {
+    this.calculatePosition();
+    addEventListener('click', this.handleClick)
+  },
+  unmounted() {
+    removeEventListener('click', this.handleClick);
+  },
+  watch: {
+    position() {
+      this.calculatePosition();
+    }
+  },
   props: {
+    position: {
+      required: true,
+      type: Object
+    },
     /**
      * @type {Array<{name: string, active: boolean}>} - Array values containing an action and a boolean indicating if the action should be active
      */
@@ -78,9 +94,29 @@ export default {
       topPosition: 0
     }
   },
+  computed: {
+    globalState() {
+      return useGlobalState();
+    }
+  },
   methods: {
-    getEmitName(name) {
-      return `cm_${firstLetterToUpperCase(name)}`;
+    calculatePosition() {
+      const conditionWidth = (this.position.x + this.CONTEXT_MENU_WIDTH + 25) > this.globalState.browserWindowSize.WIDTH;
+      const conditionHeight = (this.position.y + this.CONTEXT_MENU_HEIGHT + 20) > this.globalState.browserWindowSize.HEIGHT;
+
+      const leftValue = conditionWidth ? this.globalState.browserWindowSize.WIDTH - this.CONTEXT_MENU_WIDTH - 25 : this.position.x;
+      const topValue = conditionHeight ? this.globalState.browserWindowSize.HEIGHT = this.CONTEXT_MENU_HEIGHT - 25 : this.position.y;
+
+      this.leftPosition = leftValue;
+      this.topPosition = topValue;
+    },
+    handleClick(e) {
+      const contextMenu = this.$refs.contextMenu;
+
+      //clicked outside of context menu
+      if (contextMenu && !contextMenu.contains(e.target)) {
+        this.$emit('close');
+      }
     }
   }
 }
@@ -92,6 +128,7 @@ export default {
   flex-direction: column;
   position: absolute;
   padding: 10px;
+  border: var(--border-input-color) 2px solid;
   border-radius: 10px;
   background-color: var(--background-color-window);
 }

@@ -36,25 +36,52 @@
             width: `${zoomValue}px`,
             height: `${zoomValue}px`
           }"
-          class="list-element">
+          class="list-element"
+          @contextmenu.prevent="onRightClickFile"
+      >
         <ImgComponent v-if="element.type === 'video/mp4'" image-name="videoPlayer" :id="element" class="file-thumbnail"/>
         <ImgComponent v-else-if="element.type === 'application'" :image-name="element.name" class="file-thumbnail"/>
         <SvgComponent v-else svg-type="directory" class="file-thumbnail"/>
-        <div class="file-name">
+
+        <input v-if="currentFileRenameId === element.id" type="text" class="file-name custom-input" :value="element.name.length > 70 ? `${element.name.substring(0, 70)}...` : element.name">
+        <div v-else class="file-name">
           {{ element.name.length > 70 ? `${element.name.substring(0, 70)}...` : element.name }}
         </div>
       </li>
     </ul>
+    <ContextMenu
+        v-if="contextMenuActive === true"
+        :position="onRightClickMousePosition"
+        :primary-context-actions="[
+            {name: 'copy', active: true},
+            {name: 'delete', active: true},
+            {name: 'paste', active: true}
+        ]"
+        :secondary-context-actions="[
+            {name: 'Rename file', active: true},
+            {name: 'Open file location', active: true},
+            {name: 'Restore applications', active: true}
+        ]"
+        @cm_primary_0="console.log('copyClicked')"
+        @cm_primary_1="console.log('deleteClicked')"
+        @cm_primary_2="console.log('pasteClicked')"
+        @cm_secondary_0="currentFileRenameId = "
+        @cm_secondary_1="console.log('hello')"
+        @cm_secondary_2="console.log('restore')"
+
+        @close="contextMenuActive = false"
+    />
   </div>
 </template>
 <script>
 import {useGlobalState} from "@/stores/globalState";
 import ImgComponent from "@/ui/img-component";
 import SvgComponent from "@/ui/svg-component";
+import ContextMenu from "@/ui/ContextMenu.vue";
 
 export default {
   name: 'ContentGrid',
-  components: {SvgComponent, ImgComponent},
+  components: {ContextMenu, SvgComponent, ImgComponent},
   inject: ['db'],
   props: {
     path: {
@@ -81,7 +108,11 @@ export default {
       zoomValue: 150,
       fileSystemPath: [],
       minimumZoomValue: 100,
-      maximumZoomValue: 150
+      maximumZoomValue: 150,
+      currentFileRenameId: 0,
+      contextMenuActive: false,
+      currentRightClickedElementId: null,
+      onRightClickMousePosition: null
     }
   },
   mounted() {
@@ -92,6 +123,14 @@ export default {
     this.contentList = this.list;
   },
   methods: {
+    onRightClickFile(e) {
+      this.onRightClickMousePosition = {
+        x: e.clientX,
+        y: e.clientY
+      }
+
+      this.contextMenuActive = true;
+    },
     async openDirectoryOrFile(element) {
       await this.db.getDirectoryById(element.id).then(async directory => {
         if (!directory) {
@@ -289,6 +328,21 @@ ul {
 
 .file-name {
   overflow-wrap: anywhere;
+}
+
+.custom-input {
+  all: unset;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  outline: none;
+  border: none;
+  background: none;
+  box-shadow: none;
+  user-select: none;
+  cursor: default;
+  width: 100%;
+  text-align: center;
 }
 
 .list-element {
