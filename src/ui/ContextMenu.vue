@@ -11,16 +11,16 @@
       <div v-for="(item, index) of primaryContextActions"
            :key="item.name"
       >
-        <div v-if="item.active"
-             class="context-action"
-             :title="item.name"
-             @click="$emit(`cm_primary_${index}`)"
+        <button class="context-action"
+                :disabled="!item.active"
+                :title="item.name"
+                @click="$emit(`cm_primary_${index}`)"
         >
           <SvgComponent :svg-type="item.name"
                         :custom-height="CONTEXT_MENU_SVG_HEIGHT"
                         :custom-width="CONTEXT_MENU_SVG_WIDTH"
           />
-        </div>
+        </button>
       </div>
     </div>
     <hr style="width: 90%; margin-top: 5px; margin-bottom: 5px;"/>
@@ -46,6 +46,15 @@ import {useGlobalState} from "@/stores/globalState";
 export default {
   name: "ContextMenu",
   components: {SvgComponent},
+  beforeMount() {
+    if (this.height) {
+      this.CONTEXT_MENU_HEIGHT = this.height;
+    }
+
+    if (this.width) {
+      this.CONTEXT_MENU_WIDTH = this.width;
+    }
+  },
   mounted() {
     this.calculatePosition();
     addEventListener('click', this.handleClick)
@@ -62,6 +71,14 @@ export default {
     position: {
       required: true,
       type: Object
+    },
+    height: {
+      required: false,
+      type: Number
+    },
+    width: {
+      required: false,
+      type: Number
     },
     /**
      * @type {Array<{name: string, active: boolean}>} - Array values containing an action and a boolean indicating if the action should be active
@@ -129,30 +146,42 @@ export default {
   position: absolute;
   padding: 10px;
   border: var(--border-input-color) 2px solid;
-  border-radius: 10px;
+  border-radius: 11px;
   background-color: var(--background-color-window);
 }
+
 .context-primary-actions-wrapper {
   display: flex;
-  margin-left: 6px;
-  gap: 9px;
   flex-direction: row;
+  justify-content: space-between;
 }
+
 .context-secondary-actions-wrapper {
   display: flex;
   flex-direction: column;
-  font-size: 12px;
+  font-size: 10px;
 }
+
 .context-action {
   display: flex;
   align-items: center;
   padding: 5px;
   border-radius: 3px;
+  cursor: pointer;
+  background: none;
+  border: none;
 }
+
 .context-action:hover {
   background-color: var(--hover-color);
+}
+
+.context-action:disabled {
+  opacity: 0.3;
+  background: none;
   cursor: default;
 }
+
 .context-action path {
   fill: var(--font-color);
 }

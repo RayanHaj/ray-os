@@ -37,7 +37,7 @@
             height: `${zoomValue}px`
           }"
           class="list-element"
-          @contextmenu.prevent="onRightClickFile"
+          @contextmenu.prevent="onRightClickFile($event, element.id)"
       >
         <ImgComponent v-if="element.type === 'video/mp4'" image-name="videoPlayer" :id="element" class="file-thumbnail"/>
         <ImgComponent v-else-if="element.type === 'application'" :image-name="element.name" class="file-thumbnail"/>
@@ -65,7 +65,7 @@
         @cm_primary_0="console.log('copyClicked')"
         @cm_primary_1="console.log('deleteClicked')"
         @cm_primary_2="console.log('pasteClicked')"
-        @cm_secondary_0="currentFileRenameId = "
+        @cm_secondary_0="currentFileRenameId = currentRightClickedElementId"
         @cm_secondary_1="console.log('hello')"
         @cm_secondary_2="console.log('restore')"
 
@@ -123,13 +123,14 @@ export default {
     this.contentList = this.list;
   },
   methods: {
-    onRightClickFile(e) {
+    onRightClickFile(e, id) {
       this.onRightClickMousePosition = {
         x: e.clientX,
         y: e.clientY
       }
 
       this.contextMenuActive = true;
+      this.currentRightClickedElementId = id;
     },
     async openDirectoryOrFile(element) {
       await this.db.getDirectoryById(element.id).then(async directory => {
