@@ -124,9 +124,10 @@ export default {
   },
   methods: {
     onRightClickFile(e, id) {
+      const rect = this.$el.getBoundingClientRect();
       this.onRightClickMousePosition = {
-        x: e.clientX,
-        y: e.clientY
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top + 35
       }
 
       this.contextMenuActive = true;
