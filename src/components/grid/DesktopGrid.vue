@@ -40,8 +40,6 @@
 
     <ContextMenu
         v-if="contextMenuActive === true"
-        :height="150"
-        :width="140"
         :position="onRightClickMousePosition"
         :primary-context-actions="[
             {name: 'copy', active: tileOnRightClickIsFilled},

@@ -1,7 +1,7 @@
 <template>
-  <div class="grid" @wheel="onScrollWheel">
+  <section class="grid" @wheel="onScrollWheel">
     <div class="page-header">
-      <button class="back-button"
+      <button class="back-button btn"
               ref="backButton"
               @click="onClickBackButton"
               disabled
@@ -15,11 +15,11 @@
              disabled
       >
       <div class="zoom-buttons">
-        <button class="zoom-in-button"
+        <button class="zoom-in-button btn"
                 @click="increaseZoomValue">
           <SvgComponent svg-type="zoomIn" :custom-height="25" :custom-width="25"/>
         </button>
-        <button class="zoom-out-button"
+        <button class="zoom-out-button btn"
                 @click="decreaseZoomValue">
           <SvgComponent svg-type="zoomOut" :custom-height="25" :custom-width="25"/>
         </button>
@@ -71,7 +71,7 @@
 
         @close="contextMenuActive = false"
     />
-  </div>
+  </section>
 </template>
 <script>
 import {useGlobalState} from "@/stores/globalState";
@@ -270,6 +270,9 @@ export default {
 }
 </script>
 <style scoped>
+* {
+  box-sizing: border-box;
+}
 .grid {
   display: flex;
   flex-direction: column;
@@ -280,11 +283,11 @@ export default {
   padding-left: 0;
 }
 
-button {
+.btn {
   background-color: var(--border-input-color);
 }
 
-button:disabled, SvgComponent {
+.btn:disabled, SvgComponent {
   fill: rgba(0, 0, 0, 0.1);
   background-color: rgba(0, 0, 0, 0.1);
 }

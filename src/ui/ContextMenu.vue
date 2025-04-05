@@ -47,11 +47,11 @@ export default {
   name: "ContextMenu",
   components: {SvgComponent},
   beforeMount() {
-    if (this.height) {
+    if (this.height !== undefined) {
       this.CONTEXT_MENU_HEIGHT = this.height;
     }
 
-    if (this.width) {
+    if (this.width !== undefined) {
       this.CONTEXT_MENU_WIDTH = this.width;
     }
   },
@@ -118,6 +118,7 @@ export default {
   },
   methods: {
     calculatePosition() {
+      console.log(this.globalState.browserWindowSize)
       const conditionWidth = (this.position.x + this.CONTEXT_MENU_WIDTH + 25) > this.globalState.browserWindowSize.WIDTH;
       const conditionHeight = (this.position.y + this.CONTEXT_MENU_HEIGHT + 20) > this.globalState.browserWindowSize.HEIGHT;
 
