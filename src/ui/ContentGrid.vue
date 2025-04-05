@@ -1,5 +1,9 @@
 <template>
-  <section class="grid" @wheel="onScrollWheel">
+  <section class="grid"
+           @keydown="onKeydownShift"
+           @keyup="onKeyupShift"
+           tabindex="0"
+  >
     <div class="page-header">
       <button class="back-button btn"
               ref="backButton"
@@ -113,6 +117,12 @@ export default {
       contextMenuActive: false,
       currentRightClickedElementId: null,
       onRightClickMousePosition: null
+    }
+  },
+  beforeMount() {
+    const zoomValueLS = localStorage.getItem('zoomValue');
+    if (zoomValueLS) {
+      this.zoomValue = Number(zoomValueLS);
     }
   },
   mounted() {
@@ -250,7 +260,18 @@ export default {
         this.$refs.backButton.disabled = true;
       }
     },
+    onKeydownShift(e) {
+      if (e.key !== 'Shift') return;
+
+      this.$el.addEventListener('wheel', this.onScrollWheel);
+    },
+    onKeyupShift(e) {
+      if (e.key !== 'Shift') return;
+
+      this.$el.removeEventListener('wheel', this.onScrollWheel);
+    },
     onScrollWheel(e) {
+      console.log('hello')
       switch (e.deltaY) {
         case -100:
           this.increaseZoomValue();
@@ -261,10 +282,12 @@ export default {
       }
     },
     increaseZoomValue() {
-      this.zoomValue = this.zoomValue !== this.maximumZoomValue ? this.zoomValue += 10 : this.zoomValue
+      this.zoomValue = this.zoomValue !== this.maximumZoomValue ? this.zoomValue += 10 : this.zoomValue;
+      localStorage.setItem('zoomValue', this.zoomValue);
     },
     decreaseZoomValue() {
-      this.zoomValue = this.zoomValue !== this.minimumZoomValue ? this.zoomValue -= 10 : this.zoomValue
+      this.zoomValue = this.zoomValue !== this.minimumZoomValue ? this.zoomValue -= 10 : this.zoomValue;
+      localStorage.setItem('zoomValue', this.zoomValue);
     }
   }
 }
