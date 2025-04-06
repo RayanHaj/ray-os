@@ -271,15 +271,12 @@ export default {
       this.$el.removeEventListener('wheel', this.onScrollWheel);
     },
     onScrollWheel(e) {
-      console.log('hello')
-      switch (e.deltaY) {
-        case -100:
-          this.increaseZoomValue();
-          break;
-        case 100:
-          this.decreaseZoomValue();
-          break;
+      if (e.deltaY > 0) {
+        this.decreaseZoomValue();
+        return;
       }
+
+      this.increaseZoomValue();
     },
     increaseZoomValue() {
       this.zoomValue = this.zoomValue !== this.maximumZoomValue ? this.zoomValue += 10 : this.zoomValue;
