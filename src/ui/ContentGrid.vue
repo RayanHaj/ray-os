@@ -48,7 +48,10 @@
         <SvgComponent v-else svg-type="directory" class="file-thumbnail"/>
 
         <input v-if="currentFileRenameId === element.id" type="text" class="file-name custom-input" :value="element.name.length > 70 ? `${element.name.substring(0, 70)}...` : element.name">
-        <div v-else class="file-name">
+        <div v-else
+             class="file-name"
+             :style="{fontSize: `${FILE_NAME_FONT_SIZE}px`}"
+        >
           {{ element.name.length > 70 ? `${element.name.substring(0, 70)}...` : element.name }}
         </div>
       </li>
@@ -113,6 +116,7 @@ export default {
       fileSystemPath: [],
       minimumZoomValue: 100,
       maximumZoomValue: 150,
+      FILE_NAME_FONT_SIZE: 12,
       currentFileRenameId: 0,
       contextMenuActive: false,
       currentRightClickedElementId: null,
@@ -124,6 +128,8 @@ export default {
     if (zoomValueLS) {
       this.zoomValue = Number(zoomValueLS);
     }
+
+    this.updateFontSize();
   },
   mounted() {
     if (this.path) {
@@ -281,10 +287,21 @@ export default {
     increaseZoomValue() {
       this.zoomValue = this.zoomValue !== this.maximumZoomValue ? this.zoomValue += 10 : this.zoomValue;
       localStorage.setItem('zoomValue', this.zoomValue);
+      this.updateFontSize();
     },
     decreaseZoomValue() {
       this.zoomValue = this.zoomValue !== this.minimumZoomValue ? this.zoomValue -= 10 : this.zoomValue;
       localStorage.setItem('zoomValue', this.zoomValue);
+      this.updateFontSize();
+    },
+    updateFontSize() {
+      const maxFontSize = 17;
+      const minFontSize = 12;
+
+      const calculationFontSize = maxFontSize - ((this.maximumZoomValue / 10) - (this.zoomValue / 10));
+      if (calculationFontSize > minFontSize) {
+        this.FILE_NAME_FONT_SIZE = maxFontSize - ((this.maximumZoomValue / 10) - (this.zoomValue / 10));
+      }
     }
   }
 }
@@ -382,5 +399,6 @@ ul {
 
 .list-element:hover {
   background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 10px;
 }
 </style>
