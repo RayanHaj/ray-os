@@ -1,80 +1,80 @@
 <template>
-  <div class="window"
-       ref="window"
-       :style="{
-       minWidth: MINIMUM_WIDTH_WINDOW,
-       minHeight: MINIMUM_HEIGHT_WINDOW,
-       transition: windowIsResizing ? undefined : 'width 0.2s, height 0.2s, left 0.2s, top 0.2s, border-radius 0.1s, opacity 0.3s',
+  <section class="window"
+           :style="{
+       minWidth: customStylingValuesWindow.MINIMUM_WIDTH,
+       minHeight: customStylingValuesWindow.MINIMUM_HEIGHT,
+       transition: !windowIsResizing ? 'width 0.2s, height 0.2s, left 0.2s, top 0.2s, border-radius 0.1s, opacity 0.3s' : undefined,
+       borderRadius: !windowIsMaximized ? `${customStylingValuesWindow.BORDER_RADIUS}px` : undefined,
+       boxShadow: !windowIsMaximized ? '0 0 12px 2px rgba(255, 188, 188, 0.8)' : undefined,
        zIndex: getZIndex,
-       borderRadius: windowIsMaximized === false ? `${BORDER_RADIUS}px` : undefined,
-       boxShadow: windowIsMaximized === false ? '0 0 12px 2px rgba(255, 188, 188, 0.8)' : undefined
        }"
-       @mousemove="mouseOverEventListeners"
-       @mousedown="moveWindowOnMouseDownWindowCorners"
-       @touchover="mouseOverEventListeners"
-       @touchstart="moveWindowOnMouseDownWindowCorners"
-       @click="onClickWindow"
+           @mousemove="mouseOverEventListeners"
+           @mousedown="moveWindowOnMouseDownWindowCorners"
+           @touchover="mouseOverEventListeners"
+           @touchstart="moveWindowOnMouseDownWindowCorners"
+           @click="onClickWindow"
   >
-    <div class="window-header">
-      <div class="top-header" @click="$emit('clicked', $event)" @mousedown.prevent="onMouseDownHeader($event)"
-           @touchstart.prevent="onMouseDownHeader($event)">
-        <ImgComponent :image-name="windowObject.name" :custom-width="20" :custom-height="20"
-                      class="window-img"></ImgComponent>
-        <div class="window-name"> {{ windowObject.name }}</div>
-      </div>
-      <div class="window-state-control">
-        <div class="svg-wrapper">
-          <button class="minimize-button" @click="minimizeWindow">
-            <SvgComponent :svg-type="'minimize'"/>
-          </button>
-          <button class="maximize-button" @click="maximizeWindow" @mouseenter="onMouseenterMaximizeSvg"
-                  @mouseleave="onMouseleaveMaximizeSvg">
-            <SvgComponent :svg-type="'maximize'"/>
-          </button>
-          <button class="close-button" @click="closeWindow">
-            <SvgComponent :svg-type="'close'"/>
-          </button>
-        </div>
-        <SplitWindowsComponent
-            v-show="showSplitWindowComponent"
-            @mouseover="mouseOnSplitWindowComponent = true"
-            @mouseleave="onMouseleaveSplitWindowComponent"
-            @position="splitCurrentWindow"
-        />
-      </div>
-    </div>
+    <WindowHeader
+        :name="windowObject.name"
+        @click-header="$emit('clicked', $event)"
+        @mousedown-header="onMouseDownHeader($event)"
+        @mouseenter-maximize="onMouseenterMaximizeSvg"
+        @mouseleave-maximize="onMouseleaveMaximizeSvg"
+        @minimize="minimizeWindow"
+        @maximize="maximizeWindow"
+        @close="closeWindow"
+    />
+    <SplitWindowsComponent
+        v-show="showSplitWindowComponent"
+        @mouseover="mouseOnSplitWindowComponent = true"
+        @mouseleave="onMouseleaveSplitWindowComponent"
+        @position="splitCurrentWindow"
+    />
     <div @click="$emit('clicked', $event)" class="window-content">
       <ContentMain :window-id="windowObject.id"
                    :disable-pointer-events="disablePointerEvents"
                    :application-window-size="applicationWindowSize"
-                   @move-calculator-window-to-top-corner="setSplitWindowValues(0, '40%', '30%', 0)"
+                   @move-calculator-window-to-top-corner="UpdateWindowSizeAndPosition(0, '40%', '30%', 0)"
       />
     </div>
-  </div>
+  </section>
 </template>
 
 <script>
-import SvgComponent from "@/ui/svg-component";
 import ContentMain from "@/components/window/content/ContentMain";
 import {enableDragDropTouch} from "@/assets/libraries/drag-drop-touch.esm.min";
 import {useGlobalState} from "@/stores/globalState";
-import ImgComponent from "@/ui/img-component";
 import SplitWindowsComponent from "@/ui/split-windows-component";
+import WindowHeader from "@/components/window/elements/windowHeader.vue";
 
 export default {
   name: "application-window",
   components: {
-    ImgComponent,
-    SvgComponent,
+    WindowHeader,
     ContentMain,
     SplitWindowsComponent
   },
   data() {
     return {
-      MINIMUM_WIDTH_WINDOW: '40%',
-      MINIMUM_HEIGHT_WINDOW: '45%',
-      BORDER_RADIUS: 10,
-      windowObject: null,
+      customStylingValuesWindow: {
+        MINIMUM_WIDTH: '40%',
+        MINIMUM_HEIGHT: '45%',
+        BORDER_RADIUS: 10
+      },
+      windowObject: {
+        id: null,
+        name: null,
+        zIndex: null,
+        minimized: null,
+        fileProperties: {
+          name: null,
+          type: null,
+          createdAt: null,
+          image: null,
+          file: null,
+          id: null
+        },
+      },
       resizeObserver: null,
       mouseoverTimeoutId: null,
       mouseleaveTimeoutId: null,
@@ -105,24 +105,19 @@ export default {
         mousePositionX: 0,
         mousePositionY: 0
       },
-      windowOutOfBounds: {
-        xPositive: false,
-        xNegative: false,
-        yPositive: false,
-        yNegative: false
-      },
+      windowOutOfBounds: null,
     }
   },
   beforeMount() {
     this.$emit('rendered');
     this.windowObject = this.globalState.openWindows.find(window => window.id === this.windowId);
-  },
-  mounted() {
-    enableDragDropTouch();
     this.applicationWindowSize = {
       width: this.globalState.browserWindowSize.WIDTH,
       height: this.globalState.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED
     }
+  },
+  mounted() {
+    enableDragDropTouch();
 
     this.$el.style.width = `${this.applicationWindowSize.width}px`;
     this.$el.style.height = `${this.applicationWindowSize.height}px`;
@@ -155,12 +150,7 @@ export default {
   watch: {
     splitOtherWindow(newWindow) {
       if (newWindow.window.id === this.windowObject.id) {
-        this.setOutOfBoundsValues(
-            newWindow.xOutOfBoundsPositive === 'negative-x',
-            newWindow.xOutOfBoundsPositive === 'positive-x',
-            newWindow.xOutOfBoundsPositive === 'negative-y',
-            newWindow.xOutOfBoundsPositive === 'positive-y'
-        );
+        this.windowOutOfBounds = newWindow.windowOutOfBounds;
         this.splitWindow();
       }
     },
@@ -280,10 +270,10 @@ export default {
         event.preventDefault();
         this.$emit('windowResizing', true);
         this.windowIsResizing = true;
-        const minWidthPercentage = parseFloat(this.MINIMUM_WIDTH_WINDOW);
+        const minWidthPercentage = parseFloat(this.customStylingValuesWindow.MINIMUM_WIDTH);
         const minWidthPixels = (minWidthPercentage / 100) * this.globalState.browserWindowSize.WIDTH;
 
-        const minHeightPercentage = parseFloat(this.MINIMUM_HEIGHT_WINDOW);
+        const minHeightPercentage = parseFloat(this.customStylingValuesWindow.MINIMUM_HEIGHT);
         const minHeightPixels = (minHeightPercentage / 100) * this.globalState.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED;
 
         const east = () => {
@@ -421,11 +411,8 @@ export default {
       const newX = event.clientX;
       const newY = event.clientY;
 
-      this.windowOutOfBounds.xPositive = newX >= this.globalState.browserWindowSize.WIDTH - 1;
-      this.windowOutOfBounds.xNegative = newX <= 1;
-
-      this.windowOutOfBounds.yNegative = newY >= this.globalState.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED - 1;
-      this.windowOutOfBounds.yPositive = newY <= 1;
+      const update = this.updateWindowOutOfBounds(newX, newY);
+      console.log(update);
 
       const deltaX = newX - this.mouseDownWindowVariables.oldPositionX;
       const deltaY = newY - this.mouseDownWindowVariables.oldPositionY;
@@ -436,9 +423,23 @@ export default {
       this.mouseDownWindowVariables.oldPositionX = newX;
       this.mouseDownWindowVariables.oldPositionY = newY;
     },
+    updateWindowOutOfBounds(x, y) {
+      if (y >= this.globalState.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED - 1)
+        this.windowOutOfBounds = 'bottom';
+      else if (x >= this.globalState.browserWindowSize.WIDTH - 1)
+        this.windowOutOfBounds = 'right';
+      else if (y <= 1)
+        this.windowOutOfBounds = 'top';
+      else if (x <= 1)
+        this.windowOutOfBounds = 'left';
+      else
+        this.windowOutOfBounds = null;
+
+      return this.windowOutOfBounds;
+    },
     onMouseUpHeader() {
       this.windowIsMoving = false;
-      const returnPosOutOfBoundsPositiveOrNegative = this.splitWindow();
+      const windowOutOfBounds = this.splitWindow();
       if (this.globalState.openWindows.length > 1) {
         const window = this.globalState.openWindows.find(element => element.id === this.windowId);
         if (window === undefined) {
@@ -452,7 +453,7 @@ export default {
 
         this.$emit('splitOtherWindow', {
           'window': splitWindow,
-          'xOutOfBoundsPositive': returnPosOutOfBoundsPositiveOrNegative
+          'windowOutOfBounds': windowOutOfBounds
         });
       }
 
@@ -466,22 +467,30 @@ export default {
       const heightTaskbarExcluded = this.globalState.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED;
       const heightInPercentage = (heightTaskbarExcluded / height) * 100;
       const halfHeightInPercentage = ((heightTaskbarExcluded / 2) / height) * 100;
-      if (this.windowOutOfBounds.xPositive) {
-        this.setSplitWindowValues('50%', '50%', `${heightInPercentage}%`, 0);
-        return 'positive-x';
-      } else if (this.windowOutOfBounds.xNegative) {
-        this.setSplitWindowValues(0, '50%', `${heightInPercentage}%`, 0);
-        return 'negative-x';
-      } else if (this.windowOutOfBounds.yPositive) {
-        this.setSplitWindowValues(0, '100%', `${halfHeightInPercentage}%`, 0);
-        return 'positive-y';
-      } else if (this.windowOutOfBounds.yNegative) {
-        this.setSplitWindowValues(0, '100%', `${halfHeightInPercentage}%`, `${halfHeightInPercentage}%`);
-        return 'negative-y';
+
+      let oppositeValue = null;
+      switch (this.windowOutOfBounds) {
+        case 'right': {
+          this.UpdateWindowSizeAndPosition('50%', '50%', `${heightInPercentage}%`, 0);
+          oppositeValue = 'left';
+        } break;
+        case 'left': {
+          this.UpdateWindowSizeAndPosition(0, '50%', `${heightInPercentage}%`, 0);
+          oppositeValue = 'right';
+        } break;
+        case 'top': {
+          this.UpdateWindowSizeAndPosition(0, '100%', `${halfHeightInPercentage}%`, 0);
+          oppositeValue = 'bottom';
+        } break;
+        case 'bottom': {
+          this.UpdateWindowSizeAndPosition(0, '100%', `${halfHeightInPercentage}%`, `${halfHeightInPercentage}%`);
+          oppositeValue = 'top';
+        }
       }
-      return false;
+
+      return oppositeValue;
     },
-    setSplitWindowValues(left, width, height, top) {
+    UpdateWindowSizeAndPosition(left, width, height, top) {
       this.$el.style.left = left;
       this.$el.style.width = width;
       this.$el.style.height = height;
@@ -499,35 +508,35 @@ export default {
       this.lastWindowSplitPosition = position;
       switch (position) {
         case 'topLeft': {
-          this.setSplitWindowValues(0, '50%', `${halfHeightInPercentage}%`, 0);
+          this.UpdateWindowSizeAndPosition(0, '50%', `${halfHeightInPercentage}%`, 0);
           break;
         }
         case 'topRight': {
-          this.setSplitWindowValues('50%', '50%', `${halfHeightInPercentage}%`, 0);
+          this.UpdateWindowSizeAndPosition('50%', '50%', `${halfHeightInPercentage}%`, 0);
           break;
         }
         case 'bottomLeft': {
-          this.setSplitWindowValues(0, '50%', `${halfHeightInPercentage}%`, `${halfHeightInPercentage}%`);
+          this.UpdateWindowSizeAndPosition(0, '50%', `${halfHeightInPercentage}%`, `${halfHeightInPercentage}%`);
           break;
         }
         case 'bottomRight': {
-          this.setSplitWindowValues('50%', '50%', `${halfHeightInPercentage}%`, `${halfHeightInPercentage}%`);
+          this.UpdateWindowSizeAndPosition('50%', '50%', `${halfHeightInPercentage}%`, `${halfHeightInPercentage}%`);
           break;
         }
         case 'left': {
-          this.setSplitWindowValues(0, '50%', `${heightInPercentage}%`, 0);
+          this.UpdateWindowSizeAndPosition(0, '50%', `${heightInPercentage}%`, 0);
           break;
         }
         case 'right': {
-          this.setSplitWindowValues('50%', '50%', `${heightInPercentage}%`, 0)
+          this.UpdateWindowSizeAndPosition('50%', '50%', `${heightInPercentage}%`, 0)
           break;
         }
         case 'top': {
-          this.setSplitWindowValues(0, '100%', `${halfHeightInPercentage}%`, 0);
+          this.UpdateWindowSizeAndPosition(0, '100%', `${halfHeightInPercentage}%`, 0);
           break;
         }
         case 'bottom': {
-          this.setSplitWindowValues(0, '100%', `${halfHeightInPercentage}%`, `${halfHeightInPercentage}%`);
+          this.UpdateWindowSizeAndPosition(0, '100%', `${halfHeightInPercentage}%`, `${halfHeightInPercentage}%`);
           break;
         }
       }
@@ -559,12 +568,6 @@ export default {
       }
 
       this.mouseOnSplitWindowComponent = false;
-    },
-    setOutOfBoundsValues(xPositive, xNegative, yPositive, yNegative) {
-      this.windowOutOfBounds.xPositive = xPositive;
-      this.windowOutOfBounds.xNegative = xNegative;
-      this.windowOutOfBounds.yPositive = yPositive;
-      this.windowOutOfBounds.yNegative = yNegative;
     },
     minimizeWindow() {
       this.$emit('minimizeWindow', Number(this.windowId));
@@ -604,13 +607,11 @@ export default {
 }
 
 * {
-  font-family: 'Segoe UI Variable', serif;
-  font-size: small;
+  box-sizing: border-box;
   color: var(--font-color);
 }
 
 .window {
-  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   overflow: auto;
@@ -624,62 +625,6 @@ export default {
 .window-content {
   overflow: auto;
   height: 100%;
-}
-
-.window-header {
-  display: flex;
-  flex-direction: row;
-  height: 30px;
-  position: sticky;
-  top: 0;
-  background-color: var(--taskbar-color);
-  z-index: 2;
-}
-
-.top-header {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  height: 30px;
-  width: 100%;
-  padding-left: 10px;
-}
-
-.window-name {
-  font-size: 14px;
-  font-weight: bold;
-  margin-left: 10px;
-}
-
-.window-state-control {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  height: 100%;
-}
-
-.svg-wrapper {
-  display: flex;
-  flex-direction: row;
-  justify-content: end;
-  height: 100%;
-  width: auto;
-}
-
-.svg-wrapper button {
-  background-color: transparent;
-  border: none;
-  padding: 8px;
-  width: 60px;
-}
-
-.close-button:hover {
-  background-color: red;
-}
-
-.maximize-button:hover, .minimize-button:hover {
-  background-color: black;
 }
 
 path {

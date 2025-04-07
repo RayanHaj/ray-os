@@ -97,8 +97,8 @@ export default {
         })
       });
 
-      if (windowObject.values.file) {
-        this.videoSrc = URL.createObjectURL(windowObject.values.file);
+      if (windowObject.fileProperties.file) {
+        this.videoSrc = URL.createObjectURL(windowObject.fileProperties.file);
       }
     }
   },

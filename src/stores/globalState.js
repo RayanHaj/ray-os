@@ -110,7 +110,7 @@ export const useGlobalState = defineStore('globalState', {
                     "zIndex": zIndex,
                     'name': windowName,
                     'minimized': false,
-                    'values': element
+                    'fileProperties': element
                 }
 
                 this.openWindows.push(newWindowObject);
