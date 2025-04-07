@@ -1,6 +1,5 @@
 <template>
   <component :is="windowObject.name.replace(' ', '')"
-             :disable-pointer-events="disablePointerEvents"
              :application-window-size="applicationWindowSize"
              :window-id="windowId"
              @move-calculator-window-to-top-corner="$emit('moveCalculatorWindowToTopCorner')"
@@ -41,10 +40,6 @@ export default {
     windowId: {
       type: Number,
       required: true
-    },
-    disablePointerEvents: {
-      type: Boolean,
-      required: false
     },
     applicationWindowSize: {
       type: Object,

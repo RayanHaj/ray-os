@@ -36,7 +36,6 @@
     />
     <div @click="$emit('clicked', $event)" class="window-content">
       <ContentMain :window-id="windowObject.id"
-                   :disable-pointer-events="disablePointerEvents"
                    :application-window-size="{
                      WIDTH: customStylingValuesWindow.WIDTH,
                      HEIGHT: customStylingValuesWindow.HEIGHT
@@ -112,7 +111,6 @@ export default {
       windowOutOfBounds: null,
       mouseleaveTimeoutId: null,
       mouseOnResizeSpace: false,
-      disablePointerEvents: false,
       showSplitWindowComponent: false,
       mouseOnSplitWindowComponent: false,
     }
@@ -225,7 +223,7 @@ export default {
     mouseOverEventListeners(event) {
       event.preventDefault();
 
-      if (this.windowEvents.moving === true) {
+      if (this.windowEvents.moving || this.windowEvents.resizing) {
         return;
       }
 
@@ -254,6 +252,7 @@ export default {
       const windowHeight = this.$el.getBoundingClientRect().height;
       const windowLeft = this.$el.getBoundingClientRect().left;
       const windowTop = this.$el.getBoundingClientRect().top;
+
       this.mousePositionVariables.oldPositionX = event.clientX;
       this.mousePositionVariables.oldPositionY = event.clientY;
       this.mousePositionVariables.positionX = this.mousePositionVariables.oldPositionX - this.$el.getBoundingClientRect().x;
@@ -341,11 +340,9 @@ export default {
             break;
           }
         }
-        this.disablePointerEvents = true;
       }
 
       const onUp = () => {
-        this.disablePointerEvents = false;
         this.windowEvents.resizing = false;
         this.$emit('windowResizing', false);
 

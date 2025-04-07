@@ -1,6 +1,6 @@
 <template>
   <div class="window-content">
-    <iframe :src="links[0]" :style="{ pointerEvents: disablePointerEvents ? 'none' : 'auto'}" width="98%" height="98%"></iframe>
+    <iframe :src="links[0]" width="98%" height="98%"></iframe>
   </div>
 </template>
 
@@ -8,10 +8,6 @@
 export default {
   name: "browser-window",
   props: {
-    disablePointerEvents: {
-      type: Boolean,
-      required: true
-    }
   },
   data() {
     return {
