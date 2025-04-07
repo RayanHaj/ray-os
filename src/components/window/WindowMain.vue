@@ -93,17 +93,11 @@ export default {
         right: 10,
         bottom: 10
       },
-      mouseOverWindowVariables: {
+      mousePositionVariables: {
+        positionX: 0,
+        positionY: 0,
         oldPositionX: 0,
-        oldPositionY: 0,
-        mousePositionX: 0,
-        mousePositionY: 0
-      },
-      mouseDownWindowVariables: {
-        oldPositionX: 0,
-        oldPositionY: 0,
-        mousePositionX: 0,
-        mousePositionY: 0
+        oldPositionY: 0
       },
       windowEvents: {
         moving: false,
@@ -115,8 +109,8 @@ export default {
         mouseleave: null
       },
       resizeObserver: null,
-      mouseleaveTimeoutId: null,
       windowOutOfBounds: null,
+      mouseleaveTimeoutId: null,
       mouseOnResizeSpace: false,
       disablePointerEvents: false,
       showSplitWindowComponent: false,
@@ -235,10 +229,10 @@ export default {
         return;
       }
 
-      this.mouseOverWindowVariables.oldPositionX = event.clientX;
-      this.mouseOverWindowVariables.oldPositionY = event.clientY;
-      this.mouseOverWindowVariables.mousePositionX = this.mouseOverWindowVariables.oldPositionX - this.$el.getBoundingClientRect().x;
-      this.mouseOverWindowVariables.mousePositionY = this.mouseOverWindowVariables.oldPositionY - this.$el.getBoundingClientRect().y;
+      this.mousePositionVariables.oldPositionX = event.clientX;
+      this.mousePositionVariables.oldPositionY = event.clientY;
+      this.mousePositionVariables.positionX = this.mousePositionVariables.oldPositionX - this.$el.getBoundingClientRect().x;
+      this.mousePositionVariables.positionY = this.mousePositionVariables.oldPositionY - this.$el.getBoundingClientRect().y;
       this.mouseOnResizeSpace = false;
 
       const windowBorderSidePressed = this.returnPressedWindowBorderSide();
@@ -260,10 +254,10 @@ export default {
       const windowHeight = this.$el.getBoundingClientRect().height;
       const windowLeft = this.$el.getBoundingClientRect().left;
       const windowTop = this.$el.getBoundingClientRect().top;
-      this.mouseDownWindowVariables.oldPositionX = event.clientX;
-      this.mouseDownWindowVariables.oldPositionY = event.clientY;
-      this.mouseDownWindowVariables.mousePositionX = this.mouseDownWindowVariables.oldPositionX - this.$el.getBoundingClientRect().x;
-      this.mouseDownWindowVariables.mousePositionY = this.mouseDownWindowVariables.oldPositionY - this.$el.getBoundingClientRect().y;
+      this.mousePositionVariables.oldPositionX = event.clientX;
+      this.mousePositionVariables.oldPositionY = event.clientY;
+      this.mousePositionVariables.positionX = this.mousePositionVariables.oldPositionX - this.$el.getBoundingClientRect().x;
+      this.mousePositionVariables.positionY = this.mousePositionVariables.oldPositionY - this.$el.getBoundingClientRect().y;
 
       const windowBorderSidePressed = this.returnPressedWindowBorderSide();
 
@@ -278,7 +272,7 @@ export default {
         const minHeightPixels = (minHeightPercentage / 100) * this.globalState.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED;
 
         const east = () => {
-          this.customStylingValuesWindow.WIDTH = `${(windowWidth - (this.mouseDownWindowVariables.oldPositionX - event.clientX))}px`;
+          this.customStylingValuesWindow.WIDTH = `${(windowWidth - (this.mousePositionVariables.oldPositionX - event.clientX))}px`;
         }
 
         const west = () => {
@@ -294,7 +288,7 @@ export default {
         }
 
         const south = () => {
-          this.customStylingValuesWindow.HEIGHT = `${(windowHeight - (this.mouseDownWindowVariables.oldPositionY - event.clientY))}px`;
+          this.customStylingValuesWindow.HEIGHT = `${(windowHeight - (this.mousePositionVariables.oldPositionY - event.clientY))}px`;
         }
 
         const north = () => {
@@ -367,10 +361,10 @@ export default {
       document.addEventListener('touchend', onUp);
     },
     returnPressedWindowBorderSide() {
-      const north = this.mouseOverWindowVariables.mousePositionY - this.WINDOW_RESIZE_AREA_SPACE.top <= 0;
-      const east = this.mouseOverWindowVariables.mousePositionX + this.WINDOW_RESIZE_AREA_SPACE.right >= this.$el.getBoundingClientRect().width;
-      const south = this.mouseOverWindowVariables.mousePositionY + this.WINDOW_RESIZE_AREA_SPACE.bottom >= this.$el.getBoundingClientRect().height;
-      const west = this.mouseOverWindowVariables.mousePositionX - this.WINDOW_RESIZE_AREA_SPACE.left <= 0;
+      const north = this.mousePositionVariables.positionY - this.WINDOW_RESIZE_AREA_SPACE.top <= 0;
+      const east = this.mousePositionVariables.positionX + this.WINDOW_RESIZE_AREA_SPACE.right >= this.$el.getBoundingClientRect().width;
+      const south = this.mousePositionVariables.positionY + this.WINDOW_RESIZE_AREA_SPACE.bottom >= this.$el.getBoundingClientRect().height;
+      const west = this.mousePositionVariables.positionX - this.WINDOW_RESIZE_AREA_SPACE.left <= 0;
 
       if (north && east) return 'ne';
       if (north && west) return 'nw';
@@ -387,8 +381,8 @@ export default {
         return;
       }
 
-      this.mouseDownWindowVariables.oldPositionX = event.clientX;
-      this.mouseDownWindowVariables.oldPositionY = event.clientY;
+      this.mousePositionVariables.oldPositionX = event.clientX;
+      this.mousePositionVariables.oldPositionY = event.clientY;
 
       document.addEventListener('mouseup', this.onMouseUpHeader);
       document.addEventListener('mousemove', this.onMouseMoveHeader);
@@ -414,14 +408,14 @@ export default {
 
       this.updateWindowOutOfBounds(newX, newY);
 
-      const deltaX = newX - this.mouseDownWindowVariables.oldPositionX;
-      const deltaY = newY - this.mouseDownWindowVariables.oldPositionY;
+      const deltaX = newX - this.mousePositionVariables.oldPositionX;
+      const deltaY = newY - this.mousePositionVariables.oldPositionY;
 
       this.customStylingValuesWindow.LEFT = `${this.$el.offsetLeft + deltaX}px`;
       this.customStylingValuesWindow.TOP = `${this.$el.offsetTop + deltaY}px`;
 
-      this.mouseDownWindowVariables.oldPositionX = newX;
-      this.mouseDownWindowVariables.oldPositionY = newY;
+      this.mousePositionVariables.oldPositionX = newX;
+      this.mousePositionVariables.oldPositionY = newY;
     },
     updateWindowOutOfBounds(x, y) {
       if (y >= this.globalState.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED - 1)
