@@ -1,17 +1,21 @@
 <template>
   <section class="window"
            :style="{
+       top: customStylingValuesWindow.TOP,
+       left: customStylingValuesWindow.LEFT,
+       cursor: customStylingValuesWindow.CURSOR,
+       userSelect: customStylingValuesWindow.USER_SELECT,
+       width: customStylingValuesWindow.WIDTH,
+       height: customStylingValuesWindow.HEIGHT,
        minWidth: customStylingValuesWindow.MINIMUM_WIDTH,
        minHeight: customStylingValuesWindow.MINIMUM_HEIGHT,
-       transition: !windowIsResizing ? 'width 0.2s, height 0.2s, left 0.2s, top 0.2s, border-radius 0.1s, opacity 0.3s' : undefined,
-       borderRadius: !windowIsMaximized ? `${customStylingValuesWindow.BORDER_RADIUS}px` : undefined,
-       boxShadow: !windowIsMaximized ? '0 0 12px 2px rgba(255, 188, 188, 0.8)' : undefined,
+       transition: !windowEvents.resizing ? 'width 0.2s, height 0.2s, left 0.2s, top 0.2s, border-radius 0.1s, opacity 0.3s' : undefined,
+       borderRadius: !windowEvents.maximized ? customStylingValuesWindow.BORDER_RADIUS : undefined,
+       boxShadow: !windowEvents.maximized ? '0 0 12px 2px rgba(255, 188, 188, 0.8)' : undefined,
        zIndex: getZIndex,
        }"
            @mousemove="mouseOverEventListeners"
            @mousedown="moveWindowOnMouseDownWindowCorners"
-           @touchover="mouseOverEventListeners"
-           @touchstart="moveWindowOnMouseDownWindowCorners"
            @click="onClickWindow"
   >
     <WindowHeader
@@ -33,7 +37,10 @@
     <div @click="$emit('clicked', $event)" class="window-content">
       <ContentMain :window-id="windowObject.id"
                    :disable-pointer-events="disablePointerEvents"
-                   :application-window-size="applicationWindowSize"
+                   :application-window-size="{
+                     WIDTH: customStylingValuesWindow.WIDTH,
+                     HEIGHT: customStylingValuesWindow.HEIGHT
+                   }"
                    @move-calculator-window-to-top-corner="UpdateWindowSizeAndPosition(0, '40%', '30%', 0)"
       />
     </div>
@@ -42,7 +49,6 @@
 
 <script>
 import ContentMain from "@/components/window/content/ContentMain";
-import {enableDragDropTouch} from "@/assets/libraries/drag-drop-touch.esm.min";
 import {useGlobalState} from "@/stores/globalState";
 import SplitWindowsComponent from "@/ui/split-windows-component";
 import WindowHeader from "@/components/window/elements/windowHeader.vue";
@@ -59,7 +65,13 @@ export default {
       customStylingValuesWindow: {
         MINIMUM_WIDTH: '40%',
         MINIMUM_HEIGHT: '45%',
-        BORDER_RADIUS: 10
+        BORDER_RADIUS: '10px',
+        USER_SELECT: 'auto',
+        CURSOR: 'auto',
+        WIDTH: '',
+        HEIGHT: '',
+        LEFT: '',
+        TOP: ''
       },
       windowObject: {
         id: null,
@@ -75,18 +87,6 @@ export default {
           id: null
         },
       },
-      resizeObserver: null,
-      mouseoverTimeoutId: null,
-      mouseleaveTimeoutId: null,
-      applicationWindowSize: null,
-      lastWindowSplitPosition: null,
-      windowIsMoving: false,
-      windowIsResizing: false,
-      windowIsMaximized: false,
-      mouseOnResizeSpace: false,
-      disablePointerEvents: false,
-      showSplitWindowComponent: false,
-      mouseOnSplitWindowComponent: false,
       WINDOW_RESIZE_AREA_SPACE: {
         top: 10,
         left: 10,
@@ -105,25 +105,33 @@ export default {
         mousePositionX: 0,
         mousePositionY: 0
       },
+      windowEvents: {
+        moving: false,
+        resizing: false,
+        maximized: false,
+      },
+      timeoutIds: {
+        mouseenter: null,
+        mouseleave: null
+      },
+      resizeObserver: null,
+      mouseleaveTimeoutId: null,
       windowOutOfBounds: null,
+      mouseOnResizeSpace: false,
+      disablePointerEvents: false,
+      showSplitWindowComponent: false,
+      mouseOnSplitWindowComponent: false,
     }
   },
   beforeMount() {
     this.$emit('rendered');
     this.windowObject = this.globalState.openWindows.find(window => window.id === this.windowId);
-    this.applicationWindowSize = {
-      width: this.globalState.browserWindowSize.WIDTH,
-      height: this.globalState.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED
-    }
+    this.customStylingValuesWindow.WIDTH = `${this.globalState.browserWindowSize.WIDTH}px`;
+    this.customStylingValuesWindow.HEIGHT = `${this.globalState.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED}px`;
   },
   mounted() {
-    enableDragDropTouch();
-
-    this.$el.style.width = `${this.applicationWindowSize.width}px`;
-    this.$el.style.height = `${this.applicationWindowSize.height}px`;
-
     this.resizeObserver = new ResizeObserver(() => {
-      this.windowIsMaximized = this.getWindowIsMaximizedOrSplit();
+      this.windowEvents.maximized = this.getWindowIsMaximizedOrSplit();
     });
     this.resizeObserver.observe(this.$el);
   },
@@ -153,13 +161,6 @@ export default {
         this.windowOutOfBounds = newWindow.windowOutOfBounds;
         this.splitWindow();
       }
-    },
-    'globalState.browserWindowSize': {
-      handler() {
-        this.splitWindow();
-        this.splitCurrentWindow(this.lastWindowSplitPosition ?? null);
-      },
-      deep: true
     },
     'globalState.openTabsName': {
       handler(newValue) {
@@ -193,23 +194,23 @@ export default {
   },
   methods: {
     maximizeWindow() {
-      const windowWidth = this.$el.getBoundingClientRect().width;
-      const windowHeight = this.$el.getBoundingClientRect().height;
+      const windowWidth = this.customStylingValuesWindow.WIDTH;
+      const windowHeight = this.customStylingValuesWindow.HEIGHT;
       const browserWindowWidth = this.globalState.browserWindowSize.WIDTH;
       const browserWindowHeight = this.globalState.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED
 
       this.showSplitWindowComponent = false;
 
       if (windowWidth === browserWindowWidth && windowHeight === browserWindowHeight) {
-        this.$el.style.width = '60%';
-        this.$el.style.height = '80%';
+        this.customStylingValuesWindow.WIDTH = '60%';
+        this.customStylingValuesWindow.HEIGHT = '80%';
         return;
       }
 
-      this.$el.style.width = `100%`;
-      this.$el.style.height = `${browserWindowHeight}px`;
-      this.$el.style.left = `0`;
-      this.$el.style.top = `0`;
+      this.customStylingValuesWindow.WIDTH = `100%`;
+      this.customStylingValuesWindow.HEIGHT = `${browserWindowHeight}px`;
+      this.customStylingValuesWindow.LEFT = `0`;
+      this.customStylingValuesWindow.TOP = `0`;
     },
     getWindowIsMaximizedOrSplit() {
       if (!this.$el) {
@@ -230,7 +231,7 @@ export default {
     mouseOverEventListeners(event) {
       event.preventDefault();
 
-      if (this.windowIsMoving === true) {
+      if (this.windowEvents.moving === true) {
         return;
       }
 
@@ -243,14 +244,14 @@ export default {
       const windowBorderSidePressed = this.returnPressedWindowBorderSide();
 
       if (windowBorderSidePressed) {
-        this.$el.style.cursor = `${windowBorderSidePressed}-resize`;
-        this.$el.style.userSelect = 'none';
+        this.customStylingValuesWindow.CURSOR = `${windowBorderSidePressed}-resize`;
+        this.customStylingValuesWindow.USER_SELECT = 'none';
         this.mouseOnResizeSpace = true;
       }
 
-      if (this.mouseOnResizeSpace === false && this.windowIsResizing === false) {
-        this.$el.style.cursor = 'auto';
-        this.$el.style.userSelect = 'auto';
+      if (this.mouseOnResizeSpace === false && this.windowEvents.resizing === false) {
+        this.customStylingValuesWindow.CURSOR = 'auto';
+        this.customStylingValuesWindow.USER_SELECT = 'auto';
         this.mouseOnResizeSpace = false;
       }
     },
@@ -269,7 +270,7 @@ export default {
       const onMove = (event) => {
         event.preventDefault();
         this.$emit('windowResizing', true);
-        this.windowIsResizing = true;
+        this.windowEvents.resizing = true;
         const minWidthPercentage = parseFloat(this.customStylingValuesWindow.MINIMUM_WIDTH);
         const minWidthPixels = (minWidthPercentage / 100) * this.globalState.browserWindowSize.WIDTH;
 
@@ -277,7 +278,7 @@ export default {
         const minHeightPixels = (minHeightPercentage / 100) * this.globalState.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED;
 
         const east = () => {
-          this.$el.style.width = `${(windowWidth - (this.mouseDownWindowVariables.oldPositionX - event.clientX))}px`;
+          this.customStylingValuesWindow.WIDTH = `${(windowWidth - (this.mouseDownWindowVariables.oldPositionX - event.clientX))}px`;
         }
 
         const west = () => {
@@ -288,12 +289,12 @@ export default {
             return;
           }
 
-          this.$el.style.width = `${newWidth}px`
-          this.$el.style.left = `${event.clientX}px`
+          this.customStylingValuesWindow.WIDTH = `${newWidth}px`
+          this.customStylingValuesWindow.LEFT = `${event.clientX}px`
         }
 
         const south = () => {
-          this.$el.style.height = `${(windowHeight - (this.mouseDownWindowVariables.oldPositionY - event.clientY))}px`;
+          this.customStylingValuesWindow.HEIGHT = `${(windowHeight - (this.mouseDownWindowVariables.oldPositionY - event.clientY))}px`;
         }
 
         const north = () => {
@@ -304,8 +305,8 @@ export default {
             return;
           }
 
-          this.$el.style.height = `${newHeight}px`
-          this.$el.style.top = `${event.clientY}px`
+          this.customStylingValuesWindow.HEIGHT = `${newHeight}px`
+          this.customStylingValuesWindow.TOP = `${event.clientY}px`
         }
 
         switch (windowBorderSidePressed) {
@@ -351,7 +352,7 @@ export default {
 
       const onUp = () => {
         this.disablePointerEvents = false;
-        this.windowIsResizing = false;
+        this.windowEvents.resizing = false;
         this.$emit('windowResizing', false);
 
         document.removeEventListener('mousemove', onMove);
@@ -395,30 +396,29 @@ export default {
       document.addEventListener('touchend', this.onMouseUpHeader)
     },
     onMouseMoveHeader(event) {
-      this.windowIsMoving = true;
+      this.windowEvents.moving = true;
 
       let windowWidth = this.$el.getBoundingClientRect().width;
       let windowHeight = this.$el.getBoundingClientRect().height;
 
       if (windowWidth === this.globalState.browserWindowSize.WIDTH && windowHeight === this.globalState.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED) {
-        this.$el.style.left = `${event.clientX / 2}px`;
-        this.$el.style.top = `${event.clientY / 2}px`;
-        this.$el.style.width = '60%';
-        this.$el.style.height = '80%';
+        this.customStylingValuesWindow.LEFT = `${event.clientX / 2}px`;
+        this.customStylingValuesWindow.TOP = `${event.clientY / 2}px`;
+        this.customStylingValuesWindow.WIDTH = '60%';
+        this.customStylingValuesWindow.HEIGHT = '80%';
         return;
       }
 
       const newX = event.clientX;
       const newY = event.clientY;
 
-      const update = this.updateWindowOutOfBounds(newX, newY);
-      console.log(update);
+      this.updateWindowOutOfBounds(newX, newY);
 
       const deltaX = newX - this.mouseDownWindowVariables.oldPositionX;
       const deltaY = newY - this.mouseDownWindowVariables.oldPositionY;
 
-      this.$el.style.left = `${this.$el.offsetLeft + deltaX}px`;
-      this.$el.style.top = `${this.$el.offsetTop + deltaY}px`;
+      this.customStylingValuesWindow.LEFT = `${this.$el.offsetLeft + deltaX}px`;
+      this.customStylingValuesWindow.TOP = `${this.$el.offsetTop + deltaY}px`;
 
       this.mouseDownWindowVariables.oldPositionX = newX;
       this.mouseDownWindowVariables.oldPositionY = newY;
@@ -438,7 +438,7 @@ export default {
       return this.windowOutOfBounds;
     },
     onMouseUpHeader() {
-      this.windowIsMoving = false;
+      this.windowEvents.moving = false;
       const windowOutOfBounds = this.splitWindow();
       if (this.globalState.openWindows.length > 1) {
         const window = this.globalState.openWindows.find(element => element.id === this.windowId);
@@ -473,15 +473,18 @@ export default {
         case 'right': {
           this.UpdateWindowSizeAndPosition('50%', '50%', `${heightInPercentage}%`, 0);
           oppositeValue = 'left';
-        } break;
+        }
+          break;
         case 'left': {
           this.UpdateWindowSizeAndPosition(0, '50%', `${heightInPercentage}%`, 0);
           oppositeValue = 'right';
-        } break;
+        }
+          break;
         case 'top': {
           this.UpdateWindowSizeAndPosition(0, '100%', `${halfHeightInPercentage}%`, 0);
           oppositeValue = 'bottom';
-        } break;
+        }
+          break;
         case 'bottom': {
           this.UpdateWindowSizeAndPosition(0, '100%', `${halfHeightInPercentage}%`, `${halfHeightInPercentage}%`);
           oppositeValue = 'top';
@@ -491,10 +494,10 @@ export default {
       return oppositeValue;
     },
     UpdateWindowSizeAndPosition(left, width, height, top) {
-      this.$el.style.left = left;
-      this.$el.style.width = width;
-      this.$el.style.height = height;
-      this.$el.style.top = top;
+      this.customStylingValuesWindow.LEFT = left;
+      this.customStylingValuesWindow.WIDTH = width;
+      this.customStylingValuesWindow.HEIGHT = height;
+      this.customStylingValuesWindow.TOP = top;
       this.globalState.pushToTopOpenWindows(this.windowId);
     },
     splitCurrentWindow(position) {
@@ -505,7 +508,7 @@ export default {
       const heightTaskbarExcluded = this.globalState.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED;
       const heightInPercentage = (heightTaskbarExcluded / height) * 100;
       const halfHeightInPercentage = ((heightTaskbarExcluded / 2) / height) * 100;
-      this.lastWindowSplitPosition = position;
+
       switch (position) {
         case 'topLeft': {
           this.UpdateWindowSizeAndPosition(0, '50%', `${halfHeightInPercentage}%`, 0);
@@ -542,21 +545,21 @@ export default {
       }
     },
     onMouseenterMaximizeSvg() {
-      if (this.mouseleaveTimeoutId) {
-        clearTimeout(this.mouseleaveTimeoutId);
-        this.mouseleaveTimeoutId = null;
+      if (this.timeoutIds.mouseleave) {
+        clearTimeout(this.timeoutIds.mouseleave);
+        this.timeoutIds.mouseleave = null;
       }
-      if (this.mouseoverTimeoutId === null) {
-        this.mouseoverTimeoutId = setTimeout(() => {
+      if (this.timeoutIds.mouseenter === null) {
+        this.timeoutIds.mouseenter = setTimeout(() => {
           this.showSplitWindowComponent = true;
         }, 500);
       }
     },
     onMouseleaveMaximizeSvg() {
-      clearTimeout(this.mouseoverTimeoutId);
-      this.mouseoverTimeoutId = null;
+      clearTimeout(this.timeoutIds.mouseenter);
+      this.timeoutIds.mouseenter = null;
 
-      this.mouseleaveTimeoutId = setTimeout(() => {
+      this.timeoutIds.mouseleave = setTimeout(() => {
         if (this.mouseOnSplitWindowComponent === false) {
           this.showSplitWindowComponent = false;
         }
