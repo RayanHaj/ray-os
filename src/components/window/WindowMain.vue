@@ -235,8 +235,11 @@ export default {
 
       const windowBorderSidePressed = this.returnPressedWindowBorderSide();
 
-      if (windowBorderSidePressed) {
-        this.customStylingValuesWindow.CURSOR = `${windowBorderSidePressed}-resize`;
+      let cursorString = '';
+      windowBorderSidePressed.forEach(side => cursorString += side[0]);
+
+      if (windowBorderSidePressed.length > 0) {
+        this.customStylingValuesWindow.CURSOR = `${cursorString}-resize`;
         this.customStylingValuesWindow.USER_SELECT = 'none';
         this.mouseOnResizeSpace = true;
       }
@@ -248,10 +251,12 @@ export default {
       }
     },
     moveWindowOnMouseDownWindowCorners(event) {
-      const windowWidth = this.$el.getBoundingClientRect().width;
-      const windowHeight = this.$el.getBoundingClientRect().height;
-      const windowLeft = this.$el.getBoundingClientRect().left;
-      const windowTop = this.$el.getBoundingClientRect().top;
+      const dimensions = {
+        width: this.$el.getBoundingClientRect().width,
+        height: this.$el.getBoundingClientRect().height,
+        left: this.$el.getBoundingClientRect().left,
+        top: this.$el.getBoundingClientRect().top
+      }
 
       this.mousePositionVariables.oldPositionX = event.clientX;
       this.mousePositionVariables.oldPositionY = event.clientY;
@@ -262,84 +267,10 @@ export default {
 
       const onMove = (event) => {
         event.preventDefault();
-        this.$emit('windowResizing', true);
         this.windowEvents.resizing = true;
-        const minWidthPercentage = parseFloat(this.customStylingValuesWindow.MINIMUM_WIDTH);
-        const minWidthPixels = (minWidthPercentage / 100) * this.globalState.browserWindowSize.WIDTH;
+        this.$emit('windowResizing', true);
 
-        const minHeightPercentage = parseFloat(this.customStylingValuesWindow.MINIMUM_HEIGHT);
-        const minHeightPixels = (minHeightPercentage / 100) * this.globalState.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED;
-
-        const east = () => {
-          this.customStylingValuesWindow.WIDTH = `${(windowWidth - (this.mousePositionVariables.oldPositionX - event.clientX))}px`;
-        }
-
-        const west = () => {
-          const widthChange = windowLeft - event.clientX;
-          const newWidth = windowWidth + widthChange;
-
-          if (newWidth <= minWidthPixels) {
-            return;
-          }
-
-          this.customStylingValuesWindow.WIDTH = `${newWidth}px`
-          this.customStylingValuesWindow.LEFT = `${event.clientX}px`
-        }
-
-        const south = () => {
-          this.customStylingValuesWindow.HEIGHT = `${(windowHeight - (this.mousePositionVariables.oldPositionY - event.clientY))}px`;
-        }
-
-        const north = () => {
-          const heightChange = windowTop - event.clientY;
-          const newHeight = windowHeight + heightChange;
-
-          if (newHeight <= minHeightPixels) {
-            return;
-          }
-
-          this.customStylingValuesWindow.HEIGHT = `${newHeight}px`
-          this.customStylingValuesWindow.TOP = `${event.clientY}px`
-        }
-
-        switch (windowBorderSidePressed) {
-          case 'n': {
-            north();
-            break;
-          }
-          case 'e': {
-            east();
-            break;
-          }
-          case 's': {
-            south();
-            break;
-          }
-          case 'w': {
-            west();
-            break;
-          }
-          case 'ne': {
-            north();
-            east();
-            break;
-          }
-          case 'nw': {
-            north();
-            west();
-            break;
-          }
-          case 'se': {
-            south();
-            east();
-            break;
-          }
-          case 'sw': {
-            south();
-            west();
-            break;
-          }
-        }
+        this.resizeWindowFromCorner(windowBorderSidePressed, event, dimensions);
       }
 
       const onUp = () => {
@@ -357,21 +288,65 @@ export default {
       document.addEventListener('touchmove', onMove);
       document.addEventListener('touchend', onUp);
     },
+    resizeWindowFromCorner(side, event, dimensions) {
+      const minWidthPercentage = parseFloat(this.customStylingValuesWindow.MINIMUM_WIDTH);
+      const minWidthPixels = (minWidthPercentage / 100) * this.globalState.browserWindowSize.WIDTH;
+      const minHeightPercentage = parseFloat(this.customStylingValuesWindow.MINIMUM_HEIGHT);
+      const minHeightPixels = (minHeightPercentage / 100) * this.globalState.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED;
+
+      side.forEach(side => {
+        switch (side) {
+          case 'east': {
+            this.customStylingValuesWindow.WIDTH = `${(dimensions.width - (this.mousePositionVariables.oldPositionX - event.clientX))}px`;
+          }
+            break;
+          case 'west': {
+            const widthChange = dimensions.left - event.clientX;
+            const newWidth = dimensions.width + widthChange;
+
+            if (newWidth <= minWidthPixels) {
+              return;
+            }
+
+            this.customStylingValuesWindow.WIDTH = `${newWidth}px`
+            this.customStylingValuesWindow.LEFT = `${event.clientX}px`
+          }
+            break;
+          case 'south': {
+            this.customStylingValuesWindow.HEIGHT = `${(dimensions.height - (this.mousePositionVariables.oldPositionY - event.clientY))}px`;
+          }
+            break;
+          case 'north': {
+            const heightChange = dimensions.top - event.clientY;
+            const newHeight = dimensions.height + heightChange;
+
+            if (newHeight <= minHeightPixels) {
+              return;
+            }
+
+            this.customStylingValuesWindow.HEIGHT = `${newHeight}px`
+            this.customStylingValuesWindow.TOP = `${event.clientY}px`
+          }
+        }
+      });
+    },
     returnPressedWindowBorderSide() {
       const north = this.mousePositionVariables.positionY - this.WINDOW_RESIZE_AREA_SPACE.top <= 0;
       const east = this.mousePositionVariables.positionX + this.WINDOW_RESIZE_AREA_SPACE.right >= this.$el.getBoundingClientRect().width;
       const south = this.mousePositionVariables.positionY + this.WINDOW_RESIZE_AREA_SPACE.bottom >= this.$el.getBoundingClientRect().height;
       const west = this.mousePositionVariables.positionX - this.WINDOW_RESIZE_AREA_SPACE.left <= 0;
 
-      if (north && east) return 'ne';
-      if (north && west) return 'nw';
-      if (south && east) return 'se';
-      if (south && west) return 'sw';
+      if (north && east) return ['north', 'east'];
+      if (north && west) return ['north', 'west'];
+      if (south && east) return ['south', 'east'];
+      if (south && west) return ['south', 'west'];
 
-      if (north) return 'n';
-      if (east) return 'e';
-      if (south) return 's';
-      if (west) return 'w';
+      if (north) return ['north'];
+      if (east) return ['east'];
+      if (south) return ['south'];
+      if (west) return ['west'];
+
+      return [];
     },
     onMouseDownHeader(event) {
       if (this.mouseOnResizeSpace === true) {
