@@ -118,3 +118,20 @@ export function returnApplicationForFileType(type) {
 export function firstLetterToUpperCase(word) {
     return word[0].toUpperCase() + word.splice(1);
 }
+
+export function safeLocalStorageFetch(localStorageKey, returnType, fallbackValue) {
+    let error;
+    let value;
+
+    const item = window.localStorage.getItem(localStorageKey);
+
+    try {
+        const localStorageValue = JSON.parse(item);
+        value = typeof localStorageValue === returnType ? localStorageValue : fallbackValue;
+    } catch (e) {
+        error = e;
+        value = item ?? fallbackValue;
+    }
+
+    return {value, error};
+}

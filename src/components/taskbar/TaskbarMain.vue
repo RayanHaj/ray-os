@@ -61,8 +61,9 @@
 <script>
 import ImgComponent from "@/ui/img-component";
 import json from "@/assets/json/config.json";
-import {useGlobalState} from "@/stores/globalState";
+import {useWindowStore} from "@/stores/globalState";
 import OpenTabs from "@/components/taskbar/segments/OpenTabs";
+import {mapStores} from "pinia";
 
 export default {
   name: "taskbarFooter",
@@ -85,9 +86,7 @@ export default {
     };
   },
   computed: {
-    globalState() {
-      return useGlobalState();
-    }
+    ...mapStores(useWindowStore)
   },
   mounted() {
     this.updateDateTime();
@@ -103,7 +102,7 @@ export default {
   },
   components: {OpenTabs, ImgComponent},
   watch: {
-    'globalState.openTabs': {
+    'windowStore.openTabs': {
       handler(newValue) {
         this.setOpenTabs(newValue);
       },
@@ -121,11 +120,11 @@ export default {
       }
 
       this.db.getElementByName('files', applicationName).then(element => {
-        this.globalState.pushOpenWindow(element);
+        this.windowStore.pushOpenWindow(element);
       }).finally(() => this.showTabs(applicationName));
     },
     getHorizontalLineClass(name) {
-      return this.globalState.openWindows.some(window => window.name === name && !window.minimized) ?
+      return this.windowStore.openWindows.some(window => window.name === name && !window.minimized) ?
           'horizontal-line' : 'horizontal-line-minimized';
     },
     onMouseenterApplicationIcon(name) {
@@ -151,24 +150,24 @@ export default {
     },
     showTabs(name) {
       clearTimeout(this.mouseleaveTimeoutId);
-      this.globalState.openTabsName = name;
+      this.windowStore.openTabsName = name;
       this.showOpenTabs = true;
     },
     removeTabs() {
-      this.globalState.openTabsName = '';
+      this.windowStore.openTabsName = '';
       this.showOpenTabs = false;
       this.openTabs = [];
     },
     onClickTab(id) {
       if (!this.windowIsOpenById(id)) return;
 
-      this.globalState.pushToTopOpenWindows(id);
+      this.windowStore.pushToTopOpenWindows(id);
       this.$emit('removeMinimizeWindow', id);
 
       this.removeTabs();
     },
     onClickCloseTab(id) {
-      this.globalState.playCloseAnimation = {
+      this.windowStore.playCloseAnimation = {
         id: id,
         value: true
       };
@@ -178,10 +177,10 @@ export default {
       this.openTabs = tabs.sort((a, b) => a.id - b.id);
     },
     windowIsOpenById(id) {
-      return this.globalState.openWindows.some(window => window.id === id);
+      return this.windowStore.openWindows.some(window => window.id === id);
     },
     windowIsOpenByName(name) {
-      return this.globalState.openWindows.some(window => window.name === name)
+      return this.windowStore.openWindows.some(window => window.name === name)
     },
     updateDateTime() {
       function addLeadingZero(number) {

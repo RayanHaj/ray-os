@@ -1,123 +1,43 @@
 import {defineStore} from "pinia";
-import {returnApplicationForFileType} from "@/utils/util";
+import {returnApplicationForFileType, safeLocalStorageFetch} from "@/utils/util";
 
-export const useGlobalState = defineStore('globalState', {
+export const useWindowStore = defineStore('window', {
     state: () => ({
-        showGridOutlineDesktop: false,
         openWindows: [],
-        desktopFiles: [],
         openTabs: [],
-        playVideoObject: null,
-        taskbarFiles: null,
-        browserWindowSize: {
-            HEIGHT_TASKBAR_EXCLUDED: 0,
-            HEIGHT: 0,
-            WIDTH: 0,
-        },
-        startBlockGame: false,
-        playCloseAnimation: {},
         openTabsName: '',
-        backgroundColor: '',
-        wallpaper: '',
-        theme: '',
-
-        //DEBUG
-        DISABLE_START_ANIMATION: true
+        playCloseAnimation: {},
     }),
     actions: {
-        getShowGridOutlineDesktop() {
-            const showGridOutlineDesktopLS = window.localStorage.getItem('showGridOutlineDesktop');
-
-            if (this.showGridOutlineDesktop === false && showGridOutlineDesktopLS) {
-                this.showGridOutlineDesktop = showGridOutlineDesktopLS;
-            }
-
-            return JSON.parse(this.showGridOutlineDesktop);
-        },
-        setShowGridOutlineDesktop(value) {
-            this.showGridOutlineDesktop = value;
-            window.localStorage.setItem('showGridOutlineDesktop', value);
-        },
-        getBackgroundColor() {
-            const backgroundColorLS = window.localStorage.getItem('backgroundColor');
-
-            if (this.backgroundColor === '' && backgroundColorLS) {
-                this.backgroundColor = JSON.parse(backgroundColorLS);
-            }
-
-            return this.backgroundColor;
-        },
-        setBackgroundColor(value) {
-            this.backgroundColor = value;
-            window.localStorage.setItem('backgroundColor', JSON.stringify(value));
-        },
-        removeBackgroundColor() {
-            if (this.backgroundColor !== '') {
-                window.localStorage.removeItem('backgroundColor');
-                this.backgroundColor = '';
-            }
-        },
-        getWallpaper() {
-            const wallpaperLS = window.localStorage.getItem('wallpaper');
-            const backgroundColorLS = window.localStorage.getItem('backgroundColor');
-
-            if (this.wallpaper === '' && wallpaperLS) {
-                this.wallpaper = wallpaperLS;
-            } else if (this.wallpaper === '' && wallpaperLS === null && this.backgroundColor === '' && backgroundColorLS === null) {
-                this.setWallpaper('wallpaper_01.png');
-            }
-
-            return this.wallpaper;
-        },
-        setWallpaper(value) {
-            this.wallpaper = value;
-            window.localStorage.setItem('wallpaper', value);
-        },
-        removeWallpaper() {
-            if (this.wallpaper !== '') {
-                window.localStorage.removeItem('wallpaper');
-                this.wallpaper = '';
-            }
-        },
-        getTheme() {
-            const themeLS = window.localStorage.getItem('theme');
-            if (this.theme === '' && themeLS) {
-                this.theme = themeLS;
-            }
-
-            return this.theme;
-        },
-        setTheme(value) {
-            this.theme = value;
-            window.localStorage.setItem('theme', value);
-        },
         pushOpenWindow(element) {
-            if (typeof element === 'object') {
-                let id = 0;
-                let zIndex = 0;
-                if (this.openWindows.length > 0) {
-                    id = this.openWindows.length;
-                    zIndex = this.getHighestZIndex() + 1;
-                }
-
-                let windowName = element.name;
-                if (element.type !== 'Application') {
-                    windowName = returnApplicationForFileType(element.type);
-                }
-
-                const newWindowObject = {
-                    'id': id,
-                    "zIndex": zIndex,
-                    'name': windowName,
-                    'minimized': false,
-                    'fileProperties': element
-                }
-
-                this.openWindows.push(newWindowObject);
-                return newWindowObject.id;
-            } else {
+            if (typeof element !== 'object') {
                 console.error(`element: ${element} is not of type 'object'`)
+                return;
             }
+
+            let id = 0;
+            let zIndex = 0;
+
+            if (this.openWindows.length > 0) {
+                id = this.openWindows.length;
+                zIndex = this.getHighestZIndex() + 1;
+            }
+
+            let windowName = element.name;
+            if (element.type !== 'Application') {
+                windowName = returnApplicationForFileType(element.type);
+            }
+
+            const newWindowObject = {
+                'id': id,
+                "zIndex": zIndex,
+                'name': windowName,
+                'minimized': false,
+                'fileProperties': element
+            }
+
+            this.openWindows.push(newWindowObject);
+            return newWindowObject.id;
         },
         pushToTopOpenWindows(windowId) {
             const window = this.openWindows.find(window => Number(window.id) === Number(windowId));
@@ -163,4 +83,99 @@ export const useGlobalState = defineStore('globalState', {
             this.openWindows = this.openWindows.filter(window => window.id !== id);
         }
     }
+});
+
+export const useFileStore = defineStore('file', {
+    state: () => ({
+        desktopFiles: [],
+        taskbarFiles: []
+    })
+});
+
+export const usePreferencesStore = defineStore('preferences', {
+    state: () => ({
+        backgroundColor: '',
+        wallpaper: '',
+        theme: '',
+        showGridOutlineDesktop: false,
+        DISABLE_START_ANIMATION: true,
+    }),
+    actions: {
+        getShowGridOutlineDesktop() {
+            const {value, error} = safeLocalStorageFetch('showGridOutlineDesktop', 'boolean', false);
+            if (error) {
+                console.error('failed to fetch value from localStorage for localStorageKey', error);
+            }
+
+            return value;
+        },
+        setShowGridOutlineDesktop(value) {
+            if (typeof value !== 'boolean') return;
+            this.showGridOutlineDesktop = value;
+            window.localStorage.setItem('showGridOutlineDesktop', JSON.stringify(value));
+        },
+        getTheme() {
+            const {value, error} = safeLocalStorageFetch('theme', 'string', '');
+            if (error) {
+                console.error('failed to fetch value from localStorage for localStorageKey', error);
+            }
+
+            return value;
+        },
+        setTheme(value) {
+            this.theme = value;
+            window.localStorage.setItem('theme', value);
+        },
+        getBackgroundColor() {
+            const {value, error} = safeLocalStorageFetch('backgroundColor', 'object', '');
+            console.log(value)
+            if (error) {
+                console.error('failed to fetch value from localStorage for localStorageKey', error);
+            }
+
+            return value;
+        },
+        setBackgroundColor(value) {
+            if (typeof value !== 'object') return;
+            this.backgroundColor = value;
+            window.localStorage.setItem('backgroundColor', JSON.stringify(value));
+        },
+        removeBackgroundColor() {
+            window.localStorage.removeItem('backgroundColor');
+            this.backgroundColor = '';
+        },
+        getWallpaper() {
+            const {value, error} = safeLocalStorageFetch('wallpaper', 'string', '');
+            if (error) {
+                console.error('failed to fetch value from localStorage for localStorageKey', error);
+            }
+
+            return value;
+        },
+        setWallpaper(value) {
+            if (typeof value !== 'string') return;
+            this.wallpaper = value;
+            window.localStorage.setItem('wallpaper', value);
+        },
+        removeWallpaper() {
+            window.localStorage.removeItem('wallpaper');
+            this.wallpaper = '';
+        }
+    }
+});
+
+export const useApplicationStatesStore = defineStore('applicationStates', {
+    state: () => ({
+        currentVideoObject: {}
+    })
+});
+
+export const useGlobalStore = defineStore('global', {
+    state: () => ({
+        browserWindowSize: {
+            HEIGHT_TASKBAR_EXCLUDED: 0,
+            HEIGHT: 0,
+            WIDTH: 0,
+        },
+    })
 })

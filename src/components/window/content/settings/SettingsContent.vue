@@ -21,13 +21,13 @@
       <div v-show="selectedOption === 'background color'" class="background-color-wrapper">
         <div class="background-color-title-selected-wrapper">
           <div class="background-color-title">{{ selectedOption }}</div>
-          <div class="selected-background-color">{{ globalState.getBackgroundColor().name }}</div>
+          <div class="selected-background-color">{{ preferencesStore.getBackgroundColor()?.name }}</div>
         </div>
         <div class="color-grid" ref="colorGrid">
           <div class="background-color-list-item-wrapper" v-for="object in colors" :key="object.color">
             <div :id="object.name" class="background-color" ref="backgroundColor"
                  :style="{ 'background-color': object.color }"
-                 :class="{ 'selected': globalState.getBackgroundColor() === object }" @click="updateBackgroundColor(object)">
+                 :class="{ 'selected': preferencesStore.getBackgroundColor() === object }" @click="updateBackgroundColor(object)">
               <div class="color-name" ref="colorName"> {{ object.name }} </div>
             </div>
           </div>
@@ -42,7 +42,7 @@
                ref="wallpaper"
                v-for="wallpaper in wallpapers"
                :key="wallpaper"
-               :class="{ 'selected': globalState.getWallpaper() === wallpaper }"
+               :class="{ 'selected': preferencesStore.getWallpaper() === wallpaper }"
                @click="updateWallpaper(wallpaper)">
             <img class="wallpaper-image" :src="getImgUrl(wallpaper)" :alt="wallpaper" draggable="false">
           </div>
@@ -58,14 +58,8 @@
       </div>
       <div v-show="selectedOption === 'desktop grid'" class="desktop-grid-options-wrapper">
         <input type="checkbox"
-               :checked="globalState.getShowGridOutlineDesktop() === true"
-               @change="globalState.setShowGridOutlineDesktop($event.target.checked)"
-        >
-      </div>
-      <div v-show="selectedOption === 'enable block game'" class="desktop-grid-options-wrapper">
-        <input type="checkbox"
-               :checked="globalState.startBlockGame === true"
-               @change="globalState.startBlockGame = $event.target.checked"
+               :checked="preferencesStore.getShowGridOutlineDesktop() === true"
+               @change="preferencesStore.setShowGridOutlineDesktop($event.target.checked)"
         >
       </div>
     </div>
@@ -75,7 +69,8 @@
 <script>
 import json from '@/assets/json/config.json'
 import SvgComponent from "@/ui/svg-component";
-import { useGlobalState } from "@/stores/globalState";
+import {usePreferencesStore} from "@/stores/globalState";
+import {mapStores} from "pinia";
 
 export default {
   name: "settings-window",
@@ -102,7 +97,7 @@ export default {
   },
   mounted() {
     this.$refs.themePickerOptions.forEach(element => {
-      const theme = this.globalState.getTheme();
+      const theme = this.preferencesStore.getTheme();
       if (theme === element.value) {
         element.selected = true;
       }
@@ -158,18 +153,19 @@ export default {
       this.selectedOption = option;
     },
     updateBackgroundColor(newValue) {
-      this.globalState.removeWallpaper();
-      this.globalState.setBackgroundColor(newValue);
+      this.preferencesStore.removeWallpaper();
+      this.preferencesStore.setBackgroundColor(newValue);
     },
     updateWallpaper(newValue) {
-      this.globalState.removeBackgroundColor();
-      this.globalState.setWallpaper(newValue);
+      this.preferencesStore.removeBackgroundColor();
+      this.preferencesStore.setWallpaper(newValue);
     },
     updateTheme(newValue) {
-      this.globalState.setTheme(newValue);
+      this.preferencesStore.setTheme(newValue);
     }
   },
   computed: {
+    ...mapStores(usePreferencesStore),
     getOptions() {
       const filter = () => {
         return this.options.filter((option) => {
@@ -186,10 +182,7 @@ export default {
       }
 
       return this.options;
-    },
-    globalState() {
-      return useGlobalState();
-    },
+    }
   }
 }
 </script>

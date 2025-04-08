@@ -81,10 +81,11 @@
   </section>
 </template>
 <script>
-import {useGlobalState} from "@/stores/globalState";
+import {useApplicationStatesStore, useWindowStore} from "@/stores/globalState";
 import ImgComponent from "@/ui/img-component";
 import SvgComponent from "@/ui/svg-component";
 import ContextMenu from "@/ui/ContextMenu.vue";
+import {mapStores} from "pinia";
 
 export default {
   name: 'ContentGrid',
@@ -104,9 +105,7 @@ export default {
     }
   },
   computed: {
-    globalState() {
-      return useGlobalState();
-    }
+    ...mapStores(useWindowStore, useApplicationStatesStore),
   },
   data() {
     return {
@@ -184,19 +183,19 @@ export default {
       if (file) {
         switch (file.type) {
           case 'video/mp4': {
-            const videoPlayerId = this.globalState.getHighestZIndex();
-            this.globalState.playVideoObject = {
+            const videoPlayerId = this.windowStore.getHighestZIndex();
+            this.applicationStatesStore.playVideoObject = {
               id: videoPlayerId,
               video: file
             };
             this.db.getElementByName('files', 'Video Player').then(element => {
-              this.globalState.pushOpenWindow(element);
+              this.windowStore.pushOpenWindow(element);
             });
           }
             break;
           case 'Application': {
             this.db.getElementByName('files', file.name).then(element => {
-              this.globalState.pushOpenWindow(element)
+              this.windowStore.pushOpenWindow(element)
             });
           }
         }

@@ -5,7 +5,6 @@
 </template>
 <script>
 import ContentGrid from "@/ui/ContentGrid";
-import {useGlobalState} from "@/stores/globalState";
 import config from "@/assets/json/config"
 export default {
   name: "file-explorer-window",
@@ -17,12 +16,6 @@ export default {
       currentDirectory: config.rootDirectory
     }
   },
-  computed: {
-    globalState() {
-      return useGlobalState();
-    },
-  },
-
   mounted() {
     const defaultDirectory = {
       id: 1,
@@ -31,11 +24,6 @@ export default {
     }
 
     this.list.push(defaultDirectory);
-  },
-
-  methods: {
-    playAudio() {
-    }
   }
 }
 </script>

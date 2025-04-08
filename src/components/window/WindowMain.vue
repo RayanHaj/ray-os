@@ -48,9 +48,10 @@
 
 <script>
 import ContentMain from "@/components/window/content/ContentMain";
-import {useGlobalState} from "@/stores/globalState";
+import {useApplicationStatesStore, useGlobalStore, useWindowStore} from "@/stores/globalState";
 import SplitWindowsComponent from "@/ui/split-windows-component";
 import WindowHeader from "@/components/window/elements/windowHeader.vue";
+import {mapStores} from "pinia";
 
 export default {
   name: "application-window",
@@ -117,9 +118,9 @@ export default {
   },
   beforeMount() {
     this.$emit('rendered');
-    this.windowObject = this.globalState.openWindows.find(window => window.id === this.windowId);
-    this.customStylingValuesWindow.WIDTH = `${this.globalState.browserWindowSize.WIDTH}px`;
-    this.customStylingValuesWindow.HEIGHT = `${this.globalState.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED}px`;
+    this.windowObject = this.windowStore.openWindows.find(window => window.id === this.windowId);
+    this.customStylingValuesWindow.WIDTH = `${this.globalStore.browserWindowSize.WIDTH}px`;
+    this.customStylingValuesWindow.HEIGHT = `${this.globalStore.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED}px`;
   },
   mounted() {
     this.resizeObserver = new ResizeObserver(() => {
@@ -154,33 +155,31 @@ export default {
         this.splitWindow();
       }
     },
-    'globalState.openTabsName': {
+    'windowStore.openTabsName': {
       handler(newValue) {
         if (this.windowObject.name === newValue) {
-          this.globalState.pushToOpenTabs(newValue);
+          this.windowStore.pushToOpenTabs(newValue);
         }
       }
     },
-    'globalState.playCloseAnimation': {
+    'windowStore.playCloseAnimation': {
       handler(newValue) {
         if (newValue.id === this.windowObject.id && newValue.value === true) {
           this.playCloseAnimation().then(() => {
-            this.globalState.playCloseAnimation = {
+            this.windowStore.playCloseAnimation = {
               id: null,
               value: false
             };
-            this.globalState.closeOpenWindowByWindowId(newValue.id);
+            this.windowStore.closeOpenWindowByWindowId(newValue.id);
           });
         }
       }
     }
   },
   computed: {
-    globalState() {
-      return useGlobalState();
-    },
+    ...mapStores(useWindowStore, useGlobalStore, useApplicationStatesStore),
     getZIndex() {
-      const window = this.globalState.openWindows.find(window => Number(window.id) === Number(this.windowId));
+      const window = this.windowStore.openWindows.find(window => Number(window.id) === Number(this.windowId));
       return window.zIndex;
     }
   },
@@ -188,8 +187,8 @@ export default {
     maximizeWindow() {
       const windowWidth = this.customStylingValuesWindow.WIDTH;
       const windowHeight = this.customStylingValuesWindow.HEIGHT;
-      const browserWindowWidth = this.globalState.browserWindowSize.WIDTH;
-      const browserWindowHeight = this.globalState.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED
+      const browserWindowWidth = this.globalStore.browserWindowSize.WIDTH;
+      const browserWindowHeight = this.globalStore.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED
 
       this.showSplitWindowComponent = false;
 
@@ -210,8 +209,8 @@ export default {
       }
       const windowWidth = this.$el.getBoundingClientRect().width;
       const windowHeight = this.$el.getBoundingClientRect().height;
-      const browserWindowWidth = this.globalState.browserWindowSize.WIDTH;
-      const browserWindowHeight = this.globalState.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED;
+      const browserWindowWidth = this.globalStore.browserWindowSize.WIDTH;
+      const browserWindowHeight = this.globalStore.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED;
 
       return (
           (windowWidth === browserWindowWidth && windowHeight === browserWindowHeight) ||
@@ -290,9 +289,9 @@ export default {
     },
     resizeWindowFromCorner(side, event, dimensions) {
       const minWidthPercentage = parseFloat(this.customStylingValuesWindow.MINIMUM_WIDTH);
-      const minWidthPixels = (minWidthPercentage / 100) * this.globalState.browserWindowSize.WIDTH;
+      const minWidthPixels = (minWidthPercentage / 100) * this.globalStore.browserWindowSize.WIDTH;
       const minHeightPercentage = parseFloat(this.customStylingValuesWindow.MINIMUM_HEIGHT);
-      const minHeightPixels = (minHeightPercentage / 100) * this.globalState.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED;
+      const minHeightPixels = (minHeightPercentage / 100) * this.globalStore.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED;
 
       side.forEach(side => {
         switch (side) {
@@ -367,7 +366,7 @@ export default {
       let windowWidth = this.$el.getBoundingClientRect().width;
       let windowHeight = this.$el.getBoundingClientRect().height;
 
-      if (windowWidth === this.globalState.browserWindowSize.WIDTH && windowHeight === this.globalState.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED) {
+      if (windowWidth === this.globalStore.browserWindowSize.WIDTH && windowHeight === this.globalStore.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED) {
         this.customStylingValuesWindow.LEFT = `${event.clientX / 2}px`;
         this.customStylingValuesWindow.TOP = `${event.clientY / 2}px`;
         this.customStylingValuesWindow.WIDTH = '60%';
@@ -390,9 +389,9 @@ export default {
       this.mousePositionVariables.oldPositionY = newY;
     },
     updateWindowOutOfBounds(x, y) {
-      if (y >= this.globalState.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED - 1)
+      if (y >= this.globalStore.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED - 1)
         this.windowOutOfBounds = 'bottom';
-      else if (x >= this.globalState.browserWindowSize.WIDTH - 1)
+      else if (x >= this.globalStore.browserWindowSize.WIDTH - 1)
         this.windowOutOfBounds = 'right';
       else if (y <= 1)
         this.windowOutOfBounds = 'top';
@@ -406,13 +405,13 @@ export default {
     onMouseUpHeader() {
       this.windowEvents.moving = false;
       const windowOutOfBounds = this.splitWindow();
-      if (this.globalState.openWindows.length > 1) {
-        const window = this.globalState.openWindows.find(element => element.id === this.windowId);
+      if (this.windowStore.openWindows.length > 1) {
+        const window = this.windowStore.openWindows.find(element => element.id === this.windowId);
         if (window === undefined) {
           return;
         }
 
-        const splitWindow = this.globalState.openWindows.find(element => element.zIndex === (window.zIndex + 1) || element.zIndex === (window.zIndex - 1));
+        const splitWindow = this.windowStore.openWindows.find(element => element.zIndex === (window.zIndex + 1) || element.zIndex === (window.zIndex - 1));
         if (splitWindow === undefined) {
           return;
         }
@@ -429,8 +428,8 @@ export default {
       document.removeEventListener('touchend', this.onMouseUpHeader);
     },
     splitWindow() {
-      const height = this.globalState.browserWindowSize.HEIGHT;
-      const heightTaskbarExcluded = this.globalState.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED;
+      const height = this.globalStore.browserWindowSize.HEIGHT;
+      const heightTaskbarExcluded = this.globalStore.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED;
       const heightInPercentage = (heightTaskbarExcluded / height) * 100;
       const halfHeightInPercentage = ((heightTaskbarExcluded / 2) / height) * 100;
 
@@ -464,14 +463,14 @@ export default {
       this.customStylingValuesWindow.WIDTH = width;
       this.customStylingValuesWindow.HEIGHT = height;
       this.customStylingValuesWindow.TOP = top;
-      this.globalState.pushToTopOpenWindows(this.windowId);
+      this.windowStore.pushToTopOpenWindows(this.windowId);
     },
     splitCurrentWindow(position) {
       if (position === null) {
         return;
       }
-      const height = this.globalState.browserWindowSize.HEIGHT;
-      const heightTaskbarExcluded = this.globalState.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED;
+      const height = this.globalStore.browserWindowSize.HEIGHT;
+      const heightTaskbarExcluded = this.globalStore.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED;
       const heightInPercentage = (heightTaskbarExcluded / height) * 100;
       const halfHeightInPercentage = ((heightTaskbarExcluded / 2) / height) * 100;
 
@@ -543,16 +542,16 @@ export default {
     },
     closeWindow() {
       if (this.windowObject.name === 'Video Player') {
-        this.globalState.playVideoObject = null;
+        this.applicationStatesStore.playVideoObject = null;
       }
 
-      this.globalState.playCloseAnimation = {
+      this.windowStore.playCloseAnimation = {
         id: this.windowObject.id,
         value: true
       }
     },
     onClickWindow(event) {
-      this.globalState.pushToTopOpenWindows(event.currentTarget.id);
+      this.windowStore.pushToTopOpenWindows(event.currentTarget.id);
     },
     async playCloseAnimation() {
       return new Promise((resolve) => {

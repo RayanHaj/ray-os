@@ -6,14 +6,14 @@
                 maxWidth: `${TILE_WIDTH}px`,
                 maxHeight: `${TILE_HEIGHT}px`
               }"
-       :title="globalState.desktopFiles[tilePosition]?.overflowing === true ? globalState.desktopFiles[tilePosition]?.name : null"
+       :title="fileStore.desktopFiles[tilePosition]?.overflowing === true ? fileStore.desktopFiles[tilePosition]?.name : null"
   >
     <div class="application-img" ref="applicationImg">
-      <img :src="globalState.desktopFiles[tilePosition]?.imageUrl" :width="IMAGE_WIDTH"
-           :height="IMAGE_HEIGHT" :alt="globalState.desktopFiles[tilePosition]?.imageUrl">
+      <img :src="fileStore.desktopFiles[tilePosition]?.imageUrl" :width="IMAGE_WIDTH"
+           :height="IMAGE_HEIGHT" :alt="fileStore.desktopFiles[tilePosition]?.imageUrl">
     </div>
     <div class="application-name" ref="applicationName"
-         :class="{overflowing: globalState.desktopFiles[tilePosition]?.overflowing}"
+         :class="{overflowing: fileStore.desktopFiles[tilePosition]?.overflowing}"
          :style="{ fontSize: `${TILE_NAME_FONT_SIZE}px` }"
     >
       {{ getName() }}
@@ -22,7 +22,8 @@
 </template>
 
 <script>
-import {useGlobalState} from "@/stores/globalState";
+import {useFileStore, useWindowStore} from "@/stores/globalState";
+import {mapStores} from "pinia";
 
 export default {
   name: "TileContent",
@@ -42,13 +43,11 @@ export default {
     }
   },
   computed: {
-    globalState() {
-      return useGlobalState();
-    }
+    ...mapStores(useWindowStore, useFileStore)
   },
   methods: {
     getName() {
-      const desktopFile = this.globalState.desktopFiles[this.tilePosition]
+      const desktopFile = this.fileStore.desktopFiles[this.tilePosition]
       if (typeof desktopFile === 'undefined') {
         return;
       }

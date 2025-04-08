@@ -54,7 +54,7 @@
         @cm_primary_0="onContextMenuCopy"
         @cm_primary_1="onContextMenuDelete"
         @cm_primary_2="onContextMenuPaste"
-        @cm_secondary_0="openApplication(globalState.desktopFiles[tileOnRightClick.id]?.name)"
+        @cm_secondary_0="openApplication(fileStore.desktopFiles[tileOnRightClick.id]?.name)"
         @cm_secondary_1="console.log('hello')"
         @cm_secondary_2="init()"
 
@@ -65,10 +65,11 @@
 
 <script>
 import {enableDragDropTouch} from "@/assets/libraries/drag-drop-touch.esm.min";
-import {useGlobalState} from "@/stores/globalState";
+import {useFileStore, useGlobalStore, usePreferencesStore, useWindowStore} from "@/stores/globalState";
 import {parseFileToDbFileObject} from "@/utils/util";
 import TileContent from "@/components/grid/TileContent";
 import ContextMenu from "@/ui/ContextMenu";
+import {mapStores} from "pinia";
 
 export default {
   name: "desktop-grid",
@@ -119,7 +120,7 @@ export default {
     }
   },
   watch: {
-    'globalState.browserWindowSize': {
+    'globalStore.browserWindowSize': {
       async handler() {
         await this.init();
       },
@@ -128,10 +129,10 @@ export default {
     windowResizing(newValue) {
       this.applicationWindowIsResizing = newValue;
     },
-    'globalState.showGridOutlineDesktop'() {
-      this.showTileBorders = this.globalState.getShowGridOutlineDesktop();
+    'preferencesStore.showGridOutlineDesktop'() {
+      this.showTileBorders = this.preferencesStore.getShowGridOutlineDesktop();
     },
-    'globalState.desktopFiles': {
+    'fileStore.desktopFiles': {
       handler() {
         this.$nextTick(() => {
           this.checkApplicationNameOverflow();
@@ -141,13 +142,11 @@ export default {
     }
   },
   computed: {
-    globalState() {
-      return useGlobalState();
-    }
+    ...mapStores(usePreferencesStore, useWindowStore, useGlobalStore, useFileStore)
   },
   methods: {
     async init() {
-      this.showTileBorders = this.globalState.getShowGridOutlineDesktop();
+      this.showTileBorders = this.preferencesStore.getShowGridOutlineDesktop();
       enableDragDropTouch();
       this.updateGridWidthHeight();
       await this.setDesktopTiles().then(() => this.isLoading = false);
@@ -155,7 +154,7 @@ export default {
       window.addEventListener('resize', this.checkApplicationNameOverflow);
     },
     updateGridWidthHeight() {
-      const browserWindowSize = this.globalState.browserWindowSize;
+      const browserWindowSize = this.globalStore.browserWindowSize;
       if (browserWindowSize.WIDTH !== null && browserWindowSize.HEIGHT !== null) {
         this.GRID_WIDTH = Math.floor(browserWindowSize.WIDTH / this.TILE_WIDTH);
         this.GRID_HEIGHT = Math.floor((browserWindowSize.HEIGHT / this.TILE_HEIGHT) - 0.5);
@@ -173,7 +172,7 @@ export default {
       for (let i = 0; i < this.GRID_WIDTH * this.GRID_HEIGHT; i++) {
         if (elements[i] !== undefined) {
           const imgUrl = URL.createObjectURL(elements[i].image);
-          this.globalState.desktopFiles[i] = {
+          this.fileStore.desktopFiles[i] = {
             'index': i,
             'name': elements[i].name,
             'imageUrl': imgUrl,
@@ -181,7 +180,7 @@ export default {
             'hovering': false
           };
         } else {
-          this.globalState.desktopFiles[i] = {
+          this.fileStore.desktopFiles[i] = {
             'index': i,
             'name': null,
             'imageUrl': null,
@@ -191,16 +190,17 @@ export default {
         }
       }
 
-      this.globalState.desktopFiles = this.globalState.desktopFiles.sort((a, b) => a.index - b.index);
+      this.fileStore.desktopFiles = this.fileStore.desktopFiles.sort((a, b) => a.index - b.index);
+      this.fileStore.desktopFiles = this.fileStore.desktopFiles.sort((a, b) => a.index - b.index);
     },
     onTileMouseenter(x, y) {
-      const element = this.globalState.desktopFiles[x * this.GRID_HEIGHT + y];
+      const element = this.fileStore.desktopFiles[x * this.GRID_HEIGHT + y];
       if (element === undefined) return;
       element.hovering = true;
     },
     onTileMouseleave(x, y) {
       this.tileOnHover = null;
-      const element = this.globalState.desktopFiles[x * this.GRID_HEIGHT + y];
+      const element = this.fileStore.desktopFiles[x * this.GRID_HEIGHT + y];
       if (element === undefined) return;
       element.hovering = false;
     },
@@ -213,7 +213,7 @@ export default {
     },
     onContextMenuPaste() {
       if (this.tileOnRightClick && this.copiedApplication) {
-        this.insertTile(Number(this.tileOnRightClick.id), this.globalState.desktopFiles[this.copiedApplication.id].name);
+        this.insertTile(Number(this.tileOnRightClick.id), this.fileStore.desktopFiles[this.copiedApplication.id].name);
       }
 
       this.contextMenuActive = false;
@@ -280,16 +280,16 @@ export default {
 
       this.draggedTile = {
         'index': Number(currentTile.id),
-        'name': this.globalState.desktopFiles[currentTile.id].name
+        'name': this.fileStore.desktopFiles[currentTile.id].name
       }
 
       this.createDragImage(currentTile.querySelector('.application-img'), event);
     },
     tileIsFilled(indexX, indexY) {
       return (
-          this.globalState.desktopFiles[indexX * this.GRID_HEIGHT + indexY] !== null &&
-          this.globalState.desktopFiles[indexX * this.GRID_HEIGHT + indexY]?.name !== null &&
-          this.globalState.desktopFiles[indexX * this.GRID_HEIGHT + indexY]?.imageUrl !== null
+          this.fileStore.desktopFiles[indexX * this.GRID_HEIGHT + indexY] !== null &&
+          this.fileStore.desktopFiles[indexX * this.GRID_HEIGHT + indexY]?.name !== null &&
+          this.fileStore.desktopFiles[indexX * this.GRID_HEIGHT + indexY]?.imageUrl !== null
       )
     },
     onClickContainer() {
@@ -308,7 +308,7 @@ export default {
       }
       if (e.ctrlKey && e.code === 'KeyV') {
         if (this.tileOnHover && this.copiedApplication) {
-          this.insertTile(Number(this.tileOnHover.id), this.globalState.desktopFiles[this.copiedApplication.id].name);
+          this.insertTile(Number(this.tileOnHover.id), this.fileStore.desktopFiles[this.copiedApplication.id].name);
         }
       }
     },
@@ -334,12 +334,12 @@ export default {
       }
 
       this.db.getElementByName('files', applicationName).then(element => {
-        this.globalState.pushOpenWindow(element);
+        this.windowStore.pushOpenWindow(element);
       });
     },
     deleteTile(index) {
-      if (typeof this.globalState.desktopFiles[index] !== 'undefined' && this.globalState.desktopFiles[index].name !== null) {
-        this.globalState.desktopFiles[index] = {
+      if (typeof this.fileStore.desktopFiles[index] !== 'undefined' && this.fileStore.desktopFiles[index].name !== null) {
+        this.fileStore.desktopFiles[index] = {
           'index': index,
           'name': null,
           'imageUrl': null,
@@ -349,9 +349,9 @@ export default {
       }
     },
     insertTile(index, name) {
-      if (typeof this.globalState.desktopFiles[index] !== 'undefined') {
+      if (typeof this.fileStore.desktopFiles[index] !== 'undefined') {
         this.db.getElementByName('files', name).then(element => {
-          this.globalState.desktopFiles[index] = {
+          this.fileStore.desktopFiles[index] = {
             'index': index,
             'name': name,
             'imageUrl': URL.createObjectURL(element.image),
@@ -385,7 +385,7 @@ export default {
         this.$refs.tile.forEach(tile => {
           const applicationNameElement = tile.querySelector('.application-name');
           if (applicationNameElement && applicationNameElement.clientWidth > tile.clientWidth) {
-            this.globalState.desktopFiles.map(element => {
+            this.fileStore.desktopFiles.map(element => {
               if (element.name === applicationNameElement.innerText) {
                 element.overflowing = true;
               }
@@ -395,7 +395,7 @@ export default {
       }
     },
     getFileFromTileByPosition(x, y) {
-      const file = this.globalState.desktopFiles[this.getTilePosition(x, y)]
+      const file = this.fileStore.desktopFiles[this.getTilePosition(x, y)]
 
       if (!file) {
         return null;

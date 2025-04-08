@@ -21,7 +21,8 @@
 </template>
 
 <script>
-import { useGlobalState } from "@/stores/globalState";
+import {useGlobalStore, usePreferencesStore} from "@/stores/globalState";
+import {mapStores} from "pinia";
 
 export default {
   name: "desktop-login",
@@ -36,14 +37,12 @@ export default {
     this.sound = new Audio(require(`@/assets/audio/typing-sound.mp3`));
   },
   computed: {
-    globalState() {
-      return useGlobalState();
-    },
+    ...mapStores(usePreferencesStore)
   },
   methods: {
     updateSettings() {
-      const backgroundColor = this.globalState.getBackgroundColor();
-      const wallpaper = this.globalState.getWallpaper();
+      const backgroundColor = this.preferencesStore.getBackgroundColor();
+      const wallpaper = this.preferencesStore.getWallpaper();
 
       if (wallpaper) {
         this.$refs.container.style.backgroundImage = `url(${require(`@/assets/images/desktopWallpapers/${wallpaper}`)})`;

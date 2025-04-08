@@ -21,7 +21,6 @@
 </template>
 
 <script>
-import {useGlobalState} from "@/stores/globalState";
 import json from "@/assets/json/config.json"
 
 export default {
@@ -40,11 +39,6 @@ export default {
       bottomTileIds: [],
       isLoading: false,
       reachedBottom: false,
-    }
-  },
-  computed: {
-    globalState() {
-      return useGlobalState();
     }
   },
   beforeMount() {

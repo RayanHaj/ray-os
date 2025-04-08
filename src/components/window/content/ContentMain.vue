@@ -14,7 +14,8 @@ import SereneSounds from "@/components/window/content/sereneSounds/SereneSoundsC
 import Calculator from "@/components/window/content/calculator/CalculatorContent";
 import VideoPlayer from "@/components/window/content/videoPlayer/VideoPlayerContent";
 import Games from "@/components/window/content/games/GameLauncher.vue";
-import { useGlobalState } from "@/stores/globalState";
+import {useWindowStore} from "@/stores/globalState";
+import {mapStores} from "pinia";
 
 export default {
   name: "window-content",
@@ -28,14 +29,6 @@ export default {
     Games
   },
   emits: ['moveCalculatorWindowToTopCorner'],
-  data() {
-    return {
-      windowObject: null
-    }
-  },
-  beforeMount() {
-    this.windowObject = this.globalState.openWindows.find(window => window.id === this.windowId);
-  },
   props: {
     windowId: {
       type: Number,
@@ -47,8 +40,10 @@ export default {
     }
   },
   computed: {
-    globalState() {
-      return useGlobalState();
+    ...mapStores(useWindowStore),
+
+    windowObject() {
+      return this.windowStore.openWindows.find(window => window.id === this.windowId);
     }
   }
 }

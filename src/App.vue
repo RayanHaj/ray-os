@@ -2,39 +2,32 @@
   <div :class="theme">
     <RouterView/>
   </div>
-</template>
+</template>:
 
 <script>
 
-import { useGlobalState } from "@/stores/globalState";
+import { mapStores } from "pinia";
+import {usePreferencesStore} from "@/stores/globalState";
 
 export default {
   name: 'App',
-  mounted() {
-    this.setOrUpdateTheme();
-  },
   data() {
     return {
-      theme: 'default',
+      theme: ''
     }
+  },
+  beforeMount() {
+    this.theme = this.preferencesStore.getTheme();
   },
   computed: {
-    globalState() {
-      return useGlobalState();
-    }
+    ...mapStores(usePreferencesStore)
   },
   watch: {
-    'globalState.theme'() {
-      this.setOrUpdateTheme();
-    }
-  },
-  methods: {
-    setOrUpdateTheme() {
-      const theme = this.globalState.getTheme();
-      if (theme !== '') {
-        this.theme = theme;
+    'preferencesStore.theme'() {
+      if (this.preferencesStore.theme !== '') {
+        this.theme = this.preferencesStore.theme;
       }
-    }
+    },
   }
 }
 </script>

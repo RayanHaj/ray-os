@@ -41,7 +41,8 @@
 
 <script>
 import SvgComponent from "@/ui/svg-component";
-import {useGlobalState} from "@/stores/globalState";
+import {useGlobalStore} from "@/stores/globalState";
+import {mapStores} from "pinia";
 
 export default {
   name: "ContextMenu",
@@ -112,18 +113,15 @@ export default {
     }
   },
   computed: {
-    globalState() {
-      return useGlobalState();
-    }
+    ...mapStores(useGlobalStore)
   },
   methods: {
     calculatePosition() {
-      console.log(this.globalState.browserWindowSize)
-      const conditionWidth = (this.position.x + this.CONTEXT_MENU_WIDTH + 25) > this.globalState.browserWindowSize.WIDTH;
-      const conditionHeight = (this.position.y + this.CONTEXT_MENU_HEIGHT + 20) > this.globalState.browserWindowSize.HEIGHT;
+      const conditionWidth = (this.position.x + this.CONTEXT_MENU_WIDTH + 25) > this.globalStore.browserWindowSize.WIDTH;
+      const conditionHeight = (this.position.y + this.CONTEXT_MENU_HEIGHT + 20) > this.globalStore.browserWindowSize.HEIGHT;
 
-      const leftValue = conditionWidth ? this.globalState.browserWindowSize.WIDTH - this.CONTEXT_MENU_WIDTH - 25 : this.position.x;
-      const topValue = conditionHeight ? this.globalState.browserWindowSize.HEIGHT = this.CONTEXT_MENU_HEIGHT - 25 : this.position.y;
+      const leftValue = conditionWidth ? this.globalStore.browserWindowSize.WIDTH - this.CONTEXT_MENU_WIDTH - 25 : this.position.x;
+      const topValue = conditionHeight ? this.globalStore.browserWindowSize.HEIGHT = this.CONTEXT_MENU_HEIGHT - 25 : this.position.y;
 
       this.leftPosition = leftValue;
       this.topPosition = topValue;
