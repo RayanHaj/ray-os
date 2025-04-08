@@ -1,5 +1,5 @@
 <template>
-  <div class="container" @click="$emit('clicked')">
+  <div class="background-color-container" @click="$emit('clicked')">
     <div class="toggle-buttons">
       <div class="wifi-toggle-wrapper">
         <div class="internet-toggle toggle-button btn">
@@ -119,7 +119,7 @@ export default {
 
 <style scoped>
 
-.container {
+.background-color-container {
   display: flex;
   flex-direction: column;
   gap: 40px;

@@ -50,7 +50,7 @@ html, body {
 
 h1, h2, h3, h4, h5, h6 {
   font-family: "Inter", sans-serif;
-  color: #e0e0e0;
+  color: var(--font-color);
   font-weight: 600;
   line-height: 1.2;
   margin: 0;

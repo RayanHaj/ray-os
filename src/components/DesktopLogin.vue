@@ -1,5 +1,5 @@
 <template>
-  <div class="container" ref="container">
+  <div class="background-color-container" ref="container">
     <div class="profile-wrapper">
       <div class="img-wrapper">
         <img src="@/assets/images/default-image.png" width="220" height="220" alt="profile-picture">
@@ -99,7 +99,7 @@ export default {
   color: white
 }
 
-.container {
+.background-color-container {
   display: flex;
   flex-direction: column;
   align-items: center;
