@@ -196,7 +196,7 @@ export default {
       }
 
       if (windowComponent.$el.style.display === 'none' && window.minimized === true) {
-        windowComponent.$el.style.display = 'block';
+        windowComponent.$el.style.display = 'flex';
         window.minimized = false;
         return;
       }

@@ -171,11 +171,9 @@ export default {
 
       for (let i = 0; i < this.GRID_WIDTH * this.GRID_HEIGHT; i++) {
         if (elements[i] !== undefined) {
-          const imgUrl = URL.createObjectURL(elements[i].image);
           this.fileStore.desktopFiles[i] = {
             'index': i,
             'name': elements[i].name,
-            'imageUrl': imgUrl,
             'overflowing': false,
             'hovering': false
           };
@@ -183,7 +181,6 @@ export default {
           this.fileStore.desktopFiles[i] = {
             'index': i,
             'name': null,
-            'imageUrl': null,
             'overflowing': false,
             'hovering': false
           };
@@ -226,10 +223,9 @@ export default {
       this.contextMenuActive = false;
     },
     async handleFileUpload(file, tile) {
-      const image = await this.db.getImageByFileType(file.type);
-      const object = parseFileToDbFileObject(file.name, file.type, image, file);
+      const object = parseFileToDbFileObject(file.name, file.type, file);
       const postedFile = await this.db.postElement('files', object);
-      const parsedObject = parseFileToDbFileObject(file.name, file.type, null, null, postedFile.id, true);
+      const parsedObject = parseFileToDbFileObject(file.name, file.type, null, postedFile.id, true);
       await this.db.postElement('desktopFiles', parsedObject);
       this.insertTile(Number(tile.id), object.name);
     },
@@ -288,8 +284,7 @@ export default {
     tileIsFilled(indexX, indexY) {
       return (
           this.fileStore.desktopFiles[indexX * this.GRID_HEIGHT + indexY] !== null &&
-          this.fileStore.desktopFiles[indexX * this.GRID_HEIGHT + indexY]?.name !== null &&
-          this.fileStore.desktopFiles[indexX * this.GRID_HEIGHT + indexY]?.imageUrl !== null
+          this.fileStore.desktopFiles[indexX * this.GRID_HEIGHT + indexY]?.name !== null
       )
     },
     onClickContainer() {
@@ -342,7 +337,6 @@ export default {
         this.fileStore.desktopFiles[index] = {
           'index': index,
           'name': null,
-          'imageUrl': null,
           'overflowing': false,
           'hovering': false
         }
@@ -350,15 +344,12 @@ export default {
     },
     insertTile(index, name) {
       if (typeof this.fileStore.desktopFiles[index] !== 'undefined') {
-        this.db.getElementByName('files', name).then(element => {
-          this.fileStore.desktopFiles[index] = {
-            'index': index,
-            'name': name,
-            'imageUrl': URL.createObjectURL(element.image),
-            'overflowing': false,
-            'hovering': false
-          }
-        });
+        this.fileStore.desktopFiles[index] = {
+          'index': index,
+          'name': name,
+          'overflowing': false,
+          'hovering': false
+        }
       }
     },
     createDragImage(imgElement, event) {

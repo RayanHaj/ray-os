@@ -63,7 +63,7 @@ export default class IndexedDb {
                         fetch(imgPath)
                             .then(response => response.blob())
                             .then(async blob => {
-                                const dbFileObject = parseFileToDbFileObject(name, 'Application', blob, null, null, false);
+                                const dbFileObject = parseFileToDbFileObject(name, 'Application', blob, null, false);
                                 await this.postElement('files', dbFileObject);
 
                                 if (name !== 'Video Player') {
@@ -71,7 +71,7 @@ export default class IndexedDb {
                                         const file = files.find(file => file.name === name);
 
                                         if (file) {
-                                            const dbFileReferenceObject = parseFileToDbFileObject(file.name, file.type, null, null, file.id, true);
+                                            const dbFileReferenceObject = parseFileToDbFileObject(file.name, file.type, null, file.id, true);
                                             await this.postElement('desktopFiles', dbFileReferenceObject);
                                             await this.postElement('taskbarFiles', dbFileReferenceObject);
                                         }
@@ -273,15 +273,6 @@ export default class IndexedDb {
                 reject(event.target.error);
             }
         });
-    }
-
-    async getImageByFileType(filetype) {
-        switch (filetype) {
-            case 'video/mp4': {
-                const object = await this.getElementByName('files', 'Video Player');
-                return object.image;
-            }
-        }
     }
 
     async getFilesByDirectoryFromFileSystem(directory) {

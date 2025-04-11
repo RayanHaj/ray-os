@@ -1,7 +1,7 @@
 <template>
   <section class="background-color-container">
     <div class="background-color-header">
-      <h1 class="background-color-title">Background color: {{ preferencesStore.getBackgroundColor()?.name }}</h1>
+      <h1 class="background-color-title">Background color: {{ stores.preferencesStore.getBackgroundColor()?.name }}</h1>
     </div>
     <div class="color-grid">
       <div class="background-colors" v-for="object in colors" :key="object.color">
@@ -14,14 +14,17 @@
   </section>
 </template>
 <script>
-  import {mapStores} from "pinia";
   import {usePreferencesStore} from "@/stores/globalState";
   import json from "@/assets/json/config.json";
 
   export default {
     name: 'settings-background-color',
     computed: {
-      ...mapStores(usePreferencesStore),
+      stores() {
+        return {
+          'preferencesStore': usePreferencesStore()
+        }
+      }
     },
     data() {
       return {
@@ -30,16 +33,17 @@
       }
     },
     beforeMount() {
-      const backgroundColor = this.preferencesStore.getBackgroundColor()
+      const backgroundColor = this.stores.preferencesStore.getBackgroundColor();
+
       if (backgroundColor !== undefined) {
         this.selectedColor = backgroundColor;
       }
     },
     methods: {
       updateBackgroundColor(newValue) {
-        this.preferencesStore.removeWallpaper();
-        this.preferencesStore.setBackgroundColor(newValue);
-        this.selectedColor = this.preferencesStore.getBackgroundColor();
+        this.stores.preferencesStore.removeWallpaper();
+        this.stores.preferencesStore.setBackgroundColor(newValue);
+        this.selectedColor = this.stores.preferencesStore.getBackgroundColor();
       },
     }
   }

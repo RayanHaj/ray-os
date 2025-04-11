@@ -43,9 +43,7 @@
           class="list-element"
           @contextmenu.prevent="onRightClickFile($event, element.id)"
       >
-        <ImgComponent v-if="element.type === 'video/mp4'" image-name="videoPlayer" :id="element" class="file-thumbnail"/>
-        <ImgComponent v-else-if="element.type === 'application'" :image-name="element.name" class="file-thumbnail"/>
-        <SvgComponent v-else svg-type="directory" class="file-thumbnail"/>
+        <SvgComponent :svg-type="getSvgName(element)" :custom-width="zoomValue" :custom-height="zoomValue"/>
 
         <input v-if="currentFileRenameId === element.id" type="text" class="file-name custom-input" :value="element.name.length > 70 ? `${element.name.substring(0, 70)}...` : element.name">
         <div v-else
@@ -82,14 +80,13 @@
 </template>
 <script>
 import {useApplicationStatesStore, useWindowStore} from "@/stores/globalState";
-import ImgComponent from "@/ui/img-component";
 import SvgComponent from "@/ui/svg-component";
 import ContextMenu from "@/ui/ContextMenu.vue";
 import {mapStores} from "pinia";
 
 export default {
   name: 'ContentGrid',
-  components: {ContextMenu, SvgComponent, ImgComponent},
+  components: {ContextMenu, SvgComponent},
   inject: ['db'],
   props: {
     path: {
@@ -301,6 +298,25 @@ export default {
       if (calculationFontSize > minFontSize) {
         this.FILE_NAME_FONT_SIZE = maxFontSize - ((this.maximumZoomValue / 10) - (this.zoomValue / 10));
       }
+    },
+    getSvgName(element) {
+      if (!element) return;
+
+      let svgName = null;
+      switch (element.type) {
+        case 'Application': {
+          svgName = `os${element.name[0].toUpperCase()}${element.name.replaceAll(' ', '').slice(1)}`;
+        } break;
+        case 'video/mp4': {
+          svgName = `osPlay`;
+        } break;
+      }
+
+      if (svgName === null) {
+        svgName = 'osFileExplorer'
+      }
+
+      return svgName;
     }
   }
 }

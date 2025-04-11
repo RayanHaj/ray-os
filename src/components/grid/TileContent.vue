@@ -9,8 +9,11 @@
        :title="fileStore.desktopFiles[tilePosition]?.overflowing === true ? fileStore.desktopFiles[tilePosition]?.name : null"
   >
     <div class="application-img" ref="applicationImg">
-      <img :src="fileStore.desktopFiles[tilePosition]?.imageUrl" :width="IMAGE_WIDTH"
-           :height="IMAGE_HEIGHT" :alt="fileStore.desktopFiles[tilePosition]?.imageUrl">
+      <svg-component
+          :svg-type="getSvgName(tilePosition)"
+          :custom-width="IMAGE_WIDTH"
+          :custom-height="IMAGE_HEIGHT"
+      />
     </div>
     <div class="application-name" ref="applicationName"
          :class="{overflowing: fileStore.desktopFiles[tilePosition]?.overflowing}"
@@ -24,9 +27,11 @@
 <script>
 import {useFileStore, useWindowStore} from "@/stores/globalState";
 import {mapStores} from "pinia";
+import SvgComponent from "@/ui/svg-component.vue";
 
 export default {
   name: "TileContent",
+  components: {SvgComponent},
   props: {
     tilePosition: {
       type: Number,
@@ -41,6 +46,10 @@ export default {
       IMAGE_HEIGHT: 50,
       TILE_NAME_FONT_SIZE: 10
     }
+  },
+  mounted() {
+    const tilePosition = 1
+    console.log(`os${this.fileStore.desktopFiles[tilePosition]?.name[0].toUpperCase()}${this.fileStore.desktopFiles[tilePosition]?.name.replaceAll(' ', '').slice(1)}`)
   },
   computed: {
     ...mapStores(useWindowStore, useFileStore)
@@ -57,6 +66,16 @@ export default {
       }
 
       return desktopFile.name;
+    },
+    getSvgName(tilePosition) {
+      const applicationName = this.fileStore.desktopFiles[tilePosition]?.name;
+      if (!applicationName) {
+        return;
+      }
+      if (applicationName.includes('.mp4')) {
+        return 'osPlay';
+      }
+      return `os${applicationName[0].toUpperCase()}${applicationName.replaceAll(' ', '').slice(1)}`;
     }
   }
 }

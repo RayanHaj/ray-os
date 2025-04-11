@@ -30,13 +30,10 @@
     }
   ],
   "defaultApplicationNames": [
-    "Browser",
     "File Explorer",
     "Settings",
     "Serene Sounds",
-    "Calculator",
-    "Video Player",
-    "Games"
+    "Calculator"
   ],
   "rootDirectory": "My Files",
   "initFileSystem": [

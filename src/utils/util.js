@@ -66,7 +66,7 @@ export function parseCalculationString(calculation) {
     }
 }
 
-export function parseFileToDbFileObject(name, type, image, file, id, reference) {
+export function parseFileToDbFileObject(name, type, file, id, reference) {
     let object = null;
     switch (type) {
         case 'video/mp4':
@@ -82,7 +82,6 @@ export function parseFileToDbFileObject(name, type, image, file, id, reference) 
                     name: name,
                     type: type,
                     createdAt: new Date(),
-                    image: image,
                     file: file
                 }
             }
@@ -120,18 +119,26 @@ export function firstLetterToUpperCase(word) {
 }
 
 export function safeLocalStorageFetch(localStorageKey, returnType, fallbackValue) {
-    let error;
-    let value;
+    let value, error;
 
     const item = window.localStorage.getItem(localStorageKey);
+    if (item === null) {
+        return {fallbackValue, error}
+    }
 
     try {
         const localStorageValue = JSON.parse(item);
-        value = typeof localStorageValue === returnType ? localStorageValue : fallbackValue;
+
+        if (typeof localStorageValue !== returnType) {
+            error = `LocalStorage item type: ${typeof localStorageValue} is not the same as specified type: ${returnType}`;
+            value = fallbackValue;
+        } else {
+            value = localStorageValue;
+        }
     } catch (e) {
-        error = e;
-        value = item ?? fallbackValue;
+        value = item;
+        error = e.name !== 'SyntaxError' || typeof value === 'object' ? e : null;
     }
 
-    return {value, error};
+    return {value: value ?? fallbackValue, error};
 }

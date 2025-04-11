@@ -5,8 +5,8 @@
   >
     <div class="taskbar-items-left">
       <div class="app-icon">
-        <ImgComponent
-            image-name="home"
+        <svg-component
+            :svg-type="'osStart'"
             :custom-width="ICON_IMG_WIDTH"
             :custom-height="ICON_IMG_HEIGHT"
         />
@@ -35,10 +35,10 @@
         </div>
 
         <div class="image-wrapper">
-          <ImgComponent
-              :image-name="applicationName"
-              :custom-width="ICON_IMG_WIDTH"
-              :custom-height="ICON_IMG_HEIGHT"
+          <svg-component
+           :svg-type="getSvgName(applicationName)"
+           :custom-width="ICON_IMG_WIDTH"
+           :custom-height="ICON_IMG_HEIGHT"
           />
           <!-- Image underline -->
           <div :class="getHorizontalLineClass(applicationName)"
@@ -64,6 +64,7 @@ import json from "@/assets/json/config.json";
 import {useWindowStore} from "@/stores/globalState";
 import OpenTabs from "@/components/taskbar/segments/OpenTabs";
 import {mapStores} from "pinia";
+import SvgComponent from "@/ui/svg-component.vue";
 
 export default {
   name: "taskbarFooter",
@@ -100,7 +101,7 @@ export default {
       required: true
     }
   },
-  components: {OpenTabs, ImgComponent},
+  components: {SvgComponent, OpenTabs, ImgComponent},
   watch: {
     'windowStore.openTabs': {
       handler(newValue) {
@@ -190,6 +191,17 @@ export default {
       const date = new Date();
       this.date = `${addLeadingZero((date.getMonth() + 1))}/${addLeadingZero(date.getUTCDate())}/${date.getFullYear()}`;
       this.time = date.toLocaleString('en-US', {hour: 'numeric', minute: 'numeric', hour12: true});
+    },
+    getSvgName(name) {
+      if (!name) {
+        return;
+      }
+
+      if (name.includes('.mp4')) {
+        return 'osPlay';
+      }
+
+      return `os${name[0].toUpperCase()}${name.replaceAll(' ', '').slice(1)}`
     }
   },
 }

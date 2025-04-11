@@ -84,14 +84,12 @@ export const useWindowStore = defineStore('window', {
         }
     }
 });
-
 export const useFileStore = defineStore('file', {
     state: () => ({
         desktopFiles: [],
         taskbarFiles: []
     })
 });
-
 export const usePreferencesStore = defineStore('preferences', {
     state: () => ({
         backgroundColor: '',
@@ -120,6 +118,8 @@ export const usePreferencesStore = defineStore('preferences', {
                 console.error('failed to fetch value from localStorage for localStorageKey', error);
             }
 
+            console.log(value)
+
             return value;
         },
         setTheme(value) {
@@ -128,7 +128,6 @@ export const usePreferencesStore = defineStore('preferences', {
         },
         getBackgroundColor() {
             const {value, error} = safeLocalStorageFetch('backgroundColor', 'object', '');
-            console.log(value)
             if (error) {
                 console.error('failed to fetch value from localStorage for localStorageKey', error);
             }
@@ -163,13 +162,11 @@ export const usePreferencesStore = defineStore('preferences', {
         }
     }
 });
-
 export const useApplicationStatesStore = defineStore('applicationStates', {
     state: () => ({
         currentVideoObject: {}
     })
 });
-
 export const useGlobalStore = defineStore('global', {
     state: () => ({
         browserWindowSize: {
@@ -178,4 +175,4 @@ export const useGlobalStore = defineStore('global', {
             WIDTH: 0,
         },
     })
-})
+});

@@ -74,8 +74,7 @@ export default {
     isTileFillable(index) {
       return this.desktopFiles[index] !== null &&
           this.desktopFiles[index] !== undefined &&
-          this.desktopFiles[index]?.name !== null &&
-          this.desktopFiles[index]?.imageUrl !== null;
+          this.desktopFiles[index]?.name !== null
     },
     calculateBottomTileIds() {
       for (let indexX = 0; indexX < this.GRID_WIDTH; indexX++) {

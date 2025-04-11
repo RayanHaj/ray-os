@@ -15,47 +15,54 @@
         {{ option }}
       </li>
     </ul>
+
+<!--    <svg-component svg-type="osPlay" :custom-width="50" :custom-height="50" custom-color="white"/>-->
+<!--    <svg-component svg-type="fileExplorer" :custom-width="50" :custom-height="50" custom-color="white"/>-->
+<!--    <svg-component svg-type="sereneSounds" :custom-width="50" :custom-height="50" custom-color="white"/>-->
+<!--    <svg-component svg-type="calculator" :custom-width="50" :custom-height="50" custom-color="white"/>-->
+<!--    <svg-component svg-type="settings" :custom-width="50" :custom-height="50" custom-color="white"/>-->
+<!--    <svg-component svg-type="start" :custom-width="50" :custom-height="50" custom-color="white"/>-->
   </nav>
 </template>
 <script>
-  import SvgComponent from "@/ui/svg-component.vue";
+import SvgComponent from "@/ui/svg-component.vue";
 
-  export default {
-    name: 'settings-sidebar',
-    components: {SvgComponent},
-    computed: {
-      getOptions() {
-        const filter = () => {
-          return this.options.filter((option) => {
-            return option.includes(this.searchbarInput)
-          });
-        }
-
-        if (filter().length === 0) {
-          return ['no matches'];
-        }
-
-        if (this.searchbarInput.length !== 0) {
-          return filter();
-        }
-
-        return this.options;
+export default {
+  name: 'settings-sidebar',
+  components: {SvgComponent},
+  computed: {
+    getOptions() {
+      const filter = () => {
+        return this.options.filter((option) => {
+          return option.includes(this.searchbarInput)
+        });
       }
-    },
-    data() {
-      return {
-        searchbarInput: '',
-        selectedOption: '',
-        options: ['home', 'theme', 'background color', 'wallpaper', 'desktop grid', 'enable block game']
+
+      if (filter().length === 0) {
+        return ['no matches'];
       }
-    },
-    methods: {
-      onClickOption(option) {
-        this.selectedOption = option;
-        this.$emit('optionSelected', this.selectedOption);
+
+      if (this.searchbarInput.length !== 0) {
+        return filter();
       }
+
+      return this.options;
+    }
+  },
+  data() {
+    return {
+      searchbarInput: '',
+      selectedOption: '',
+      options: ['home', 'theme', 'background color', 'wallpaper', 'desktop grid', 'enable block game']
+    }
+  },
+  methods: {
+    onClickOption(option) {
+      this.selectedOption = option;
+      this.$emit('optionSelected', this.selectedOption);
     }
   }
+}
 </script>
 <style scoped>
 .sidebar {
@@ -67,14 +74,17 @@
   padding: 10px 0 0 10px;
   border-radius: 5px;
 }
+
 .search-wrapper {
   position: relative;
 }
+
 .search-svg {
   position: absolute;
   top: calc(50% - 10px);
   right: 8px;
 }
+
 .searchbar {
   width: 100%;
   padding: 7px;
@@ -84,10 +94,12 @@
   font-size: 15px;
   color: white;
 }
+
 .searchbar:focus {
   outline: none;
   border-color: var(--border-input-selected-color);
 }
+
 ul {
   display: flex;
   flex-direction: column;

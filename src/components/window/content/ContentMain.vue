@@ -9,11 +9,10 @@
 <script>
 import FileExplorer from "@/components/window/content/fileExplorer/FileExplorerContent";
 import Settings from "@/components/window/content/settings/SettingsContent";
-import Browser from "@/components/window/content/browser/BrowserContent";
 import SereneSounds from "@/components/window/content/sereneSounds/SereneSoundsContent";
 import Calculator from "@/components/window/content/calculator/CalculatorContent";
 import VideoPlayer from "@/components/window/content/videoPlayer/VideoPlayerContent";
-import Games from "@/components/window/content/games/GameLauncher.vue";
+// import Games from "@/components/window/content/games/GameLauncher.vue";
 import {useWindowStore} from "@/stores/globalState";
 import {mapStores} from "pinia";
 
@@ -21,12 +20,11 @@ export default {
   name: "window-content",
   components: {
     SereneSounds,
-    Browser,
     Settings,
     FileExplorer,
     Calculator,
     VideoPlayer,
-    Games
+    // Games
   },
   emits: ['moveCalculatorWindowToTopCorner'],
   props: {
