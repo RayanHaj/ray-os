@@ -121,11 +121,11 @@ export default class IndexedDb {
                         files.forEach(file => {
                             switch (file.type) {
                                 case 'video/mp4': {
-                                    this.addFileToDirectory(file.name, file.type, 'Videos');
+                                    this.addFileToDirectory(file.id, file.name, file.type, 'Videos');
                                 }
                                     break;
                                 case 'Application': {
-                                    this.addFileToDirectory(file.name, file.type, 'Applications');
+                                    this.addFileToDirectory(file.id, file.name, file.type, 'Applications');
                                 }
                                     break;
                             }
@@ -219,6 +219,118 @@ export default class IndexedDb {
         });
     }
 
+    async deleteFile(id) {
+        const storeName = 'files';
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction([storeName], 'readwrite');
+            const store = transaction.objectStore(storeName);
+            const request = store.delete(id);
+
+            request.onsuccess = () => {
+                resolve(`file: ${id} successfully deleted`);
+            }
+
+            request.onerror = event => {
+                reject(event.target.error);
+            }
+        });
+    }
+
+    async deleteDirectory(id) {
+        const storeName = 'fileSystem';
+
+        await this.recursiveChildrenDelete(id)
+
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction([storeName], 'readwrite');
+            const store = transaction.objectStore(storeName);
+            const request = store.delete(id);
+
+            request.onsuccess = async event => {
+                resolve(event.target.result);
+            }
+
+            request.onerror = event => {
+                reject(event.target.error);
+            }
+        });
+    }
+
+    async deleteChildReverenceFromParent(id, childId) {
+        return new Promise((resolve, reject) => {
+            const storeName = 'fileSystem';
+            const transaction = this.db.transaction([storeName], 'readwrite');
+            const store = transaction.objectStore(storeName);
+            const getParentRequest = store.get(id);
+
+            getParentRequest.onsuccess(event => {
+                const result = event.target.result;
+                result.children = result.children.filter(child => child.id === childId);
+                const putRequest = store.put(result);
+
+                putRequest.onsuccess = () => {
+                    resolve();
+                }
+
+                putRequest.onerror = () => {
+                    reject();
+                }
+            });
+        });
+    }
+
+    async recursiveChildrenDelete(id) {
+        let children = [];
+
+        try {
+            children = await this.getDirectoryChildren(id);
+        } catch (_) {
+            return;
+        }
+
+        for (const child of children) {
+            if (child.type === 'directory') {
+                console.dir({
+                    'children': child,
+                    'date': (new Date).getMilliseconds()
+                });
+                await this.deleteDirectory(child.id)
+            } else {
+                console.dir({
+                    'children': child,
+                    'date': (new Date).getMilliseconds()
+                });
+                await this.deleteFile(child.id)
+            }
+        }
+    }
+
+    async getDirectoryChildren(id) {
+        const storeName = 'fileSystem';
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction([storeName], 'readwrite');
+            const store = transaction.objectStore(storeName);
+            const request = store.get(id);
+
+            request.onsuccess = event => {
+                const children = event.target.result.children;
+                if (!children) {
+                    reject(null);
+                }
+
+                if (children.length > 0) {
+                    resolve(children);
+                }
+
+                reject(null);
+            }
+
+            request.onerror = event => {
+                reject(event.target.error);
+            }
+        });
+    }
+
     async getElementByType(storeName, type) {
         return new Promise((resolve, reject) => {
             const transaction = this.db.transaction([storeName], 'readonly');
@@ -303,7 +415,7 @@ export default class IndexedDb {
         });
     }
 
-    async addFileToDirectory(name, type, directoryName) {
+    async addFileToDirectory(id, name, type, directoryName) {
         return new Promise((resolve, reject) => {
             this.getDirectoriesByNameFileSystem(directoryName).then(directories => {
                 const transaction = this.db.transaction(['fileSystem'], 'readwrite');
@@ -314,6 +426,7 @@ export default class IndexedDb {
                     const element = event.target.result;
                     if (element) {
                         element.children.push({
+                            'id': id,
                             'type': type,
                             'name': name
                         });

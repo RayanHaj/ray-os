@@ -133,7 +133,7 @@ export default {
   },
   methods: {
     init() {
-      if (this.stores.preferencesStore.getBackgroundColor() !== '' && this.stores.preferencesStore.getBackgroundColor() !== null) {
+      if (this.stores.preferencesStore.getBackgroundColor() !== undefined) {
         this.setBackgroundColor();
       } else {
         this.setWallpaper();
@@ -150,18 +150,18 @@ export default {
     },
     setBackgroundColor() {
       let backgroundColor = this.stores.preferencesStore.getBackgroundColor();
-      this.stores.preferencesStore.removeWallpaper();
-
       console.log(backgroundColor)
+      this.stores.preferencesStore.removeWallpaper();
       this.$refs.desktop.style.backgroundImage = 'none'
       this.$refs.desktop.style.backgroundColor = backgroundColor.color;
     },
     setWallpaper() {
       let wallpaper = this.stores.preferencesStore.getWallpaper();
-      if (wallpaper === '') {
+      if (wallpaper === undefined) {
         this.stores.preferencesStore.setWallpaper(json.wallpapers[0]);
         wallpaper = json.wallpapers[0];
       }
+
       this.stores.preferencesStore.removeBackgroundColor();
 
       this.$refs.desktop.style.backgroundImage = `url(${require(`@/assets/images/desktopWallpapers/${wallpaper}`)})`;

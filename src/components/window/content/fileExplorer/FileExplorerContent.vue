@@ -4,7 +4,7 @@
   </div>
 </template>
 <script>
-import ContentGrid from "@/ui/ContentGrid";
+import ContentGrid from "@/components/window/content/fileExplorer/ContentGrid.vue";
 import config from "@/assets/json/config"
 export default {
   name: "file-explorer-window",

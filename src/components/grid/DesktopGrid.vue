@@ -60,6 +60,7 @@
 
         @close="contextMenuActive = false"
     />
+    <button @click="test">Click me</button>
   </section>
 </template>
 
@@ -151,6 +152,9 @@ export default {
     },
   },
   methods: {
+    async test() {
+      await this.db.deleteDirectory(1);
+    },
     async init() {
       this.showTileBorders = this.stores.preferencesStore.getShowGridOutlineDesktop();
       enableDragDropTouch();
@@ -234,6 +238,7 @@ export default {
       const parsedObject = parseFileToDbFileObject(file.name, file.type, null, postedFile.id, true);
       await this.db.postElement('desktopFiles', parsedObject);
       this.insertTile(Number(tile.id), object.name);
+      return postedFile.id;
     },
     async onTileDrop(event) {
       const currentTile = event.currentTarget;
@@ -261,14 +266,14 @@ export default {
 
         switch (file.type.toString()) {
           case 'video/mp4': {
-            await this.handleFileUpload(file, tile);
-            await this.db.addFileToDirectory(file.name, file.type, 'Videos');
+            const uploadedFileId = await this.handleFileUpload(file, tile);
+            await this.db.addFileToDirectory(uploadedFileId, file.name, file.type, 'Videos');
             break;
           }
           case 'image/png':
           case 'image/jpg': {
-            await this.handleFileUpload(file, tile);
-            await this.db.addFileToDirectory(file.name, file.type, 'Pictures');
+            const uploadedFileId = await this.handleFileUpload(file, tile);
+            await this.db.addFileToDirectory(uploadedFileId, file.name, file.type, 'Pictures');
             break;
           }
         }

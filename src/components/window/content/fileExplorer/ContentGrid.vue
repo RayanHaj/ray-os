@@ -41,7 +41,7 @@
             height: `${zoomValue}px`
           }"
           class="list-element"
-          @contextmenu.prevent="onRightClickFile($event, element.id)"
+          @contextmenu.prevent="onRightClickFile($event, element)"
       >
         <SvgComponent :svg-type="getSvgName(element)" :custom-width="zoomValue" :custom-height="zoomValue"/>
 
@@ -68,9 +68,9 @@
             {name: 'Restore applications', active: true}
         ]"
         @cm_primary_0="console.log('copyClicked')"
-        @cm_primary_1="console.log('deleteClicked')"
+        @cm_primary_1="onFileOrDirectoryDelete"
         @cm_primary_2="console.log('pasteClicked')"
-        @cm_secondary_0="currentFileRenameId = currentRightClickedElementId"
+        @cm_secondary_0="currentFileRenameId = currentRightClickedElement"
         @cm_secondary_1="console.log('hello')"
         @cm_secondary_2="console.log('restore')"
 
@@ -80,7 +80,7 @@
 </template>
 <script>
 import {useApplicationStatesStore, useWindowStore} from "@/stores/globalState";
-import SvgComponent from "@/ui/svg-component";
+import SvgComponent from "@/ui/svg-component.vue";
 import ContextMenu from "@/ui/ContextMenu.vue";
 
 export default {
@@ -119,7 +119,7 @@ export default {
       FILE_NAME_FONT_SIZE: 12,
       currentFileRenameId: 0,
       contextMenuActive: false,
-      currentRightClickedElementId: null,
+      currentRightClickedElement: null,
       onRightClickMousePosition: null
     }
   },
@@ -139,7 +139,7 @@ export default {
     this.contentList = this.list;
   },
   methods: {
-    onRightClickFile(e, id) {
+    onRightClickFile(e, element) {
       const rect = this.$el.getBoundingClientRect();
       this.onRightClickMousePosition = {
         x: e.clientX - rect.left,
@@ -147,7 +147,12 @@ export default {
       }
 
       this.contextMenuActive = true;
-      this.currentRightClickedElementId = id;
+      this.currentRightClickedElement = element;
+    },
+    async onFileOrDirectoryDelete() {
+      await this.db.deleteDirectory(this.currentRightClickedElement.id).then(async () => {
+        await this.openDirectoryOrFile({id: this.getPreviousDirectory().id});
+      });
     },
     async openDirectoryOrFile(element) {
       await this.db.getDirectoryById(element.id).then(async directory => {
@@ -166,6 +171,7 @@ export default {
         }
 
         directory.children.forEach(child => {
+          console.log(child)
           this.contentList.push(child);
         });
 

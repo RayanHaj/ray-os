@@ -46,7 +46,7 @@
 import json from '@/assets/json/config'
 import {useApplicationStatesStore, useWindowStore} from "@/stores/globalState";
 import SvgComponent from "@/ui/svg-component";
-import ContentGrid from "@/ui/ContentGrid";
+import ContentGrid from "@/components/window/content/fileExplorer/ContentGrid.vue";
 
 export default {
   name: "video-player-window",
