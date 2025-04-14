@@ -1,11 +1,11 @@
 <template>
   <div class="desktop" ref="desktop" :style="{ filter: `brightness(${desktopBrightnessValue}%)`}">
-    <OsLoader v-if="osLoaderFinished === false && this.preferencesStore.DISABLE_START_ANIMATION === false"
+    <OsLoader v-if="osLoaderFinished === false && this.stores.preferencesStore.DISABLE_START_ANIMATION === false"
               @finished="osLoaderFinished = true"
     />
-    <div v-show="osLoaderFinished === true || this.preferencesStore.DISABLE_START_ANIMATION === true" class="main-screen">
+    <div v-show="osLoaderFinished === true || this.stores.preferencesStore.DISABLE_START_ANIMATION === true" class="main-screen">
       <MainWindow
-          v-for="window in this.windowStore.openWindows"
+          v-for="window in this.stores.windowStore.openWindows"
           :key="window.id"
           class="window"
           :ref="window.id"
@@ -21,13 +21,13 @@
           @window-resizing="windowIsResizing = $event"
       />
       <transition name="slide">
-        <DesktopGrid v-show="osLoaderFinished === true || this.preferencesStore.DISABLE_START_ANIMATION === true"
+        <DesktopGrid v-show="osLoaderFinished === true || this.stores.preferencesStore.DISABLE_START_ANIMATION === true"
             @clicked="activateQuickSettingsMenu(false)"
             :window-resizing="windowIsResizing"
             class="desktop-grid"/>
       </transition>
     </div>
-    <div v-show="osLoaderFinished === true || this.preferencesStore.DISABLE_START_ANIMATION === true" class="footer-container">
+    <div v-show="osLoaderFinished === true || this.stores.preferencesStore.DISABLE_START_ANIMATION === true" class="footer-container">
       <SettingsMenu v-show="quickSettingMenuIsOpen"
                     ref="settingsMenu"
                     class="quick-settings-menu"
@@ -52,7 +52,6 @@ import DesktopGrid from "@/components/grid/DesktopGrid";
 import QuickSettings from "@/components/taskbar/segments/QuickSettings";
 import {useGlobalStore, usePreferencesStore, useWindowStore} from "@/stores/globalState";
 import { deviceIsMobile } from "@/utils/util";
-import {mapStores} from "pinia";
 import json from "../assets/json/config.json"
 
 export default {
@@ -99,19 +98,19 @@ export default {
     windowIsRendered() {
       this.updateWindowDimensions();
     },
-    'preferencesStore.backgroundColor'() {
-      if (this.preferencesStore.backgroundColor !== '') {
+    'stores.preferencesStore.backgroundColor'() {
+      if (this.stores.preferencesStore.backgroundColor !== '') {
         this.setBackgroundColor();
       }
     },
-    'preferencesStore.wallpaper'() {
-      if (this.preferencesStore.wallpaper !== '') {
+    'stores.preferencesStore.wallpaper'() {
+      if (this.stores.preferencesStore.wallpaper !== '') {
         this.setWallpaper();
       }
     },
-    'windowStore.openWindows.length'(newValue, oldValue) {
+    'stores.windowStore.openWindows.length'(newValue, oldValue) {
       if (newValue > oldValue) {
-        const newElement = this.windowStore.openWindows[this.windowStore.openWindows.length - 1];
+        const newElement = this.stores.windowStore.openWindows[this.stores.windowStore.openWindows.length - 1];
         this.$nextTick(() => {
             const windowElement = this.$refs[newElement.id][0];
           if (Number(windowElement.$el.id) === newElement.id) {
@@ -124,40 +123,46 @@ export default {
     },
   },
   computed: {
-    ...mapStores(usePreferencesStore, useWindowStore, useGlobalStore)
+    stores() {
+      return {
+        'preferencesStore': usePreferencesStore(),
+        'windowStore': useWindowStore(),
+        'globalStore': useGlobalStore(),
+      }
+    },
   },
   methods: {
     init() {
-      if (this.preferencesStore.getBackgroundColor() !== '' && this.preferencesStore.getBackgroundColor() !== null) {
+      if (this.stores.preferencesStore.getBackgroundColor() !== '' && this.stores.preferencesStore.getBackgroundColor() !== null) {
         this.setBackgroundColor();
       } else {
         this.setWallpaper();
       }
 
-      this.globalStore.browserWindowSize.WIDTH = this.$el.getBoundingClientRect().width;
-      this.globalStore.browserWindowSize.HEIGHT = this.$el.getBoundingClientRect().height;
-      this.globalStore.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED = this.$el.getBoundingClientRect().height - this.TASKBAR_HEIGHT;
+      this.stores.globalStore.browserWindowSize.WIDTH = this.$el.getBoundingClientRect().width;
+      this.stores.globalStore.browserWindowSize.HEIGHT = this.$el.getBoundingClientRect().height;
+      this.stores.globalStore.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED = this.$el.getBoundingClientRect().height - this.TASKBAR_HEIGHT;
 
       window.addEventListener('resize', this.updateWindowDimensions);
     },
     setApplicationNameVariable(object) {
-      this.windowStore.pushOpenWindow(object);
+      this.stores.windowStore.pushOpenWindow(object);
     },
     setBackgroundColor() {
-      let backgroundColor = this.preferencesStore.getBackgroundColor();
-      this.preferencesStore.removeWallpaper();
+      let backgroundColor = this.stores.preferencesStore.getBackgroundColor();
+      this.stores.preferencesStore.removeWallpaper();
 
       console.log(backgroundColor)
       this.$refs.desktop.style.backgroundImage = 'none'
       this.$refs.desktop.style.backgroundColor = backgroundColor.color;
     },
     setWallpaper() {
-      let wallpaper = this.preferencesStore.getWallpaper();
+      let wallpaper = this.stores.preferencesStore.getWallpaper();
       if (wallpaper === '') {
-        this.preferencesStore.setWallpaper(json.wallpapers[0]);
+        this.stores.preferencesStore.setWallpaper(json.wallpapers[0]);
         wallpaper = json.wallpapers[0];
       }
-      this.preferencesStore.removeBackgroundColor();
+      this.stores.preferencesStore.removeBackgroundColor();
 
       this.$refs.desktop.style.backgroundImage = `url(${require(`@/assets/images/desktopWallpapers/${wallpaper}`)})`;
       this.$refs.desktop.style.backgroundColor = 'none';
@@ -172,9 +177,9 @@ export default {
       this.activateQuickSettingsMenu(false);
     },
     updateWindowDimensions() {
-      this.globalStore.browserWindowSize.WIDTH = this.$el.getBoundingClientRect().width;
-      this.globalStore.browserWindowSize.HEIGHT = this.$el.getBoundingClientRect().height;
-      this.globalStore.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED = this.$el.getBoundingClientRect().height - this.TASKBAR_HEIGHT;
+      this.stores.globalStore.browserWindowSize.WIDTH = this.$el.getBoundingClientRect().width;
+      this.stores.globalStore.browserWindowSize.HEIGHT = this.$el.getBoundingClientRect().height;
+      this.stores.globalStore.browserWindowSize.HEIGHT_TASKBAR_EXCLUDED = this.$el.getBoundingClientRect().height - this.TASKBAR_HEIGHT;
     },
     activateQuickSettingsMenu(quickSettingsMenuButtonClicked) {
       if (quickSettingsMenuButtonClicked) {
@@ -188,7 +193,7 @@ export default {
       }
     },
     minimizeWindow(windowId) {
-      const window = this.windowStore.openWindows.find(window => window.id === windowId);
+      const window = this.stores.windowStore.openWindows.find(window => window.id === windowId);
       const windowComponent = this.$refs[windowId][0];
 
       if (!windowComponent || !window) {

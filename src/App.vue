@@ -6,7 +6,6 @@
 
 <script>
 
-import { mapStores } from "pinia";
 import {usePreferencesStore} from "@/stores/globalState";
 
 export default {
@@ -17,15 +16,19 @@ export default {
     }
   },
   beforeMount() {
-    this.theme = this.preferencesStore.getTheme();
+    this.theme = this.stores.preferencesStore.getTheme();
   },
   computed: {
-    ...mapStores(usePreferencesStore)
+    stores() {
+      return {
+        'preferencesStore': usePreferencesStore()
+      }
+    }
   },
   watch: {
-    'preferencesStore.theme'() {
-      if (this.preferencesStore.theme !== '') {
-        this.theme = this.preferencesStore.theme;
+    'stores.preferencesStore.theme'() {
+      if (this.stores.preferencesStore.theme !== '') {
+        this.theme = this.stores.preferencesStore.theme;
       }
     },
   }

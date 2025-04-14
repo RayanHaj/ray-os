@@ -6,7 +6,7 @@
                 maxWidth: `${TILE_WIDTH}px`,
                 maxHeight: `${TILE_HEIGHT}px`
               }"
-       :title="fileStore.desktopFiles[tilePosition]?.overflowing === true ? fileStore.desktopFiles[tilePosition]?.name : null"
+       :title="stores.fileStore.desktopFiles[tilePosition]?.overflowing === true ? stores.fileStore.desktopFiles[tilePosition]?.name : null"
   >
     <div class="application-img" ref="applicationImg">
       <svg-component
@@ -16,7 +16,7 @@
       />
     </div>
     <div class="application-name" ref="applicationName"
-         :class="{overflowing: fileStore.desktopFiles[tilePosition]?.overflowing}"
+         :class="{overflowing: stores.fileStore.desktopFiles[tilePosition]?.overflowing}"
          :style="{ fontSize: `${TILE_NAME_FONT_SIZE}px` }"
     >
       {{ getName() }}
@@ -26,7 +26,6 @@
 
 <script>
 import {useFileStore, useWindowStore} from "@/stores/globalState";
-import {mapStores} from "pinia";
 import SvgComponent from "@/ui/svg-component.vue";
 
 export default {
@@ -47,16 +46,17 @@ export default {
       TILE_NAME_FONT_SIZE: 10
     }
   },
-  mounted() {
-    const tilePosition = 1
-    console.log(`os${this.fileStore.desktopFiles[tilePosition]?.name[0].toUpperCase()}${this.fileStore.desktopFiles[tilePosition]?.name.replaceAll(' ', '').slice(1)}`)
-  },
   computed: {
-    ...mapStores(useWindowStore, useFileStore)
+    stores() {
+      return {
+        'windowStore': useWindowStore(),
+        'fileStore': useFileStore()
+      }
+    },
   },
   methods: {
     getName() {
-      const desktopFile = this.fileStore.desktopFiles[this.tilePosition]
+      const desktopFile = this.stores.fileStore.desktopFiles[this.tilePosition]
       if (typeof desktopFile === 'undefined') {
         return;
       }
@@ -68,7 +68,7 @@ export default {
       return desktopFile.name;
     },
     getSvgName(tilePosition) {
-      const applicationName = this.fileStore.desktopFiles[tilePosition]?.name;
+      const applicationName = this.stores.fileStore.desktopFiles[tilePosition]?.name;
       if (!applicationName) {
         return;
       }

@@ -22,7 +22,7 @@
     computed: {
       stores() {
         return {
-          'preferencesStore': usePreferencesStore()
+          'preferencesStore': usePreferencesStore(),
         }
       }
     },

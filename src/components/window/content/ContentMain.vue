@@ -12,10 +12,7 @@ import Settings from "@/components/window/content/settings/SettingsContent";
 import SereneSounds from "@/components/window/content/sereneSounds/SereneSoundsContent";
 import Calculator from "@/components/window/content/calculator/CalculatorContent";
 import VideoPlayer from "@/components/window/content/videoPlayer/VideoPlayerContent";
-// import Games from "@/components/window/content/games/GameLauncher.vue";
 import {useWindowStore} from "@/stores/globalState";
-import {mapStores} from "pinia";
-
 export default {
   name: "window-content",
   components: {
@@ -38,10 +35,13 @@ export default {
     }
   },
   computed: {
-    ...mapStores(useWindowStore),
-
+    stores() {
+      return {
+        'windowStore': useWindowStore()
+      }
+    },
     windowObject() {
-      return this.windowStore.openWindows.find(window => window.id === this.windowId);
+      return this.stores.windowStore.openWindows.find(window => window.id === this.windowId);
     }
   }
 }

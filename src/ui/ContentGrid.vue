@@ -82,7 +82,6 @@
 import {useApplicationStatesStore, useWindowStore} from "@/stores/globalState";
 import SvgComponent from "@/ui/svg-component";
 import ContextMenu from "@/ui/ContextMenu.vue";
-import {mapStores} from "pinia";
 
 export default {
   name: 'ContentGrid',
@@ -102,7 +101,12 @@ export default {
     }
   },
   computed: {
-    ...mapStores(useWindowStore, useApplicationStatesStore),
+    stores() {
+      return {
+        'windowStore': useWindowStore(),
+        'applicationStatesStore': useApplicationStatesStore()
+      }
+    },
   },
   data() {
     return {
@@ -180,19 +184,19 @@ export default {
       if (file) {
         switch (file.type) {
           case 'video/mp4': {
-            const videoPlayerId = this.windowStore.getHighestZIndex();
-            this.applicationStatesStore.playVideoObject = {
+            const videoPlayerId = this.stores.windowStore.getHighestZIndex();
+            this.stores.applicationStatesStore.playVideoObject = {
               id: videoPlayerId,
               video: file
             };
             this.db.getElementByName('files', 'Video Player').then(element => {
-              this.windowStore.pushOpenWindow(element);
+              this.stores.windowStore.pushOpenWindow(element);
             });
           }
             break;
           case 'Application': {
             this.db.getElementByName('files', file.name).then(element => {
-              this.windowStore.pushOpenWindow(element)
+              this.stores.windowStore.pushOpenWindow(element)
             });
           }
         }

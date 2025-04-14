@@ -47,7 +47,6 @@ import json from '@/assets/json/config'
 import {useApplicationStatesStore, useWindowStore} from "@/stores/globalState";
 import SvgComponent from "@/ui/svg-component";
 import ContentGrid from "@/ui/ContentGrid";
-import {mapStores} from "pinia";
 
 export default {
   name: "video-player-window",
@@ -66,7 +65,12 @@ export default {
   },
   inject: ['db', 'provide'],
   computed: {
-    ...mapStores(useApplicationStatesStore, useWindowStore)
+    stores() {
+      return {
+        'applicationStatesStore': useApplicationStatesStore(),
+        'windowStore': useWindowStore()
+      }
+    },
   },
   watch: {
     videoCurrentTime(newValue) {
@@ -83,11 +87,11 @@ export default {
     }
   },
   mounted() {
-    const globalStoreVideoObject = this.applicationStatesStore.playVideoObject;
+    const globalStoreVideoObject = this.stores.applicationStatesStore.playVideoObject;
     if (globalStoreVideoObject?.id - 1 === this.windowId) {
-      this.videoSrc = URL.createObjectURL(this.applicationStatesStore.playVideoObject.video.file);
+      this.videoSrc = URL.createObjectURL(this.stores.applicationStatesStore.playVideoObject.video.file);
     } else {
-      const windowObject = this.windowStore.openWindows.find(window => window.id === this.windowId);
+      const windowObject = this.stores.windowStore.openWindows.find(window => window.id === this.windowId);
 
       this.db.getElementByType('files', 'video/mp4').then(elements => {
         elements.forEach(element => {

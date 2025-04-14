@@ -12,7 +12,7 @@
                ref="wallpaper"
                v-for="wallpaper in wallpapers"
                :key="wallpaper"
-               :class="{ 'selected': preferencesStore.getWallpaper() === wallpaper }"
+               :class="{ 'selected': stores.preferencesStore.getWallpaper() === wallpaper }"
                @click="updateWallpaper(wallpaper)">
             <img class="wallpaper-image" :src="getImgUrl(wallpaper)" :alt="wallpaper" draggable="false">
           </div>
@@ -28,8 +28,8 @@
       </div>
       <div v-show="selectedOption === 'desktop grid'" class="desktop-grid-options-wrapper">
         <input type="checkbox"
-               :checked="preferencesStore.getShowGridOutlineDesktop() === true"
-               @change="preferencesStore.setShowGridOutlineDesktop($event.target.checked)"
+               :checked="stores.preferencesStore.getShowGridOutlineDesktop() === true"
+               @change="stores.preferencesStore.setShowGridOutlineDesktop($event.target.checked)"
         >
       </div>
     </div>
@@ -39,7 +39,6 @@
 <script>
 import json from '@/assets/json/config.json'
 import {usePreferencesStore} from "@/stores/globalState";
-import {mapStores} from "pinia";
 import Sidebar from "@/components/window/content/settings/SettingsSidebar.vue";
 import BackgroundColor from "@/components/window/content/settings/SettingsBackgroundColor.vue";
 
@@ -64,7 +63,7 @@ export default {
   },
   mounted() {
     this.$refs.themePickerOptions.forEach(element => {
-      const theme = this.preferencesStore.getTheme();
+      const theme = this.stores.preferencesStore.getTheme();
       if (theme === element.value) {
         element.selected = true;
       }
@@ -80,23 +79,27 @@ export default {
       this.selectedOption = option;
     },
     updateBackgroundColor(newValue) {
-      this.preferencesStore.removeWallpaper();
-      this.preferencesStore.setBackgroundColor(newValue);
+      this.stores.preferencesStore.removeWallpaper();
+      this.stores.preferencesStore.setBackgroundColor(newValue);
     },
     updateWallpaper(newValue) {
-      this.preferencesStore.removeBackgroundColor();
-      this.preferencesStore.setWallpaper(newValue);
+      this.stores.preferencesStore.removeBackgroundColor();
+      this.stores.preferencesStore.setWallpaper(newValue);
     },
     updateTheme(newValue) {
-      this.preferencesStore.setTheme(newValue);
+      this.stores.preferencesStore.setTheme(newValue);
     }
   },
   computed: {
-    ...mapStores(usePreferencesStore),
+    stores() {
+      return {
+        'preferencesStore': usePreferencesStore()
+      }
+    },
     getOptions() {
       const filter = () => {
         return this.options.filter((option) => {
-          return option.includes(this.searchbarInput)
+          return option.includes(this.stores.searchbarInput)
         });
       }
 
@@ -104,7 +107,7 @@ export default {
         return ['no matches'];
       }
 
-      if (this.searchbarInput.length !== 0) {
+      if (this.stores.searchbarInput.length !== 0) {
         return filter();
       }
 
