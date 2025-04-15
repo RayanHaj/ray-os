@@ -25,7 +25,7 @@
 </template>
 
 <script>
-import {useFileStore, useWindowStore} from "@/stores/globalState";
+import {useFileStore, useWindowStore} from "@/stores/globalState.ts";
 import SvgComponent from "@/ui/svg-component.vue";
 
 export default {

@@ -44,7 +44,7 @@
 
 <script>
 import json from '@/assets/json/config'
-import {useApplicationStatesStore, useWindowStore} from "@/stores/globalState";
+import {useApplicationStatesStore, useWindowStore} from "@/stores/globalState.ts";
 import SvgComponent from "@/ui/svg-component";
 import ContentGrid from "@/components/window/content/fileExplorer/ContentGrid.vue";
 
@@ -93,7 +93,7 @@ export default {
     } else {
       const windowObject = this.stores.windowStore.openWindows.find(window => window.id === this.windowId);
 
-      this.db.getElementByType('files', 'video/mp4').then(elements => {
+      this.db.getElement('files', 'type', 'video/mp4').then(elements => {
         elements.forEach(element => {
           element.videoUrl = URL.createObjectURL(element.file);
           this.videoList.push(element);

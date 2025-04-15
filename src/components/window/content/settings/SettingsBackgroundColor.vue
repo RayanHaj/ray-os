@@ -14,7 +14,7 @@
   </section>
 </template>
 <script>
-  import {usePreferencesStore} from "@/stores/globalState";
+  import {usePreferencesStore} from "@/stores/globalState.ts";
   import json from "@/assets/json/config.json";
 
   export default {

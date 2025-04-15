@@ -1,5 +1,6 @@
 const { defineConfig } = require('@vue/cli-service')
 const webpack = require("webpack");
+// eslint-disable-next-line no-undef
 module.exports = defineConfig({
   transpileDependencies: true,
   configureWebpack: {
@@ -24,5 +25,5 @@ module.exports = defineConfig({
         },
       },
     },
-  }
+  },
 });

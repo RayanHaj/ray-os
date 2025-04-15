@@ -41,7 +41,7 @@
 
 <script>
 import SvgComponent from "@/ui/svg-component";
-import {useGlobalStore} from "@/stores/globalState";
+import {useGlobalStore} from "@/stores/globalState.ts";
 
 export default {
   name: "ContextMenu",

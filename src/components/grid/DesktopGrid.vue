@@ -65,8 +65,7 @@
 </template>
 
 <script>
-import {enableDragDropTouch} from "@/assets/libraries/drag-drop-touch.esm.min";
-import {useFileStore, useGlobalStore, usePreferencesStore, useWindowStore} from "@/stores/globalState";
+import {useFileStore, useGlobalStore, usePreferencesStore, useWindowStore} from "@/stores/globalState.ts";
 import {parseFileToDbFileObject} from "@/utils/util";
 import TileContent from "@/components/grid/TileContent";
 import ContextMenu from "@/ui/ContextMenu";
@@ -157,7 +156,6 @@ export default {
     },
     async init() {
       this.showTileBorders = this.stores.preferencesStore.getShowGridOutlineDesktop();
-      enableDragDropTouch();
       this.updateGridWidthHeight();
       await this.setDesktopTiles().then(() => this.isLoading = false);
       window.addEventListener('keydown', this.onKeydownTile);
@@ -175,7 +173,7 @@ export default {
 
       const elements = [];
       for (let reference of desktopFileReferences) {
-        const file = await this.db.getFileByReferenceId('desktopFiles', reference.id);
+        const file = await this.db.getElement('desktopFiles', 'id', reference.id);
         elements.push(file);
       }
 
@@ -339,7 +337,7 @@ export default {
         return;
       }
 
-      this.db.getElementByName('files', applicationName).then(element => {
+      this.db.getElement('files', 'name', applicationName).then(element => {
         this.stores.windowStore.pushOpenWindow(element);
       });
     },

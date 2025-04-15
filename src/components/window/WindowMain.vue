@@ -48,7 +48,7 @@
 
 <script>
 import ContentMain from "@/components/window/content/ContentMain";
-import {useApplicationStatesStore, useGlobalStore, useWindowStore} from "@/stores/globalState";
+import {useApplicationStatesStore, useGlobalStore, useWindowStore} from "@/stores/globalState.ts";
 import SplitWindowsComponent from "@/ui/split-windows-component";
 import WindowHeader from "@/components/window/elements/windowHeader.vue";
 

@@ -6,7 +6,7 @@
 
 <script>
 
-import {usePreferencesStore} from "@/stores/globalState";
+import {usePreferencesStore} from "@/stores/globalState.ts";
 
 export default {
   name: 'App',

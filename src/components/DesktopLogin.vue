@@ -21,7 +21,7 @@
 </template>
 
 <script>
-import {usePreferencesStore} from "@/stores/globalState";
+import {usePreferencesStore} from "@/stores/globalState.ts";
 
 export default {
   name: "desktop-login",
@@ -33,7 +33,7 @@ export default {
   },
   mounted() {
     this.updateSettings();
-    this.sound = new Audio(require(`@/assets/audio/typing-sound.mp3`));
+    this.sound = new Audio(import(`@/assets/audio/typing-sound.mp3`));
   },
   computed: {
     stores() {
@@ -48,7 +48,7 @@ export default {
       const wallpaper = this.stores.preferencesStore.getWallpaper();
 
       if (wallpaper) {
-        this.$refs.container.style.backgroundImage = `url(${require(`@/assets/images/desktopWallpapers/${wallpaper}`)})`;
+        this.$refs.container.style.backgroundImage = `url(${import(`@/assets/images/desktopWallpapers/${wallpaper}`)})`;
         this.$refs.container.style.backgroundColor = 'none';
       } else if (backgroundColor) {
         this.$refs.container.style.backgroundColor = backgroundColor.color;

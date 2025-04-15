@@ -38,7 +38,7 @@
 
 <script>
 import json from '@/assets/json/config.json'
-import {usePreferencesStore} from "@/stores/globalState";
+import {usePreferencesStore} from "@/stores/globalState.ts";
 import Sidebar from "@/components/window/content/settings/SettingsSidebar.vue";
 import BackgroundColor from "@/components/window/content/settings/SettingsBackgroundColor.vue";
 
@@ -73,7 +73,7 @@ export default {
   },
   methods: {
     getImgUrl(wallpaper) {
-      return require(`@/assets/images/desktopWallpapers/${wallpaper}`);
+      return import(`@/assets/images/desktopWallpapers/${wallpaper}`);
     },
     onClickOption(option) {
       this.selectedOption = option;

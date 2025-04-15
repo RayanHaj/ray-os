@@ -50,7 +50,7 @@ import Loader from "@/components/DesktopLoader";
 import Window from "@/components/window/WindowMain";
 import DesktopGrid from "@/components/grid/DesktopGrid";
 import QuickSettings from "@/components/taskbar/segments/QuickSettings";
-import {useGlobalStore, usePreferencesStore, useWindowStore} from "@/stores/globalState";
+import {useGlobalStore, usePreferencesStore, useWindowStore} from "@/stores/globalState.ts";
 import { deviceIsMobile } from "@/utils/util";
 import json from "../assets/json/config.json"
 
@@ -164,7 +164,7 @@ export default {
 
       this.stores.preferencesStore.removeBackgroundColor();
 
-      this.$refs.desktop.style.backgroundImage = `url(${require(`@/assets/images/desktopWallpapers/${wallpaper}`)})`;
+      this.$refs.desktop.style.backgroundImage = `url(${import(`@/assets/images/desktopWallpapers/${wallpaper}`)})`;
       this.$refs.desktop.style.backgroundColor = 'none';
     },
     updateBrightnessValue() {
@@ -183,9 +183,7 @@ export default {
     },
     activateQuickSettingsMenu(quickSettingsMenuButtonClicked) {
       if (quickSettingsMenuButtonClicked) {
-        this.quickSettingMenuIsOpen === true ?
-            this.quickSettingMenuIsOpen = false :
-            this.quickSettingMenuIsOpen = true;
+        this.quickSettingMenuIsOpen = this.quickSettingMenuIsOpen !== true;
       } else {
         if (this.quickSettingMenuIsOpen === true) {
           this.quickSettingMenuIsOpen = false;

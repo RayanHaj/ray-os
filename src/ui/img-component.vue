@@ -34,6 +34,11 @@ export default {
       height: undefined
     };
   },
+  computed: {
+    getImageUrl() {
+      return this.imageExists ? import(`@/assets/images/applicationImages/${this.parsedImageName}.png`) : import('@/assets/images/default-image.png');
+    }
+  },
   watch: {
     customWidth(newValue) {
       this.width = newValue;
@@ -54,16 +59,11 @@ export default {
     this.parsedImageName = parseApplicationNameToImageNameFormat(this.imageName);
     this.checkIfImageExists();
   },
-  computed: {
-    getImageUrl() {
-      return this.imageExists ? require(`@/assets/images/applicationImages/${this.parsedImageName}.png`) : require('@/assets/images/default-image.png');
-    }
-  },
   methods: {
     checkIfImageExists() {
       try {
         const img = new Image();
-        img.src = require(`@/assets/images/applicationImages/${this.parsedImageName}.png`);
+        img.src = import(`@/assets/images/applicationImages/${this.parsedImageName}.png`);
 
         img.onload = () => {
           this.imageExists = true;

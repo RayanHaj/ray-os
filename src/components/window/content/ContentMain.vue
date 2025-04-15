@@ -12,7 +12,7 @@ import Settings from "@/components/window/content/settings/SettingsContent";
 import SereneSounds from "@/components/window/content/sereneSounds/SereneSoundsContent";
 import Calculator from "@/components/window/content/calculator/CalculatorContent";
 import VideoPlayer from "@/components/window/content/videoPlayer/VideoPlayerContent";
-import {useWindowStore} from "@/stores/globalState";
+import {useWindowStore} from "@/stores/globalState.ts";
 export default {
   name: "window-content",
   components: {

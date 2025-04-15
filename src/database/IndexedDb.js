@@ -29,8 +29,7 @@ export default class IndexedDb {
                     store.createIndex('name', 'name');
                     store.createIndex('type', 'type');
                     store.createIndex('createdAt', 'createdAt');
-                    store.createIndex('image', 'image');
-                    store.createIndex('file', 'file');
+                    store.createIndex('rawFile', 'rawFile');
                 }
 
                 if (!this.db.objectStoreNames.contains('desktopFiles')) {
@@ -49,6 +48,7 @@ export default class IndexedDb {
 
                 if (!this.db.objectStoreNames.contains('fileSystem')) {
                     const store = this.db.createObjectStore('fileSystem', {keyPath: 'id', autoIncrement: true});
+                    store.createIndex('id', 'id');
                     store.createIndex('directoryName', 'directoryName');
                     store.createIndex('parentDirectories', 'parentDirectories');
                     store.createIndex('children', 'children');
@@ -58,7 +58,7 @@ export default class IndexedDb {
                 transaction.oncomplete = async () => {
                     for (let name of json.defaultApplicationNames) {
                         const parsedName = parseApplicationNameToImageNameFormat(name);
-                        const imgPath = require(`@/assets/images/applicationImages/${parsedName}.png`);
+                        const imgPath = import(`@/assets/images/applicationImages/${parsedName}.png`);
 
                         fetch(imgPath)
                             .then(response => response.blob())
@@ -139,7 +139,26 @@ export default class IndexedDb {
             };
         });
     }
+    async getElement(storeName, index, identifier) {
+        try {
+            return new Promise((resolve, reject) => {
+                const transaction = this.db.transaction([storeName], 'readonly');
+                const indexedStore = transaction.objectStore(storeName).index(index);
+                const request = indexedStore.get(identifier);
 
+                request.onsuccess = event => {
+                    resolve(event.target.result);
+                };
+
+                request.onerror = event => {
+                    reject(event.target.error);
+                };
+            })
+        } catch (error) {
+            console.error(`couldn't fetch element: ${error}`);
+            throw error;
+        }
+    }
     async getAllElements(storeName) {
         return new Promise((resolve, reject) => {
             const transaction = this.db.transaction([storeName], 'readonly');
@@ -155,29 +174,6 @@ export default class IndexedDb {
             };
         });
     }
-
-    async getFileByReferenceId(storeName, id) {
-        return new Promise((resolve, reject) => {
-            if (storeName !== 'desktopFiles' && storeName !== 'taskbarFiles') {
-                reject(new Error('storeName must be a referring to reference store'));
-            }
-            const transaction = this.db.transaction([storeName], 'readonly');
-            const store = transaction.objectStore(storeName);
-            const index = store.index('id');
-
-            const request = index.get(id);
-
-            request.onsuccess = async () => {
-                const file = await this.getElementById('files', id);
-                resolve(file);
-            }
-
-            request.onerror = event => {
-                reject(event.target.error);
-            }
-        });
-    }
-
     async postElement(storeName, element) {
         return new Promise((resolve, reject) => {
             const transaction = this.db.transaction([storeName], 'readwrite');
@@ -196,7 +192,6 @@ export default class IndexedDb {
             request.onerror = event => reject(event.target.error);
         });
     }
-
     async updateElement(storeName, key, value, id) {
         return new Promise((resolve, reject) => {
             const transaction = this.db.transaction([storeName], 'readwrite');
@@ -218,24 +213,26 @@ export default class IndexedDb {
             transaction.onerror = event => reject(event.target.error);
         });
     }
+    async deleteElement(storeName, identifier) {
+        try {
+            return new Promise((resolve, reject) => {
+                const transaction = this.db.transaction([storeName], 'readwrite');
+                const indexedStore = transaction.objectStore(storeName);
+                const request = indexedStore.delete(identifier);
 
-    async deleteFile(id) {
-        const storeName = 'files';
-        return new Promise((resolve, reject) => {
-            const transaction = this.db.transaction([storeName], 'readwrite');
-            const store = transaction.objectStore(storeName);
-            const request = store.delete(id);
+                request.onsuccess = () => {
+                    resolve(`element with identifier of: ${identifier} successfully deleted`);
+                };
 
-            request.onsuccess = () => {
-                resolve(`file: ${id} successfully deleted`);
-            }
-
-            request.onerror = event => {
-                reject(event.target.error);
-            }
-        });
+                request.onerror = event => {
+                    reject(event.target.error);
+                };
+            })
+        } catch (error) {
+            console.error(`couldn't delete element: ${error}`);
+            throw error;
+        }
     }
-
     async deleteDirectory(id) {
         const storeName = 'fileSystem';
 
@@ -255,7 +252,6 @@ export default class IndexedDb {
             }
         });
     }
-
     async deleteChildReverenceFromParent(id, childId) {
         return new Promise((resolve, reject) => {
             const storeName = 'fileSystem';
@@ -269,16 +265,15 @@ export default class IndexedDb {
                 const putRequest = store.put(result);
 
                 putRequest.onsuccess = () => {
-                    resolve();
+                    resolve(`successfully deleted child reference: ${childId} from parent directory: ${id}`);
                 }
 
-                putRequest.onerror = () => {
-                    reject();
+                putRequest.onerror = event => {
+                    reject(event.target.error);
                 }
             });
         });
     }
-
     async recursiveChildrenDelete(id) {
         let children = [];
 
@@ -300,11 +295,12 @@ export default class IndexedDb {
                     'children': child,
                     'date': (new Date).getMilliseconds()
                 });
-                await this.deleteFile(child.id)
+                await this.deleteElement('files', child.id);
+                await this.deleteElement('desktopFiles', child.id);
+                await this.deleteElement('taskbarFiles', child.id);
             }
         }
     }
-
     async getDirectoryChildren(id) {
         const storeName = 'fileSystem';
         return new Promise((resolve, reject) => {
@@ -330,63 +326,6 @@ export default class IndexedDb {
             }
         });
     }
-
-    async getElementByType(storeName, type) {
-        return new Promise((resolve, reject) => {
-            const transaction = this.db.transaction([storeName], 'readonly');
-            const store = transaction.objectStore(storeName);
-            const index = store.index('type');
-
-            const request = index.getAll(type);
-
-            request.onsuccess = event => {
-                resolve(event.target.result);
-            }
-
-            request.onerror = event => {
-                reject(event.target.error);
-            }
-        });
-    }
-
-    async getElementByName(storeName, name) {
-        return new Promise((resolve, reject) => {
-            const transaction = this.db.transaction([storeName], 'readonly');
-            const store = transaction.objectStore(storeName);
-            const index = store.index('name');
-
-            const request = index.get(name);
-
-            request.onsuccess = event => {
-                resolve(event.target.result);
-            }
-
-            request.onerror = event => {
-                reject(event.target.error);
-            }
-        });
-    }
-
-    async getElementById(storeName, id) {
-        return new Promise((resolve, reject) => {
-            const transaction = this.db.transaction([storeName], 'readonly');
-            const store = transaction.objectStore(storeName);
-            const index = store.index('id');
-
-            console.log(id)
-
-            const request = index.get(id);
-
-            request.onsuccess = event => {
-                resolve(event.target.result);
-            }
-
-            request.onerror = event => {
-                reject(event.target.error);
-            }
-        });
-    }
-
     async getFilesByDirectoryFromFileSystem(directory) {
         const transaction = this.db.transaction(['fileSystem'], 'readonly');
         const store = transaction.objectStore('fileSystem');
@@ -414,7 +353,6 @@ export default class IndexedDb {
             };
         });
     }
-
     async addFileToDirectory(id, name, type, directoryName) {
         return new Promise((resolve, reject) => {
             this.getDirectoriesByNameFileSystem(directoryName).then(directories => {
@@ -441,7 +379,6 @@ export default class IndexedDb {
             });
         });
     }
-
     async getDirectoriesByNameFileSystem(name) {
         const transaction = this.db.transaction(['fileSystem'], 'readonly');
         const store = transaction.objectStore('fileSystem');
@@ -467,34 +404,5 @@ export default class IndexedDb {
                 reject('Error occurred while accessing cursor: ' + event.target.error);
             }
         });
-    }
-
-    async getDirectoryById(id) {
-        if (!id) return;
-
-        const transaction = this.db.transaction(['fileSystem'], 'readonly');
-        const store = transaction.objectStore('fileSystem');
-
-        return new Promise((resolve, reject) => {
-            const request = store.get(id);
-
-            request.onsuccess = (event) => {
-                resolve(event.target.result);
-            };
-
-            request.onerror = () => {
-                reject(new Error('failed to fetch directory with the given id'));
-            };
-        });
-    }
-
-    parameterValidator(storeName, fileType) {
-        if (storeName !== null && !this.acceptedStoreNames.includes(storeName)) {
-            return `storeName: ${storeName} is not accepted`;
-        }
-
-        if (fileType !== null && !this.acceptedFileTypes.includes(fileType)) {
-            return `fileType: ${fileType} is not accepted`;
-        }
     }
 }
