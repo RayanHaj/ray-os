@@ -175,7 +175,7 @@ export default {
 
       const elements = [];
       for (let reference of desktopFileReferences) {
-        const file = await this.db.getFileByReferenceId('desktopFiles', reference.id);
+        const file = await this.db.getElement('desktopFiles', 'id', reference.id);
         elements.push(file);
       }
 
@@ -339,7 +339,7 @@ export default {
         return;
       }
 
-      this.db.getElementByName('files', applicationName).then(element => {
+      this.db.getElement('files', 'name', applicationName).then(element => {
         this.stores.windowStore.pushOpenWindow(element);
       });
     },

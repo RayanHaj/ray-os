@@ -93,7 +93,7 @@ export default {
     } else {
       const windowObject = this.stores.windowStore.openWindows.find(window => window.id === this.windowId);
 
-      this.db.getElementByType('files', 'video/mp4').then(elements => {
+      this.db.getElement('files', 'type', 'video/mp4').then(elements => {
         elements.forEach(element => {
           element.videoUrl = URL.createObjectURL(element.file);
           this.videoList.push(element);

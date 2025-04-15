@@ -155,7 +155,7 @@ export default {
       });
     },
     async openDirectoryOrFile(element) {
-      await this.db.getDirectoryById(element.id).then(async directory => {
+      await this.db.getElement('fileSystem', 'id', element.id).then(async directory => {
         if (!directory) {
           await this.openFileByName(element.name);
           return;
@@ -184,7 +184,7 @@ export default {
       let file = null;
 
       if (name) {
-        file = await this.db.getElementByName('files', name);
+        file = await this.db.getElement('files', 'name', name);
       }
 
       if (file) {
@@ -195,13 +195,13 @@ export default {
               id: videoPlayerId,
               video: file
             };
-            this.db.getElementByName('files', 'Video Player').then(element => {
+            this.db.getElement('files','type','Video Player').then(element => {
               this.stores.windowStore.pushOpenWindow(element);
             });
           }
             break;
           case 'Application': {
-            this.db.getElementByName('files', file.name).then(element => {
+            this.db.getElement('files', 'name', file.name).then(element => {
               this.stores.windowStore.pushOpenWindow(element)
             });
           }
@@ -210,7 +210,7 @@ export default {
     },
     openFileSystemRoot() {
       const defaultDirectoryId = 1;
-      this.db.getDirectoryById(defaultDirectoryId).then(directory => {
+      this.db.getElement('fileSystem', 'id', defaultDirectoryId).then(directory => {
         this.contentList = [];
 
         const defaultDirectoryObject = {

@@ -122,7 +122,7 @@ export default {
         return;
       }
 
-      this.db.getElementByName('files', applicationName).then(element => {
+      this.db.getElement('files', 'name', applicationName).then(element => {
         this.stores.windowStore.pushOpenWindow(element);
       }).finally(() => this.showTabs(applicationName));
     },
