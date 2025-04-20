@@ -1,16 +1,11 @@
 <script setup lang="ts">
-  import { onMounted } from 'vue'
   import IconTooling from '@/components/icons/IconTooling.vue'
   import IconCommunity from '@/components/icons/IconCommunity.vue'
   import IconDocumentation from '@/components/icons/IconDocumentation.vue'
+  import { useTaskbarStore } from '@/stores/taskbar.ts'
 
-  const emits = defineEmits(['height']);
   const flying = false;
-
-  const taskbarHeight = 90;
-  onMounted(() => {
-    emits('height', taskbarHeight);
-  });
+  const taskbarHeight = useTaskbarStore().taskbarHeight;
 </script>
 
 <template>

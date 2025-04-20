@@ -1,28 +1,24 @@
 <script setup lang="ts">
-import { useBrowserWindowSize } from '@/composables/useBrowserWindowSize.ts'
-import { useGridStore } from '@/stores/grid.ts'
-import { computed } from 'vue'
-import Tile from '@/components/DesktopGridTile.vue'
+import TileComponent from '@/components/DesktopGridTile.vue'
+import { useTileCountGrid } from '@/composables/useTileCountGrid.ts'
+import { onMounted, onUnmounted } from 'vue'
+import { useBrowserStore } from '@/stores/browser.ts'
 
-const props = defineProps({
-  taskbarHeight: {
-    type: Number,
-    required: true
-  }
+const browserStore = useBrowserStore();
+const tileCountVertical = useTileCountGrid().y;
+onMounted(() => {
+  browserStore.startListening();
 });
 
-const { height } = useBrowserWindowSize();
-
-const gridStore = useGridStore();
-const tileCountVertical = computed(() =>
-  Math.floor((height.value - props.taskbarHeight) / gridStore.tileHeight)
-);
+onUnmounted(() => {
+  browserStore.stopListening();
+});
 </script>
 
 <template>
   <div class="grid">
     <div class="row" v-for="row in tileCountVertical" :key="row">
-      <Tile :taskbar-height="taskbarHeight"/>
+      <TileComponent :row-number="row"/>
     </div>
   </div>
 </template>

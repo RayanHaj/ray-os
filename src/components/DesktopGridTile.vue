@@ -1,21 +1,20 @@
 <script setup lang="ts">
-import { computed } from 'vue'
 import { useGridStore } from '@/stores/grid.ts'
-import { useBrowserWindowSize } from '@/composables/useBrowserWindowSize.ts'
+import { useTileCountGrid } from '@/composables/useTileCountGrid.ts'
 
 const props = defineProps({
-  taskbarHeight: {
+  rowNumber: {
     type: Number,
-    required: true
+    required: true,
   }
 });
 
-const { width } = useBrowserWindowSize();
-
 const gridStore = useGridStore();
-const tileCountHorizontal = computed(() =>
-  Math.floor((width.value - props.taskbarHeight) / gridStore.tileWidth)
-);
+const tileCountHorizontal = useTileCountGrid().x;
+
+function getId(x: number) {
+  return ((props.rowNumber - 1) * tileCountHorizontal.value + x).toString();
+}
 
 const tileStyling = {
   width: `${gridStore.tileWidth}px`,
@@ -24,9 +23,13 @@ const tileStyling = {
 </script>
 
 <template>
-  <div class="tile" v-for="x in tileCountHorizontal" :key="x" :style="tileStyling">
-
-  </div>
+  <div
+    v-for="x in tileCountHorizontal"
+    :id="getId(x)"
+    class="tile"
+    :key="x"
+    :style="tileStyling"
+  ></div>
 </template>
 
 <style scoped>
