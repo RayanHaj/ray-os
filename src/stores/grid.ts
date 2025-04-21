@@ -9,6 +9,7 @@ export const useGridStore = defineStore('grid', () => {
   const tiles = ref<Tile[]>([]);
 
   return {
+    tiles,
     tileWidth,
     tileHeight,
     taskbarHeight
