@@ -2,17 +2,19 @@ import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { useDebounce } from '@/composables/useDebounce.ts'
 import { useGridStore } from '@/stores/grid.ts'
+import { useTileCountGrid } from '@/composables/useTileCountGrid.ts'
 
 export const useBrowserStore = defineStore('browser', () => {
   const width = ref(0);
   const height = ref(0);
   const windowResizing = ref(false);
   const gridStore = useGridStore();
+  const tileCount = useTileCountGrid();
 
   const debouncedLog = useDebounce(() => {
     windowResizing.value = false;
-    gridStore.tiles = [];
-  }, 500);
+    gridStore.pushAllTiles(tileCount.y.value, tileCount.x.value);
+  }, 10);
 
   updateSizes();
   function updateSizes() {
