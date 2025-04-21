@@ -108,17 +108,17 @@ const tileStyling = {
   display: flex;
   justify-content: center;
   align-items: center;
-  border: 1px white solid;
   user-select: none;
 }
 
 .tile.filled:hover {
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: var(--button-secondary-color);
+  border-radius: 10px;
 }
 
 .content {
   text-align: center;
   font-size: 13px;
-  color: white;
+  color: var(--text-color);
 }
 </style>

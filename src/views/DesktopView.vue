@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import DesktopGrid from '@/components/DesktopGrid.vue'
 import DesktopTaskbar from '@/components/DesktopTaskbar.vue'
-
 </script>
 
 <template>
@@ -13,8 +12,8 @@ import DesktopTaskbar from '@/components/DesktopTaskbar.vue'
 
 <style scoped>
 main {
-  width: 100vw;
   height: 100vh;
-  background: blue;
+  width: 100vw;
+  background: var(--background-color);
 }
 </style>

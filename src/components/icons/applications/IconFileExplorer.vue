@@ -31,7 +31,7 @@
     customColor: {
       type: String,
       required: false,
-      default: 'var(--icon-color)'
+      default: 'var(--text-color)'
     }
   });
 </script>
