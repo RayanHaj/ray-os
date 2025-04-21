@@ -1,5 +1,5 @@
 export interface Tile  {
   id: number;
-  iconUrl: string,
+  iconImageName: string,
   label: string,
 }

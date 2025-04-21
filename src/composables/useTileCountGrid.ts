@@ -11,7 +11,7 @@ export function useTileCountGrid() {
   const x =
     computed(() => Math.floor(browserStore.width / gridStore.tileWidth));
   const y =
-    computed(() => Math.floor((browserStore.height - taskbarStore.taskbarHeight) / gridStore.tileHeight - 1.5));
+    computed(() => Math.floor((browserStore.height - taskbarStore.taskbarHeight) / gridStore.tileHeight - 1));
 
   return { x, y }
 }
