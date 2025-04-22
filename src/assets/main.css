@@ -24,6 +24,9 @@ body {
   --button-secondary-color: #262626;
   --input-primary-color: #121212;
   --input-secondary-color: #333;
+  --taskbar-background-color: #1a0033;
+  --window-primary-color: #121212;
+  --window-secondary-color: #262626;
 }
 
 [data-theme='vintage-terminal'] {
@@ -34,6 +37,9 @@ body {
   --button-secondary-color: #333;
   --input-primary-color: #111;
   --input-secondary-color: #1a1a1a;
+  --taskbar-background-color: #004400;
+  --window-primary-color: #111;
+  --window-secondary-color: #333;
 }
 
 [data-theme='soft-spring'] {
@@ -44,6 +50,9 @@ body {
   --button-secondary-color: #b3dec1;
   --input-primary-color: #ffffff;
   --input-secondary-color: #e0f7e9;
+  --taskbar-background-color: #a9ccb4;
+  --window-primary-color: #ffffff;
+  --window-secondary-color: #d5e8d4;
 }
 
 [data-theme='sunset-pop'] {
@@ -54,7 +63,12 @@ body {
   --button-secondary-color: #fad0c4;
   --input-primary-color: #fff5e6;
   --input-secondary-color: #ffe0b2;
+  --taskbar-background-color: #e67e73;
+  --window-primary-color: #fff5e6;
+  --window-secondary-color: #ff9a8b;
 }
+
+
 
 
 [data-theme='pink'] {

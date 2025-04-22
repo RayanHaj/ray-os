@@ -27,20 +27,23 @@ watchEffect(() => {
   (async () => {
     const newSvgs: { id: number; component: Component }[] = [];
     for (let i = 1; i <= tileCountHorizontal.value; i++) {
-      const tile = getTileByTileHorizontalPosition(i)
-      if (!tile || (tile && tile.iconImageName === '')) {
-        continue;
-      }
+      const tile = getTileByTileHorizontalPosition(i);
 
-      const svg = await useSvgByFileNameAndDirectory('applications', tile.iconImageName);
-      if (!svg) {
-        continue;
-      }
+      if (tile?.content?.type === 'application') {
+        if (!tile || (tile && tile.content.iconImageName === '')) {
+          continue;
+        }
 
-      newSvgs.push({
-        id: tile.id,
-        component: svg,
-      });
+        const svg = await useSvgByFileNameAndDirectory('applications', tile.content.iconImageName);
+        if (!svg) {
+          continue;
+        }
+
+        newSvgs.push({
+          id: tile.content.id,
+          component: svg,
+        });
+      }
     }
 
     svgs.value = newSvgs;
@@ -48,17 +51,21 @@ watchEffect(() => {
 });
 
 function tileContainsApplication(id: number) {
-  const tile = getTiles.value.find(tile => tile.id === id);
+  const tile = getTiles.value.find(tile => tile.content?.id === id);
   if (!tile) {
     return false;
   }
 
-  return tile.label !== '' && tile.iconImageName !== '';
+  if (tile.content?.type === 'file') {
+    return;
+  }
+
+  return tile.label !== '' && tile.content?.iconImageName !== '';
 }
 
 function getTileByTileHorizontalPosition(x: number) {
   const id = calculateId(x);
-  const tile = getTiles.value.find(tile => tile.id === id);
+  const tile = getTiles.value.find(tile => tile.content?.id === id);
   if (!tile) {
     return null;
   }

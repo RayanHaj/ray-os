@@ -11,32 +11,43 @@ export const useGridStore = defineStore('grid', () => {
 
 
   const browserStore = useBrowserStore();
-  function pushAllTiles(verticalTileCount: number, horizontalTileCount: number) {
+  function updateTileContent() {
     const filledTiles = tiles.value.filter(tile => tile.label !== '');
+
+    const newTiles: Tile[] = [];
+    if (filledTiles.length === 0) {
+      const tile: Tile = { label: 'File Explorer', content: {
+          id: 30,
+          type: 'application',
+          iconImageName: 'IconFileExplorer'
+        }
+      };
+      const tile2: Tile = { label: 'File Explorer', content: {
+          id: 1,
+          type: 'application',
+          iconImageName: 'IconFileExplorer'
+        }
+      };
+      newTiles.push(tile);
+      newTiles.push(tile2);
+    }
+
     tiles.value = [];
     if (browserStore.windowResizing === false) {
-      for (let y = 0; y < verticalTileCount; y++) {
-        for (let x = 0; x < horizontalTileCount; x++) {
-          if (filledTiles.length !== 0) {
-            tiles.value.push(filledTiles[0]);
-            filledTiles.splice(0, 1);
-          } else {
-            const id = (y * horizontalTileCount + x) + 1;
-            let tile: Tile;
-            if (id === 1) {
-              tile = { id: id, iconImageName: 'IconFileExplorer', label: 'File Explorer' };
-            } else {
-              tile = { id: id, iconImageName: '', label: '' };
-            }
-            tiles.value.push(tile);
-          }
-        }
+      if (filledTiles.length > 0) {
+        filledTiles.forEach(tile => {
+          newTiles.push(tile);
+        });
       }
+
+      tiles.value = newTiles.sort((a, b) => a.content?.id - b.content?.id);
     }
   }
 
   function pushTile(tile: Tile) {
-    tiles.value[tile.id-1] = tile;
+    if (tile.content) {
+      tiles.value[tile.content.id - 1] = tile;
+    }
   }
 
   return {
@@ -44,7 +55,7 @@ export const useGridStore = defineStore('grid', () => {
     tileWidth,
     tileHeight,
     taskbarHeight,
-    pushAllTiles,
+    updateTileContent,
     pushTile
   }
 });

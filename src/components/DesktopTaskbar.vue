@@ -1,8 +1,6 @@
 <script setup lang="ts">
-  import IconTooling from '@/components/icons/IconTooling.vue'
-  import IconCommunity from '@/components/icons/IconCommunity.vue'
-  import IconDocumentation from '@/components/icons/IconDocumentation.vue'
-  import { useTaskbarStore } from '@/stores/taskbar.ts'
+  import { useTaskbarStore } from '@/stores/taskbar.ts';
+
 
   const flying = false;
   const taskbarHeight = useTaskbarStore().taskbarHeight;
@@ -11,9 +9,11 @@
 <template>
   <div class="taskbar" :class="{'active': !flying}" :style="{height: `${taskbarHeight}px`}">
     <div class="flying" :class="{'active': flying}">
-      <div :style="{marginLeft: '20px'}"><IconTooling/></div>
-      <div><IconDocumentation/></div>
-      <div :style="{marginRight: '20px'}"><IconCommunity/></div>
+      <div :style="{marginLeft: '20px'}"></div>
+      <div>
+
+      </div>
+      <div :style="{marginRight: '20px'}"></div>
     </div>
   </div>
 </template>
@@ -37,7 +37,7 @@
 }
 
 .active {
-  background-color: black;
+  background-color: var(--taskbar-background-color);
   color: white;
 }
 </style>
