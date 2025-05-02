@@ -14,7 +14,6 @@ export const useBrowserStore = defineStore('browser', () => {
     gridStore.updateTileContent();
   }, 10);
 
-  updateSizes();
   function updateSizes() {
     width.value = window.innerWidth;
     height.value = window.innerHeight;
@@ -22,6 +21,7 @@ export const useBrowserStore = defineStore('browser', () => {
   }
 
   function startListening() {
+    updateSizes();
     addEventListener('resize', () => {
       updateSizes();
       windowResizing.value = true;

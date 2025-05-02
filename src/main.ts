@@ -14,7 +14,7 @@ app.use(router)
 
 const theme = useThemeSwitcher().getTheme();
 if (theme === '') {
-  useThemeSwitcher().setTheme('dark');
+  useThemeSwitcher().setTheme('midnight-neon');
 } else {
   document.documentElement.setAttribute('data-theme', theme);
 }

@@ -14,6 +14,6 @@ import DesktopTaskbar from '@/components/DesktopTaskbar.vue'
 main {
   height: 100vh;
   width: 100vw;
-  background: var(--background-color);
+  background-color: var(--background-color);
 }
 </style>

@@ -1,111 +1,101 @@
 <script setup lang="ts">
 import { useGridStore } from '@/stores/grid.ts'
 import { useTileCountGrid } from '@/composables/useTileCountGrid.ts'
-import { type Component, computed, shallowRef, watchEffect } from 'vue'
+import {
+  type Component,
+  computed,
+  ref,
+  shallowRef,
+  watchEffect
+} from 'vue'
 import { useSvgByFileNameAndDirectory } from '@/composables/useSvgByFileNameAndDirectory.ts'
+import type { Tile } from '@/types/Tile.ts'
 
 const props = defineProps({
-  rowNumber: {
-    type: Number,
+  position: {
+    type: Object,
     required: true,
-  },
+  }
 })
 
-const tileCountHorizontal = useTileCountGrid().x
+const tileCountVertical = useTileCountGrid().y
 
-function calculateId(x: number) {
-  return (props.rowNumber - 1) * tileCountHorizontal.value + x
-}
+const gridStore = useGridStore();
+const tile = ref<Tile>();
+const id = ref<number>(0);
+watchEffect(() => {
+  id.value = (props.position.x - 1) * tileCountVertical.value + props.position.y;
+  tile.value = gridStore.tiles.find((tile) => tile.content.id === id.value);
+});
 
-const gridStore = useGridStore()
-const getTiles = computed(() => {
-  return gridStore.tiles
-})
-
-const svgs = shallowRef<{ id: number; component: Component }[]>([]);
+const svg = shallowRef<{ id: number; component: Component }>()
 watchEffect(() => {
   (async () => {
-    const newSvgs: { id: number; component: Component }[] = [];
-    for (let i = 1; i <= tileCountHorizontal.value; i++) {
-      const tile = getTileByTileHorizontalPosition(i);
-
-      if (tile?.content?.type === 'application') {
-        if (!tile || (tile && tile.content.iconImageName === '')) {
-          continue;
-        }
-
-        const svg = await useSvgByFileNameAndDirectory('applications', tile.content.iconImageName);
-        if (!svg) {
-          continue;
-        }
-
-        newSvgs.push({
-          id: tile.content.id,
-          component: svg,
-        });
-      }
+    if (!tile.value) {
+      return;
+    }
+    if (!tile.value.content) {
+      return;
     }
 
-    svgs.value = newSvgs;
+    if (tile.value.content.type === 'application' && tile.value.content.iconImageName !== '') {
+      const getSvg = await useSvgByFileNameAndDirectory(
+        'applications',
+        tile.value.content.iconImageName,
+      )
+      if (!getSvg) {
+        return
+      }
+
+      svg.value = { id: tile.value.content.id, component: getSvg };
+    }
   })();
 });
 
-function tileContainsApplication(id: number) {
-  const tile = getTiles.value.find(tile => tile.content?.id === id);
-  if (!tile) {
+const tileContainsApplication = computed(() => {
+  if (!tile.value) {
     return false;
   }
-
-  if (tile.content?.type === 'file') {
-    return;
+  if (!tile.value.content) {
+    return false;
   }
-
-  return tile.label !== '' && tile.content?.iconImageName !== '';
-}
-
-function getTileByTileHorizontalPosition(x: number) {
-  const id = calculateId(x);
-  const tile = getTiles.value.find(tile => tile.content?.id === id);
-  if (!tile) {
-    return null;
+  if (tile.value.content.type === 'file') {
+    return false;
   }
-
-  return tile;
-}
-
-function getSvgByTileHorizontalPosition(x: number) {
-  const id = calculateId(x);
-  const svg = svgs.value.find(svg => svg.id === id);
-  if (!svg) {
-    return null;
-  }
-
-  return svg;
-}
-
+  return tile.value?.label !== '' && tile.value?.content.iconImageName !== '';
+});
 const tileStyling = {
   width: `${gridStore.tileWidth}px`,
   height: `${gridStore.tileHeight}px`,
+}
+
+function onDragStart(event: DragEvent) {
+  const id = tile.value?.content.id;
+  if (!id) {
+    return;
+  }
+
+  event?.dataTransfer?.setData('application/json', JSON.stringify(tile.value));
 }
 </script>
 
 <template>
   <div
-    v-for="x in tileCountHorizontal"
-    :id="calculateId(x).toString()"
+    :id="id.toString()"
     class="tile"
-    :class="{'filled': tileContainsApplication(calculateId(x))}"
-    :key="x"
+    :class="{ filled: tileContainsApplication }"
     :style="tileStyling"
+    :draggable="tileContainsApplication"
+    @dragstart="onDragStart"
   >
-    <div class="content">
+    <div class="content" v-if="tile">
       <component
-        v-if="svgs.some((svg) => svg.id === calculateId(x))"
-        :is="getSvgByTileHorizontalPosition(x)?.component"
+        v-if="svg?.id === id"
+        :is="svg?.component"
         :custom-width="50"
         :custom-height="50"
       />
-      <div>{{ getTileByTileHorizontalPosition(x)?.label }}</div>
+      <div>{{ tile?.label }}</div>
     </div>
   </div>
 </template>
@@ -116,6 +106,8 @@ const tileStyling = {
   justify-content: center;
   align-items: center;
   user-select: none;
+  width: 100%;
+  height: 100%;
 }
 
 .tile.filled:hover {
