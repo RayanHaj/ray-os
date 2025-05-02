@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { Tile } from '@/types/Tile.ts'
 import { useBrowserStore } from '@/stores/browser.ts'
+import initTiles from '@/json/initTiles.json'
 
 export const useGridStore = defineStore('grid', () => {
   const tileWidth = ref(90)
@@ -14,50 +15,41 @@ export const useGridStore = defineStore('grid', () => {
   function updateTileContent() {
     const filledTiles = tiles.value.filter((tile) => tile.label !== '')
 
-    const newTiles: Tile[] = []
-
-    if (browserStore.windowResizing === false) {
-      if (filledTiles.length === 0) {
-        const tile: Tile = {
-          label: 'File Explorer',
-          content: {
-            id: 1,
-            type: 'application',
-            iconImageName: 'IconFileExplorer',
-          },
-        }
-        const tile2: Tile = {
-          label: 'File Explorer',
-          content: {
-            id: 2,
-            type: 'application',
-            iconImageName: 'IconFileExplorer',
-          },
-        }
-        const tile3: Tile = {
-          label: 'File Explorer',
-          content: {
-            id: 3,
-            type: 'application',
-            iconImageName: 'IconFileExplorer',
-          },
-        }
-        newTiles.push(tile);
-        newTiles.push(tile2);
-        newTiles.push(tile3);
-      }
-
-      tiles.value = []
-      if (filledTiles.length > 0) {
-        filledTiles.forEach((tile) => {
-          newTiles.push(tile)
-        })
-      }
-
-      tiles.value = newTiles.sort((a, b) => a.content?.id - b.content?.id)
+    if (browserStore.windowResizing === true) {
+      return
     }
 
-    console.log(tiles.value)
+    let newTiles: Tile[] = [];
+    if (filledTiles.length === 0) {
+      newTiles = setInitialValues();
+    }
+
+    tiles.value = [];
+    if (filledTiles.length > 0) {
+      filledTiles.forEach((tile) => {
+        newTiles.push(tile)
+      })
+    }
+
+    tiles.value = newTiles.sort((a, b) => a.content?.id - b.content?.id);
+  }
+
+  function setInitialValues() {
+    return initTiles.reduce((accumulator, value) => {
+      if (value.content.type !== 'application') return accumulator;
+
+      const tile: Tile = {
+        label: value.label,
+        content: {
+          id: value.content.id,
+          type: value.content.type,
+          iconImageName: value.content.iconImageName,
+        },
+      }
+
+      accumulator.push(tile);
+      return accumulator
+    }, [] as Tile[]);
   }
 
   function pushTile(tile: Tile) {

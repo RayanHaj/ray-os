@@ -1,0 +1,26 @@
+[
+  {
+    "label": "File Explorer",
+    "content": {
+      "id": 1,
+      "type": "application",
+      "iconImageName": "IconFileExplorer"
+    }
+  },
+  {
+    "label": "Calculator",
+    "content": {
+      "id": 2,
+      "type": "application",
+      "iconImageName": "IconCalculator"
+    }
+  },
+  {
+    "label": "Serene Sounds",
+    "content": {
+      "id": 3,
+      "type": "application",
+      "iconImageName": "IconSereneSounds"
+    }
+  }
+]

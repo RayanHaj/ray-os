@@ -74,8 +74,37 @@ function onDragStart(event: DragEvent) {
   if (!id) {
     return;
   }
-
   event?.dataTransfer?.setData('application/json', JSON.stringify(tile.value));
+}
+
+function onDrop(event: DragEvent) {
+  const targetId = Number((event.currentTarget as HTMLElement).id);
+  const sourceJSONString = event.dataTransfer?.getData('application/json');
+
+  let source: Tile | null = null;
+  if (sourceJSONString) {
+    try {
+      source = JSON.parse(sourceJSONString);
+    } catch (e) {
+      console.error(e);
+      return;
+    }
+  }
+
+  if (source === null) return;
+
+  const sourceIndex = gridStore.tiles.findIndex(tile => tile.content.id === source?.content.id);
+  if (sourceIndex !== -1) {
+    gridStore.tiles.splice(sourceIndex, 1);
+  }
+
+  const targetIndex = gridStore.tiles.findIndex(tile => tile.content.id === targetId);
+  if (targetIndex === -1) {
+    source.content.id = targetId;
+    gridStore.tiles.push(source);
+  } else {
+    return;
+  }
 }
 </script>
 
@@ -87,15 +116,18 @@ function onDragStart(event: DragEvent) {
     :style="tileStyling"
     :draggable="tileContainsApplication"
     @dragstart="onDragStart"
+    @dragover.prevent
+    @dragenter.prevent
+    @drop.prevent="onDrop"
   >
-    <div class="content" v-if="tile">
+    <div class="content" v-if="tile && svg">
       <component
-        v-if="svg?.id === id"
-        :is="svg?.component"
+        v-if="svg.id === id"
+        :is="svg.component"
         :custom-width="50"
         :custom-height="50"
       />
-      <div>{{ tile?.label }}</div>
+      <div>{{ tile.label }}</div>
     </div>
   </div>
 </template>
