@@ -3,24 +3,21 @@
     "label": "File Explorer",
     "content": {
       "id": 1,
-      "type": "application",
-      "iconImageName": "IconFileExplorer"
+      "type": "application"
     }
   },
   {
     "label": "Calculator",
     "content": {
       "id": 2,
-      "type": "application",
-      "iconImageName": "IconCalculator"
+      "type": "application"
     }
   },
   {
     "label": "Serene Sounds",
     "content": {
       "id": 3,
-      "type": "application",
-      "iconImageName": "IconSereneSounds"
+      "type": "application"
     }
   }
 ]

@@ -40,10 +40,10 @@ watchEffect(() => {
       return;
     }
 
-    if (tile.value.content.type === 'application' && tile.value.content.iconImageName !== '') {
+    if (tile.value.content.type === 'application' && tile.value.label !== '') {
       const getSvg = await useSvgByFileNameAndDirectory(
         'applications',
-        tile.value.content.iconImageName,
+        tile.value.label,
       )
       if (!getSvg) {
         return
@@ -61,10 +61,11 @@ const tileContainsApplication = computed(() => {
   if (!tile.value.content) {
     return false;
   }
-  if (tile.value.content.type === 'file') {
-    return false;
+  if (!tile.value.label) {
+    return false
   }
-  return tile.value?.label !== '' && tile.value?.content.iconImageName !== '';
+
+  return tile.value.content.type === 'application';
 });
 const tileStyling = {
   width: `${gridStore.tileWidth}px`,

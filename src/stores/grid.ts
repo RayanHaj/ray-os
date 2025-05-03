@@ -42,8 +42,7 @@ export const useGridStore = defineStore('grid', () => {
         label: value.label,
         content: {
           id: value.content.id,
-          type: value.content.type,
-          iconImageName: value.content.iconImageName,
+          type: value.content.type
         },
       }
 

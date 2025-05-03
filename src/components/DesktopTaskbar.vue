@@ -25,6 +25,7 @@
   align-items: center;
   top: 100%;
   position: sticky;
+  z-index: 9999;
 }
 
 .flying {

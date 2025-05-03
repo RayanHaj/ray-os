@@ -1,39 +1,19 @@
 <script setup lang="ts">
 import DesktopGrid from '@/components/DesktopGrid.vue'
 import DesktopTaskbar from '@/components/DesktopTaskbar.vue'
-
-//DEBUG
-import { useWindowStore } from '@/stores/window.ts'
-import { computed } from 'vue'
+import { type ComputedRef } from 'vue'
 import ApplicationWindow from '@/components/ApplicationWindow.vue'
+import type { WindowReference } from '@/types/WindowReference.ts'
+import { useFlatOpenWindowsReferencesFull } from '@/composables/useFlatOpenWindowsReferencesFull.ts'
 
-const windowStore = useWindowStore();
-
-
-const references = computed(() => {
-  const referencesList: {id: number, label: string, zIndex: number}[] = [];
-  const keys = Object.keys(windowStore.openWindowsReferences);
-  keys.forEach(key => {
-    windowStore.openWindowsReferences[key].forEach(value => {
-      const newObject = {
-        id: value.id,
-        label: key,
-        zIndex: value.zIndex
-      };
-
-      referencesList.push(newObject);
-    });
-  });
-
-  return referencesList;
-});
+const references: ComputedRef<WindowReference[]> = useFlatOpenWindowsReferencesFull();
 </script>
 
 <template>
   <main>
     <ApplicationWindow
       v-for="reference of references"
-      :key="reference.id"
+      :key="`${reference.label}-${reference.id}`"
       :reference="reference"
     />
     <DesktopGrid/>
