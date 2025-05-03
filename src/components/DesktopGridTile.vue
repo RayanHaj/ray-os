@@ -10,6 +10,7 @@ import {
 } from 'vue'
 import { useSvgByFileNameAndDirectory } from '@/composables/useSvgByFileNameAndDirectory.ts'
 import type { Tile } from '@/types/Tile.ts'
+import { useWindowStore } from '@/stores/window.ts'
 
 const props = defineProps({
   position: {
@@ -18,8 +19,9 @@ const props = defineProps({
   }
 })
 
-const tileCountVertical = useTileCountGrid().y
+const tileCountVertical = useTileCountGrid().y;
 
+const windowStore = useWindowStore();
 const gridStore = useGridStore();
 const tile = ref<Tile>();
 const id = ref<number>(0);
@@ -106,6 +108,10 @@ function onDrop(event: DragEvent) {
     return;
   }
 }
+function openWindow() {
+  if (!tile.value) return;
+  windowStore.pushOpenWindowReference(tile.value.label);
+}
 </script>
 
 <template>
@@ -119,6 +125,7 @@ function onDrop(event: DragEvent) {
     @dragover.prevent
     @dragenter.prevent
     @drop.prevent="onDrop"
+    @dblclick="openWindow"
   >
     <div class="content" v-if="tile && svg">
       <component

@@ -3,22 +3,39 @@ import DesktopGrid from '@/components/DesktopGrid.vue'
 import DesktopTaskbar from '@/components/DesktopTaskbar.vue'
 
 //DEBUG
-// import { useWindowStore } from '@/stores/window.ts'
-//
-// const windowStore = useWindowStore();
-// for (let i = 0; i < 10; i++) {
-//   windowStore.pushOpenWindow('File Explorer');
-// }
-//
-// for (let i = 0; i < 10; i++) {
-//   windowStore.pushOpenWindow('Serene Sounds');
-// }
-//
-// windowStore.removeOpenWindowReference('File Explorer', 1001);
+import { useWindowStore } from '@/stores/window.ts'
+import { computed } from 'vue'
+import ApplicationWindow from '@/components/ApplicationWindow.vue'
+
+const windowStore = useWindowStore();
+
+
+const references = computed(() => {
+  const referencesList: {id: number, label: string, zIndex: number}[] = [];
+  const keys = Object.keys(windowStore.openWindowsReferences);
+  keys.forEach(key => {
+    windowStore.openWindowsReferences[key].forEach(value => {
+      const newObject = {
+        id: value.id,
+        label: key,
+        zIndex: value.zIndex
+      };
+
+      referencesList.push(newObject);
+    });
+  });
+
+  return referencesList;
+});
 </script>
 
 <template>
   <main>
+    <ApplicationWindow
+      v-for="reference of references"
+      :key="reference.id"
+      :reference="reference"
+    />
     <DesktopGrid/>
     <DesktopTaskbar/>
   </main>

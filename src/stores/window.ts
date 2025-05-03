@@ -1,50 +1,59 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { reactive } from 'vue'
 
 type WindowReference = {
-  [key: string]: number[];
+  [key: string]: { id: number, zIndex: number }[];
 }
 
 export const useWindowStore = defineStore('window', () => {
-  const openWindowsReferences = ref<WindowReference>({});
+  const openWindowsReferences = reactive<WindowReference>({});
 
   function pushOpenWindowReference(windowName: string) {
-    let reference = 1000;
-    if (typeof openWindowsReferences.value[windowName] === 'undefined') {
-      openWindowsReferences.value[windowName] = [reference];
+    let id = 1000;
+
+    if (typeof openWindowsReferences[windowName] === 'undefined') {
+      openWindowsReferences[windowName] = [{ id: id, zIndex: generateNextZIndex() }];
       return;
     }
 
-    reference = openWindowsReferences.value[windowName].reduce((accumulator, value) => {
-      if (value > accumulator) {
-        accumulator = value;
+    id = openWindowsReferences[windowName].reduce((accumulator, value) => {
+      if (value.id > accumulator) {
+        accumulator = value.id;
       }
 
       return accumulator;
-    }, reference);
+    }, id);
+    id += 1;
 
-    reference += 1;
+    openWindowsReferences[windowName].push({id: id, zIndex: generateNextZIndex()});
+  }
 
-    openWindowsReferences.value[windowName].push(reference);
+  function generateNextZIndex() {
+    const keys = Object.keys(openWindowsReferences);
+    return keys.reduce((accumulator, value) => {
+      openWindowsReferences[value].forEach(element => {
+        if (element.zIndex > accumulator) {
+          accumulator = element.zIndex;
+        }
+      });
+
+      return accumulator;
+    }, 1) + 1;
   }
 
   function removeOpenWindowReference(windowName: string, reference: number) {
-    if (typeof openWindowsReferences.value[windowName] === 'undefined') {
+    if (typeof openWindowsReferences[windowName] === 'undefined') {
       return;
     }
 
-    openWindowsReferences.value[windowName] =
-      openWindowsReferences.value[windowName]
-        .filter(windowReference => windowReference !== reference);
+    openWindowsReferences[windowName] =
+      openWindowsReferences[windowName]
+        .filter(windowReference => windowReference.id !== reference);
 
-    if (openWindowsReferences.value[windowName].length === 0) {
-      delete openWindowsReferences.value[windowName];
+    if (openWindowsReferences[windowName].length === 0) {
+      delete openWindowsReferences[windowName];
     }
   }
 
-  function getOpenWindowReferences() {
-    return openWindowsReferences.value;
-  }
-
-  return { openWindowsReferences, pushOpenWindow: pushOpenWindowReference, getOpenWindowReferences, removeOpenWindowReference }
+  return { openWindowsReferences, pushOpenWindowReference, removeOpenWindowReference }
 })
