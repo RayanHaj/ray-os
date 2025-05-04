@@ -1,8 +1,8 @@
-import type { Tile } from '@/types/Tile.ts'
+import type { Item } from '@/types/Item.ts'
 import { useGridStore } from '@/stores/grid.ts'
 import { test, expect } from 'vitest'
 
-function generateTiles(count: number): Tile[] {
+function generateTiles(count: number): Item[] {
   const tiles = [];
   for (let i = 1; i < count; i++) {
     tiles.push({
@@ -19,11 +19,11 @@ const tiles = generateTiles(10);
 const gridStore = useGridStore();
 
 test("Tiles can be pushed into grid", () => {
-  expect(gridStore.tiles.length).toBe(0);
+  expect(gridStore.items.length).toBe(0);
 
   tiles.forEach(tile => {
-    gridStore.tiles.push(tile);
+    gridStore.items.push(tile);
   });
 
-  expect(gridStore.tiles.length).toBe(10);
+  expect(gridStore.items.length).toBe(10);
 });

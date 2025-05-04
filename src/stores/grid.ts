@@ -1,67 +1,49 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import type { Tile } from '@/types/Tile.ts'
+import type { Item } from '@/types/Item.ts'
 import { useBrowserStore } from '@/stores/browser.ts'
-import initTiles from '@/json/initTiles.json'
+import { useFileStore } from '@/stores/file.ts'
 
 export const useGridStore = defineStore('grid', () => {
-  const tileWidth = ref(90)
-  const tileHeight = ref(90)
-  const taskbarHeight = ref(0)
-  const tiles = ref<Tile[]>([])
+  const tileWidth = ref(90);
+  const tileHeight = ref(90);
+  const items = ref<Item[]>([]);
 
-  const browserStore = useBrowserStore()
+  const browserStore = useBrowserStore();
+  const fileStore = useFileStore();
 
   function updateTileContent() {
-    const filledTiles = tiles.value.filter((tile) => tile.label !== '')
+    const filledTiles = items.value.filter((item) => item.label !== '')
 
     if (browserStore.windowResizing === true) {
       return
     }
 
-    let newTiles: Tile[] = [];
+    let newTiles: Item[] = [];
     if (filledTiles.length === 0) {
-      newTiles = setInitialValues();
+      newTiles = fileStore.files;
     }
 
-    tiles.value = [];
+    items.value = [];
     if (filledTiles.length > 0) {
       filledTiles.forEach((tile) => {
         newTiles.push(tile)
       })
     }
 
-    tiles.value = newTiles.sort((a, b) => a.content?.id - b.content?.id);
+    items.value = newTiles.sort((a, b) => a.content?.id - b.content?.id);
   }
 
-  function setInitialValues() {
-    return initTiles.reduce((accumulator, value) => {
-      if (value.content.type !== 'application') return accumulator;
-
-      const tile: Tile = {
-        label: value.label,
-        content: {
-          id: value.content.id,
-          type: value.content.type
-        },
-      }
-
-      accumulator.push(tile);
-      return accumulator
-    }, [] as Tile[]);
-  }
-
-  function pushTile(tile: Tile) {
+  function pushTile(tile: Item) {
     if (tile.content) {
-      tiles.value[tile.content.id - 1] = tile
+      items.value[tile.content.id - 1] = tile
     }
   }
 
   return {
-    tiles,
+    items,
     tileWidth,
     tileHeight,
-    taskbarHeight,
     updateTileContent,
     pushTile,
   }

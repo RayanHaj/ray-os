@@ -16,7 +16,8 @@ import { useBrowserStore } from '@/stores/browser.ts'
     top: '0',
     width: '50%',
     height: '50%',
-    zIndex: props.reference.zIndex
+    zIndex: props.reference.zIndex,
+    display: 'block'
   });
 
   const cachedStyles = ref({
@@ -110,7 +111,8 @@ import { useBrowserStore } from '@/stores/browser.ts'
   }
 
   function minimizeWindow() {
-    console.log(isMaximized.value);
+    styles.value.display = 'none';
+    windowStore.setWindowMinimized(props.reference.label, props.reference.id);
   }
 </script>
 
@@ -131,5 +133,6 @@ import { useBrowserStore } from '@/stores/browser.ts'
   .window {
     background-color: var(--window-primary-color);
     position: absolute;
+    border: var(--window-border-color) 1px solid;
   }
 </style>

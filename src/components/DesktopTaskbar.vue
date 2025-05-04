@@ -1,17 +1,24 @@
 <script setup lang="ts">
   import { useTaskbarStore } from '@/stores/taskbar.ts';
+  import DesktopTaskbarTile from '@/components/DesktopTaskbarTile.vue'
+  import { onMounted } from 'vue'
 
-
+  const taskbarStore = useTaskbarStore();
   const flying = false;
-  const taskbarHeight = useTaskbarStore().taskbarHeight;
+  const taskbarHeight = taskbarStore.taskbarHeight;
+
+  onMounted(() => {
+    console.log(taskbarStore.items)
+  })
+
 </script>
 
 <template>
   <div class="taskbar" :class="{'active': !flying}" :style="{height: `${taskbarHeight}px`}">
     <div class="flying" :class="{'active': flying}">
-      <div :style="{marginLeft: '20px'}"></div>
-      <div>
-
+      <div :style="{marginRight: '20px'}"></div>
+      <div class="tiles">
+        <DesktopTaskbarTile v-for="item of taskbarStore.items" :key="item.content.id" :id="item.content.id"/>
       </div>
       <div :style="{marginRight: '20px'}"></div>
     </div>
@@ -35,6 +42,12 @@
   width: 90%;
   height: 80%;
   border-radius: 10px;
+}
+
+.tiles {
+  display: flex;
+  flex-direction: row;
+  gap: 15px;
 }
 
 .active {

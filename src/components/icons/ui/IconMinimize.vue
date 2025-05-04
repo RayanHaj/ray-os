@@ -28,7 +28,7 @@ defineProps({
   customColor: {
     type: String,
     required: false,
-    default: 'var(--text-color)',
+    default: 'var(--svg-color)',
   },
 })
 </script>

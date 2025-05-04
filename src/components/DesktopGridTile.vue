@@ -1,15 +1,14 @@
 <script setup lang="ts">
 import { useGridStore } from '@/stores/grid.ts'
+import { useFileStore } from '@/stores/file.ts'
 import { useTileCountGrid } from '@/composables/useTileCountGrid.ts'
 import {
   type Component,
-  computed,
+  computed, onMounted,
   ref,
-  shallowRef,
-  watchEffect
+  shallowRef, watchEffect
 } from 'vue'
-import { useSvgByFileNameAndDirectory } from '@/composables/useSvgByFileNameAndDirectory.ts'
-import type { Tile } from '@/types/Tile.ts'
+import type { Item } from '@/types/Item.ts'
 import { useWindowStore } from '@/stores/window.ts'
 
 const props = defineProps({
@@ -23,49 +22,42 @@ const tileCountVertical = useTileCountGrid().y;
 
 const windowStore = useWindowStore();
 const gridStore = useGridStore();
-const tile = ref<Tile>();
+const fileStore = useFileStore();
+const item = ref<Item>();
 const id = ref<number>(0);
-watchEffect(() => {
+const svg = shallowRef<Component>();
+
+function updateTile() {
   id.value = (props.position.x - 1) * tileCountVertical.value + props.position.y;
-  tile.value = gridStore.tiles.find((tile) => tile.content.id === id.value);
+  item.value = gridStore.items.find((tile) => tile.content.id === id.value);
+
+  if (item.value && item.value.content.type === 'application' && item.value.label !== '') {
+    svg.value = fileStore.fileSvgs[item.value.label];
+  }
+}
+
+onMounted(() => {
+  updateTile();
 });
 
-const svg = shallowRef<{ id: number; component: Component }>()
 watchEffect(() => {
-  (async () => {
-    if (!tile.value) {
-      return;
-    }
-    if (!tile.value.content) {
-      return;
-    }
-
-    if (tile.value.content.type === 'application' && tile.value.label !== '') {
-      const getSvg = await useSvgByFileNameAndDirectory(
-        'applications',
-        tile.value.label,
-      )
-      if (!getSvg) {
-        return
-      }
-
-      svg.value = { id: tile.value.content.id, component: getSvg };
-    }
-  })();
+  updateTile();
 });
+
+const getSvg = computed(() => svg.value);
 
 const tileContainsApplication = computed(() => {
-  if (!tile.value) {
+  if (!item.value) {
     return false;
   }
-  if (!tile.value.content) {
+  if (!item.value.content) {
     return false;
   }
-  if (!tile.value.label) {
+  if (!item.value.label) {
     return false
   }
 
-  return tile.value.content.type === 'application';
+  return item.value.content.type === 'application';
 });
 const tileStyling = {
   width: `${gridStore.tileWidth}px`,
@@ -73,18 +65,18 @@ const tileStyling = {
 }
 
 function onDragStart(event: DragEvent) {
-  const id = tile.value?.content.id;
+  const id = item.value?.content.id;
   if (!id) {
     return;
   }
-  event?.dataTransfer?.setData('application/json', JSON.stringify(tile.value));
+  event?.dataTransfer?.setData('application/json', JSON.stringify(item.value));
 }
 
 function onDrop(event: DragEvent) {
   const targetId = Number((event.currentTarget as HTMLElement).id);
   const sourceJSONString = event.dataTransfer?.getData('application/json');
 
-  let source: Tile | null = null;
+  let source: Item | null = null;
   if (sourceJSONString) {
     try {
       source = JSON.parse(sourceJSONString);
@@ -96,22 +88,22 @@ function onDrop(event: DragEvent) {
 
   if (source === null) return;
 
-  const sourceIndex = gridStore.tiles.findIndex(tile => tile.content.id === source?.content.id);
+  const sourceIndex = gridStore.items.findIndex(tile => tile.content.id === source?.content.id);
   if (sourceIndex !== -1) {
-    gridStore.tiles.splice(sourceIndex, 1);
+    gridStore.items.splice(sourceIndex, 1);
   }
 
-  const targetIndex = gridStore.tiles.findIndex(tile => tile.content.id === targetId);
+  const targetIndex = gridStore.items.findIndex(tile => tile.content.id === targetId);
   if (targetIndex === -1) {
     source.content.id = targetId;
-    gridStore.tiles.push(source);
+    gridStore.items.push(source);
   } else {
     return;
   }
 }
 function openWindow() {
-  if (!tile.value) return;
-  windowStore.pushOpenWindowReference(tile.value.label);
+  if (!item.value) return;
+  windowStore.pushOpenWindowReference(item.value.label);
 }
 </script>
 
@@ -128,14 +120,14 @@ function openWindow() {
     @drop.prevent="onDrop"
     @dblclick="openWindow"
   >
-    <div class="content" v-if="tile && svg">
+    <div class="content" v-if="item">
       <component
-        v-if="svg.id === id"
-        :is="svg.component"
+        v-if="svg"
+        :is="getSvg"
         :custom-width="50"
         :custom-height="50"
       />
-      <div>{{ tile.label }}</div>
+      <div>{{ item.label }}</div>
     </div>
   </div>
 </template>
@@ -151,7 +143,7 @@ function openWindow() {
 }
 
 .tile.filled:hover {
-  background-color: var(--button-secondary-color);
+  background-color: var(--button-hover-color);
   border-radius: 10px;
 }
 

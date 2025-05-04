@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import DesktopGrid from '@/components/DesktopGrid.vue'
 import DesktopTaskbar from '@/components/DesktopTaskbar.vue'
-import { type ComputedRef } from 'vue'
+import { type ComputedRef, onBeforeMount, onMounted } from 'vue'
 import ApplicationWindow from '@/components/ApplicationWindow.vue'
 import type { WindowReference } from '@/types/WindowReference.ts'
 import { useFlatOpenWindowsReferencesFull } from '@/composables/useFlatOpenWindowsReferencesFull.ts'

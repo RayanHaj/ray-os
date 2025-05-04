@@ -17,55 +17,65 @@ body {
 }
 
 [data-theme='midnight-neon'] {
-  --background-color: #0d0d0d;
+  --background-color: #0a0a0a;
   --text-color: #39ff14;
   --svg-color: #ff00ff;
-  --button-primary-color: #1f1f1f;
-  --button-secondary-color: #262626;
-  --input-primary-color: #121212;
-  --input-secondary-color: #333;
-  --taskbar-background-color: #1a0033;
-  --window-primary-color: #121212;
-  --window-secondary-color: #262626;
+  --button-primary-color: #1a1a1a;
+  --button-secondary-color: #2a2a2a;
+  --input-primary-color: #101010;
+  --input-secondary-color: #292929;
+  --taskbar-background-color: #220044;
+  --window-primary-color: #111111;
+  --window-secondary-color: #1e1e1e;
 }
 
 [data-theme='vintage-terminal'] {
-  --background-color: #1b1b1b;
+  --background-color: #0c1712;
   --text-color: #00ff00;
+  --text-secondary-color: #00cc00;
+  --accent-color: #33ff33;
   --svg-color: #00ff00;
-  --button-primary-color: #222;
-  --button-secondary-color: #333;
-  --input-primary-color: #111;
-  --input-secondary-color: #1a1a1a;
-  --taskbar-background-color: #004400;
-  --window-primary-color: #111;
-  --window-secondary-color: #333;
+  --button-primary-color: #1c2c1c;
+  --button-secondary-color: #2a3a2a;
+  --button-hover-color: #304030;
+  --button-text-color: #00ff00;
+  --input-primary-color: #0f1a0f;
+  --input-secondary-color: #1a2a1a;
+  --input-border-color: #00ff00;
+  --input-focus-color: #122112;
+  --taskbar-background-color: #002800;
+  --taskbar-border-color: #00ff00;
+  --window-primary-color: #0e1c0e;
+  --window-secondary-color: #1e2e1e;
+  --window-border-color: #00cc00;
+  --shadow-color: rgba(0, 255, 0, 0.15);
+  --highlight-color: #00ff0080;
 }
 
 [data-theme='soft-spring'] {
-  --background-color: #f2f6e9;
+  --background-color: #f7faf0;
   --text-color: #2c3e50;
-  --svg-color: #27ae60;
-  --button-primary-color: #d5e8d4;
-  --button-secondary-color: #b3dec1;
+  --svg-color: #2ecc71;
+  --button-primary-color: #e0f2e9;
+  --button-secondary-color: #c3e8d6;
   --input-primary-color: #ffffff;
-  --input-secondary-color: #e0f7e9;
-  --taskbar-background-color: #a9ccb4;
+  --input-secondary-color: #ecf9f0;
+  --taskbar-background-color: #b8d8c2;
   --window-primary-color: #ffffff;
-  --window-secondary-color: #d5e8d4;
+  --window-secondary-color: #e0f2e9;
 }
 
 [data-theme='sunset-pop'] {
-  --background-color: #ffecd2;
+  --background-color: #fff1e6;
   --text-color: #2d1e2f;
-  --svg-color: #ff7f50;
-  --button-primary-color: #ff9a8b;
-  --button-secondary-color: #fad0c4;
-  --input-primary-color: #fff5e6;
-  --input-secondary-color: #ffe0b2;
-  --taskbar-background-color: #e67e73;
-  --window-primary-color: #fff5e6;
-  --window-secondary-color: #ff9a8b;
+  --svg-color: #ff6f61;
+  --button-primary-color: #ffc3a0;
+  --button-secondary-color: #ffe0dc;
+  --input-primary-color: #fff9f4;
+  --input-secondary-color: #ffe7cf;
+  --taskbar-background-color: #ff7660;
+  --window-primary-color: #fff9f4;
+  --window-secondary-color: #ffc3a0;
 }
 
 

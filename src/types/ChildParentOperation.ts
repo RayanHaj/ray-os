@@ -1,7 +1,7 @@
-import type { Tile } from '@/types/Tile.ts'
+import type { Item } from '@/types/Item.ts'
 
 export interface ChildParentOperation {
   identifier: string,
   type: string,
-  value: Tile,
+  value: Item,
 }

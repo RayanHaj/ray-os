@@ -102,6 +102,6 @@ button {
 }
 
 #minimize:hover, #maximize:hover {
-  background-color: var(--button-primary-color);
+  background-color: var(--button-hover-color);
 }
 </style>
