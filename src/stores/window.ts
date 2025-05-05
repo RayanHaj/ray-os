@@ -1,22 +1,22 @@
 import { defineStore } from 'pinia'
-import { reactive } from 'vue'
+import { ref } from 'vue'
 
 type WindowReference = {
-  [key: string]: { id: number, zIndex: number, minimized: boolean }[];
+  [applicationName: string]: { id: number, zIndex: number, minimized: boolean }[];
 }
 
 export const useWindowStore = defineStore('window', () => {
-  const openWindowsReferences = reactive<WindowReference>({});
+  const openWindowsReferences = ref<WindowReference>({});
 
   function pushOpenWindowReference(windowName: string) {
     let id = 1000;
 
-    if (typeof openWindowsReferences[windowName] === 'undefined') {
-      openWindowsReferences[windowName] = [{ id: id, zIndex: generateNextZIndex(), minimized: false }];
+    if (typeof openWindowsReferences.value[windowName] === 'undefined') {
+      openWindowsReferences.value[windowName] = [{ id: id, zIndex: generateNextZIndex(), minimized: false }];
       return;
     }
 
-    id = openWindowsReferences[windowName].reduce((accumulator, value) => {
+    id = openWindowsReferences.value[windowName].reduce((accumulator, value) => {
       if (value.id > accumulator) {
         accumulator = value.id;
       }
@@ -25,23 +25,24 @@ export const useWindowStore = defineStore('window', () => {
     }, id);
     id += 1;
 
-    openWindowsReferences[windowName].push({ id: id, zIndex: generateNextZIndex(), minimized: false });
+    openWindowsReferences.value[windowName].push({ id: id, zIndex: generateNextZIndex(), minimized: false });
+    console.log(openWindowsReferences.value)
   }
 
   function setWindowMinimized(windowName: string, id: number) {
-    const index = openWindowsReferences[windowName].findIndex(reference => reference.id === id);
+    const index = openWindowsReferences.value[windowName].findIndex(reference => reference.id === id);
 
     if (index === -1) {
       return;
     }
 
-    openWindowsReferences[windowName][index].minimized = !openWindowsReferences[windowName][index].minimized;
+    openWindowsReferences.value[windowName][index].minimized = !openWindowsReferences.value[windowName][index].minimized;
   }
 
   function generateNextZIndex() {
-    const keys = Object.keys(openWindowsReferences);
+    const keys = Object.keys(openWindowsReferences.value);
     return keys.reduce((accumulator, value) => {
-      openWindowsReferences[value].forEach(element => {
+      openWindowsReferences.value[value].forEach(element => {
         if (element.zIndex > accumulator) {
           accumulator = element.zIndex;
         }
@@ -52,16 +53,16 @@ export const useWindowStore = defineStore('window', () => {
   }
 
   function removeOpenWindowReference(windowName: string, reference: number) {
-    if (typeof openWindowsReferences[windowName] === 'undefined') {
+    if (typeof openWindowsReferences.value[windowName] === 'undefined') {
       return;
     }
 
-    openWindowsReferences[windowName] =
-      openWindowsReferences[windowName]
+    openWindowsReferences.value[windowName] =
+      openWindowsReferences.value[windowName]
         .filter(windowReference => windowReference.id !== reference);
 
-    if (openWindowsReferences[windowName].length === 0) {
-      delete openWindowsReferences[windowName];
+    if (openWindowsReferences.value[windowName].length === 0) {
+      delete openWindowsReferences.value[windowName];
     }
   }
 
