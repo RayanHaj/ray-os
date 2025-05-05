@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { computed, type PropType, ref } from 'vue'
+import { computed, type PropType, ref, } from 'vue'
 import type { WindowReference } from '@/types/WindowReference.ts'
 import { useWindowStore } from '@/stores/window.ts'
-import ApplicationWindowHeader from '@/components/ApplicationWindowHeader.vue'
+import WindowHeader from '@/components/WindowHeader.vue'
 import { useBrowserStore } from '@/stores/browser.ts'
   const props = defineProps({
     reference: {
@@ -120,7 +120,7 @@ import { useBrowserStore } from '@/stores/browser.ts'
   <div class="window" ref="window" :id="constructedId" :style="styles"
        @mousedown="onMouseDown"
   >
-    <ApplicationWindowHeader
+    <WindowHeader
       :reference="reference"
       @window-control-close="closeWindow"
       @window-control-maximize="maximizeWindow"

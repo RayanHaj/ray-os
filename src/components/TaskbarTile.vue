@@ -4,7 +4,7 @@
   import { useWindowStore } from '@/stores/window.ts'
   import { type Component, computed, onBeforeMount, ref } from 'vue'
   import type { Item } from '@/types/Item.ts'
-  import DesktopTaskbarTabs from '@/components/DesktopTaskbarTabs.vue'
+  import TaskbarTabs from '@/components/TaskbarTabs.vue'
 
   const fileStore = useFileStore();
   const taskbarStore = useTaskbarStore();
@@ -64,15 +64,74 @@
 
     return true;
   }
+
+  const setClassOnHover = ref<string | null>(null)
+  const setTimeoutId = ref<number | null>(null);
+  const mouseOnTabs = ref(false);
+  function onMouseEnter() {
+    if (firstWindowOpenedOnClickTile.value) {
+      firstWindowOpenedOnClickTile.value = false;
+    }
+
+    setClassOnHover.value = 'active';
+    if (setTimeoutId.value) {
+      clearTimeout(setTimeoutId.value);
+      setTimeoutId.value = null;
+    }
+
+    setTimeoutId.value = setTimeout(() => {
+      isHoveringOnTile.value = true;
+    }, 500);
+  }
+
+  function onMouseLeave() {
+    if (firstWindowOpenedOnClickTile.value) {
+      setClassOnHover.value = null;
+    }
+
+    if (setTimeoutId.value) {
+      clearTimeout(setTimeoutId.value);
+      setTimeoutId.value = null;
+    }
+
+    if (!hasTabs()) {
+      setClassOnHover.value = null;
+      isHoveringOnTile.value = false;
+      return;
+    }
+
+    setTimeoutId.value = setTimeout(() => {
+      setClassOnHover.value = null;
+      isHoveringOnTile.value = false;
+    }, 500);
+  }
+
+  function onTabsUnmounted() {
+    mouseOnTabs.value = false;
+    isHoveringOnTile.value = false;
+    setClassOnHover.value = null;
+  }
+
+  const firstWindowOpenedOnClickTile = ref(false);
+  function onClickTile() {
+    if (!item.value) {
+      return;
+    }
+
+    windowStore.pushOpenWindowReference(item.value.label);
+    firstWindowOpenedOnClickTile.value = true;
+  }
 </script>
 
 <template>
   <div class="tile"
-       @mouseenter.prevent="isHoveringOnTile = true"
-       @mouseleave.prevent="isHoveringOnTile = false"
+       :class="setClassOnHover"
+       @mouseenter.prevent="onMouseEnter"
+       @mouseleave.prevent="onMouseLeave"
   >
-    <DesktopTaskbarTabs v-if="hasTabs() && item" :application-name="item.label"/>
-    <div class="content">
+    <TaskbarTabs v-if="hasTabs() && item && firstWindowOpenedOnClickTile === false" :application-name="item.label"
+                 @mouse-entered="mouseOnTabs = true" @mouse-left="mouseOnTabs = false;" @tabs-unmounted="onTabsUnmounted"/>
+    <div class="content" @click="onClickTile">
       <component v-if="svg" :is="svg"
                  :custom-width="40"
                  :custom-height="40"
@@ -89,11 +148,10 @@
     align-items: center;
     width: 100%;
     height: 100%;
-    padding: 10px;
     position: relative;
   }
 
-  .tile:hover {
+  .tile.active {
     background-color: var(--button-hover-color);
     border-radius: 10px;
   }
@@ -113,6 +171,9 @@
   .content {
     display: flex;
     flex-direction: column;
+    width: 100%;
+    height: 100%;
+    padding: 10px;
   }
 
   .underline.hidden {

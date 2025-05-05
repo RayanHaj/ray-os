@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import DesktopGrid from '@/components/DesktopGrid.vue'
-import DesktopTaskbar from '@/components/DesktopTaskbar.vue'
-import { type ComputedRef, onBeforeMount, onMounted } from 'vue'
-import ApplicationWindow from '@/components/ApplicationWindow.vue'
+import GridMain from '@/components/GridMain.vue'
+import TaskbarMain from '@/components/TaskbarMain.vue'
+import { type ComputedRef } from 'vue'
+import WindowMain from '@/components/WindowMain.vue'
 import type { WindowReference } from '@/types/WindowReference.ts'
 import { useFlatOpenWindowsReferencesFull } from '@/composables/useFlatOpenWindowsReferencesFull.ts'
 
@@ -11,13 +11,13 @@ const references: ComputedRef<WindowReference[]> = useFlatOpenWindowsReferencesF
 
 <template>
   <main>
-    <ApplicationWindow
+    <WindowMain
       v-for="reference of references"
       :key="`${reference.label}-${reference.id}`"
       :reference="reference"
     />
-    <DesktopGrid/>
-    <DesktopTaskbar/>
+    <GridMain/>
+    <TaskbarMain/>
   </main>
 </template>
 

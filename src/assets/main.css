@@ -48,8 +48,11 @@ body {
   --window-primary-color: #0e1c0e;
   --window-secondary-color: #1e2e1e;
   --window-border-color: #00cc00;
-  --shadow-color: rgba(0, 255, 0, 0.15);
   --highlight-color: #00ff0080;
+  --tabs-background: #051505;
+  --tabs-secondary-background: #082008;
+  --tabs-text: #00ff00;
+  --tabs-hover: #0a250a;
 }
 
 [data-theme='soft-spring'] {

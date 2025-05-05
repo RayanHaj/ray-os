@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import TileComponent from '@/components/DesktopGridTile.vue'
+import GridTile from '@/components/GridTile.vue'
 import { useTileCountGrid } from '@/composables/useTileCountGrid.ts'
 import { computed } from 'vue'
 import { useBrowserStore } from '@/stores/browser.ts'
@@ -20,7 +20,7 @@ const gridHeight = computed(() => (browserStore.height - taskbarStore.taskbarHei
     <div class="grid" @dragover.prevent @dragenter.prevent>
       <div class="column" v-for="row in tileCountHorizontal" :key="row">
         <div class="row" v-for="column in tileCountVertical" :key="column">
-          <TileComponent :position="{x: row, y: column}"/>
+          <GridTile :position="{x: row, y: column}"/>
         </div>
       </div>
     </div>
