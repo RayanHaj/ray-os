@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, type PropType, ref, watch, watchEffect } from 'vue';
+import { type Component, computed, type PropType, ref, watch } from 'vue';
 import type { WindowReference } from '@/types/WindowReference.ts';
 import { useWindowStore } from '@/stores/window.ts';
 import WindowHeader from '@/components/WindowHeader.vue';
@@ -10,6 +10,10 @@ const props = defineProps({
     required: true,
     type: Object as PropType<WindowReference>,
   },
+  windowContentComponent: {
+    required: true,
+    type: Object as PropType<Component>
+  }
 });
 
 const styles = ref({
@@ -63,7 +67,6 @@ watch(
 );
 
 function onMouseDown(event: MouseEvent) {
-  event.preventDefault();
 
   if (isMaximized.value) {
     return;
@@ -141,13 +144,16 @@ function maximize() {
         windowStore.setWindowMinimized(props.reference.label, props.reference.id)
       "
     />
+    <component :is="windowContentComponent"/>
   </div>
 </template>
 
 <style scoped>
 .window {
+  height: 100%;
   background-color: var(--window-primary-color);
   position: absolute;
   border: var(--window-border-color) 1px solid;
+  user-select: none;
 }
 </style>

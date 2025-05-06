@@ -19,5 +19,12 @@
       "id": 3,
       "type": "application"
     }
+  },
+  {
+    "label": "Settings",
+    "content": {
+      "id": 4,
+      "type": "application"
+    }
   }
 ]

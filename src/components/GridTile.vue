@@ -134,7 +134,6 @@ function openWindow() {
 
 .tile.filled:hover {
   background-color: var(--button-hover-color);
-  border-radius: 10px;
 }
 
 .content {

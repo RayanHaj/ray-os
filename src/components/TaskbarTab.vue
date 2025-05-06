@@ -2,6 +2,7 @@
 import { type Component, onBeforeMount, type PropType, shallowRef } from 'vue';
 import { useWindowStore } from '@/stores/window.ts';
 import { useSvgByFileNameAndDirectory } from '@/composables/useSvgByFileNameAndDirectory.ts';
+import { useThemeSwitcher } from '@/composables/useThemeSwitcher.ts';
 
 type WindowReference = {
   id: number;
@@ -65,10 +66,9 @@ function onClickTab() {
   margin: 0;
   padding: 0;
   border: none;
-  height: 30px;
-  width: 35px;
-  border-radius: 50%;
-  background: var(--button-primary-color);
+  height: 25px;
+  width: 30px;
+  background: none;
 }
 
 .close-button:hover {
