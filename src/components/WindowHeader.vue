@@ -68,6 +68,7 @@ onBeforeMount(async () => {
   color: var(--text-color);
   background-color: var(--window-secondary-color);
   padding-left: 12px;
+  border-bottom: var(--window-border-color) solid 1px;
 }
 
 .info-wrapper {
@@ -81,6 +82,7 @@ onBeforeMount(async () => {
 
 .window-name {
   font-weight: bold;
+  min-width: max-content;
 }
 
 .window-controls {

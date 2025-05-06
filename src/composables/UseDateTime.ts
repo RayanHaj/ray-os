@@ -6,18 +6,10 @@ export function useDateTime() {
 
   const updateTime = () => {
     const now = new Date();
-    time.value = formatTime(now);
+    time.value = now.toLocaleTimeString();
 
     const delay = 1000 - now.getMilliseconds();
     timeoutId = setTimeout(updateTime, delay);
-  };
-
-  const formatTime = (date: Date): string => {
-    return (
-      `${String(date.getHours()).padStart(2, '0')}:` +
-      `${String(date.getMinutes()).padStart(2, '0')}:` +
-      `${String(date.getSeconds()).padStart(2, '0')}`
-    );
   };
 
   onMounted(() => {

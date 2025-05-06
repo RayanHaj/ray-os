@@ -24,7 +24,7 @@ body {
   --svg-color: #3dff3d;
   --button-primary-color: #153015;
   --button-secondary-color: #2a4a2a;
-  --button-hover-color: #3d5d3d;
+  --button-hover-color: #486a48;
   --button-text-color: #ffffff;
   --input-primary-color: #0f1a0f;
   --input-secondary-color: #1f3f1f;
@@ -33,7 +33,7 @@ body {
   --taskbar-background-color: #002800;
   --taskbar-border-color: #3dff3d;
   --window-primary-color: #0e1c0e;
-  --window-secondary-color: #1e3e1e;
+  --window-secondary-color: #2b5a2b;
   --window-border-color: #00cc00;
   --highlight-color: #3dff3d80;
   --tabs-background: #051505;
@@ -50,7 +50,7 @@ body {
   --svg-color: #ff47ff;
   --button-primary-color: #1c0c2c;
   --button-secondary-color: #38144d;
-  --button-hover-color: #4a1a66;
+  --button-hover-color: #5f2399;
   --button-text-color: #ffffff;
   --input-primary-color: #0f0a1a;
   --input-secondary-color: #251547;
@@ -59,7 +59,7 @@ body {
   --taskbar-background-color: #200038;
   --taskbar-border-color: #ff47ff;
   --window-primary-color: #0e0c1c;
-  --window-secondary-color: #2e1a47;
+  --window-secondary-color: #3a2366;
   --window-border-color: #cc00cc;
   --highlight-color: #ff47ff80;
   --tabs-background: #05051f;
@@ -76,7 +76,7 @@ body {
   --svg-color: #ffc133;
   --button-primary-color: #2c1c00;
   --button-secondary-color: #473310;
-  --button-hover-color: #5c4a1a;
+  --button-hover-color: #6d501f;
   --button-text-color: #ffffff;
   --input-primary-color: #1a0f00;
   --input-secondary-color: #382b08;
@@ -85,7 +85,7 @@ body {
   --taskbar-background-color: #402800;
   --taskbar-border-color: #ffc133;
   --window-primary-color: #1c0e00;
-  --window-secondary-color: #3a2800;
+  --window-secondary-color: #5a3d00;
   --window-border-color: #cc8800;
   --highlight-color: #ffc13380;
   --tabs-background: #150500;
@@ -102,7 +102,7 @@ body {
   --svg-color: #47edff;
   --button-primary-color: #001c2c;
   --button-secondary-color: #003347;
-  --button-hover-color: #004361;
+  --button-hover-color: #00567a;
   --button-text-color: #ffffff;
   --input-primary-color: #000f1a;
   --input-secondary-color: #002a40;
@@ -111,7 +111,7 @@ body {
   --taskbar-background-color: #002840;
   --taskbar-border-color: #47edff;
   --window-primary-color: #000e1c;
-  --window-secondary-color: #002b42;
+  --window-secondary-color: #004b6b;
   --window-border-color: #00aacc;
   --highlight-color: #47edff80;
   --tabs-background: #000515;
@@ -128,7 +128,7 @@ body {
   --svg-color: #ff5533;
   --button-primary-color: #2c0c0c;
   --button-secondary-color: #471919;
-  --button-hover-color: #661f1f;
+  --button-hover-color: #7a2626;
   --button-text-color: #ffffff;
   --input-primary-color: #1a0505;
   --input-secondary-color: #3a1010;
@@ -137,7 +137,7 @@ body {
   --taskbar-background-color: #380000;
   --taskbar-border-color: #ff5533;
   --window-primary-color: #1c0000;
-  --window-secondary-color: #3e0a0a;
+  --window-secondary-color: #5a1a1a;
   --window-border-color: #cc2800;
   --highlight-color: #ff553380;
   --tabs-background: #150000;
@@ -154,7 +154,7 @@ body {
   --svg-color: #cc47ff;
   --button-primary-color: #1c0c2c;
   --button-secondary-color: #331a47;
-  --button-hover-color: #4d2a66;
+  --button-hover-color: #5a2a7a;
   --button-text-color: #ffffff;
   --input-primary-color: #12081a;
   --input-secondary-color: #261340;
@@ -163,7 +163,7 @@ body {
   --taskbar-background-color: #280040;
   --taskbar-border-color: #cc47ff;
   --window-primary-color: #16061c;
-  --window-secondary-color: #2e0e4a;
+  --window-secondary-color: #47205f;
   --window-border-color: #9933cc;
   --highlight-color: #cc47ff80;
   --tabs-background: #0c0520;

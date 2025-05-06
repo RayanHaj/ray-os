@@ -33,7 +33,7 @@ function onClickOption(option: string) {
   padding: 10px;
   gap: 5px;
   height: 100%;
-  background: var(--accent-color);
+  background: var(--window-secondary-color);
 }
 
 .option {

@@ -22,12 +22,14 @@ onBeforeMount(async () => {
         <component :is="searchSvg" :custom-width="40" :custom-height="40" />
       </button>
     </div>
-    <div class="tiles">
-      <TaskbarTile
-        v-for="item of taskbarStore.items"
-        :key="item.content.id"
-        :id="item.content.id"
-      />
+    <div class="middle">
+      <div class="tiles">
+        <TaskbarTile
+          v-for="item of taskbarStore.items"
+          :key="item.content.id"
+          :id="item.content.id"
+        />
+      </div>
     </div>
     <div class="left-side">
       {{ time }}
@@ -49,20 +51,39 @@ onBeforeMount(async () => {
   padding-right: 25px;
 }
 
-.tiles {
+.middle {
   display: flex;
   flex-direction: row;
+  justify-content: center;
+  align-content: center;
   gap: 15px;
+  width: 60%;
+}
+
+.tiles {
+  display: flex;
 }
 
 .search-button {
-  background: var(--button-primary-color);
+  background: none;
   border: none;
-  padding: 7px 10px;
-  border-radius: 5px;
+  width: 60px;
+  height: 60px;
+  border-radius: 10px;
 }
 
 .search-button:hover {
-  background: var(--button-secondary-color);
+  background: var(--button-hover-color);
+}
+
+.left-side,
+.right-side {
+  width: 20%;
+}
+
+.left-side {
+  font-size: 20px;
+  font-family: 'Courier New', sans-serif;
+  text-align: end;
 }
 </style>

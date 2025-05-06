@@ -23,6 +23,7 @@ const styles = ref({
   height: '50%',
   zIndex: props.reference.zIndex,
   display: 'block',
+  cursor: 'auto',
 });
 
 const cachedStyles = ref({
@@ -86,7 +87,6 @@ function onMouseUp(event: Event) {
 }
 
 const window = ref();
-
 function onMouseMove(event: MouseEvent) {
   event.preventDefault();
 
@@ -131,10 +131,57 @@ function maximize() {
   styles.value.left = '0';
   styles.value.top = '0';
 }
+
+function onMouseoverWindow(event: MouseEvent) {
+  const rect = window.value.getBoundingClientRect();
+  const x = event.clientX - rect.left;
+  const y = event.clientY - rect.top;
+
+  const edgeMargin = 7;
+  const cornerMargin = 10;
+
+  const onTopLeft = x <= cornerMargin && y <= cornerMargin;
+  const onTopRight = x >= rect.width - cornerMargin && y <= cornerMargin;
+  const onBottomLeft = x <= cornerMargin && y >= rect.height - cornerMargin;
+  const onBottomRight = x >= rect.width - cornerMargin && y >= rect.height - cornerMargin;
+
+  const onLeft = x <= edgeMargin && y > cornerMargin && y < rect.height - cornerMargin;
+  const onRight =
+    x >= rect.width - edgeMargin && y > cornerMargin && y < rect.height - cornerMargin;
+  const onTop = y <= edgeMargin && x > cornerMargin && x < rect.width - cornerMargin;
+  const onBottom =
+    y >= rect.height - edgeMargin && x > cornerMargin && x < rect.width - cornerMargin;
+
+  if (onTopLeft) {
+    styles.value.cursor = 'nw-resize';
+  } else if (onTopRight) {
+    styles.value.cursor = 'ne-resize';
+  } else if (onBottomLeft) {
+    styles.value.cursor = 'sw-resize';
+  } else if (onBottomRight) {
+    styles.value.cursor = 'se-resize';
+  } else if (onLeft) {
+    styles.value.cursor = 'w-resize';
+  } else if (onRight) {
+    styles.value.cursor = 'e-resize';
+  } else if (onTop) {
+    styles.value.cursor = 'n-resize';
+  } else if (onBottom) {
+    styles.value.cursor = 's-resize';
+  } else {
+    styles.value.cursor = 'default';
+  }
+}
 </script>
 
 <template>
-  <div class="window" ref="window" :id="constructedId" :style="styles">
+  <div
+    class="window"
+    ref="window"
+    :id="constructedId"
+    :style="styles"
+    @mousemove="onMouseoverWindow"
+  >
     <WindowHeader
       :reference="reference"
       @onMousedownHeader="onMouseDown"
@@ -153,7 +200,7 @@ function maximize() {
   height: 100%;
   background-color: var(--window-primary-color);
   position: absolute;
-  border: var(--window-border-color) 1px solid;
+  border: var(--window-border-color) 2px solid;
   user-select: none;
 }
 </style>
