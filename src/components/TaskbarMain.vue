@@ -2,14 +2,14 @@
 import { useTaskbarStore } from '@/stores/taskbar.ts';
 import TaskbarTile from '@/components/TaskbarTile.vue';
 import { useDateTime } from '../composables/UseDateTime.ts';
-import { type Component, onBeforeMount, ref } from 'vue';
+import { type Component, onBeforeMount, shallowRef } from 'vue';
 import { useSvgByFileNameAndDirectory } from '@/composables/useSvgByFileNameAndDirectory.ts';
 
 const taskbarStore = useTaskbarStore();
 const taskbarHeight = taskbarStore.taskbarHeight;
 const { time } = useDateTime();
 
-const searchSvg = ref<Component | undefined>();
+const searchSvg = shallowRef<Component | undefined>();
 onBeforeMount(async () => {
   searchSvg.value = (await useSvgByFileNameAndDirectory('ui', 'Search')) ?? undefined;
 });

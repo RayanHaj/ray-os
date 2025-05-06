@@ -134,9 +134,10 @@ function maximize() {
 </script>
 
 <template>
-  <div class="window" ref="window" :id="constructedId" :style="styles" @mousedown="onMouseDown">
+  <div class="window" ref="window" :id="constructedId" :style="styles">
     <WindowHeader
       :reference="reference"
+      @onMousedownHeader="onMouseDown"
       @window-control-close="closeWindow"
       @window-control-maximize="maximizeWindow"
       @window-control-minimize="

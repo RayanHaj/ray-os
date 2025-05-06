@@ -43,6 +43,7 @@ onBeforeMount(async () => {
       <component class="svg" :is="svg" :custom-width="15" :custom-height="15" />
       <p class="window-name">{{ reference.label }}</p>
     </div>
+    <div :style="{ width: '100%' }" @mousedown="$emit('onMousedownHeader', $event)" />
     <div class="window-controls">
       <button
         v-for="button of windowControlButtons"
