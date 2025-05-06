@@ -1,4 +1,5 @@
 import './assets/main.css';
+import themes from '@/json/themes.json';
 
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
@@ -14,7 +15,7 @@ app.use(router);
 
 const theme = useThemeSwitcher().getTheme();
 if (theme === '') {
-  useThemeSwitcher().setTheme('midnight-neon');
+  useThemeSwitcher().setTheme(Object.keys(themes)[0]);
 } else {
   document.documentElement.setAttribute('data-theme', theme);
 }
