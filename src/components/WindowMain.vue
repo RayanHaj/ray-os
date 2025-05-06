@@ -12,8 +12,8 @@ const props = defineProps({
   },
   windowContentComponent: {
     required: true,
-    type: Object as PropType<Component>
-  }
+    type: Object as PropType<Component>,
+  },
 });
 
 const styles = ref({
@@ -67,7 +67,6 @@ watch(
 );
 
 function onMouseDown(event: MouseEvent) {
-
   if (isMaximized.value) {
     return;
   }
@@ -144,7 +143,7 @@ function maximize() {
         windowStore.setWindowMinimized(props.reference.label, props.reference.id)
       "
     />
-    <component :is="windowContentComponent"/>
+    <component :is="windowContentComponent" />
   </div>
 </template>
 

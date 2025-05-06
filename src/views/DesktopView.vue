@@ -8,7 +8,7 @@ import { useFlatOpenWindowsReferencesFull } from '@/composables/useFlatOpenWindo
 
 import FallbackMain from '@/components/applications/FallbackMain.vue';
 import SettingsMain from '@/components/applications/settings/SettingsMain.vue';
-const windowContentComponents = shallowRef<{[componentName: string]: Component}>({
+const windowContentComponents = shallowRef<{ [componentName: string]: Component }>({
   settings: SettingsMain,
 });
 

@@ -10,7 +10,7 @@ onMounted(() => {
   if (currentTheme) {
     selectedTheme.value = currentTheme;
   }
-})
+});
 </script>
 
 <template>
@@ -21,6 +21,4 @@ onMounted(() => {
   </div>
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>
