@@ -1,5 +1,5 @@
 export interface WindowReference {
-  id: number,
-  label: string,
-  zIndex: number
+  id: number;
+  label: string;
+  zIndex: number;
 }

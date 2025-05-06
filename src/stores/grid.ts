@@ -1,8 +1,8 @@
-import { defineStore } from 'pinia'
-import { ref } from 'vue'
-import type { Item } from '@/types/Item.ts'
-import { useBrowserStore } from '@/stores/browser.ts'
-import { useFileStore } from '@/stores/file.ts'
+import { defineStore } from 'pinia';
+import { ref } from 'vue';
+import type { Item } from '@/types/Item.ts';
+import { useBrowserStore } from '@/stores/browser.ts';
+import { useFileStore } from '@/stores/file.ts';
 
 export const useGridStore = defineStore('grid', () => {
   const tileWidth = ref(90);
@@ -13,10 +13,10 @@ export const useGridStore = defineStore('grid', () => {
   const fileStore = useFileStore();
 
   function updateTileContent() {
-    const filledTiles = items.value.filter((item) => item.label !== '')
+    const filledTiles = items.value.filter((item) => item.label !== '');
 
     if (browserStore.windowResizing === true) {
-      return
+      return;
     }
 
     let newTiles: Item[] = [];
@@ -27,8 +27,8 @@ export const useGridStore = defineStore('grid', () => {
     items.value = [];
     if (filledTiles.length > 0) {
       filledTiles.forEach((tile) => {
-        newTiles.push(tile)
-      })
+        newTiles.push(tile);
+      });
     }
 
     items.value = newTiles.sort((a, b) => a.content?.id - b.content?.id);
@@ -36,7 +36,7 @@ export const useGridStore = defineStore('grid', () => {
 
   function pushTile(tile: Item) {
     if (tile.content) {
-      items.value[tile.content.id - 1] = tile
+      items.value[tile.content.id - 1] = tile;
     }
   }
 
@@ -46,5 +46,5 @@ export const useGridStore = defineStore('grid', () => {
     tileHeight,
     updateTileContent,
     pushTile,
-  }
-})
+  };
+});

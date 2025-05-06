@@ -9,5 +9,5 @@ export function useDebounce<T extends (...args: unknown[]) => void>(func: T, del
     timeout = setTimeout(() => {
       func(...args);
     }, delay);
-  }
+  };
 }

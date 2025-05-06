@@ -1,190 +1,195 @@
 <script setup lang="ts">
-  import { useFileStore } from '@/stores/file.ts';
-  import { useTaskbarStore } from '@/stores/taskbar.ts'
-  import { useWindowStore } from '@/stores/window.ts'
-  import { type Component, computed, onBeforeMount, ref } from 'vue'
-  import type { Item } from '@/types/Item.ts'
-  import TaskbarTabs from '@/components/TaskbarTabs.vue'
+import { useFileStore } from '@/stores/file.ts';
+import { useTaskbarStore } from '@/stores/taskbar.ts';
+import { useWindowStore } from '@/stores/window.ts';
+import { type Component, computed, onBeforeMount, ref } from 'vue';
+import type { Item } from '@/types/Item.ts';
+import TaskbarTabs from '@/components/TaskbarTabs.vue';
 
-  const fileStore = useFileStore();
-  const taskbarStore = useTaskbarStore();
-  const props = defineProps({
-    id: {
-      required: true,
-      type: Number
-    }
-  });
+const fileStore = useFileStore();
+const taskbarStore = useTaskbarStore();
+const props = defineProps({
+  id: {
+    required: true,
+    type: Number,
+  },
+});
 
-  const isHoveringOnTile = ref(false);
+const isHoveringOnTile = ref(false);
 
-  const item = ref<Item>();
-  const svg = ref<Component>();
-  onBeforeMount(() => {
-    updateTile();
-  });
+const item = ref<Item>();
+const svg = ref<Component>();
+onBeforeMount(() => {
+  updateTile();
+});
 
-  function updateTile() {
-    item.value = taskbarStore.items.find((item) => item.content.id === props.id);
+function updateTile() {
+  item.value = taskbarStore.items.find((item) => item.content.id === props.id);
 
-    if (item.value && item.value.content.type === 'application' && item.value.label !== '') {
-      svg.value = fileStore.fileSvgs[item.value.label];
-    }
+  if (item.value && item.value.content.type === 'application' && item.value.label !== '') {
+    svg.value = fileStore.fileSvgs[item.value.label];
+  }
+}
+
+const windowStore = useWindowStore();
+const getUnderlineClass = computed(() => {
+  if (!item.value) {
+    return 'underline hidden';
   }
 
-  const windowStore = useWindowStore();
-  const getUnderlineClass = computed(() => {
-    if (!item.value) {
-      return 'underline hidden';
-    }
-
-    if (!windowStore.openWindowsReferences[item.value.label]) {
-      return 'underline hidden';
-    }
-
-    const openWindowsReferenceCount = windowStore.openWindowsReferences[item.value.label].length;
-    const minimizedCount = windowStore.openWindowsReferences[item.value.label]
-      .reduce((accumulator, value) => value.minimized ? accumulator + 1 : accumulator, 0);
-
-    if (minimizedCount === openWindowsReferenceCount) {
-      return 'underline minimized';
-    } else {
-      return 'underline maximized';
-    }
-  });
-
-  function hasTabs() {
-    if (!isHoveringOnTile.value) {
-      return false;
-    }
-
-    const reference = windowStore.openWindowsReferences[item.value ? item.value.label : ''];
-    if (!reference || reference.length === 0) {
-      return false;
-    }
-
-    return true;
+  if (!windowStore.openWindowsReferences[item.value.label]) {
+    return 'underline hidden';
   }
 
-  const setClassOnHover = ref<string | null>(null)
-  const setTimeoutId = ref<number | null>(null);
-  const mouseOnTabs = ref(false);
-  function onMouseEnter() {
-    if (firstWindowOpenedOnClickTile.value) {
-      firstWindowOpenedOnClickTile.value = false;
-    }
+  const openWindowsReferenceCount = windowStore.openWindowsReferences[item.value.label].length;
+  const minimizedCount = windowStore.openWindowsReferences[item.value.label].reduce(
+    (accumulator, value) => (value.minimized ? accumulator + 1 : accumulator),
+    0,
+  );
 
-    setClassOnHover.value = 'active';
-    if (setTimeoutId.value) {
-      clearTimeout(setTimeoutId.value);
-      setTimeoutId.value = null;
-    }
+  if (minimizedCount === openWindowsReferenceCount) {
+    return 'underline minimized';
+  } else {
+    return 'underline maximized';
+  }
+});
 
-    setTimeoutId.value = setTimeout(() => {
-      isHoveringOnTile.value = true;
-    }, 500);
+function hasTabs() {
+  if (!isHoveringOnTile.value) {
+    return false;
   }
 
-  function onMouseLeave() {
-    if (firstWindowOpenedOnClickTile.value) {
-      setClassOnHover.value = null;
-    }
-
-    if (setTimeoutId.value) {
-      clearTimeout(setTimeoutId.value);
-      setTimeoutId.value = null;
-    }
-
-    if (!hasTabs()) {
-      setClassOnHover.value = null;
-      isHoveringOnTile.value = false;
-      return;
-    }
-
-    setTimeoutId.value = setTimeout(() => {
-      setClassOnHover.value = null;
-      isHoveringOnTile.value = false;
-    }, 500);
+  const reference = windowStore.openWindowsReferences[item.value ? item.value.label : ''];
+  if (!reference || reference.length === 0) {
+    return false;
   }
 
-  function onTabsUnmounted() {
-    mouseOnTabs.value = false;
-    isHoveringOnTile.value = false;
+  return true;
+}
+
+const setClassOnHover = ref<string | null>(null);
+const setTimeoutId = ref<number | null>(null);
+const mouseOnTabs = ref(false);
+function onMouseEnter() {
+  if (firstWindowOpenedOnClickTile.value) {
+    firstWindowOpenedOnClickTile.value = false;
+  }
+
+  setClassOnHover.value = 'active';
+  if (setTimeoutId.value) {
+    clearTimeout(setTimeoutId.value);
+    setTimeoutId.value = null;
+  }
+
+  setTimeoutId.value = setTimeout(() => {
+    isHoveringOnTile.value = true;
+  }, 500);
+}
+
+function onMouseLeave() {
+  if (firstWindowOpenedOnClickTile.value) {
     setClassOnHover.value = null;
   }
 
-  const firstWindowOpenedOnClickTile = ref(false);
-  function onClickTile() {
-    if (!item.value) {
-      return;
-    }
-
-    windowStore.pushOpenWindowReference(item.value.label);
-    firstWindowOpenedOnClickTile.value = true;
+  if (setTimeoutId.value) {
+    clearTimeout(setTimeoutId.value);
+    setTimeoutId.value = null;
   }
+
+  if (!hasTabs()) {
+    setClassOnHover.value = null;
+    isHoveringOnTile.value = false;
+    return;
+  }
+
+  setTimeoutId.value = setTimeout(() => {
+    setClassOnHover.value = null;
+    isHoveringOnTile.value = false;
+  }, 500);
+}
+
+function onTabsUnmounted() {
+  mouseOnTabs.value = false;
+  isHoveringOnTile.value = false;
+  setClassOnHover.value = null;
+}
+
+const firstWindowOpenedOnClickTile = ref(false);
+function onClickTile() {
+  if (!item.value) {
+    return;
+  }
+
+  windowStore.pushOpenWindowReference(item.value.label);
+  firstWindowOpenedOnClickTile.value = true;
+}
 </script>
 
 <template>
-  <div class="tile"
-       :class="setClassOnHover"
-       @mouseenter.prevent="onMouseEnter"
-       @mouseleave.prevent="onMouseLeave"
+  <div
+    class="tile"
+    :class="setClassOnHover"
+    @mouseenter.prevent="onMouseEnter"
+    @mouseleave.prevent="onMouseLeave"
   >
-    <TaskbarTabs v-if="hasTabs() && item && firstWindowOpenedOnClickTile === false" :application-name="item.label"
-                 @mouse-entered="mouseOnTabs = true" @mouse-left="mouseOnTabs = false;" @tabs-unmounted="onTabsUnmounted"/>
+    <TaskbarTabs
+      v-if="hasTabs() && item && firstWindowOpenedOnClickTile === false"
+      :application-name="item.label"
+      @mouse-entered="mouseOnTabs = true"
+      @mouse-left="mouseOnTabs = false"
+      @tabs-unmounted="onTabsUnmounted"
+    />
     <div class="content" @click="onClickTile">
-      <component v-if="svg" :is="svg"
-                 :custom-width="40"
-                 :custom-height="40"
-      />
-      <hr :class="getUnderlineClass">
+      <component v-if="svg" :is="svg" :custom-width="40" :custom-height="40" />
+      <hr :class="getUnderlineClass" />
     </div>
   </div>
 </template>
 
 <style scoped>
-  .tile {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    height: 100%;
-    position: relative;
-  }
+.tile {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
 
-  .tile.active {
-    background-color: var(--button-hover-color);
-    border-radius: 10px;
-  }
+.tile.active {
+  background-color: var(--button-hover-color);
+  border-radius: 10px;
+}
 
-  hr {
-    height: 5px;
-    border: none;
-    background-color: var(--svg-color);
-    border-radius: 50px;
-    bottom: 2px;
-    width: 66%;
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-  }
+hr {
+  height: 5px;
+  border: none;
+  background-color: var(--svg-color);
+  border-radius: 50px;
+  bottom: 2px;
+  width: 66%;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
 
-  .content {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    height: 100%;
-    padding: 10px;
-  }
+.content {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  padding: 10px;
+}
 
-  .underline.hidden {
-    visibility: hidden;
-  }
+.underline.hidden {
+  visibility: hidden;
+}
 
-  .underline.maximized {
-    width: 66%;
-  }
+.underline.maximized {
+  width: 66%;
+}
 
-  .underline.minimized {
-    width: 40%;
-  }
+.underline.minimized {
+  width: 40%;
+}
 </style>

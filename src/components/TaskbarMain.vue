@@ -1,26 +1,29 @@
 <script setup lang="ts">
-  import { useTaskbarStore } from '@/stores/taskbar.ts';
-  import TaskbarTile from '@/components/TaskbarTile.vue'
-  import { onMounted } from 'vue'
+import { useTaskbarStore } from '@/stores/taskbar.ts';
+import TaskbarTile from '@/components/TaskbarTile.vue';
+import { onMounted } from 'vue';
 
-  const taskbarStore = useTaskbarStore();
-  const flying = false;
-  const taskbarHeight = taskbarStore.taskbarHeight;
+const taskbarStore = useTaskbarStore();
+const flying = false;
+const taskbarHeight = taskbarStore.taskbarHeight;
 
-  onMounted(() => {
-    console.log(taskbarStore.items)
-  })
-
+onMounted(() => {
+  console.log(taskbarStore.items);
+});
 </script>
 
 <template>
-  <div class="taskbar" :class="{'active': !flying}" :style="{height: `${taskbarHeight}px`}">
-    <div class="flying" :class="{'active': flying}">
-      <div :style="{marginRight: '20px'}"></div>
+  <div class="taskbar" :class="{ active: !flying }" :style="{ height: `${taskbarHeight}px` }">
+    <div class="flying" :class="{ active: flying }">
+      <div :style="{ marginRight: '20px' }"></div>
       <div class="tiles">
-        <TaskbarTile v-for="item of taskbarStore.items" :key="item.content.id" :id="item.content.id"/>
+        <TaskbarTile
+          v-for="item of taskbarStore.items"
+          :key="item.content.id"
+          :id="item.content.id"
+        />
       </div>
-      <div :style="{marginRight: '20px'}"></div>
+      <div :style="{ marginRight: '20px' }"></div>
     </div>
   </div>
 </template>

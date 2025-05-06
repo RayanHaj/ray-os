@@ -13,7 +13,7 @@ body {
 :root {
   --background-color: #ffffff;
   --text-color: #000000;
-  --svg-color: ''
+  --svg-color: '';
 }
 
 [data-theme='midnight-neon'] {
@@ -80,9 +80,6 @@ body {
   --window-primary-color: #fff9f4;
   --window-secondary-color: #ffc3a0;
 }
-
-
-
 
 [data-theme='pink'] {
   --background-color: pink;

@@ -1,22 +1,17 @@
 <script setup lang="ts">
-import { useGridStore } from '@/stores/grid.ts'
-import { useFileStore } from '@/stores/file.ts'
-import { useTileCountGrid } from '@/composables/useTileCountGrid.ts'
-import {
-  type Component,
-  computed, onMounted,
-  ref,
-  shallowRef, watchEffect
-} from 'vue'
-import type { Item } from '@/types/Item.ts'
-import { useWindowStore } from '@/stores/window.ts'
+import { useGridStore } from '@/stores/grid.ts';
+import { useFileStore } from '@/stores/file.ts';
+import { useTileCountGrid } from '@/composables/useTileCountGrid.ts';
+import { type Component, computed, onMounted, ref, shallowRef, watchEffect } from 'vue';
+import type { Item } from '@/types/Item.ts';
+import { useWindowStore } from '@/stores/window.ts';
 
 const props = defineProps({
   position: {
     type: Object,
     required: true,
-  }
-})
+  },
+});
 
 const tileCountVertical = useTileCountGrid().y;
 
@@ -54,7 +49,7 @@ const tileContainsApplication = computed(() => {
     return false;
   }
   if (!item.value.label) {
-    return false
+    return false;
   }
 
   return item.value.content.type === 'application';
@@ -62,7 +57,7 @@ const tileContainsApplication = computed(() => {
 const tileStyling = {
   width: `${gridStore.tileWidth}px`,
   height: `${gridStore.tileHeight}px`,
-}
+};
 
 function onDragStart(event: DragEvent) {
   const id = item.value?.content.id;
@@ -88,12 +83,12 @@ function onDrop(event: DragEvent) {
 
   if (source === null) return;
 
-  const sourceIndex = gridStore.items.findIndex(tile => tile.content.id === source?.content.id);
+  const sourceIndex = gridStore.items.findIndex((tile) => tile.content.id === source?.content.id);
   if (sourceIndex !== -1) {
     gridStore.items.splice(sourceIndex, 1);
   }
 
-  const targetIndex = gridStore.items.findIndex(tile => tile.content.id === targetId);
+  const targetIndex = gridStore.items.findIndex((tile) => tile.content.id === targetId);
   if (targetIndex === -1) {
     source.content.id = targetId;
     gridStore.items.push(source);
@@ -121,12 +116,7 @@ function openWindow() {
     @dblclick="openWindow"
   >
     <div class="content" v-if="item">
-      <component
-        v-if="svg"
-        :is="getSvg"
-        :custom-width="50"
-        :custom-height="50"
-      />
+      <component v-if="svg" :is="getSvg" :custom-width="50" :custom-height="50" />
       <div>{{ item.label }}</div>
     </div>
   </div>

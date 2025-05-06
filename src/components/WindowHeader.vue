@@ -7,16 +7,16 @@ import {
   type Raw,
   ref,
   shallowRef,
-} from 'vue'
-import type { WindowReference } from '@/types/WindowReference.ts'
-import { useSvgByFileNameAndDirectory } from '@/composables/useSvgByFileNameAndDirectory.ts'
+} from 'vue';
+import type { WindowReference } from '@/types/WindowReference.ts';
+import { useSvgByFileNameAndDirectory } from '@/composables/useSvgByFileNameAndDirectory.ts';
 
 const props = defineProps({
   reference: {
     required: true,
     type: Object as PropType<WindowReference>,
   },
-})
+});
 
 const windowControlButtons = ref<{ name: string; svg: Raw<Component> | null }[]>([]);
 const svg = shallowRef<Component | null>(null);
@@ -26,12 +26,12 @@ onBeforeMount(async () => {
   const buttons = [
     { name: 'Minimize', svg: null },
     { name: 'Maximize', svg: null },
-    { name: 'Close', svg: null }
+    { name: 'Close', svg: null },
   ];
   windowControlButtons.value = await Promise.all(
     buttons.map(async (button) => {
       const svg = await useSvgByFileNameAndDirectory('ui', button.name);
-      return { name: button.name, svg: svg ? markRaw(svg) : null }
+      return { name: button.name, svg: svg ? markRaw(svg) : null };
     }),
   );
 });
@@ -44,12 +44,13 @@ onBeforeMount(async () => {
       <p class="window-name">{{ reference.label }}</p>
     </div>
     <div class="window-controls">
-      <button v-for="button of windowControlButtons"
-              :key="button.name"
-              :id="button.name.toLowerCase()"
-              @click="$emit(`windowControl${button.name}`)"
+      <button
+        v-for="button of windowControlButtons"
+        :key="button.name"
+        :id="button.name.toLowerCase()"
+        @click="$emit(`windowControl${button.name}`)"
       >
-        <component :is="button.svg" :custom-width="15" :custom-height="15"/>
+        <component :is="button.svg" :custom-width="15" :custom-height="15" />
       </button>
     </div>
   </header>
@@ -101,7 +102,8 @@ button {
   border: none;
 }
 
-#minimize:hover, #maximize:hover {
+#minimize:hover,
+#maximize:hover {
   background-color: var(--button-hover-color);
 }
 </style>

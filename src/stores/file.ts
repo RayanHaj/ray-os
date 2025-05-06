@@ -1,9 +1,9 @@
-import { markRaw, ref } from 'vue'
-import { defineStore } from 'pinia'
-import type { Item } from '@/types/Item.ts'
-import type { Component } from 'vue'
-import initItems from '@/json/initTiles.json'
-import { useSvgByFileNameAndDirectory } from '@/composables/useSvgByFileNameAndDirectory.ts'
+import { markRaw, ref } from 'vue';
+import { defineStore } from 'pinia';
+import type { Item } from '@/types/Item.ts';
+import type { Component } from 'vue';
+import initItems from '@/json/initTiles.json';
+import { useSvgByFileNameAndDirectory } from '@/composables/useSvgByFileNameAndDirectory.ts';
 
 export const useFileStore = defineStore('file', () => {
   const files = ref<Item[]>([]);
@@ -30,19 +30,19 @@ export const useFileStore = defineStore('file', () => {
         label: value.label,
         content: {
           id: value.content.id,
-          type: value.content.type
+          type: value.content.type,
         },
-      }
+      };
 
       accumulator.push(item);
-      return accumulator
+      return accumulator;
     }, [] as Item[]);
   }
 
   async function addItem(item: Item) {
     files.value.push(item);
     if (item.content.type === 'application') {
-      await useSvgByFileNameAndDirectory('applications', item.label).then(svg => {
+      await useSvgByFileNameAndDirectory('applications', item.label).then((svg) => {
         if (!svg) {
           return;
         }
@@ -56,5 +56,5 @@ export const useFileStore = defineStore('file', () => {
     return fileSvgs.value[name];
   }
 
-  return { initializeFiles, getSvgByName, files, fileSvgs }
+  return { initializeFiles, getSvgByName, files, fileSvgs };
 });

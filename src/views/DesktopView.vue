@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import GridMain from '@/components/GridMain.vue'
-import TaskbarMain from '@/components/TaskbarMain.vue'
-import { type ComputedRef } from 'vue'
-import WindowMain from '@/components/WindowMain.vue'
-import type { WindowReference } from '@/types/WindowReference.ts'
-import { useFlatOpenWindowsReferencesFull } from '@/composables/useFlatOpenWindowsReferencesFull.ts'
+import GridMain from '@/components/GridMain.vue';
+import TaskbarMain from '@/components/TaskbarMain.vue';
+import { type ComputedRef } from 'vue';
+import WindowMain from '@/components/WindowMain.vue';
+import type { WindowReference } from '@/types/WindowReference.ts';
+import { useFlatOpenWindowsReferencesFull } from '@/composables/useFlatOpenWindowsReferencesFull.ts';
 
 const references: ComputedRef<WindowReference[]> = useFlatOpenWindowsReferencesFull();
 </script>
@@ -16,8 +16,8 @@ const references: ComputedRef<WindowReference[]> = useFlatOpenWindowsReferencesF
       :key="`${reference.label}-${reference.id}`"
       :reference="reference"
     />
-    <GridMain/>
-    <TaskbarMain/>
+    <GridMain />
+    <TaskbarMain />
   </main>
 </template>
 

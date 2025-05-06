@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { ref } from 'vue';
 export function useBrowserWindowSize() {
   const width = ref(0);
   const height = ref(0);
@@ -10,5 +10,5 @@ export function useBrowserWindowSize() {
     height.value = window.innerHeight;
   }
 
-  return { width: width, height: height, updateSizes }
+  return { width: width, height: height, updateSizes };
 }

@@ -1,6 +1,6 @@
-import type { Item } from '@/types/Item.ts'
-import { useGridStore } from '@/stores/grid.ts'
-import { test, expect } from 'vitest'
+import type { Item } from '@/types/Item.ts';
+import { useGridStore } from '@/stores/grid.ts';
+import { test, expect } from 'vitest';
 
 function generateTiles(count: number): Item[] {
   const tiles = [];
@@ -8,7 +8,7 @@ function generateTiles(count: number): Item[] {
     tiles.push({
       id: i,
       iconUrl: `@/assets/icons/icon${i}.png`,
-      label: `app${i}`
+      label: `app${i}`,
     });
   }
 
@@ -18,10 +18,10 @@ function generateTiles(count: number): Item[] {
 const tiles = generateTiles(10);
 const gridStore = useGridStore();
 
-test("Tiles can be pushed into grid", () => {
+test('Tiles can be pushed into grid', () => {
   expect(gridStore.items.length).toBe(0);
 
-  tiles.forEach(tile => {
+  tiles.forEach((tile) => {
     gridStore.items.push(tile);
   });
 

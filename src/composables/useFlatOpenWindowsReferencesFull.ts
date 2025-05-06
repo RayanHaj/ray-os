@@ -1,5 +1,5 @@
-import { useWindowStore } from '@/stores/window'
-import { computed } from 'vue'
+import { useWindowStore } from '@/stores/window';
+import { computed } from 'vue';
 
 export function useFlatOpenWindowsReferencesFull() {
   const windowStore = useWindowStore();
@@ -9,7 +9,7 @@ export function useFlatOpenWindowsReferencesFull() {
         id: element.id,
         label: key,
         zIndex: element.zIndex,
-        minimized: element.minimized
+        minimized: element.minimized,
       }));
     });
   });
