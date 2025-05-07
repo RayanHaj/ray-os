@@ -68,7 +68,7 @@ watch(
 );
 
 function onMouseDown(event: MouseEvent) {
-  if (isMaximized.value) {
+  if (isMaximized.value || currentCorner.value !== 'default') {
     return;
   }
 
@@ -132,7 +132,11 @@ function maximize() {
   styles.value.top = '0';
 }
 
+const isMouseDown = ref(false);
+const currentCorner = ref('');
 function onMouseoverWindow(event: MouseEvent) {
+  if (isMouseDown.value && currentCorner.value !== 'default') return;
+
   const rect = window.value.getBoundingClientRect();
   const x = event.clientX - rect.left;
   const y = event.clientY - rect.top;
@@ -154,22 +158,96 @@ function onMouseoverWindow(event: MouseEvent) {
 
   if (onTopLeft) {
     styles.value.cursor = 'nw-resize';
+    currentCorner.value = 'north west';
   } else if (onTopRight) {
     styles.value.cursor = 'ne-resize';
+    currentCorner.value = 'north east';
   } else if (onBottomLeft) {
     styles.value.cursor = 'sw-resize';
+    currentCorner.value = 'south west';
   } else if (onBottomRight) {
     styles.value.cursor = 'se-resize';
+    currentCorner.value = 'south east';
   } else if (onLeft) {
     styles.value.cursor = 'w-resize';
+    currentCorner.value = 'west';
   } else if (onRight) {
     styles.value.cursor = 'e-resize';
+    currentCorner.value = 'east';
   } else if (onTop) {
     styles.value.cursor = 'n-resize';
+    currentCorner.value = 'north';
   } else if (onBottom) {
     styles.value.cursor = 's-resize';
+    currentCorner.value = 'south';
   } else {
     styles.value.cursor = 'default';
+    currentCorner.value = 'default';
+  }
+}
+
+function onMouseDownWindow() {
+  if (currentCorner.value !== 'default') {
+    isMouseDown.value = true;
+    document.body.style.cursor = styles.value.cursor;
+
+    addEventListener('mousemove', resizeWindow);
+    addEventListener('mouseup', onMouseUpWindow);
+  }
+}
+
+function onMouseUpWindow() {
+  isMouseDown.value = false;
+  document.body.style.cursor = '';
+
+  removeEventListener('mousemove', resizeWindow);
+  removeEventListener('mouseup', onMouseUpWindow);
+}
+
+function resizeWindow(event: MouseEvent) {
+  const splitValue = currentCorner.value.split(' ');
+  if (splitValue.length === 1) {
+    resizeWindowOnCornerMouseDown(event, splitValue[0]);
+  } else {
+    splitValue.forEach((value) => resizeWindowOnCornerMouseDown(event, value));
+  }
+}
+
+function resizeWindowOnCornerMouseDown(event: MouseEvent, side: string) {
+  const rect = window.value.getBoundingClientRect();
+  switch (side) {
+    case 'north':
+      {
+        const heightChange = rect.top - event.clientY;
+        const newHeight = rect.height + heightChange;
+
+        styles.value.height = `${newHeight}px`;
+        styles.value.top = `${event.clientY}px`;
+      }
+      break;
+    case 'east':
+      {
+        const widthChange = event.clientX - rect.right;
+        const newWidth = rect.width + widthChange;
+
+        styles.value.width = `${newWidth}px`;
+      }
+      break;
+    case 'south':
+      {
+        const heightChange = event.clientY - rect.bottom;
+        const newHeight = rect.height + heightChange;
+
+        styles.value.height = `${newHeight}px`;
+      }
+      break;
+    case 'west': {
+      const widthChange = rect.left - event.clientX;
+      const newWidth = rect.width + widthChange;
+
+      styles.value.width = `${newWidth}px`;
+      styles.value.left = `${event.clientX}px`;
+    }
   }
 }
 </script>
@@ -181,6 +259,7 @@ function onMouseoverWindow(event: MouseEvent) {
     :id="constructedId"
     :style="styles"
     @mousemove="onMouseoverWindow"
+    @mousedown="onMouseDownWindow"
   >
     <WindowHeader
       :reference="reference"
