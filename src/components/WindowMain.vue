@@ -281,5 +281,7 @@ function resizeWindowOnCornerMouseDown(event: MouseEvent, side: string) {
   position: absolute;
   border: var(--window-border-color) 2px solid;
   user-select: none;
+  min-width: 300px;
+  min-height: 200px;
 }
 </style>
