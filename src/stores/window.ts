@@ -32,7 +32,6 @@ export const useWindowStore = defineStore('window', () => {
       zIndex: generateNextZIndex(),
       minimized: false,
     });
-    console.log(openWindowsReferences.value);
   }
 
   function setWindowMinimized(windowName: string, id: number) {

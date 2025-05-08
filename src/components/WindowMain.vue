@@ -14,7 +14,13 @@ const props = defineProps({
     required: true,
     type: Object as PropType<Component>,
   },
+  selectedLayout: {
+    required: true,
+    type: Object as PropType<{ layout: string; windowId: string }>,
+  },
 });
+
+const emits = defineEmits(['showSnapLayout']);
 
 const styles = ref({
   left: '0',
@@ -80,15 +86,25 @@ function onMouseDown(event: MouseEvent) {
   addEventListener('mouseup', onMouseUp);
 }
 
+const isDraggingWindow = ref(false);
 function onMouseUp(event: Event) {
   event.preventDefault();
+  isDraggingWindow.value = false;
+  if (showSnapLayout.value) {
+    emits('showSnapLayout', { show: false, windowId: constructedId });
+    showSnapLayout.value = false;
+  }
+
   removeEventListener('mousemove', onMouseMove);
   removeEventListener('mouseup', onMouseUp);
 }
 
 const window = ref();
+const showSnapLayout = ref(false);
 function onMouseMove(event: MouseEvent) {
   event.preventDefault();
+
+  isDraggingWindow.value = true;
 
   const deltaX = oldPosition.value.clientX - event.clientX;
   const deltaY = oldPosition.value.clientY - event.clientY;
@@ -98,6 +114,18 @@ function onMouseMove(event: MouseEvent) {
 
   oldPosition.value.clientX = event.clientX;
   oldPosition.value.clientY = event.clientY;
+
+  if (window.value.getBoundingClientRect().top <= browserStore.heightExcTaskbar / 2) {
+    if (!showSnapLayout.value) {
+      emits('showSnapLayout', { show: true, windowId: constructedId });
+      showSnapLayout.value = true;
+    }
+  } else {
+    if (showSnapLayout.value) {
+      emits('showSnapLayout', { show: false, windowId: constructedId });
+      showSnapLayout.value = false;
+    }
+  }
 }
 
 function closeWindow() {
@@ -135,7 +163,7 @@ function maximize() {
 const isMouseDown = ref(false);
 const currentCorner = ref('');
 function onMouseoverWindow(event: MouseEvent) {
-  if (isMouseDown.value && currentCorner.value !== 'default') return;
+  if ((isMouseDown.value && currentCorner.value !== 'default') || isDraggingWindow.value) return;
 
   const rect = window.value.getBoundingClientRect();
   const x = event.clientX - rect.left;
@@ -250,6 +278,70 @@ function resizeWindowOnCornerMouseDown(event: MouseEvent, side: string) {
     }
   }
 }
+
+function snapWindow(position: string) {
+  switch (position) {
+    case 'left':
+      {
+        styles.value.left = '0';
+        styles.value.height = `${browserStore.heightExcTaskbar}px`;
+        styles.value.width = '50%';
+        styles.value.top = '0';
+      }
+      break;
+    case 'right':
+      {
+        styles.value.left = '50%';
+        styles.value.height = `${browserStore.heightExcTaskbar}px`;
+        styles.value.width = '50%';
+        styles.value.top = '0';
+      }
+      break;
+    case 'top-left':
+      {
+        styles.value.left = '0';
+        styles.value.height = `${browserStore.heightExcTaskbar / 2}px`;
+        styles.value.width = '50%';
+        styles.value.top = '0';
+      }
+      break;
+    case 'top-right':
+      {
+        styles.value.left = '50%';
+        styles.value.height = `${browserStore.heightExcTaskbar / 2}px`;
+        styles.value.width = '50%';
+        styles.value.top = '0';
+      }
+      break;
+    case 'bottom-left':
+      {
+        styles.value.left = '0';
+        styles.value.height = `${browserStore.heightExcTaskbar / 2}px`;
+        styles.value.width = '50%';
+        styles.value.top = `${browserStore.heightExcTaskbar / 2}px`;
+      }
+      break;
+    case 'bottom-right': {
+      styles.value.left = '50%';
+      styles.value.height = `${browserStore.heightExcTaskbar / 2}px`;
+      styles.value.width = '50%';
+      styles.value.top = `${browserStore.heightExcTaskbar / 2}px`;
+    }
+  }
+}
+
+watch(
+  () => props.selectedLayout,
+  () => {
+    if (
+      props.selectedLayout.layout === '' ||
+      props.selectedLayout.windowId === '' ||
+      props.selectedLayout.windowId !== constructedId
+    )
+      return;
+    snapWindow(props.selectedLayout.layout);
+  },
+);
 </script>
 
 <template>
