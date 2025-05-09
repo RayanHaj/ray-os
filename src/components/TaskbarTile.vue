@@ -83,7 +83,7 @@ function onMouseEnter() {
 
   setTimeoutId.value = setTimeout(() => {
     isHoveringOnTile.value = true;
-  }, 500);
+  }, 250);
 }
 
 function onMouseLeave() {
@@ -132,13 +132,15 @@ function onClickTile() {
     @mouseenter.prevent="onMouseEnter"
     @mouseleave.prevent="onMouseLeave"
   >
-    <TaskbarTabs
-      v-if="hasTabs() && item && firstWindowOpenedOnClickTile === false"
-      :application-name="item.label"
-      @mouse-entered="mouseOnTabs = true"
-      @mouse-left="mouseOnTabs = false"
-      @tabs-unmounted="onTabsUnmounted"
-    />
+    <transition name="fade-shadow">
+      <TaskbarTabs
+        v-if="hasTabs() && item && firstWindowOpenedOnClickTile === false"
+        :application-name="item.label"
+        @mouse-entered="mouseOnTabs = true"
+        @mouse-left="mouseOnTabs = false"
+        @tabs-unmounted="onTabsUnmounted"
+      />
+    </transition>
     <div class="content" @click="onClickTile">
       <component v-if="svg" :is="svg" :custom-width="40" :custom-height="40" />
       <hr :class="getUnderlineClass" />
@@ -171,6 +173,7 @@ hr {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
+  transition: width 0.2s;
 }
 
 .content {
@@ -191,5 +194,27 @@ hr {
 
 .underline.minimized {
   width: 40%;
+}
+
+.fade-shadow-enter-from,
+.fade-shadow-leave-to {
+  opacity: 0;
+  transform: translateY(20px);
+  box-shadow: none;
+}
+
+.fade-shadow-enter-to,
+.fade-shadow-leave-from {
+  opacity: 1;
+  transform: translateY(0);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.fade-shadow-enter-active,
+.fade-shadow-leave-active {
+  transition:
+    transform 0.3s ease,
+    opacity 0.3s ease,
+    box-shadow 0.3s ease;
 }
 </style>

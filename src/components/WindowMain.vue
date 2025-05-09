@@ -22,6 +22,7 @@ const props = defineProps({
 
 const emits = defineEmits(['showSnapLayout']);
 
+const isDraggingWindow = ref(false);
 const styles = ref({
   left: '0',
   top: '0',
@@ -30,7 +31,19 @@ const styles = ref({
   zIndex: props.reference.zIndex,
   display: 'block',
   cursor: 'auto',
+  transition: 'width 0.5s, height 0.5s, left 0.5s, top 0.5s',
 });
+
+watch(
+  () => isDraggingWindow.value,
+  (newValue) => {
+    if (newValue) {
+      styles.value.transition = 'none';
+    } else {
+      styles.value.transition = 'width 0.5s, height 0.5s, left 0.5s, top 0.5s';
+    }
+  },
+);
 
 const cachedStyles = ref({
   left: '0',
@@ -78,6 +91,8 @@ function onMouseDown(event: MouseEvent) {
     return;
   }
 
+  isDraggingWindow.value = true;
+
   //Set initial position on mouse down
   oldPosition.value.clientX = event.clientX;
   oldPosition.value.clientY = event.clientY;
@@ -86,7 +101,6 @@ function onMouseDown(event: MouseEvent) {
   addEventListener('mouseup', onMouseUp);
 }
 
-const isDraggingWindow = ref(false);
 function onMouseUp(event: Event) {
   event.preventDefault();
   isDraggingWindow.value = false;
@@ -103,8 +117,6 @@ const window = ref();
 const showSnapLayout = ref(false);
 function onMouseMove(event: MouseEvent) {
   event.preventDefault();
-
-  isDraggingWindow.value = true;
 
   const deltaX = oldPosition.value.clientX - event.clientX;
   const deltaY = oldPosition.value.clientY - event.clientY;
@@ -163,7 +175,12 @@ function maximize() {
 const isMouseDown = ref(false);
 const currentCorner = ref('');
 function onMouseoverWindow(event: MouseEvent) {
-  if ((isMouseDown.value && currentCorner.value !== 'default') || isDraggingWindow.value) return;
+  if (
+    (isMouseDown.value && currentCorner.value !== 'default') ||
+    isDraggingWindow.value ||
+    isMaximized.value
+  )
+    return;
 
   const rect = window.value.getBoundingClientRect();
   const x = event.clientX - rect.left;
@@ -226,6 +243,7 @@ function onMouseDownWindow() {
 
 function onMouseUpWindow() {
   isMouseDown.value = false;
+  styles.value.transition = 'width 0.5s, height 0.5s, left 0.5s, top 0.5s';
   document.body.style.cursor = '';
 
   removeEventListener('mousemove', resizeWindow);
@@ -233,6 +251,7 @@ function onMouseUpWindow() {
 }
 
 function resizeWindow(event: MouseEvent) {
+  styles.value.transition = 'none';
   const splitValue = currentCorner.value.split(' ');
   if (splitValue.length === 1) {
     resizeWindowOnCornerMouseDown(event, splitValue[0]);
@@ -336,7 +355,8 @@ watch(
     if (
       props.selectedLayout.layout === '' ||
       props.selectedLayout.windowId === '' ||
-      props.selectedLayout.windowId !== constructedId
+      props.selectedLayout.windowId !== constructedId ||
+      isMaximized.value
     )
       return;
     snapWindow(props.selectedLayout.layout);

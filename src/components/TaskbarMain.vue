@@ -2,12 +2,15 @@
 import { useTaskbarStore } from '@/stores/taskbar.ts';
 import TaskbarTile from '@/components/TaskbarTile.vue';
 import { useDateTime } from '../composables/UseDateTime.ts';
-import { type Component, onBeforeMount, shallowRef } from 'vue';
+import { type Component, onBeforeMount, ref, shallowRef } from 'vue';
 import { useSvgByFileNameAndDirectory } from '@/composables/useSvgByFileNameAndDirectory.ts';
+import StartMenuMain from '@/components/StartMenuMain.vue';
 
 const taskbarStore = useTaskbarStore();
 const taskbarHeight = taskbarStore.taskbarHeight;
 const { time } = useDateTime();
+
+const openStartMenu = ref(false);
 
 const searchSvg = shallowRef<Component | undefined>();
 onBeforeMount(async () => {
@@ -16,9 +19,10 @@ onBeforeMount(async () => {
 </script>
 
 <template>
+  <StartMenuMain v-if="openStartMenu" />
   <div class="taskbar" :style="{ height: `${taskbarHeight}px` }">
-    <div class="right-side">
-      <button class="search-button">
+    <div class="left-side">
+      <button type="button" class="search-button" @click="openStartMenu = !openStartMenu">
         <component :is="searchSvg" :custom-width="40" :custom-height="40" />
       </button>
     </div>
@@ -31,7 +35,7 @@ onBeforeMount(async () => {
         />
       </div>
     </div>
-    <div class="left-side">
+    <div class="right-side">
       {{ time }}
     </div>
   </div>
@@ -81,7 +85,7 @@ onBeforeMount(async () => {
   width: 20%;
 }
 
-.left-side {
+.right-side {
   font-size: 20px;
   font-family: 'Courier New', sans-serif;
   text-align: end;

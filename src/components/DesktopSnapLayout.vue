@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type PropType, ref, watch } from 'vue';
+import { computed, type PropType, ref, watch } from 'vue';
 
 const props = defineProps({
   showSnapLayout: {
@@ -50,32 +50,33 @@ watch(
     selectedLayout.value = '';
   },
 );
+
+const showBeam = computed(() => props.showSnapLayout.show && !showLayoutAndHidePreview.value);
 </script>
 
 <template>
-  <hr
-    v-if="showSnapLayout.show && !showLayoutAndHidePreview"
-    class="preview-beam"
-    @mouseenter="showLayoutAndHidePreview = true"
-  />
-  <div
-    v-else
-    class="snap-layout"
-    :style="{ display: showSnapLayout.show ? 'flex' : 'none' }"
-    @mouseleave="showLayoutAndHidePreview = false"
-    @mouseover="onMouseOver($event.target)"
-  >
-    <div class="half-layout">
-      <div class="layout-option left border-radius-bottom-left border-radius-top-left" />
-      <div class="layout-option right border-radius-bottom-right border-radius-top-right" />
+  <transition name="slide">
+    <hr v-if="showBeam" class="preview-beam" @mouseenter="showLayoutAndHidePreview = true" />
+  </transition>
+  <transition name="slide">
+    <div
+      v-if="!showBeam && props.showSnapLayout.show"
+      class="snap-layout border-radius-bottom-left border-radius-bottom-right"
+      @mouseleave="showLayoutAndHidePreview = false"
+      @mouseover="onMouseOver($event.target)"
+    >
+      <div class="half-layout">
+        <div class="layout-option left border-radius-bottom-left border-radius-top-left" />
+        <div class="layout-option right border-radius-bottom-right border-radius-top-right" />
+      </div>
+      <div class="quarter-layout">
+        <div class="layout-option top-left border-radius-top-left" />
+        <div class="layout-option top-right border-radius-top-right" />
+        <div class="layout-option bottom-left border-radius-bottom-left" />
+        <div class="layout-option bottom-right border-radius-bottom-right" />
+      </div>
     </div>
-    <div class="quarter-layout">
-      <div class="layout-option top-left border-radius-top-left" />
-      <div class="layout-option top-right border-radius-top-right" />
-      <div class="layout-option bottom-left border-radius-bottom-left" />
-      <div class="layout-option bottom-right border-radius-bottom-right" />
-    </div>
-  </div>
+  </transition>
 </template>
 
 <style scoped>
@@ -87,7 +88,7 @@ watch(
   gap: 10px;
   height: 150px;
   position: absolute;
-  top: 10px;
+  top: 0;
   left: 0;
   right: 0;
   margin-left: auto;
@@ -160,7 +161,6 @@ watch(
   background-color: black;
 }
 
-.snap-layout,
 .half-layout,
 .quarter-layout {
   border-radius: 10px;
@@ -180,5 +180,20 @@ watch(
 
 .border-radius-top-right {
   border-top-right-radius: 10px;
+}
+
+.slide-enter-from,
+.slide-leave-to {
+  transform: translateY(-100%);
+}
+
+.slide-enter-to,
+.slide-leave-from {
+  transform: translateY(0);
+}
+
+.slide-enter-active,
+.slide-leave-active {
+  transition: transform 0.3s ease;
 }
 </style>
