@@ -26,5 +26,12 @@
       "id": 4,
       "type": "application"
     }
+  },
+  {
+    "label": "Terminal",
+    "content": {
+      "id": 5,
+      "type": "application"
+    }
   }
 ]

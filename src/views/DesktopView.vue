@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import GridMain from '@/components/GridMain.vue';
 import TaskbarMain from '@/components/TaskbarMain.vue';
-import { type Component, type ComputedRef, ref, shallowRef } from 'vue';
+import { type Component, type ComputedRef, ref, shallowRef, watch } from 'vue';
 import WindowMain from '@/components/WindowMain.vue';
-import type { WindowReference } from '@/types/WindowReference.ts';
+import type { WindowFlatReference } from '@/types/WindowFlatReference.ts';
 import { useFlatOpenWindowsReferencesFull } from '@/composables/useFlatOpenWindowsReferencesFull.ts';
 
 import FallbackMain from '@/components/applications/FallbackMain.vue';
@@ -14,8 +14,8 @@ const windowContentComponents = shallowRef<{ [componentName: string]: Component 
   settings: SettingsMain,
 });
 
-const references: ComputedRef<WindowReference[]> = useFlatOpenWindowsReferencesFull();
-function getWindowContentComponent(reference: WindowReference): Component {
+const references: ComputedRef<WindowFlatReference[]> = useFlatOpenWindowsReferencesFull();
+function getWindowContentComponent(reference: WindowFlatReference): Component {
   const component = windowContentComponents.value[reference.label.toLowerCase()];
   if (!component) {
     return FallbackMain;

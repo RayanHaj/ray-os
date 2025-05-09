@@ -8,7 +8,7 @@ import {
   ref,
   shallowRef,
 } from 'vue';
-import type { WindowReference } from '@/types/WindowReference.ts';
+import type { WindowFlatReference } from '@/types/WindowFlatReference.ts';
 import { useSvgByFileNameAndDirectory } from '@/composables/useSvgByFileNameAndDirectory.ts';
 
 const props = defineProps({

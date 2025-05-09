@@ -1,12 +1,14 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
+import type { WindowReference } from '@/types/WindowReference.ts';
+import type { WindowFlatReference } from '@/types/WindowFlatReference.ts';
 
-type WindowReference = {
-  [applicationName: string]: { id: number; zIndex: number; minimized: boolean }[];
+type WindowReferences = {
+  [applicationName: string]: WindowReference[];
 };
 
 export const useWindowStore = defineStore('window', () => {
-  const openWindowsReferences = ref<WindowReference>({});
+  const openWindowsReferences = ref<WindowReferences>({});
 
   function pushOpenWindowReference(windowName: string) {
     let id = 1000;
@@ -76,10 +78,23 @@ export const useWindowStore = defineStore('window', () => {
     }
   }
 
+  function setWindowZIndexToTop(reference: WindowFlatReference) {
+    const index = openWindowsReferences.value[reference.label].findIndex(
+      (value) => reference.id === value.id,
+    );
+    if (index !== -1) {
+      const value = openWindowsReferences.value[reference.label][index];
+      value.zIndex = generateNextZIndex();
+
+      openWindowsReferences.value[reference.label][index] = value;
+    }
+  }
+
   return {
     openWindowsReferences,
     pushOpenWindowReference,
     removeOpenWindowReference,
     setWindowMinimized,
+    setWindowZIndexToTop,
   };
 });

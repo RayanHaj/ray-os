@@ -2,7 +2,6 @@
 import { type Component, onBeforeMount, type PropType, shallowRef } from 'vue';
 import { useWindowStore } from '@/stores/window.ts';
 import { useSvgByFileNameAndDirectory } from '@/composables/useSvgByFileNameAndDirectory.ts';
-import { useThemeSwitcher } from '@/composables/useThemeSwitcher.ts';
 
 type WindowReference = {
   id: number;
