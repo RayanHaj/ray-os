@@ -31,7 +31,6 @@ function updateTile() {
 }
 
 onMounted(() => {
-  console.log(props.position);
   updateTile();
 });
 

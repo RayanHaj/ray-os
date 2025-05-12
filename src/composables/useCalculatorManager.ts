@@ -1,155 +1,157 @@
 import { ref } from 'vue';
-
-type Calculation = {
-  [calculationId: number]: { calculationAnswer: number; calculationArray: CalculationArray };
-};
-type CalculationArray = { value: number | string; type: 'number' | 'operator' }[];
+import type { CalculatorKey } from '@/types/CalculatorKey.ts';
+type CalculationArray = CalculatorKey[];
 
 export function useCalculatorManager() {
-  const calculationId = ref(-1);
-  const calculationAnswer = ref(0);
-  const calculationArray = ref<CalculationArray>([]);
-  const calculationHistory = ref<Calculation>({});
+  const calculationArray = ref<CalculationArray>([{ value: 0, type: 'input' }]);
 
   const hasCalculated = ref(false);
 
-  function pushElementToCalculationArray(currentElement: {
+  function pushToCalculationArray(currentKey: {
     value: number | string;
-    type: 'number' | 'operator';
+    type: 'input' | 'operator';
   }) {
-    const previousElement = calculationArray.value[calculationArray.value.length - 1];
+    if (hasCalculated.value) {
+      handleHasCalculated(currentKey);
+    }
+
+    const previousKey = calculationArray.value[calculationArray.value.length - 1];
+    if (calculationArray.value.length === 1) {
+      removeInitialZero(currentKey, previousKey);
+    }
 
     if (calculationArray.value.length > 0) {
-      const isTrailingNumbers =
-        previousElement.type === 'number' && currentElement.type === 'number';
-      const isTrailingOperators =
-        previousElement.type === 'operator' && currentElement.type === 'operator';
-
-      if (previousElement.type === 'number' && currentElement.value === '√') {
-        calculate();
-        return;
-      }
-
-      if (isTrailingNumbers) {
-        joinTrailingNumbers(previousElement, currentElement);
-        return;
-      }
-
-      if (isTrailingOperators) {
-        const i = calculationArray.value.length - 1;
-        calculationArray.value[i] = currentElement;
+      const hasTrailingKeys = handleTrailingKeys(previousKey, currentKey);
+      if (hasTrailingKeys) {
         return;
       }
     } else {
-      if (firstValueIsOperator(currentElement)) {
+      if (currentKey.type === 'operator') {
         return;
       }
     }
 
-    if (calculationArray.value.length === 3) {
-      if (previousElement.type === 'number' && currentElement.type === 'operator') {
-        calculate();
+    calculate();
+    calculationArray.value = [...calculationArray.value, currentKey];
+  }
+
+  function removeInitialZero(currentKey: CalculatorKey, previousKey: CalculatorKey) {
+    if (previousKey.value === 0) {
+      if (currentKey.value === '.' || currentKey.type === 'operator') {
+        return;
       }
+
+      emptyCalculationLists(false);
     }
-
-    calculationArray.value = [...calculationArray.value, currentElement];
   }
 
-  function firstValueIsOperator(element: { value: number | string; type: 'number' | 'operator' }) {
-    if (calculationArray.value.length === 0) {
-      if (element.type === 'operator') {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  function joinTrailingNumbers(
-    lastElement: {
-      value: number | string;
-      type: 'number' | 'operator';
-    },
-    element: {
-      value: number | string;
-      type: 'number' | 'operator';
-    },
-  ) {
-    const lastStr = String(lastElement.value);
-    const currentStr = String(element.value);
-    lastElement.value = lastStr + currentStr;
-  }
-
-  function removeLastElementInCalculationArray() {
-    if (calculationArray.value.length === 0) {
+  function checkCalculationStructure() {
+    if (calculationArray.value.length < 3) {
       return;
     }
 
-    calculationArray.value = calculationArray.value.filter(
-      (_, index) => index !== calculationArray.value.length - 1,
-    );
+    const structure = ['input', 'operator', 'input'];
+    return !calculationArray.value.some((key, index) => structure[index] !== key.type);
   }
 
-  function emptyCalculation() {
-    calculationArray.value = [];
-    calculationAnswer.value = 0;
+  function handleTrailingKeys(previousKey: CalculatorKey, currentKey: CalculatorKey) {
+    const isTrailingNumbers = previousKey.type === 'input' && currentKey.type === 'input';
+    const isTrailingOperators = previousKey.type === 'operator' && currentKey.type === 'operator';
+
+    let hasTrailingKeys = true;
+    if (isTrailingNumbers) {
+      onTrailingNumbers(previousKey, currentKey);
+    } else if (isTrailingOperators) {
+      onTrailingOperators(previousKey, currentKey);
+    } else {
+      if (previousKey.type !== 'input' && currentKey.value === '.') {
+        currentKey.value = '0.';
+      }
+
+      hasTrailingKeys = false;
+    }
+
+    return hasTrailingKeys;
+  }
+
+  function handleHasCalculated(currentKey: CalculatorKey) {
+    hasCalculated.value = false;
+    if (calculationArray.value.length > 1) {
+      return;
+    }
+
+    if (currentKey.type === 'input') {
+      const elementIsDot = currentKey.value === '.';
+      emptyCalculationLists(elementIsDot);
+    }
+  }
+
+  function emptyCalculationLists(defaultValue: boolean) {
+    calculationArray.value = defaultValue ? [{ value: 0, type: 'input' }] : [];
+  }
+
+  function onTrailingNumbers(previousKey: CalculatorKey, currentKey: CalculatorKey) {
+    const previousKeyStr = String(previousKey.value);
+    const currentKeyStr = String(currentKey.value);
+    previousKey.value = previousKeyStr + currentKeyStr;
+  }
+
+  function onTrailingOperators(previousKey: CalculatorKey, currentKey: CalculatorKey) {
+    if (previousKey.value === currentKey.value) {
+      return;
+    }
+
+    calculationArray.value[calculationArray.value.length - 1] = currentKey;
   }
 
   function calculate() {
     let calculation = 0;
-    calculationArray.value.forEach((element, index) => {
-      const previousElement = calculationArray.value[index - 1];
-      if (typeof previousElement === 'undefined' || previousElement.type === element.type) {
-        return false;
+    if (!checkCalculationStructure()) {
+      return;
+    }
+
+    calculationArray.value.forEach((currentKey, index) => {
+      const previousKey = calculationArray.value[index - 1];
+      if (typeof previousKey === 'undefined') {
+        return;
       }
 
-      if (element.type === 'number' && previousElement.type === 'operator') {
-        const number = Number(element.value) as number;
-        const operator = previousElement.value as string;
+      if (currentKey.type === 'input' && previousKey.type === 'operator') {
+        const currentNumber = Number(currentKey.value) as number;
+        const operator = previousKey.value as string;
 
-        calculation = processCalculation(number, operator, calculation);
-      } else if (previousElement.type === 'number' && element.type === 'operator') {
-        calculation = previousElement.value as number;
+        calculation = processCalculation(calculation, currentNumber, operator);
+      } else if (currentKey.type === 'operator' && previousKey.type === 'input') {
+        calculation = Number(previousKey.value) as number;
       }
     });
 
-    calculationId.value += 1;
-    calculationHistory.value[calculationId.value] = {
-      calculationAnswer: calculationAnswer.value,
-      calculationArray: calculationArray.value,
-    };
-    calculationAnswer.value = calculation;
-    calculationArray.value = [{ value: calculation, type: 'number' }];
+    calculationArray.value = [{ value: Number(calculation.toFixed(3)), type: 'input' }];
     hasCalculated.value = true;
-    return calculationAnswer.value;
   }
 
-  function processCalculation(number: number, operator: string, calculation: number) {
-    let finalNumber = 0;
+  function processCalculation(calculation: number, currentNumber: number, operator: string) {
+    let calculationValue = 0;
     switch (operator) {
       case '+':
-        finalNumber = calculation + number;
+        calculationValue = calculation + currentNumber;
         break;
       case '-':
-        finalNumber = calculation - number;
+        calculationValue = calculation - currentNumber;
         break;
       case '/':
-        finalNumber = calculation / number;
+        calculationValue = calculation / currentNumber;
         break;
       case '*':
-        finalNumber = calculation * number;
-        break;
-      case '√':
-        finalNumber = Math.sqrt(number);
+        calculationValue = calculation * currentNumber;
     }
 
-    return finalNumber;
+    return calculationValue;
   }
 
   return {
     calculate,
-    calculationAnswer,
     calculationArray,
-    pushElementToCalculationArray,
-    removeLastElementInCalculationArray,
+    pushToCalculationArray,
   };
 }

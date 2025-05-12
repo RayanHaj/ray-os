@@ -4,6 +4,7 @@ import CalculatorGrid from '@/components/applications/calculator/CalculatorGrid.
 import CalculatorHistory from '@/components/applications/calculator/CalculatorHistory.vue';
 import { useCalculatorManager } from '@/composables/useCalculatorManager.ts';
 import { provide } from 'vue';
+
 provide('calculatorManager', useCalculatorManager());
 </script>
 

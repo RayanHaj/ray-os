@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, ref, watch } from 'vue';
+import { inject, onMounted, ref, watch } from 'vue';
 import { useCalculatorManager } from '@/composables/useCalculatorManager.ts';
 
 const injectedCalculatorManager =
@@ -10,6 +10,10 @@ if (!injectedCalculatorManager) {
 
 const calculatorManager = injectedCalculatorManager;
 const calculationString = ref('');
+
+onMounted(() => {
+  calculationString.value = calculatorManager.calculationArray.value[0].value.toString();
+});
 watch(
   () => calculatorManager.calculationArray.value,
   () => {
@@ -17,7 +21,7 @@ watch(
       (accumulator: string, value, currentIndex) => {
         accumulator +=
           value.type === 'operator' ||
-          (value.type === 'number' &&
+          (value.type === 'input' &&
             calculatorManager.calculationArray.value[currentIndex - 1]?.type === 'operator')
             ? ` ${value.value}`
             : value.value;
