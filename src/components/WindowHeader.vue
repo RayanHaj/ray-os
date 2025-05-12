@@ -8,13 +8,13 @@ import {
   ref,
   shallowRef,
 } from 'vue';
-import type { WindowFlatReference } from '@/types/WindowFlatReference.ts';
 import { useSvgByFileNameAndDirectory } from '@/composables/useSvgByFileNameAndDirectory.ts';
+import type { WindowFlatReference } from '@/types/WindowFlatReference.ts';
 
 const props = defineProps({
   reference: {
     required: true,
-    type: Object as PropType<WindowReference>,
+    type: Object as PropType<WindowFlatReference>,
   },
 });
 

@@ -25,13 +25,13 @@ const svg = shallowRef<Component>();
 function updateTile() {
   id.value = (props.position.x - 1) * tileCountVertical.value + props.position.y;
   item.value = gridStore.items.find((tile) => tile.content.id === id.value);
-
   if (item.value && item.value.content.type === 'application' && item.value.label !== '') {
     svg.value = fileStore.fileSvgs[item.value.label];
   }
 }
 
 onMounted(() => {
+  console.log(props.position);
   updateTile();
 });
 

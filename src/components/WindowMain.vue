@@ -137,6 +137,6 @@ function maximizeWindow() {
   border: var(--window-border-color) 2px solid;
   user-select: none;
   min-width: 300px;
-  min-height: 200px;
+  min-height: 290px;
 }
 </style>

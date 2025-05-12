@@ -158,7 +158,7 @@ const showBeam = computed(() => props.showSnapLayout.show && !showLayoutAndHideP
 .bottom-right:hover,
 .left:hover,
 .right:hover {
-  background-color: black;
+  background-color: var(--accent-color);
 }
 
 .half-layout,

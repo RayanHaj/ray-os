@@ -8,10 +8,12 @@ import { useFlatOpenWindowsReferencesFull } from '@/composables/useFlatOpenWindo
 
 import FallbackMain from '@/components/applications/FallbackMain.vue';
 import SettingsMain from '@/components/applications/settings/SettingsMain.vue';
+import CalculatorMain from '@/components/applications/calculator/CalculatorMain.vue';
 import DesktopSnapLayout from '@/components/DesktopSnapLayout.vue';
 
 const windowContentComponents = shallowRef<{ [componentName: string]: Component }>({
   settings: SettingsMain,
+  calculator: CalculatorMain,
 });
 
 const references: ComputedRef<WindowFlatReference[]> = useFlatOpenWindowsReferencesFull();

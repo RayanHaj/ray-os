@@ -15,8 +15,8 @@ const gridHeight = computed(() => browserStore.height - taskbarStore.taskbarHeig
 <template>
   <div class="container" :style="{ height: `${gridHeight}px` }">
     <div class="grid" @dragover.prevent @dragenter.prevent>
-      <div class="column" v-for="row in tileCountHorizontal" :key="row">
-        <div class="row" v-for="column in tileCountVertical" :key="column">
+      <div class="row" v-for="row in tileCountHorizontal" :key="row">
+        <div class="column" v-for="column in tileCountVertical" :key="column">
           <GridTile :position="{ x: row, y: column }" />
         </div>
       </div>
@@ -37,9 +37,11 @@ const gridHeight = computed(() => browserStore.height - taskbarStore.taskbarHeig
   flex-direction: row;
   justify-content: center;
   align-items: center;
+  width: 100%;
+  height: 100%;
 }
 
-.column {
+.row {
   display: flex;
   flex-direction: column;
 }
