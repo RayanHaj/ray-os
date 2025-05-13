@@ -13,11 +13,11 @@ const calculationGridItems: CalculatorKey[] = [
   { visual: '%', value: '%', type: 'special' },
   { visual: 'CE', value: 'CE', type: 'special' },
   { visual: 'C', value: 'C', type: 'special' },
-  { visual: '⌫', value: 'back', type: 'operator' },
+  { visual: '⌫', value: 'back', type: 'special' },
 
   { visual: '1/x', value: '1/x', type: 'special' },
   { visual: 'x²', value: 'x^2', type: 'special' },
-  { visual: '√', value: '√', type: 'operator' },
+  { visual: '√', value: '√', type: 'special' },
   { visual: '÷', value: '/', type: 'operator' },
 
   { visual: '7', value: 7, type: 'input' },
@@ -44,24 +44,11 @@ const calculationGridItems: CalculatorKey[] = [
 const calculatorManager = injectedCalculatorManager;
 function onClickGridItem(key: CalculatorKey) {
   if (key.type === 'special') {
-    handleSpecialKey(key);
+    calculatorManager.processSpecialKey(key);
     return;
   }
 
   calculatorManager.pushToCalculationArray({ value: key.value, type: key.type });
-}
-
-function handleSpecialKey(key: CalculatorKey) {
-  switch (key.value) {
-    case '=':
-      {
-        calculatorManager.calculate();
-      }
-      break;
-    case 'C': {
-      calculatorManager.calculationArray.value = [{ value: 0, type: 'input' }];
-    }
-  }
 }
 </script>
 

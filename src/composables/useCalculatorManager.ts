@@ -1,5 +1,6 @@
 import { ref } from 'vue';
 import type { CalculatorKey } from '@/types/CalculatorKey.ts';
+
 type CalculationArray = CalculatorKey[];
 
 export function useCalculatorManager() {
@@ -104,10 +105,10 @@ export function useCalculatorManager() {
     calculationArray.value[calculationArray.value.length - 1] = currentKey;
   }
 
-  function calculate() {
+  function calculate(): number {
     let calculation = 0;
     if (!checkCalculationStructure()) {
-      return;
+      return -1;
     }
 
     calculationArray.value.forEach((currentKey, index) => {
@@ -128,30 +129,134 @@ export function useCalculatorManager() {
 
     calculationArray.value = [{ value: Number(calculation.toFixed(3)), type: 'input' }];
     hasCalculated.value = true;
+    return Number(calculation.toFixed(3));
   }
 
-  function processCalculation(calculation: number, currentNumber: number, operator: string) {
-    let calculationValue = 0;
+  function processCalculation(accumulator: number, currentNumber: number, operator: string) {
     switch (operator) {
       case '+':
-        calculationValue = calculation + currentNumber;
-        break;
+        return accumulator + currentNumber;
       case '-':
-        calculationValue = calculation - currentNumber;
-        break;
+        return accumulator - currentNumber;
       case '/':
-        calculationValue = calculation / currentNumber;
-        break;
+        return accumulator / currentNumber;
       case '*':
-        calculationValue = calculation * currentNumber;
+        return accumulator * currentNumber;
+      default:
+        return accumulator;
+    }
+  }
+
+  function removeLastKey() {
+    if (calculationArray.value.length === 0) {
+      return;
     }
 
-    return calculationValue;
+    const lastKey = calculationArray.value[calculationArray.value.length - 1];
+    const lastKeyAsString = lastKey.value.toString() as string;
+    if (lastKey.type === 'input' && lastKeyAsString.length > 1) {
+      lastKey.value = lastKeyAsString.slice(0, lastKeyAsString.length - 1);
+    } else {
+      calculationArray.value.splice(calculationArray.value.length - 1, 1);
+    }
+
+    if (calculationArray.value.length === 0) {
+      calculationArray.value[0] = { value: 0, type: 'input' };
+    }
+
+    hasCalculated.value = false;
+  }
+
+  function handleSquareRoot() {
+    const lastKey = calculationArray.value[calculationArray.value.length - 1];
+    if (lastKey.type === 'input') {
+      lastKey.value = Math.sqrt(Number(lastKey.value) as number);
+    }
+  }
+
+  function handleSignToggle() {
+    const lastKey = calculationArray.value[calculationArray.value.length - 1];
+    if (lastKey.type === 'input') {
+      lastKey.value = Number(lastKey.value) * -1;
+    }
+  }
+
+  function handlePercentage() {
+    const lastKey = calculationArray.value[calculationArray.value.length - 1];
+    if (lastKey.type === 'input') {
+      lastKey.value = Number(lastKey.value) / 100;
+      if (checkCalculationStructure()) {
+        calculate();
+      }
+    } else if (lastKey.type === 'operator') {
+      const key = calculationArray.value[calculationArray.value.length - 2];
+      if (key.type === 'input') {
+        key.value = key.value as number;
+        pushToCalculationArray({ value: key.value / 100, type: key.type });
+        calculate();
+      }
+    }
+  }
+
+  function handleClear() {
+    calculationArray.value = [{ value: 0, type: 'input' }];
+  }
+
+  function handleClearEntry() {
+    calculationArray.value = calculationArray.value.filter(
+      (_, index) => index !== calculationArray.value.length - 1,
+    );
+  }
+
+  function handleDevisionByOne() {
+    const lastKey = calculationArray.value[calculationArray.value.length - 1];
+    if (lastKey.type === 'input') {
+      lastKey.value = 1 / Number(lastKey.value);
+    }
+  }
+
+  function handlePow() {
+    const lastKey = calculationArray.value[calculationArray.value.length - 1];
+    if (lastKey.type === 'input') {
+      lastKey.value = Math.pow(Number(lastKey.value), 2);
+    }
+  }
+
+  function processSpecialKey(key: CalculatorKey) {
+    switch (key.value) {
+      case '=':
+        calculate();
+        break;
+      case 'C':
+        handleClear();
+        break;
+      case 'CE':
+        handleClearEntry();
+        break;
+      case 'back':
+        removeLastKey();
+        break;
+      case '√':
+        handleSquareRoot();
+        break;
+      case '+/-':
+        handleSignToggle();
+        break;
+      case '%':
+        handlePercentage();
+        break;
+      case '1/x':
+        handleDevisionByOne();
+        break;
+      case 'x^2':
+        handlePow();
+    }
   }
 
   return {
     calculate,
     calculationArray,
     pushToCalculationArray,
+    processSpecialKey,
   };
 }
