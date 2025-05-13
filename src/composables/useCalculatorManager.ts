@@ -5,6 +5,7 @@ type CalculationArray = CalculatorKey[];
 
 export function useCalculatorManager() {
   const calculationArray = ref<CalculationArray>([{ value: 0, type: 'input' }]);
+  const calculationHistory = ref<{ calculationString: string; calculationAnswer: number }[]>([]);
 
   const hasCalculated = ref(false);
 
@@ -127,9 +128,18 @@ export function useCalculatorManager() {
       }
     });
 
-    calculationArray.value = [{ value: Number(calculation.toFixed(3)), type: 'input' }];
+    const calculationAnswer = Number(calculation.toFixed(3));
+    calculationHistory.value = [
+      ...calculationHistory.value,
+      {
+        calculationString: calculationArray.value.map((key) => key.value).join(' '),
+        calculationAnswer: calculationAnswer,
+      },
+    ];
+
+    calculationArray.value = [{ value: calculationAnswer, type: 'input' }];
     hasCalculated.value = true;
-    return Number(calculation.toFixed(3));
+    return calculationAnswer;
   }
 
   function processCalculation(accumulator: number, currentNumber: number, operator: string) {
@@ -256,6 +266,7 @@ export function useCalculatorManager() {
   return {
     calculate,
     calculationArray,
+    calculationHistory,
     pushToCalculationArray,
     processSpecialKey,
   };

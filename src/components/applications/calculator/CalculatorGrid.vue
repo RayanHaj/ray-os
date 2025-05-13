@@ -68,10 +68,19 @@ function onClickGridItem(key: CalculatorKey) {
 <style scoped>
 button {
   font-size: 20px;
+  color: var(--text-color);
+  background: var(--button-primary-color);
+  border: var(--window-border-color) 2px solid;
+  height: 100%;
+}
+
+button:hover {
+  background: var(--button-secondary-color);
 }
 .calculator-grid {
   display: grid;
   grid-template-columns: auto auto auto auto;
   height: 80%;
+  width: 100%;
 }
 </style>

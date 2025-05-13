@@ -35,15 +35,29 @@ watch(
 </script>
 
 <template>
-  <div class="calculator-answer">{{ calculationString }}</div>
+  <div class="calculator-answer-container">
+    <p class="calculator-answer">{{ calculationString }}</p>
+  </div>
 </template>
 
 <style scoped>
-.calculator-answer {
+.calculator-answer-container {
   display: flex;
   align-items: center;
   justify-content: end;
   height: 20%;
+  container: calculatorName / size;
+}
+
+.calculator-answer {
+  color: var(--text-color);
   font-size: 55px;
+  padding-right: 10px;
+}
+
+@container calculatorName (max-height: 80px) {
+  .calculator-answer {
+    font-size: 30px;
+  }
 }
 </style>
