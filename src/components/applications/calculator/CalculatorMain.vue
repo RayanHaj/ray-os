@@ -4,7 +4,6 @@ import CalculatorGrid from '@/components/applications/calculator/CalculatorGrid.
 import CalculatorHistory from '@/components/applications/calculator/CalculatorHistory.vue';
 import { useCalculatorManager } from '@/composables/useCalculatorManager.ts';
 import { provide, ref } from 'vue';
-
 const historyIsToggled = ref(false);
 provide('calculatorManager', useCalculatorManager());
 </script>
@@ -49,6 +48,8 @@ provide('calculatorManager', useCalculatorManager());
   color: var(--text-color);
   border: var(--highlight-color) solid 1px;
   padding: 10px;
+  margin: 10px;
   height: 100%;
+  cursor: pointer;
 }
 </style>
