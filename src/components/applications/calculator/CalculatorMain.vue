@@ -10,7 +10,7 @@ provide('calculatorManager', useCalculatorManager());
 
 <template>
   <CalculatorHistory :is-toggled="historyIsToggled" />
-  <div class="calculator">
+  <section class="calculator">
     <div class="header">
       <button id="showHistoryButton" @click="historyIsToggled = !historyIsToggled">
         Show history
@@ -20,7 +20,7 @@ provide('calculatorManager', useCalculatorManager());
       <CalculatorAnswer />
       <CalculatorGrid />
     </div>
-  </div>
+  </section>
 </template>
 
 <style scoped>

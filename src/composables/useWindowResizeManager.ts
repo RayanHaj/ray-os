@@ -3,20 +3,10 @@ import type { WindowFlatReference } from '@/types/WindowFlatReference.ts';
 import { useWindowStateManager } from '@/composables/useWindowStateManager.ts';
 import { useBrowserStore } from '@/stores/browser.ts';
 import { useWindowStore } from '@/stores/window.ts';
-
-type StyleProps = {
-  left: string;
-  top: string;
-  width: string;
-  height: string;
-  zIndex: number;
-  display: string;
-  cursor: string;
-  transition: string;
-};
+import type { WindowStyleObject } from '@/types/WindowStyleObject.ts';
 
 export function useWindowResizeManager(
-  styles: Ref<StyleProps>,
+  styles: Ref<WindowStyleObject>,
   reference: WindowFlatReference,
   window: Ref,
   windowStateManager: ReturnType<typeof useWindowStateManager>,
@@ -55,11 +45,19 @@ export function useWindowResizeManager(
 
   function resizeWindowOnCornerMouseDown(event: MouseEvent, side: string) {
     const rect = window.value.getBoundingClientRect();
+
+    const minHeight = Number(styles.value.minHeight.replace('px', ''));
+    const minWidth = Number(styles.value.minWidth.replace('px', ''))
+
     switch (side) {
       case 'north':
         {
           const heightChange = rect.top - event.clientY;
           const newHeight = rect.height + heightChange;
+          if (newHeight <= minHeight) {
+            styles.value.cursor = 'default'
+            return;
+          }
 
           styles.value.height = `${newHeight}px`;
           styles.value.top = `${event.clientY}px`;
@@ -69,6 +67,10 @@ export function useWindowResizeManager(
         {
           const widthChange = event.clientX - rect.right;
           const newWidth = rect.width + widthChange;
+          if (newWidth <= minWidth) {
+            styles.value.cursor = 'default';
+            return;
+          }
 
           styles.value.width = `${newWidth}px`;
         }
@@ -77,6 +79,10 @@ export function useWindowResizeManager(
         {
           const heightChange = event.clientY - rect.bottom;
           const newHeight = rect.height + heightChange;
+          if (newHeight <= minHeight) {
+            styles.value.cursor = 'default'
+            return;
+          }
 
           styles.value.height = `${newHeight}px`;
         }
@@ -84,6 +90,10 @@ export function useWindowResizeManager(
       case 'west': {
         const widthChange = rect.left - event.clientX;
         const newWidth = rect.width + widthChange;
+        if (newWidth <= minWidth) {
+          styles.value.cursor = 'default';
+          return;
+        }
 
         styles.value.width = `${newWidth}px`;
         styles.value.left = `${event.clientX}px`;

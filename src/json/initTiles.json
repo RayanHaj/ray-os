@@ -33,5 +33,12 @@
       "id": 5,
       "type": "application"
     }
+  },
+  {
+  "label": "Paint",
+  "content": {
+    "id": 6,
+    "type": "application"
   }
+}
 ]

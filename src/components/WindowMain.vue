@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type Component, type PropType, ref, watch } from 'vue';
+import { type Component, type PropType, type Ref, ref, watch } from 'vue';
 import type { WindowFlatReference } from '@/types/WindowFlatReference.ts';
 import { useWindowStore } from '@/stores/window.ts';
 import WindowHeader from '@/components/WindowHeader.vue';
@@ -8,6 +8,7 @@ import { useWindowStateManager } from '@/composables/useWindowStateManager.ts';
 import { useWindowPositionManager } from '@/composables/useWindowPositionManager.ts';
 import { useWindowResizeManager } from '@/composables/useWindowResizeManager.ts';
 import { useWindowSnappingManager } from '@/composables/useWindowSnappingManager.ts';
+import type { WindowStyleObject } from '@/types/WindowStyleObject.ts';
 
 const props = defineProps({
   reference: {
@@ -24,11 +25,13 @@ const props = defineProps({
   },
 });
 
-const styles = ref({
+const styles: Ref<WindowStyleObject> = ref({
   left: '25%',
   top: '25%',
   width: '50%',
   height: '50%',
+  minWidth: '300px',
+  minHeight: '330px',
   zIndex: props.reference.zIndex,
   display: 'block',
   cursor: 'auto',
@@ -136,8 +139,6 @@ function maximizeWindow() {
   position: absolute;
   border: var(--window-border-color) 2px solid;
   user-select: none;
-  min-width: 300px;
-  min-height: 330px;
   overflow: hidden;
 }
 </style>
