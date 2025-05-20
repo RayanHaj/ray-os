@@ -129,6 +129,7 @@ function openWindow() {
   user-select: none;
   width: 100%;
   height: 100%;
+  border-radius: 5px;
 }
 
 .tile.filled:hover {

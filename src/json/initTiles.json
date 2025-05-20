@@ -35,10 +35,17 @@
     }
   },
   {
-  "label": "Paint",
-  "content": {
-    "id": 6,
-    "type": "application"
+    "label": "Paint",
+    "content": {
+      "id": 6,
+      "type": "application"
+    }
+  },
+  {
+    "label": "Portfolio",
+    "content": {
+      "id": 7,
+      "type": "application"
+    }
   }
-}
 ]

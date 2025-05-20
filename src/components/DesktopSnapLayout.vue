@@ -106,7 +106,7 @@ const showBeam = computed(() => props.showSnapLayout.show && !showLayoutAndHideP
   margin-right: auto;
   background-color: var(--accent-color);
   z-index: 9999;
-  height: 15px;
+  height: 25px;
   border-bottom-left-radius: 20px;
   border-bottom-right-radius: 20px;
   border: none;
