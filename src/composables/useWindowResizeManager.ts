@@ -47,7 +47,7 @@ export function useWindowResizeManager(
     const rect = window.value.getBoundingClientRect();
 
     const minHeight = Number(styles.value.minHeight.replace('px', ''));
-    const minWidth = Number(styles.value.minWidth.replace('px', ''))
+    const minWidth = Number(styles.value.minWidth.replace('px', ''));
 
     switch (side) {
       case 'north':

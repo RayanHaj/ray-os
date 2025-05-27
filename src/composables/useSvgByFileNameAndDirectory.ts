@@ -3,6 +3,7 @@ import type { Component } from 'vue';
 const svgs = import.meta.glob(`@/components/icons/*/*.vue`);
 export async function useSvgByFileNameAndDirectory(directory: string, name: string) {
   const formattedName = formatName(name);
+  console.log(formattedName)
   const path = `/src/components/icons/${directory}/${formattedName}${!formattedName.includes('.vue') ? '.vue' : ''}`;
 
   const loader = svgs[path];

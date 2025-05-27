@@ -1,7 +1,6 @@
 import type { RayDb } from 'ray-db-wrapper';
 import type { FileSystemItem } from '@/types/FileSystemItem.ts';
 
-
 export async function insertItemIntoFileSystem(rayDb: RayDb, parents: number[], item: {
   file?: { name: string, id: number },
   directory?: { name: string, children: number[] }
@@ -29,6 +28,41 @@ export async function insertItemIntoFileSystem(rayDb: RayDb, parents: number[], 
   return id;
 }
 
+export async function fileSystemLookupChildren(rayDb: RayDb, names: string[] | string) {
+  if (rayDb === undefined) {
+    console.error('indexed database not defined');
+    return;
+  }
+
+  if (typeof names === 'string') {
+    names = parseStringIntoRecursionArray(names);
+  }
+
+  const fileSystemItems = await rayDb.findAll<FileSystemItem>('fileSystem');
+  const rootItem = fileSystemItems.filter(fileSystemItem => fileSystemItem.directory?.name === names[0])[0];
+
+  if (fileSystemItems === undefined) {
+    console.error(`no directory found with name ${names[0]}`);
+    return;
+  }
+
+  names.splice(0, 1);
+
+  const value = await doRecursion(rayDb, rootItem, names);
+  if (value && value.directory) {
+    if (value.directory.children.length === 0) {
+      return;
+    }
+
+    const children: FileSystemItem[] = [];
+    for (const childId of value.directory.children) {
+      const child = await rayDb.findOne<FileSystemItem>('fileSystem', 'id', childId);
+      children.push(child);
+    }
+
+    return children;
+  }
+}
 export async function fileSystemLookup(rayDb: RayDb, names: string[] | string) {
   if (rayDb === undefined) {
     console.error('indexed database not defined');

@@ -10,17 +10,25 @@ import FallbackMain from '@/components/applications/FallbackMain.vue';
 import SettingsMain from '@/components/applications/settings/SettingsMain.vue';
 import CalculatorMain from '@/components/applications/calculator/CalculatorMain.vue';
 import PaintMain from '@/components/applications/paint/PaintMain.vue';
+import FileExplorerMain from '@/components/applications/fileExplorer/FileExplorerMain.vue';
 import DesktopSnapLayout from '@/components/DesktopSnapLayout.vue';
+import ContextMenu from '@/components/ContextMenu.vue';
+import { useContextMenuStore } from '@/stores/contextMenu.ts';
+import { useOnOuterClickCloseContextMenu } from '@/composables/useOnOuterClickCloseContextMenu.ts';
 
 const windowContentComponents = shallowRef<{ [componentName: string]: Component }>({
   settings: SettingsMain,
   calculator: CalculatorMain,
-  paint: PaintMain
+  paint: PaintMain,
+  fileExplorer: FileExplorerMain,
 });
 
 const references: ComputedRef<WindowFlatReference[]> = useFlatOpenWindowsReferencesFull();
+
 function getWindowContentComponent(reference: WindowFlatReference): Component {
-  const component = windowContentComponents.value[reference.label.toLowerCase()];
+  const formattedComponentName =
+    reference.label[0].toLowerCase() + reference.label.replace(' ', '').substring(1);
+  const component = windowContentComponents.value[formattedComponentName];
   if (!component) {
     return FallbackMain;
   }
@@ -30,10 +38,18 @@ function getWindowContentComponent(reference: WindowFlatReference): Component {
 
 const showSnapLayout = ref<{ show: boolean; windowId: string }>({ show: false, windowId: '' });
 const selectedLayout = ref<{ layout: string; windowId: string }>({ layout: '', windowId: '' });
+
+const contextMenuStore = useContextMenuStore();
 </script>
 
 <template>
-  <main>
+  <main @mousedown="useOnOuterClickCloseContextMenu($event.target as HTMLElement)">
+    <ContextMenu
+      v-show="contextMenuStore.isShown()"
+      :primary-actions="contextMenuStore.contextMenusProperties.primaryActions"
+      :secondary-actions="contextMenuStore.contextMenusProperties.secondaryActions"
+      :mouse-position="contextMenuStore.contextMenusProperties.mousePosition"
+    />
     <DesktopSnapLayout
       :show-snap-layout="showSnapLayout"
       @selected-layout="selectedLayout = $event"
