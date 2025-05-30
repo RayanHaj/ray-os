@@ -29,4 +29,5 @@ defineProps({
     required: false,
     default: 'var(--svg-color)',
   },
-});</script>
+});
+</script>

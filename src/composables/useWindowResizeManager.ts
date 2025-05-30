@@ -55,7 +55,7 @@ export function useWindowResizeManager(
           const heightChange = rect.top - event.clientY;
           const newHeight = rect.height + heightChange;
           if (newHeight <= minHeight) {
-            styles.value.cursor = 'default'
+            styles.value.cursor = 'default';
             return;
           }
 
@@ -80,7 +80,7 @@ export function useWindowResizeManager(
           const heightChange = event.clientY - rect.bottom;
           const newHeight = rect.height + heightChange;
           if (newHeight <= minHeight) {
-            styles.value.cursor = 'default'
+            styles.value.cursor = 'default';
             return;
           }
 

@@ -44,7 +44,7 @@ const allFileSystemItems = await rayDb.findAll<FileSystemItem>('fileSystem');
 
 let rootIdCache = null;
 for (const directoryName of fileSystemStore.rootDirectories) {
-  const element = allFileSystemItems.find(item => item.directory?.name === directoryName)
+  const element = allFileSystemItems.find((item) => item.directory?.name === directoryName);
   if (element) {
     if (element.directory?.name === fileSystemStore.rootDirectories[0]) {
       rootIdCache = element.id;
@@ -59,16 +59,6 @@ for (const directoryName of fileSystemStore.rootDirectories) {
         directory: { name: directoryName, children: [] },
       });
     }
-  }
-}
-
-const celebrationDir = await fileSystemLookup(rayDb, 'celebration');
-if (!celebrationDir) {
-  const parentDir = await fileSystemLookup(rayDb, 'files');
-  if (parentDir && parentDir.id) {
-    await insertItemIntoFileSystem(rayDb, [parentDir.id], {
-      directory: { name: 'celebration', children: [] },
-    });
   }
 }
 

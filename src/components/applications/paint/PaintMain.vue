@@ -1,13 +1,12 @@
 <script setup lang="ts">
-
 import PaintCanvas from '@/components/applications/paint/PaintCanvas.vue';
 import PaintToolbar from '@/components/applications/paint/PaintToolbar.vue';
 </script>
 
 <template>
   <section class="paint">
-    <PaintCanvas/>
-    <PaintToolbar/>
+    <PaintCanvas />
+    <PaintToolbar />
   </section>
 </template>
 

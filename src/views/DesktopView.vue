@@ -43,13 +43,8 @@ const contextMenuStore = useContextMenuStore();
 </script>
 
 <template>
-  <main @mousedown="useOnOuterClickCloseContextMenu($event.target as HTMLElement)">
-    <ContextMenu
-      v-show="contextMenuStore.isShown()"
-      :primary-actions="contextMenuStore.contextMenusProperties.primaryActions"
-      :secondary-actions="contextMenuStore.contextMenusProperties.secondaryActions"
-      :mouse-position="contextMenuStore.contextMenusProperties.mousePosition"
-    />
+  <main @click="useOnOuterClickCloseContextMenu($event.target as HTMLElement)">
+    <ContextMenu v-show="contextMenuStore.isShown()" />
     <DesktopSnapLayout
       :show-snap-layout="showSnapLayout"
       @selected-layout="selectedLayout = $event"

@@ -1,16 +1,24 @@
 import type { RayDb } from 'ray-db-wrapper';
 import type { FileSystemItem } from '@/types/FileSystemItem.ts';
+import { useFileSystemStore } from '@/stores/fileSystem.ts';
 
-export async function insertItemIntoFileSystem(rayDb: RayDb, parents: number[], item: {
-  file?: { name: string, id: number },
-  directory?: { name: string, children: number[] }
-}) {
+export async function insertItemIntoFileSystem(
+  rayDb: RayDb,
+  parents: number[],
+  item: {
+    file?: { name: string; id: number };
+    directory?: { name: string; children: number[] };
+  },
+) {
   if (rayDb === undefined) {
     console.error('indexed database not defined');
     return;
   }
 
-  let id = await rayDb.insertOne<FileSystemItem>('fileSystem', {parents: parents, [item.directory ? 'directory' : 'file']: item.directory || item.file})
+  let id = await rayDb.insertOne<FileSystemItem>('fileSystem', {
+    parents: parents,
+    [item.directory ? 'directory' : 'file']: item.directory || item.file,
+  });
 
   if (Number.isNaN(id)) return;
 
@@ -25,9 +33,9 @@ export async function insertItemIntoFileSystem(rayDb: RayDb, parents: number[], 
     }
   }
 
+  useFileSystemStore().updateFileSystem();
   return id;
 }
-
 export async function fileSystemLookupChildren(rayDb: RayDb, names: string[] | string) {
   if (rayDb === undefined) {
     console.error('indexed database not defined');
@@ -39,7 +47,9 @@ export async function fileSystemLookupChildren(rayDb: RayDb, names: string[] | s
   }
 
   const fileSystemItems = await rayDb.findAll<FileSystemItem>('fileSystem');
-  const rootItem = fileSystemItems.filter(fileSystemItem => fileSystemItem.directory?.name === names[0])[0];
+  const rootItem = fileSystemItems.filter(
+    (fileSystemItem) => fileSystemItem.directory?.name === names[0],
+  )[0];
 
   if (fileSystemItems === undefined) {
     console.error(`no directory found with name ${names[0]}`);
@@ -63,20 +73,21 @@ export async function fileSystemLookupChildren(rayDb: RayDb, names: string[] | s
     return children;
   }
 }
-export async function fileSystemLookup(rayDb: RayDb, names: string[] | string) {
+export async function fileSystemLookup(rayDb: RayDb, name: string) {
   if (rayDb === undefined) {
     console.error('indexed database not defined');
     return;
   }
 
-  if (typeof names === 'string') {
-    names = parseStringIntoRecursionArray(names);
-  }
-
-  const startPoint = await rayDb.findOne<FileSystemItem>('fileSystem', 'directory', names[0]);
-  names.splice(0, 1);
-
-  return await doRecursion(rayDb, startPoint, names);
+  const items = await rayDb.findAll<FileSystemItem>('fileSystem');
+  return items.filter((item) => {
+    if (item.directory) {
+      return item.directory.name === name;
+    } else if (item.file) {
+      return item.file.name === name;
+    }
+    return;
+  });
 }
 
 async function doRecursion(rayDb: RayDb, startPoint: FileSystemItem, names: string[]) {
@@ -92,8 +103,8 @@ async function doRecursion(rayDb: RayDb, startPoint: FileSystemItem, names: stri
   let item: FileSystemItem = startPoint;
 
   if (!startPoint.directory) {
-   console.error('property: directory, does not exist on startPoint');
-   return;
+    console.error('property: directory, does not exist on startPoint');
+    return;
   }
 
   for (const child of startPoint.directory.children) {

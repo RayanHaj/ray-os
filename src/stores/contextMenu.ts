@@ -1,29 +1,46 @@
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import type { PrimaryActionsContextMenu } from '@/types/PrimaryActionsContextMenu.ts';
 import type { SecondaryActionsContextMenu } from '@/types/SecondaryActionsContextMenu.ts';
 
-export const useContextMenuStore = defineStore('contextMenu' ,() => {
+export const useContextMenuStore = defineStore('contextMenu', () => {
   const contextMenusProperties = ref<{
-      show: boolean,
-      primaryActions?: PrimaryActionsContextMenu[],
-      secondaryActions?: SecondaryActionsContextMenu[],
-      mousePosition?: { left: number; top: number },
+    show: boolean;
+    primaryActions?: PrimaryActionsContextMenu[];
+    secondaryActions?: SecondaryActionsContextMenu[];
+    mousePosition?: { left: number; top: number };
   }>({ show: false });
 
+  const watcher = ref<() => void>();
+  const buttonClicked = ref<{ [button: string]: boolean }>({});
   function initializeContextMenu(
     primaryActions?: PrimaryActionsContextMenu[],
     secondaryActions?: SecondaryActionsContextMenu[],
-    mousePosition?: { left: number; top: number }
+    mousePosition?: { left: number; top: number },
+    actions?: { [buttonName: string]: () => unknown | Promise<unknown> },
   ) {
     contextMenusProperties.value.primaryActions = primaryActions;
     contextMenusProperties.value.secondaryActions = secondaryActions;
     contextMenusProperties.value.mousePosition = mousePosition;
+
+    watcher.value = watch(
+      () => buttonClicked.value,
+      async (value) => {
+        const buttonName = Object.keys(value)[0];
+
+        if (actions && typeof actions?.[buttonName] === 'function') {
+          await actions?.[buttonName]();
+        }
+      },
+    );
   }
 
-  function updateContextMenuPosition(
-    mousePosition?: { left: number; top: number }
-  ) {
+  function setClickedButton(button: string) {
+    const currentValue = buttonClicked.value[button] ?? false;
+    buttonClicked.value = { [button]: !currentValue };
+  }
+
+  function updateContextMenuPosition(mousePosition?: { left: number; top: number }) {
     contextMenusProperties.value.mousePosition = mousePosition;
   }
 
@@ -37,6 +54,9 @@ export const useContextMenuStore = defineStore('contextMenu' ,() => {
 
   function hide() {
     contextMenusProperties.value.show = false;
+    if (typeof watcher.value === 'function') {
+      watcher.value();
+    }
   }
 
   function closeContextMenuOnOuterClick(target: HTMLElement) {
@@ -47,5 +67,14 @@ export const useContextMenuStore = defineStore('contextMenu' ,() => {
     hide();
   }
 
-  return { show, isShown, hide, updateContextMenuPosition, closeContextMenuOnOuterClick, initializeContextMenu, contextMenusProperties }
+  return {
+    show,
+    isShown,
+    hide,
+    updateContextMenuPosition,
+    closeContextMenuOnOuterClick,
+    initializeContextMenu,
+    contextMenusProperties,
+    setClickedButton,
+  };
 });
