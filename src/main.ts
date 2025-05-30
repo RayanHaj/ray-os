@@ -8,8 +8,8 @@ import { RayDb } from 'ray-db-wrapper';
 
 import App from './App.vue';
 import router from './router';
-import type { FileSystemItem } from '@/types/FileSystemItem.ts';
-import { fileSystemLookup, insertItemIntoFileSystem } from '@/composables/useIndexedDbHelper.ts';
+import { insertItemIntoFileSystem } from '@/composables/useIndexedDbHelper.ts';
+import { useFileStore } from '@/stores/file.ts';
 
 const app = createApp(App);
 
@@ -21,8 +21,8 @@ const rayDb = await RayDb.create('desktop', 1, [
     name: 'files',
     keyPath: 'id',
     indexes: [
-      { indexName: 'name', keyPath: 'name', unique: true },
-      { indexName: 'type', keyPath: 'type', unique: false },
+      { indexName: 'label', keyPath: 'label', unique: true },
+      { indexName: 'content', keyPath: 'content', unique: false }
     ],
     autoIncrement: true,
   },
@@ -40,27 +40,19 @@ const rayDb = await RayDb.create('desktop', 1, [
 ]);
 
 const fileSystemStore = useFileSystemStore();
-const allFileSystemItems = await rayDb.findAll<FileSystemItem>('fileSystem');
 
-let rootIdCache = null;
-for (const directoryName of fileSystemStore.rootDirectories) {
-  const element = allFileSystemItems.find((item) => item.directory?.name === directoryName);
-  if (element) {
-    if (element.directory?.name === fileSystemStore.rootDirectories[0]) {
-      rootIdCache = element.id;
-    }
-  } else {
-    if (rootIdCache) {
-      await insertItemIntoFileSystem(rayDb, [rootIdCache], {
-        directory: { name: directoryName, children: [] },
-      });
-    } else {
-      rootIdCache = await insertItemIntoFileSystem(rayDb, [], {
-        directory: { name: directoryName, children: [] },
-      });
-    }
-  }
+const rootDirectory = fileSystemStore.rootDirectory;
+const parentId = await insertItemIntoFileSystem(rayDb, [], {
+  directory: { name: rootDirectory, children: [] },
+});
+
+if (parentId) {
+  await insertItemIntoFileSystem(rayDb, [parentId], {
+    directory: { name: 'Applications', children: [] }
+  })
 }
+
+await useFileStore().initializeFiles(rayDb);
 
 app.provide('rayDb', rayDb);
 const theme = useThemeSwitcher().getTheme();

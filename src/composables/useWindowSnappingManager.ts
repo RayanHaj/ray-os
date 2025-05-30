@@ -34,7 +34,7 @@ export function useWindowSnappingManager(styles: Ref<StyleProps>) {
           styles.value.top = '0';
         }
         break;
-      case 'top-left':
+      case 'topLeft':
         {
           styles.value.left = '0';
           styles.value.height = `${browserStore.heightExcTaskbar / 2}px`;
@@ -42,7 +42,7 @@ export function useWindowSnappingManager(styles: Ref<StyleProps>) {
           styles.value.top = '0';
         }
         break;
-      case 'top-right':
+      case 'topRight':
         {
           styles.value.left = '50%';
           styles.value.height = `${browserStore.heightExcTaskbar / 2}px`;
@@ -50,7 +50,7 @@ export function useWindowSnappingManager(styles: Ref<StyleProps>) {
           styles.value.top = '0';
         }
         break;
-      case 'bottom-left':
+      case 'bottomLeft':
         {
           styles.value.left = '0';
           styles.value.height = `${browserStore.heightExcTaskbar / 2}px`;
@@ -58,7 +58,7 @@ export function useWindowSnappingManager(styles: Ref<StyleProps>) {
           styles.value.top = `${browserStore.heightExcTaskbar / 2}px`;
         }
         break;
-      case 'bottom-right': {
+      case 'bottomRight': {
         styles.value.left = '50%';
         styles.value.height = `${browserStore.heightExcTaskbar / 2}px`;
         styles.value.width = '50%';

@@ -1,5 +1,12 @@
 <script setup lang="ts">
-import { type ComponentPublicInstance, inject, onBeforeMount, reactive, ref, watch } from 'vue';
+import {
+  type ComponentPublicInstance,
+  inject,
+  onBeforeMount,
+  reactive,
+  ref,
+  watch
+} from 'vue';
 import {
   fileSystemLookup,
   fileSystemLookupChildren,
@@ -21,7 +28,7 @@ const fileExplorerGrid = ref<
   | undefined
 >();
 
-const currentPath = ref<string[]>(['C:']);
+const currentPath = ref<string[]>([useFileSystemStore().rootDirectory]);
 const currentDirectories = ref<FileSystemItem[]>([]);
 const previousDirectories = ref<FileSystemItem[][]>([]);
 
@@ -35,7 +42,7 @@ onBeforeMount(async () => {
     return;
   }
 
-  currentDirectories.value = (await fileSystemLookupChildren(rayDb, 'C:')) ?? [];
+  currentDirectories.value = (await fileSystemLookupChildren(rayDb, useFileSystemStore().rootDirectory))?.children ?? [];
 });
 
 watch(
@@ -46,7 +53,7 @@ watch(
     }
 
     currentDirectories.value =
-      (await fileSystemLookupChildren(rayDb, currentPath.value[currentPath.value.length - 1])) ??
+      (await fileSystemLookupChildren(rayDb, currentPath.value.join('/')))?.children ??
       [];
   },
 );
@@ -77,7 +84,8 @@ async function onDblClickItem(fileSystemItem: FileSystemItem) {
   }
 
   if (fileSystemItem.directory) {
-    const children = await fileSystemLookupChildren(rayDb, fileSystemItem.directory.name);
+    const children = await fileSystemLookupChildren(rayDb, `${currentPath.value.join('/')}/${fileSystemItem.directory.name}`)
+      .then(value => value?.children);
     previousDirectories.value.push(currentDirectories.value);
 
     currentDirectories.value = children ?? [];
@@ -108,7 +116,7 @@ async function handleModalInput(input: string) {
   if (previous) {
     parentId = previous.find((el) => el.directory?.name === parentName)?.id ?? null;
   } else {
-    parentId = await fileSystemLookup(rayDb, 'C:').then((value) => (value ? value[0].id : null));
+    parentId = await fileSystemLookup(rayDb, useFileSystemStore().rootDirectory).then((value) => (value ? value[0].id : null));
   }
 
   if (!parentId) {

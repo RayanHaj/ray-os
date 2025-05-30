@@ -15,6 +15,14 @@ export async function insertItemIntoFileSystem(
     return;
   }
 
+  const foundItems = await rayDb.findAll<FileSystemItem>('fileSystem');
+  if (foundItems.filter(foundItem =>
+    foundItem.directory?.name === useFileSystemStore().rootDirectory &&
+    item.directory?.name === useFileSystemStore().rootDirectory
+  ).length === 1) {
+    return;
+  }
+
   let id = await rayDb.insertOne<FileSystemItem>('fileSystem', {
     parents: parents,
     [item.directory ? 'directory' : 'file']: item.directory || item.file,
@@ -36,41 +44,62 @@ export async function insertItemIntoFileSystem(
   useFileSystemStore().updateFileSystem();
   return id;
 }
-export async function fileSystemLookupChildren(rayDb: RayDb, names: string[] | string) {
+
+export async function getRootDirectory(rayDb: RayDb) {
   if (rayDb === undefined) {
     console.error('indexed database not defined');
     return;
   }
 
-  if (typeof names === 'string') {
-    names = parseStringIntoRecursionArray(names);
-  }
+  return await fileSystemLookup(rayDb, useFileSystemStore().rootDirectory);
+}
 
-  const fileSystemItems = await rayDb.findAll<FileSystemItem>('fileSystem');
-  const rootItem = fileSystemItems.filter(
-    (fileSystemItem) => fileSystemItem.directory?.name === names[0],
-  )[0];
-
-  if (fileSystemItems === undefined) {
-    console.error(`no directory found with name ${names[0]}`);
+export async function fileSystemLookupChildren(rayDb: RayDb, path: string) {
+  if (rayDb === undefined) {
+    console.error('indexed database not defined');
     return;
   }
 
-  names.splice(0, 1);
+  const pathArray: string[] = parseStringIntoRecursionArray(path);
+  console.log(pathArray);
+  const rootDirectoryId = await getRootDirectory(rayDb).then((value) =>
+    value ? value[0].id : null,
+  );
+  if (!rootDirectoryId) {
+    return;
+  }
 
-  const value = await doRecursion(rayDb, rootItem, names);
+  const fileSystemItems = await rayDb.findAll<FileSystemItem>('fileSystem');
+  const rootItem = fileSystemItems.filter((fileSystemItem) => {
+    return (
+      fileSystemItem.directory?.name === pathArray[0] &&
+      (fileSystemItem.directory.name === useFileSystemStore().rootDirectory ||
+        fileSystemItem.parents.includes(rootDirectoryId))
+    );
+  })[0];
+
+  if (fileSystemItems.length === 0) {
+    console.error(`no directory found with name ${pathArray[0]}`);
+    return;
+  }
+
+  pathArray.splice(0, 1);
+
+  const value = await doRecursion(rayDb, rootItem, pathArray);
   if (value && value.directory) {
     if (value.directory.children.length === 0) {
-      return;
+      return { parent: value, children: [] };
     }
 
     const children: FileSystemItem[] = [];
     for (const childId of value.directory.children) {
       const child = await rayDb.findOne<FileSystemItem>('fileSystem', 'id', childId);
-      children.push(child);
+      if (child) {
+        children.push(child);
+      }
     }
 
-    return children;
+    return { parent: value, children: children };
   }
 }
 export async function fileSystemLookup(rayDb: RayDb, name: string) {

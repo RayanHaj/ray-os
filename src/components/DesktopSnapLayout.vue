@@ -17,21 +17,7 @@ function onMouseOver(element: EventTarget | null) {
 
   const classList = element.classList;
   if (classList.contains('layout-option')) {
-    if (classList.contains('left')) {
-      selectedLayout.value = 'left';
-    } else if (classList.contains('right')) {
-      selectedLayout.value = 'right';
-    } else if (classList.contains('top-left')) {
-      selectedLayout.value = 'top-left';
-    } else if (classList.contains('top-right')) {
-      selectedLayout.value = 'top-right';
-    } else if (classList.contains('bottom-left')) {
-      selectedLayout.value = 'bottom-left';
-    } else if (classList.contains('bottom-right')) {
-      selectedLayout.value = 'bottom-right';
-    } else {
-      selectedLayout.value = '';
-    }
+    selectedLayout.value = element.id;
   } else {
     selectedLayout.value = '';
   }
@@ -66,14 +52,14 @@ const showBeam = computed(() => props.showSnapLayout.show && !showLayoutAndHideP
       @mouseover="onMouseOver($event.target)"
     >
       <div class="half-layout">
-        <div class="layout-option left border-radius-bottom-left border-radius-top-left" />
-        <div class="layout-option right border-radius-bottom-right border-radius-top-right" />
+        <div id="left" class="layout-option border-radius-bottom-left border-radius-top-left" />
+        <div id="right" class="layout-option border-radius-bottom-right border-radius-top-right" />
       </div>
       <div class="quarter-layout">
-        <div class="layout-option top-left border-radius-top-left" />
-        <div class="layout-option top-right border-radius-top-right" />
-        <div class="layout-option bottom-left border-radius-bottom-left" />
-        <div class="layout-option bottom-right border-radius-bottom-right" />
+        <div id="topLeft" class="layout-option border-radius-top-left" />
+        <div id="topRight" class="layout-option border-radius-top-right" />
+        <div id="bottomLeft" class="layout-option border-radius-bottom-left" />
+        <div id="bottomRight" class="layout-option border-radius-bottom-right" />
       </div>
     </div>
   </transition>
@@ -122,8 +108,8 @@ const showBeam = computed(() => props.showSnapLayout.show && !showLayoutAndHideP
   gap: 10px;
 }
 
-.left,
-.right {
+#left,
+#right {
   width: 100px;
   height: 100%;
   background-color: var(--window-secondary-color);
@@ -143,21 +129,21 @@ const showBeam = computed(() => props.showSnapLayout.show && !showLayoutAndHideP
   gap: 10px;
 }
 
-.top-left,
-.top-right,
-.bottom-left,
-.bottom-right {
+#topLeft,
+#topRight,
+#bottomLeft,
+#bottomRight {
   width: 120px;
   height: 50px;
   background-color: var(--window-secondary-color);
 }
 
-.top-left:hover,
-.top-right:hover,
-.bottom-left:hover,
-.bottom-right:hover,
-.left:hover,
-.right:hover {
+#topLeft:hover,
+#topRight:hover,
+#bottomLeft:hover,
+#bottomRight:hover,
+#left:hover,
+#right:hover {
   background-color: var(--accent-color);
 }
 

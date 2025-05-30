@@ -5,7 +5,10 @@ import { useSvgByFileNameAndDirectory } from '@/composables/useSvgByFileNameAndD
 import type { RayDb } from 'ray-db-wrapper';
 import { useContextMenuStore } from '@/stores/contextMenu.ts';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
-import { fileSystemLookup, insertItemIntoFileSystem } from '@/composables/useIndexedDbHelper.ts';
+import {
+  fileSystemLookup,
+  insertItemIntoFileSystem
+} from '@/composables/useIndexedDbHelper.ts';
 import type { SecondaryActionsContextMenu } from '@/types/SecondaryActionsContextMenu.ts';
 import type { PrimaryActionsContextMenu } from '@/types/PrimaryActionsContextMenu.ts';
 
@@ -47,9 +50,11 @@ watch(
 );
 
 const directorySvg = shallowRef<Component | undefined>();
+const fileSvg = shallowRef<Component | undefined>();
 const contextMenuStore = useContextMenuStore();
 onBeforeMount(async () => {
   directorySvg.value = (await useSvgByFileNameAndDirectory('ui', 'Directory')) ?? undefined;
+  fileSvg.value = (await useSvgByFileNameAndDirectory('ui', 'TextFile')) ?? undefined;
 });
 
 const primaryActionsGrid: PrimaryActionsContextMenu[] = [];
@@ -83,19 +88,17 @@ const actionsGridItem = (file: FileSystemItem | null) => {
         return;
       }
 
-      if (file.directory?.name)
-        if (fileSystemStore.rootDirectories.includes(file.directory?.name)) {
-          alert('cannot delete');
-        }
+      console.log(file);
 
       if (file?.id && file.directory) {
         await props.rayDb?.deleteOne('fileSystem', file.id);
       }
+
+      useFileSystemStore().updateFileSystem();
     },
   };
 };
 
-const fileSystemStore = useFileSystemStore();
 function onRightClick(
   event: MouseEvent,
   file: FileSystemItem | null,
@@ -126,12 +129,12 @@ function onRightClick(
         @click.right.prevent.stop="onRightClick($event, fileSystemItem, 'gridItem')"
       >
         <component
-          :is="directorySvg"
+          :is="fileSystemItem.directory ? directorySvg : fileSvg"
           :custom-width="60"
           :custom-height="60"
           :style="{ marginLeft: '5px' }"
         />
-        {{ fileSystemItem.directory?.name }}
+        {{ fileSystemItem.directory?.name ?? fileSystemItem.file?.name }}
       </div>
     </div>
   </section>
@@ -167,6 +170,7 @@ function onRightClick(
   height: 100px;
   color: var(--text-color);
   padding: 10px;
+  font-size: 12px;
 }
 
 .item:hover {
