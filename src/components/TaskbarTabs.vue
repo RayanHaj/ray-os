@@ -42,6 +42,7 @@ onBeforeUnmount(() => emits('tabsUnmounted'));
   flex-direction: column;
   gap: 5px;
   background-color: var(--tabs-background);
+  border: var(--window-border-color) solid 2px;
   color: var(--tabs-text);
   border-radius: 5px;
   bottom: 90px;
