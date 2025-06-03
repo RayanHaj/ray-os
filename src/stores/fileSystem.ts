@@ -2,8 +2,9 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
 export const useFileSystemStore = defineStore('fileSystem', () => {
-  const rootDirectory = ref('root');
+  const rootDirectory = ref('C:');
   const updateFileSystemVal = ref(false);
+  const rootId = ref<number>();
 
   function updateFileSystem() {
     updateFileSystemVal.value = !updateFileSystemVal.value;
@@ -12,5 +13,6 @@ export const useFileSystemStore = defineStore('fileSystem', () => {
     rootDirectory,
     updateFileSystemVal,
     updateFileSystem,
+    rootId
   };
 });

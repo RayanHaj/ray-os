@@ -8,20 +8,16 @@ defineProps({
     default: () => ['C:/'],
   },
 });
-const emits = defineEmits(['headerEvent']);
+const emits = defineEmits(['header-event:back']);
 </script>
 
 <template>
   <header class="file-explorer-header">
     <div class="left-side">
-      <button @click="emits('headerEvent', 'back')">^</button>
+      <button class="back-button" @click="emits('header-event:back')">^</button>
     </div>
     <div class="middle-side">
       <input type="text" :value="currentPath.join('/')" disabled />
-    </div>
-    <div class="right-side">
-      <button @click="emits('headerEvent', 'zoomIn')">In</button>
-      <button @click="emits('headerEvent', 'zoomOut')">Out</button>
     </div>
   </header>
 </template>
@@ -35,21 +31,12 @@ const emits = defineEmits(['headerEvent']);
   color: var(--text-color);
 }
 
-.left-side {
-  width: 15%;
-}
-
-.right-side {
-  width: 15%;
+.left-side, .back-button {
+  width: 150px;
 }
 
 .middle-side {
-  width: 70%;
-}
-
-.right-side {
-  display: flex;
-  flex-direction: row;
+  width: 100%;
 }
 
 button {

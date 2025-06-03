@@ -1,17 +1,6 @@
 <script setup lang="ts">
-import {
-  type ComponentPublicInstance,
-  inject,
-  onBeforeMount,
-  reactive,
-  ref,
-  watch
-} from 'vue';
-import {
-  fileSystemLookup,
-  fileSystemLookupChildren,
-  insertItemIntoFileSystem,
-} from '@/composables/useIndexedDbHelper.ts';
+import { onBeforeMount, ref, watch } from 'vue';
+import { fileSystemLookup, insertItemIntoFileSystem } from '@/composables/useIndexedDbHelper.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import FileExplorerHeader from '@/components/applications/fileExplorer/FileExplorerHeader.vue';
 import FileExplorerGrid from '@/components/applications/fileExplorer/FileExplorerGrid.vue';
@@ -19,135 +8,118 @@ import type { FileSystemItem } from '@/types/FileSystemItem.ts';
 import FileExplorerModal from '@/components/applications/fileExplorer/FileExplorerModal.vue';
 import { useContextMenuStore } from '@/stores/contextMenu.ts';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
+import { useInjectOrThrow } from '@/composables/useInjectOrThrow.ts';
+import type { Item } from '@/types/Item.ts';
+import { useWindowStore } from '@/stores/window.ts';
 
-const rayDb = inject<RayDb>('rayDb');
-const fileExplorerGrid = ref<
-  | ComponentPublicInstance<{
-      onDblClickItem: () => void;
-    }>
-  | undefined
->();
+const rayDb = useInjectOrThrow<RayDb>('rayDb');
+const fileSystemStore = useFileSystemStore();
 
-const currentPath = ref<string[]>([useFileSystemStore().rootDirectory]);
-const currentDirectories = ref<FileSystemItem[]>([]);
-const previousDirectories = ref<FileSystemItem[][]>([]);
+const currentPath = ref<string[]>([fileSystemStore.rootDirectory]);
+const currentItems = ref<Array<FileSystemItem & { type: string }>>([]);
+const previousItems = ref<Array<Array<FileSystemItem & { type: string }>>>([]);
 
-const headerEvents = reactive({
-  zoomIn: 0,
-  zoomOut: 0,
-  back: 0,
-});
 onBeforeMount(async () => {
-  if (!rayDb) {
-    return;
-  }
-
-  currentDirectories.value = (await fileSystemLookupChildren(rayDb, useFileSystemStore().rootDirectory))?.children ?? [];
+  await updateCurrentItems(fileSystemStore.rootDirectory);
 });
 
 watch(
-  () => useFileSystemStore().updateFileSystemVal,
-  async () => {
-    if (!rayDb) {
-      return;
-    }
-
-    currentDirectories.value =
-      (await fileSystemLookupChildren(rayDb, currentPath.value.join('/')))?.children ??
-      [];
-  },
+  () => fileSystemStore.updateFileSystemVal,
+  async () => await updateCurrentItems(currentPath.value.join('/')),
 );
 
-function handleHeaderEvent(event: string) {
-  switch (event) {
-    case 'back':
-      const poppedDirectory = previousDirectories.value.pop();
-      if (!Array.isArray(poppedDirectory)) {
-        return;
+async function updateCurrentItems(path: string) {
+  const fileSystemItems = await fileSystemLookup(rayDb, path);
+  if (!fileSystemItems || !fileSystemItems.children) {
+    throw new Error(`No fileSystemItems (children) found with specified path: ${path}`);
+  }
+
+  currentItems.value = await mapItemsWithType(fileSystemItems.children);
+}
+
+async function mapItemsWithType(items: FileSystemItem[]) {
+  return await Promise.all(
+    items.map(async (item) => {
+      const updatedItems = { ...item, type: 'directory' };
+
+      if (item.file) {
+        const file = await rayDb.findOne<Item>('files', 'id', item.file.id);
+        updatedItems.type = file.content.type;
       }
-      if (poppedDirectory.length > 0) {
-        currentDirectories.value = poppedDirectory;
-        currentPath.value.pop();
-      }
-      break;
-    case 'zoomOut':
-      headerEvents.zoomOut += 1;
-      break;
-    case 'zoomIn':
-      headerEvents.zoomIn += 1;
+
+      return updatedItems;
+    }),
+  );
+}
+
+function handleBackClick() {
+  const poppedItem = previousItems.value.pop();
+
+  if (poppedItem && poppedItem.length > 0) {
+    currentItems.value = poppedItem;
+    currentPath.value.pop();
   }
 }
 
-async function onDblClickItem(fileSystemItem: FileSystemItem) {
-  if (!rayDb) {
-    return;
-  }
+async function onDblClickItem(item: FileSystemItem & { type: string }) {
+  previousItems.value.push(currentItems.value);
 
-  if (fileSystemItem.directory) {
-    const children = await fileSystemLookupChildren(rayDb, `${currentPath.value.join('/')}/${fileSystemItem.directory.name}`)
-      .then(value => value?.children);
-    previousDirectories.value.push(currentDirectories.value);
-
-    currentDirectories.value = children ?? [];
-
-    if (fileSystemItem.directory && fileSystemItem.directory.name) {
-      currentPath.value.push(fileSystemItem.directory.name);
+  if (item.directory) {
+    await updateCurrentItems(`${currentPath.value.join('/')}/${item.directory.name}`);
+    currentPath.value.push(item.directory.name);
+  } else if (item.file) {
+    switch (item.type) {
+      case 'application':
+        useWindowStore().pushOpenWindowReference(item.file.name);
+        break;
+      case 'file':
     }
   }
 }
 
-const showNewDirectoryModal = ref(false);
-
-function toggleModal() {
+const addNewItemModalOpen = ref(false);
+function toggleAddNewItemModal() {
   useContextMenuStore().hide();
-  showNewDirectoryModal.value = true;
+  addNewItemModalOpen.value = true;
 }
 
 async function handleModalInput(input: string) {
-  if (!rayDb) {
-    showNewDirectoryModal.value = false;
-    return;
-  }
+  const currentPathItemName = currentPath.value[currentPath.value.length - 1];
+  const previousItem = previousItems.value[previousItems.value.length - 1];
 
-  const parentName = currentPath.value[currentPath.value.length - 1];
-  const previous = previousDirectories.value[previousDirectories.value.length - 1];
-
-  let parentId = null;
-  if (previous) {
-    parentId = previous.find((el) => el.directory?.name === parentName)?.id ?? null;
+  let parentId;
+  if (previousItem) {
+    parentId = previousItem.find((el) => el.directory?.name === currentPathItemName)?.id ?? null;
   } else {
-    parentId = await fileSystemLookup(rayDb, useFileSystemStore().rootDirectory).then((value) => (value ? value[0].id : null));
+    parentId = await fileSystemLookup(rayDb, fileSystemStore.rootDirectory).then((value) =>
+      value ? value.parent.id : null,
+    );
   }
 
   if (!parentId) {
     return;
   }
 
-  await insertItemIntoFileSystem(rayDb, [parentId], {
-    directory: { name: input, children: [] },
-  });
-
-  showNewDirectoryModal.value = false;
+  await insertItemIntoFileSystem(rayDb, [parentId], { directory: { name: input, children: [] } });
+  addNewItemModalOpen.value = false;
 }
 </script>
 
 <template>
   <div class="file-explorer">
     <FileExplorerModal
-      v-show="showNewDirectoryModal"
+      v-show="addNewItemModalOpen"
       title="add new directory"
       @modal-event:submit-click="handleModalInput"
-      @modal-event:cancel-click="showNewDirectoryModal = false"
+      @modal-event:cancel-click="addNewItemModalOpen = false"
     />
-    <FileExplorerHeader :current-path="currentPath" @header-event="handleHeaderEvent" />
+    <FileExplorerHeader :current-path="currentPath" @header-event:back="handleBackClick" />
     <FileExplorerGrid
-      ref="fileExplorerGrid"
-      :current-directories="currentDirectories"
-      :previous-directories="previousDirectories"
+      :current-directories="currentItems"
+      :previous-directories="previousItems"
       :ray-db="rayDb!"
-      :header-events="headerEvents"
       @item-event:dbl-click="onDblClickItem"
-      @add-new-directory="toggleModal"
+      @add-new-directory="toggleAddNewItemModal"
     />
   </div>
 </template>

@@ -7,7 +7,7 @@ import { useSvgByFileNameAndDirectory } from '@/composables/useSvgByFileNameAndD
 import type { ApplicationItem } from '@/types/ApplicationItem.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import {
-  fileSystemLookupChildren,
+  fileSystemLookup,
   insertItemIntoFileSystem
 } from '@/composables/useIndexedDbHelper.ts';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
@@ -45,7 +45,7 @@ export const useFileStore = defineStore('file', () => {
         itemArray.push(objectItem);
       } else {
         await rayDb.insertOne<Item>('files', objectItem);
-        const parentId = await fileSystemLookupChildren(rayDb, `${useFileSystemStore().rootDirectory}/Applications`)
+        const parentId = await fileSystemLookup(rayDb, `${useFileSystemStore().rootDirectory}/Applications`)
           .then(value => value?.parent.id);
 
         if (parentId) {
