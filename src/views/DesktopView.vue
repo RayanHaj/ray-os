@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import GridMain from '@/components/GridMain.vue';
 import TaskbarMain from '@/components/TaskbarMain.vue';
-import { type Component, type ComputedRef, onMounted, ref, shallowRef } from 'vue';
+import { type Component, type ComputedRef, ref, shallowRef } from 'vue';
 import WindowMain from '@/components/WindowMain.vue';
 import type { WindowFlatReference } from '@/types/WindowFlatReference.ts';
 import { useFlatOpenWindowsReferencesFull } from '@/composables/useFlatOpenWindowsReferencesFull.ts';
@@ -13,6 +13,7 @@ import PaintMain from '@/components/applications/paint/PaintMain.vue';
 import FileExplorerMain from '@/components/applications/fileExplorer/FileExplorerMain.vue';
 import DesktopSnapLayout from '@/components/DesktopSnapLayout.vue';
 import ContextMenu from '@/components/ContextMenu.vue';
+import SereneSoundsMain from '@/components/applications/sereneSounds/SereneSoundsMain.vue';
 import { useContextMenuStore } from '@/stores/contextMenu.ts';
 import { useOnOuterClickCloseContextMenu } from '@/composables/useOnOuterClickCloseContextMenu.ts';
 
@@ -21,6 +22,7 @@ const windowContentComponents = shallowRef<{ [componentName: string]: Component 
   calculator: CalculatorMain,
   paint: PaintMain,
   fileExplorer: FileExplorerMain,
+  sereneSounds: SereneSoundsMain
 });
 
 const references: ComputedRef<WindowFlatReference[]> = useFlatOpenWindowsReferencesFull();

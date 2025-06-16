@@ -3,31 +3,20 @@
     :width="customWidth"
     :height="customHeight"
     xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 1664 1664"
+    viewBox="0 0 24 24"
+    :fill="customColor"
+    :style="{ paddingTop: '5px' }"
   >
     <path
       :fill="customColor"
-      fill-rule="evenodd"
-      d="M1152 704q0-185-131.5-316.5T704 256T387.5 387.5T256 704t131.5 316.5T704 1152t316.5-131.5T1152 704zm512 832q0 52-38 90t-90 38q-54 0-90-38l-343-342q-179 124-399 124q-143 0-273.5-55.5t-225-150t-150-225T0 704t55.5-273.5t150-225t225-150T704 0t273.5 55.5t225 150t150 225T1408 704q0 220-124 399l343 343q37 37 37 90z"
+      d="M12.5 12.5H20v5.885q0 .666-.475 1.14q-.474.475-1.14.475H12.5v-7.5Zm0-1V4h5.885q.666 0 1.14.475q.475.474.475 1.14V11.5h-7.5Zm-1 0H4V5.615q0-.666.475-1.14Q4.949 4 5.615 4H11.5v7.5Zm0 1V20H5.615q-.666 0-1.14-.475Q4 19.051 4 18.385V12.5h7.5Z"
     />
   </svg>
 </template>
 <script setup lang="ts">
 defineProps({
-  customWidth: {
-    type: Number,
-    required: false,
-    default: 20,
-  },
-  customHeight: {
-    type: Number,
-    required: false,
-    default: 20,
-  },
-  customColor: {
-    type: String,
-    required: false,
-    default: 'var(--svg-color)',
-  },
+  customWidth: { type: Number, required: false, default: 20 },
+  customHeight: { type: Number, required: false, default: 20 },
+  customColor: { type: String, required: false, default: 'var(--svg-color)' },
 });
 </script>

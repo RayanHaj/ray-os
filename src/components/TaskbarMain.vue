@@ -2,28 +2,35 @@
 import { useTaskbarStore } from '@/stores/taskbar.ts';
 import TaskbarTile from '@/components/TaskbarTile.vue';
 import { useDateTime } from '../composables/UseDateTime.ts';
-import { type Component, onBeforeMount, ref, shallowRef } from 'vue';
+import { type Component, onBeforeMount, shallowRef } from 'vue';
 import { useSvgByFileNameAndDirectory } from '@/composables/useSvgByFileNameAndDirectory.ts';
 import StartMenuMain from '@/components/StartMenuMain.vue';
+import { useStartMenuStore } from '@/stores/startMenu.ts';
 
 const taskbarStore = useTaskbarStore();
 const taskbarHeight = taskbarStore.taskbarHeight;
 const { time } = useDateTime();
 
-const openStartMenu = ref(false);
-
 const searchSvg = shallowRef<Component | undefined>();
 onBeforeMount(async () => {
   searchSvg.value = (await useSvgByFileNameAndDirectory('ui', 'Search')) ?? undefined;
 });
+
+const startMenuStore = useStartMenuStore();
 </script>
 
 <template>
-  <StartMenuMain v-if="openStartMenu" />
+  <StartMenuMain v-show="startMenuStore.isShown()" />
   <div class="taskbar" :style="{ height: `${taskbarHeight}px` }">
     <div class="left-side">
-      <button type="button" class="search-button" @click="openStartMenu = !openStartMenu">
-        <component :is="searchSvg" :custom-width="40" :custom-height="40" />
+      <button type="button"
+              class="taskbar-search-button"
+              @click="startMenuStore.show()"
+              :style="{
+                backgroundColor: startMenuStore.isShown() ? 'var(--button-hover-color)' : ''
+              }"
+      >
+        <component :is="searchSvg" :custom-width="55" :custom-height="55" />
       </button>
     </div>
     <div class="middle">
@@ -68,7 +75,7 @@ onBeforeMount(async () => {
   display: flex;
 }
 
-.search-button {
+.taskbar-search-button {
   background: none;
   border: none;
   width: 60px;
@@ -76,7 +83,7 @@ onBeforeMount(async () => {
   border-radius: 10px;
 }
 
-.search-button:hover {
+.taskbar-search-button:hover {
   background: var(--button-hover-color);
 }
 

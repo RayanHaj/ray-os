@@ -62,9 +62,8 @@ function handleBackClick() {
 }
 
 async function onDblClickItem(item: FileSystemItem & { type: string }) {
-  previousItems.value.push(currentItems.value);
-
   if (item.directory) {
+    previousItems.value.push(currentItems.value);
     await updateCurrentItems(`${currentPath.value.join('/')}/${item.directory.name}`);
     currentPath.value.push(item.directory.name);
   } else if (item.file) {
@@ -117,6 +116,7 @@ async function handleModalInput(input: string) {
     <FileExplorerGrid
       :current-directories="currentItems"
       :previous-directories="previousItems"
+      :current-path="currentPath"
       :ray-db="rayDb!"
       @item-event:dbl-click="onDblClickItem"
       @add-new-directory="toggleAddNewItemModal"

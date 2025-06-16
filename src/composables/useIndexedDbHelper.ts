@@ -70,7 +70,7 @@ export async function fileSystemLookup(rayDb: RayDb, path: string) {
 
   pathArray.splice(0, 1);
 
-  const value = await traversePath(rayDb, startPoint, pathArray);
+  const value = await getFileSystemItem(rayDb, startPoint, pathArray);
   if (value && value.directory) {
     if (value.directory.children.length === 0) {
       return { parent: value, children: [] };
@@ -96,7 +96,7 @@ export async function fileSystemLookup(rayDb: RayDb, path: string) {
  * @param pathArray
  * @returns The FileSystemItem found at the end of the path, or undefined if not found.
  */
-async function traversePath(rayDb: RayDb, startItem: FileSystemItem, pathArray: string[]) {
+export async function getFileSystemItem(rayDb: RayDb, startItem: FileSystemItem, pathArray: string[]) {
   if (pathArray.length === 0) {
     return startItem;
   }
@@ -112,7 +112,36 @@ async function traversePath(rayDb: RayDb, startItem: FileSystemItem, pathArray: 
     currentItem = await rayDb.findOne<FileSystemItem>('fileSystem', 'id', child);
     if (currentItem && (currentItem.directory?.name === nextPathName || currentItem.file?.name === nextPathName)) {
       pathArray.shift();
-      return await traversePath(rayDb, currentItem, pathArray);
+      return await getFileSystemItem(rayDb, currentItem, pathArray);
+    }
+  }
+}
+
+export async function deleteFileSystemItem(rayDb: RayDb, id: number) {
+  const parent: FileSystemItem = await rayDb.findOne<FileSystemItem>('fileSystem', 'id', id);
+  if (!parent) {
+    return;
+  }
+
+  if (parent.file) {
+    await rayDb.deleteOne('fileSystem', parent.file.id);
+    await rayDb.deleteOne('files', parent.file.id);
+    return;
+  }
+
+  if (parent.directory && parent.id) {
+    await rayDb.deleteOne('fileSystem', parent.id);
+
+    let currentItem: FileSystemItem;
+    for (const child of parent.directory.children) {
+      currentItem = await rayDb.findOne<FileSystemItem>('fileSystem', 'id', child);
+      if (currentItem.id)
+        if (currentItem.directory) {
+          await deleteFileSystemItem(rayDb, currentItem.id);
+        } else if (currentItem.file) {
+          await rayDb.deleteOne('fileSystem', currentItem.id);
+          await rayDb.deleteOne('files', currentItem.id);
+        }
     }
   }
 }

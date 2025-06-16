@@ -8,20 +8,18 @@ import { useFileSystemStore } from '@/stores/fileSystem.ts';
 import type { SecondaryActionsContextMenu } from '@/types/SecondaryActionsContextMenu.ts';
 import type { PrimaryActionsContextMenu } from '@/types/PrimaryActionsContextMenu.ts';
 import { useFileStore } from '@/stores/file.ts';
+import type { FileItem } from '@/types/FileItem.ts';
+import type { Item } from '@/types/Item.ts';
+import { deleteFileSystemItem, getFileSystemItem } from '@/composables/useIndexedDbHelper.ts';
 
 const props = defineProps({
   currentDirectories: {
     required: true,
-    type: Array as PropType<Array<FileSystemItem & { type: string }>>
+    type: Array as PropType<Array<FileSystemItem & { type: string }>>,
   },
-  previousDirectories: {
-    required: true,
-    type: Array as PropType<FileSystemItem[][]>
-  },
-  rayDb: {
-    required: true,
-    type: Object as PropType<RayDb>
-  }
+  previousDirectories: { required: true, type: Array as PropType<FileSystemItem[][]> },
+  currentPath: { required: true, type: Array as PropType<string[]> },
+  rayDb: { required: true, type: Object as PropType<RayDb> },
 });
 
 const emits = defineEmits(['itemEvent:dblClick', 'addNewDirectory']);
@@ -37,13 +35,13 @@ onBeforeMount(async () => {
 
 const primaryActionsGrid: PrimaryActionsContextMenu[] = [];
 const secondaryActionsGrid: SecondaryActionsContextMenu[] = [
-  { id: 'newDirectory', label: 'add new directory', disabled: false }
+  { id: 'newDirectory', label: 'add new directory', disabled: false },
 ];
 const actionsGrid = () => {
   return {
     newDirectory: async () => {
       emits('addNewDirectory');
-    }
+    },
   };
 };
 
@@ -57,26 +55,28 @@ const actionsGridItem = (file: FileSystemItem | null) => {
         return;
       }
 
-      if (file?.id && file.directory) {
-        await props.rayDb?.deleteOne('fileSystem', file.id);
+      if (file.directory && file.id) {
+        await deleteFileSystemItem(props.rayDb, file.id);
+      } else if (file.file) {
+        await deleteFileSystemItem(props.rayDb, file.file.id);
       }
 
       useFileSystemStore().updateFileSystem();
       useContextMenuStore().hide();
-    }
+    },
   };
 };
 
 function onRightClick(
   event: MouseEvent,
   file: FileSystemItem | null,
-  calledFrom: 'grid' | 'gridItem'
+  calledFrom: 'grid' | 'gridItem',
 ) {
   contextMenuStore.initializeContextMenu(
     calledFrom === 'grid' ? primaryActionsGrid : primaryActionsGridItem,
     calledFrom === 'grid' ? secondaryActionsGrid : secondaryActionsGridItem,
     { left: event.clientX, top: event.clientY },
-    calledFrom === 'grid' ? actionsGrid() : actionsGridItem(file)
+    calledFrom === 'grid' ? actionsGrid() : actionsGridItem(file),
   );
   contextMenuStore.show();
 }
@@ -100,6 +100,28 @@ function getSvg(fileSystemItem: FileSystemItem & { type: string }) {
     }
   }
 }
+
+async function onFileDrop(event: DragEvent) {
+  const file = event.dataTransfer?.files[0];
+  if (!file) {
+    return;
+  }
+
+  const allowedFileTypes = ['text/plain', 'image/png', 'image/jpeg'];
+  if (!allowedFileTypes.includes(file.type)) {
+    return;
+  }
+
+  const object = {
+    type: file.type,
+    name: file.name,
+    size: file.size,
+    createdAt: file.lastModified.toString(),
+    rawFile: file,
+  };
+
+  await props.rayDb.insertOne<Item>('files', { label: file.name, content: object as FileItem });
+}
 </script>
 
 <template>
@@ -107,6 +129,8 @@ function getSvg(fileSystemItem: FileSystemItem & { type: string }) {
     class="file-explorer-grid"
     ref="gridRef"
     @click.right.prevent.stop="onRightClick($event, null, 'grid')"
+    @dragover.prevent
+    @drop.prevent="onFileDrop"
   >
     <div class="grid">
       <div

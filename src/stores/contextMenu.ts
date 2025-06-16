@@ -13,6 +13,7 @@ export const useContextMenuStore = defineStore('contextMenu', () => {
 
   const watcher = ref<() => void>();
   const buttonClicked = ref<{ [button: string]: boolean }>({});
+
   function initializeContextMenu(
     primaryActions?: PrimaryActionsContextMenu[],
     secondaryActions?: SecondaryActionsContextMenu[],
@@ -59,20 +60,11 @@ export const useContextMenuStore = defineStore('contextMenu', () => {
     }
   }
 
-  function closeContextMenuOnOuterClick(target: HTMLElement) {
-    if (target.closest('.context-menu')) {
-      return;
-    }
-
-    hide();
-  }
-
   return {
     show,
     isShown,
     hide,
     updateContextMenuPosition,
-    closeContextMenuOnOuterClick,
     initializeContextMenu,
     contextMenusProperties,
     setClickedButton,
