@@ -36,6 +36,15 @@ export const useWindowStore = defineStore('window', () => {
     });
   }
 
+  function getWindowCountByName(windowName: string) {
+    const reference = openWindowsReferences.value[windowName];
+    if (!reference) {
+      return 0;
+    }
+
+    return reference.length;
+  }
+
   function setWindowMinimized(windowName: string, id: number) {
     const index = openWindowsReferences.value[windowName].findIndex(
       (reference) => reference.id === id,
@@ -96,5 +105,6 @@ export const useWindowStore = defineStore('window', () => {
     removeOpenWindowReference,
     setWindowMinimized,
     setWindowZIndexToTop,
+    getWindowCountByName
   };
 });

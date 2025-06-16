@@ -3,7 +3,8 @@ import SereneSoundsFooter from '@/components/applications/sereneSounds/SereneSou
 import { onBeforeMount, onUnmounted } from 'vue';
 import { useSereneSoundsStore } from '@/stores/sereneSounds.ts';
 import { useGetInitialSounds } from '@/composables/useGetInitialSounds.ts';
-import type { AllowedSoundNames } from '@/types/AllowedSoundNames.ts';
+import SereneSoundsCollection
+  from '@/components/applications/sereneSounds/collection/SereneSoundsCollection.vue';
 
 const sereneSoundsStore = useSereneSoundsStore();
 onBeforeMount(async () => {
@@ -13,8 +14,6 @@ onBeforeMount(async () => {
       sereneSoundsStore.sounds = initSounds;
     }
   }
-
-  await sereneSoundsStore.playSound(Object.keys(sereneSoundsStore.sounds)[0] as AllowedSoundNames);
 });
 
 onUnmounted(() => {
@@ -24,6 +23,7 @@ onUnmounted(() => {
 
 <template>
   <div class="serene-sounds-main">
+    <SereneSoundsCollection/>
     <SereneSoundsFooter />
   </div>
 </template>

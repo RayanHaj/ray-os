@@ -1,15 +1,14 @@
 <script setup lang="ts">
 import { useTaskbarStore } from '@/stores/taskbar.ts';
 import TaskbarTile from '@/components/TaskbarTile.vue';
-import { useDateTime } from '../composables/UseDateTime.ts';
 import { type Component, onBeforeMount, shallowRef } from 'vue';
 import { useSvgByFileNameAndDirectory } from '@/composables/useSvgByFileNameAndDirectory.ts';
 import StartMenuMain from '@/components/StartMenuMain.vue';
 import { useStartMenuStore } from '@/stores/startMenu.ts';
+import TimeProcessSection from '@/components/TimeProcessSection.vue';
 
 const taskbarStore = useTaskbarStore();
 const taskbarHeight = taskbarStore.taskbarHeight;
-const { time } = useDateTime();
 
 const searchSvg = shallowRef<Component | undefined>();
 onBeforeMount(async () => {
@@ -18,17 +17,15 @@ onBeforeMount(async () => {
 
 const startMenuStore = useStartMenuStore();
 </script>
-
 <template>
   <StartMenuMain v-show="startMenuStore.isShown()" />
   <div class="taskbar" :style="{ height: `${taskbarHeight}px` }">
     <div class="left-side">
-      <button type="button"
-              class="taskbar-search-button"
-              @click="startMenuStore.show()"
-              :style="{
-                backgroundColor: startMenuStore.isShown() ? 'var(--button-hover-color)' : ''
-              }"
+      <button
+        type="button"
+        class="taskbar-search-button"
+        @click="startMenuStore.show()"
+        :style="{ backgroundColor: startMenuStore.isShown() ? 'var(--button-hover-color)' : '' }"
       >
         <component :is="searchSvg" :custom-width="55" :custom-height="55" />
       </button>
@@ -43,11 +40,10 @@ const startMenuStore = useStartMenuStore();
       </div>
     </div>
     <div class="right-side">
-      {{ time }}
+      <TimeProcessSection />
     </div>
   </div>
 </template>
-
 <style scoped>
 .taskbar {
   display: flex;
@@ -90,11 +86,5 @@ const startMenuStore = useStartMenuStore();
 .left-side,
 .right-side {
   width: 20%;
-}
-
-.right-side {
-  font-size: 20px;
-  font-family: 'Courier New', sans-serif;
-  text-align: end;
 }
 </style>
