@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 
-defineProps({ title: { required: true, category: String } });
+defineProps({ title: { required: true, type: String } });
 
 const input = ref('');
 const emits = defineEmits(['modalEvent:submitClick', 'modalEvent:cancelClick']);

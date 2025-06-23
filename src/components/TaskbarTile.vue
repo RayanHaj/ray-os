@@ -11,7 +11,7 @@ const taskbarStore = useTaskbarStore();
 const props = defineProps({
   id: {
     required: true,
-    category: Number,
+    type: Number,
   },
 });
 

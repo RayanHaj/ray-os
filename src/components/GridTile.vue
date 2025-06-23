@@ -8,7 +8,7 @@ import { useWindowStore } from '@/stores/window.ts';
 
 const props = defineProps({
   position: {
-    category: Object,
+    type: Object,
     required: true,
   },
 });

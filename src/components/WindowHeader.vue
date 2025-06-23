@@ -14,7 +14,7 @@ import type { WindowFlatReference } from '@/types/WindowFlatReference.ts';
 const props = defineProps({
   reference: {
     required: true,
-    category: Object as PropType<WindowFlatReference>,
+    type: Object as PropType<WindowFlatReference>,
   },
 });
 

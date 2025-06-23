@@ -2,7 +2,7 @@
   const props = defineProps({
     text: {
       required: false,
-      category: () => String,
+      type: () => String,
       default: ''
     }
   });

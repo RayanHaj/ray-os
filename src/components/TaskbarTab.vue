@@ -12,11 +12,11 @@ type WindowReference = {
 const props = defineProps({
   windowReference: {
     required: true,
-    category: Object as PropType<WindowReference>,
+    type: Object as PropType<WindowReference>,
   },
   applicationName: {
     required: true,
-    category: String,
+    type: String,
   },
 });
 

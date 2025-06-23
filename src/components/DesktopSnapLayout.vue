@@ -4,7 +4,7 @@ import { computed, type PropType, ref, watch } from 'vue';
 const props = defineProps({
   showSnapLayout: {
     required: true,
-    category: Object as PropType<{ show: boolean; windowId: string }>,
+    type: Object as PropType<{ show: boolean; windowId: string }>,
   },
 });
 

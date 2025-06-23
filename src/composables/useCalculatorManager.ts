@@ -4,7 +4,7 @@ import type { CalculatorKey } from '@/types/CalculatorKey.ts';
 type CalculationArray = CalculatorKey[];
 
 export function useCalculatorManager() {
-  const calculationArray = ref<CalculationArray>([{ value: 0, category: 'input' }]);
+  const calculationArray = ref<CalculationArray>([{ value: 0, type: 'input' }]);
   const calculationHistory = ref<{ calculationString: string; calculationAnswer: number }[]>([]);
 
   const hasCalculated = ref(false);
@@ -89,7 +89,7 @@ export function useCalculatorManager() {
   }
 
   function emptyCalculationLists(defaultValue: boolean) {
-    calculationArray.value = defaultValue ? [{ value: 0, category: 'input' }] : [];
+    calculationArray.value = defaultValue ? [{ value: 0, type: 'input' }] : [];
   }
 
   function onTrailingNumbers(previousKey: CalculatorKey, currentKey: CalculatorKey) {
@@ -137,7 +137,7 @@ export function useCalculatorManager() {
       },
     ];
 
-    calculationArray.value = [{ value: calculationAnswer, category: 'input' }];
+    calculationArray.value = [{ value: calculationAnswer, type: 'input' }];
     hasCalculated.value = true;
     return calculationAnswer;
   }
@@ -171,7 +171,7 @@ export function useCalculatorManager() {
     }
 
     if (calculationArray.value.length === 0) {
-      calculationArray.value[0] = { value: 0, category: 'input' };
+      calculationArray.value[0] = { value: 0, type: 'input' };
     }
 
     hasCalculated.value = false;
@@ -202,14 +202,14 @@ export function useCalculatorManager() {
       const key = calculationArray.value[calculationArray.value.length - 2];
       if (key.type === 'input') {
         key.value = key.value as number;
-        pushToCalculationArray({ value: key.value / 100, category: key.type });
+        pushToCalculationArray({ value: key.value / 100, type: key.type });
         calculate();
       }
     }
   }
 
   function handleClear() {
-    calculationArray.value = [{ value: 0, category: 'input' }];
+    calculationArray.value = [{ value: 0, type: 'input' }];
   }
 
   function handleClearEntry() {
