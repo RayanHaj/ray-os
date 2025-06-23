@@ -57,6 +57,10 @@ export function useWindowPositionManager(
   function onMouseMove(event: MouseEvent) {
     event.preventDefault();
 
+    if (windowStateManager.isSnapped.value === true) {
+      windowStateManager.isSnapped.value = false;
+    }
+
     const deltaX = oldPosition.value.clientX - event.clientX;
     const deltaY = oldPosition.value.clientY - event.clientY;
 

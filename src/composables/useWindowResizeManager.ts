@@ -34,6 +34,10 @@ export function useWindowResizeManager(
   }
 
   function resizeWindow(event: MouseEvent) {
+    if (windowStateManager.isSnapped.value === true) {
+      windowStateManager.isSnapped.value = false;
+    }
+
     styles.value.transition = 'none';
     const splitValue = currentCorner.value.split(' ');
     if (splitValue.length === 1) {

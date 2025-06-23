@@ -2,16 +2,23 @@
 import SettingsSidebar from '@/components/applications/settings/SettingsSidebar.vue';
 import SettingsThemes from '@/components/applications/settings/SettingsThemes.vue';
 import { ref } from 'vue';
+import type { AllowedSettingsOptions } from '@/types/SettingsTypes.ts';
 
-const selectedOption = ref('themes');
+const selectedOption = ref<AllowedSettingsOptions>('Themes');
 </script>
 
 <template>
   <div class="settings">
     <SettingsSidebar @selected-option="selectedOption = $event" />
     <div class="selected-setting-window">
-      <h1>{{ selectedOption }}</h1>
-      <SettingsThemes v-show="selectedOption === 'themes'" />
+      <div class="option-name">
+        <h1>{{ selectedOption }}</h1>
+        <hr>
+      </div>
+      <div class="current-option-settings">
+        <SettingsThemes v-show="selectedOption === 'Themes'" />
+        
+      </div>
     </div>
   </div>
 </template>
@@ -20,7 +27,6 @@ const selectedOption = ref('themes');
 .settings {
   display: flex;
   flex-direction: row;
-  gap: 10px;
   width: 100%;
   height: calc(100% - 30px);
   color: var(--text-color);
@@ -29,5 +35,23 @@ const selectedOption = ref('themes');
   display: flex;
   gap: 15px;
   flex-direction: column;
+  width: 100%;
+}
+.option-name {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding-inline: 10px;
+}
+.option-name h1 {
+  padding-inline: 5px;
+}
+hr {
+  width: 100%;
+  border: var(--window-border-color) solid 2px;
+  border-radius: 10px;
+}
+.current-option-settings {
+  padding-inline: 15px;
 }
 </style>

@@ -82,6 +82,7 @@ watch(
     )
       return;
     windowSnappingManager.snapWindow(value.layout);
+    windowStateManager.isSnapped.value = true;
   },
 );
 
@@ -117,7 +118,9 @@ function maximizeWindow() {
     class="window"
     ref="window"
     :id="windowStateManager.constructedId"
-    :style="styles"
+    :style="{
+      ...styles,
+      borderRadius: windowStateManager.isMaximized.value || windowStateManager.isSnapped.value ? '0px' : '10px'      }"
     @mousemove="windowResizeManager.onMouseMoveWindow($event)"
     @mousedown="windowResizeManager.onMouseDownWindow()"
   >

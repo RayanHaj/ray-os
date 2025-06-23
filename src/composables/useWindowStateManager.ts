@@ -30,9 +30,10 @@ export function useWindowStateManager(styles: Ref<StyleProps>, reference: Window
     );
   });
 
+  const isSnapped = ref(false);
   const isDraggingWindow = ref(false);
 
   const constructedId = `${reference.label}-${reference.id}`;
 
-  return { windowReference, isMaximized, constructedId, isDraggingWindow };
+  return { windowReference, isMaximized, constructedId, isDraggingWindow, isSnapped };
 }

@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import type { AllowedSettingsOptions } from '@/types/SettingsTypes.ts';
 
 const emits = defineEmits(['selectedOption']);
 
-const options = ref(['themes']);
-const selectedOption = ref('themes');
+const options = ref<AllowedSettingsOptions[]>(['Themes', 'System']);
+const selectedOption = ref<AllowedSettingsOptions>('Themes');
 
-function onClickOption(option: string) {
+function onClickOption(option: AllowedSettingsOptions) {
   selectedOption.value = option;
   emits('selectedOption', selectedOption.value);
 }
