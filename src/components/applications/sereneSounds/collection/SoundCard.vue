@@ -3,10 +3,11 @@ import { onBeforeMount, type PropType, ref, shallowRef, watch } from 'vue';
 import type { AllowedSoundNames } from '@/types/AllowedSoundNames.ts';
 import { useSvgByFileNameAndDirectory } from '@/composables/useSvgByFileNameAndDirectory.ts';
 import { useSereneSoundsStore } from '@/stores/sereneSounds.ts';
+import type { AllowedSoundCategories } from '@/types/AllowedSoundCategories.ts';
 
 const props = defineProps({
   sound: {
-    type: Object as PropType<{name: AllowedSoundNames, type: string}>
+    type: Object as PropType<{name: AllowedSoundNames, category: AllowedSoundCategories}>
   }
 });
 
@@ -46,7 +47,7 @@ async function onPlay() {
 </script>
 
 <template>
-  <div :class="sound?.type" class="sound-card">
+  <div class="sound-card">
     <div class="sound-card-start">
       <div class="sound-name">{{ sound?.name }}</div>
     </div>
@@ -66,10 +67,8 @@ async function onPlay() {
     width: 250px;
     padding: 10px;
     color: var(--text-color);
-    border-radius: 10px;
-  }
-  .water {
     background-color: var(--tabs-background);
+    border-radius: 10px;
   }
   .play-sound-btn {
     display: flex;

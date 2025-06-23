@@ -15,11 +15,11 @@ import { deleteFileSystemItem, getFileSystemItem } from '@/composables/useIndexe
 const props = defineProps({
   currentDirectories: {
     required: true,
-    type: Array as PropType<Array<FileSystemItem & { type: string }>>,
+    category: Array as PropType<Array<FileSystemItem & { type: string }>>,
   },
-  previousDirectories: { required: true, type: Array as PropType<FileSystemItem[][]> },
-  currentPath: { required: true, type: Array as PropType<string[]> },
-  rayDb: { required: true, type: Object as PropType<RayDb> },
+  previousDirectories: { required: true, category: Array as PropType<FileSystemItem[][]> },
+  currentPath: { required: true, category: Array as PropType<string[]> },
+  rayDb: { required: true, category: Object as PropType<RayDb> },
 });
 
 const emits = defineEmits(['itemEvent:dblClick', 'addNewDirectory']);

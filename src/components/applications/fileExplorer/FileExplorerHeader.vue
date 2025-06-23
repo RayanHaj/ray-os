@@ -4,7 +4,7 @@ import type { PropType } from 'vue';
 defineProps({
   currentPath: {
     required: false,
-    type: Array as PropType<string[]>,
+    category: Array as PropType<string[]>,
     default: () => ['C:/'],
   },
 });

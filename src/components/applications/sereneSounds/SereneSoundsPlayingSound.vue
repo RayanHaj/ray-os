@@ -64,7 +64,7 @@ async function onPlay() {
 }
 
 .sound-name {
-  font-size: 12px;
+  font-size: 15px;
   color: var(--text-color);
 }
 

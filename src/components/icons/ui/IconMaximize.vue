@@ -15,17 +15,17 @@
 <script setup lang="ts">
 defineProps({
   customWidth: {
-    type: Number,
+    category: Number,
     required: false,
     default: 20,
   },
   customHeight: {
-    type: Number,
+    category: Number,
     required: false,
     default: 20,
   },
   customColor: {
-    type: String,
+    category: String,
     required: false,
     default: 'var(--svg-color)',
   },

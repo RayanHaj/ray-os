@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import SereneSoundsFooter from '@/components/applications/sereneSounds/SereneSoundsFooter.vue';
-import { onBeforeMount, onUnmounted } from 'vue';
+import { onBeforeMount, onUnmounted, ref } from 'vue';
 import { useSereneSoundsStore } from '@/stores/sereneSounds.ts';
 import { useGetInitialSounds } from '@/composables/useGetInitialSounds.ts';
 import SereneSoundsCollection
   from '@/components/applications/sereneSounds/collection/SereneSoundsCollection.vue';
 
 const sereneSoundsStore = useSereneSoundsStore();
+
+const loaded = ref(false);
 onBeforeMount(async () => {
   if (Object.keys(sereneSoundsStore.sounds).length === 0) {
     const initSounds = await useGetInitialSounds();
@@ -14,6 +16,8 @@ onBeforeMount(async () => {
       sereneSoundsStore.sounds = initSounds;
     }
   }
+
+  loaded.value = true;
 });
 
 onUnmounted(() => {
@@ -22,8 +26,8 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="serene-sounds-main">
-    <SereneSoundsCollection/>
+  <div class="serene-sounds-main" v-if="loaded">
+    <SereneSoundsCollection />
     <SereneSoundsFooter />
   </div>
 </template>

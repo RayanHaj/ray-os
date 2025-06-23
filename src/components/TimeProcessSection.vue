@@ -36,6 +36,7 @@ watch(
   font-family: 'Courier New', sans-serif;
   align-items: end;
   padding: 10px;
+  width: fit-content;
   border-radius: 5px;
 }
 

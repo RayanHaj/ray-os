@@ -10,35 +10,35 @@ if (!injectedCalculatorManager) {
 }
 
 const calculationGridItems: CalculatorKey[] = [
-  { visual: '%', value: '%', type: 'special' },
-  { visual: 'CE', value: 'CE', type: 'special' },
-  { visual: 'C', value: 'C', type: 'special' },
-  { visual: '⌫', value: 'back', type: 'special' },
+  { visual: '%', value: '%', category: 'special' },
+  { visual: 'CE', value: 'CE', category: 'special' },
+  { visual: 'C', value: 'C', category: 'special' },
+  { visual: '⌫', value: 'back', category: 'special' },
 
-  { visual: '1/x', value: '1/x', type: 'special' },
-  { visual: 'x²', value: 'x^2', type: 'special' },
-  { visual: '√', value: '√', type: 'special' },
-  { visual: '÷', value: '/', type: 'operator' },
+  { visual: '1/x', value: '1/x', category: 'special' },
+  { visual: 'x²', value: 'x^2', category: 'special' },
+  { visual: '√', value: '√', category: 'special' },
+  { visual: '÷', value: '/', category: 'operator' },
 
-  { visual: '7', value: 7, type: 'input' },
-  { visual: '8', value: 8, type: 'input' },
-  { visual: '9', value: 9, type: 'input' },
-  { visual: '×', value: '*', type: 'operator' },
+  { visual: '7', value: 7, category: 'input' },
+  { visual: '8', value: 8, category: 'input' },
+  { visual: '9', value: 9, category: 'input' },
+  { visual: '×', value: '*', category: 'operator' },
 
-  { visual: '4', value: 4, type: 'input' },
-  { visual: '5', value: 5, type: 'input' },
-  { visual: '6', value: 6, type: 'input' },
-  { visual: '−', value: '-', type: 'operator' },
+  { visual: '4', value: 4, category: 'input' },
+  { visual: '5', value: 5, category: 'input' },
+  { visual: '6', value: 6, category: 'input' },
+  { visual: '−', value: '-', category: 'operator' },
 
-  { visual: '1', value: 1, type: 'input' },
-  { visual: '2', value: 2, type: 'input' },
-  { visual: '3', value: 3, type: 'input' },
-  { visual: '+', value: '+', type: 'operator' },
+  { visual: '1', value: 1, category: 'input' },
+  { visual: '2', value: 2, category: 'input' },
+  { visual: '3', value: 3, category: 'input' },
+  { visual: '+', value: '+', category: 'operator' },
 
-  { visual: '+/−', value: '+/-', type: 'special' },
-  { visual: '0', value: 0, type: 'input' },
-  { visual: '.', value: '.', type: 'input' },
-  { visual: '=', value: '=', type: 'special' },
+  { visual: '+/−', value: '+/-', category: 'special' },
+  { visual: '0', value: 0, category: 'input' },
+  { visual: '.', value: '.', category: 'input' },
+  { visual: '=', value: '=', category: 'special' },
 ];
 
 const calculatorManager = injectedCalculatorManager;
@@ -48,7 +48,7 @@ function onClickGridItem(key: CalculatorKey) {
     return;
   }
 
-  calculatorManager.pushToCalculationArray({ value: key.value, type: key.type });
+  calculatorManager.pushToCalculationArray({ value: key.value, category: key.type });
 }
 </script>
 

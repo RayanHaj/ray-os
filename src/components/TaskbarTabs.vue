@@ -6,7 +6,7 @@ import TaskbarTab from '@/components/TaskbarTab.vue';
 const props = defineProps({
   applicationName: {
     required: true,
-    type: String,
+    category: String,
   },
 });
 

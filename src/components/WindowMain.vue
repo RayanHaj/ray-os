@@ -13,15 +13,15 @@ import type { WindowStyleObject } from '@/types/WindowStyleObject.ts';
 const props = defineProps({
   reference: {
     required: true,
-    type: Object as PropType<WindowFlatReference>,
+    category: Object as PropType<WindowFlatReference>,
   },
   windowContentComponent: {
     required: true,
-    type: Object as PropType<Component>,
+    category: Object as PropType<Component>,
   },
   selectedLayout: {
     required: true,
-    type: Object as PropType<{ layout: string; windowId: string }>,
+    category: Object as PropType<{ layout: string; windowId: string }>,
   },
 });
 

@@ -5,7 +5,7 @@ import type { useCalculatorManager } from '@/composables/useCalculatorManager.ts
 defineProps({
   isToggled: {
     required: true,
-    type: Boolean,
+    category: Boolean,
     default: false,
   },
 });

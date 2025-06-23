@@ -87,4 +87,10 @@ const startMenuStore = useStartMenuStore();
 .right-side {
   width: 20%;
 }
+
+.right-side {
+  display: flex;
+  flex-direction: row;
+  justify-content: end;
+}
 </style>
