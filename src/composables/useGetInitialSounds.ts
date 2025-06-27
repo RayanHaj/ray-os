@@ -4,13 +4,12 @@ import { useGetAudioForSereneSounds } from '@/composables/useGetAudioForSereneSo
 import type { AllowedSoundCategories } from '@/types/AllowedSoundCategories.ts';
 
 export async function useGetInitialSounds() {
-  const soundNames: { name: AllowedSoundNames, category: AllowedSoundCategories }[] =
-    [
-      {name: 'heavy rain loop', category: 'water'},
-      {name: 'heavy rain window loop', category: 'water'},
-      {name: 'ocean waves', category: 'water'},
-      {name: "crackling fireplace", category: 'fire'}
-    ]
+  const soundNames: { name: AllowedSoundNames; category: AllowedSoundCategories }[] = [
+    { name: 'heavy rain loop', category: 'water' },
+    { name: 'heavy rain window loop', category: 'water' },
+    { name: 'ocean waves', category: 'water' },
+    { name: 'crackling fireplace', category: 'fire' },
+  ];
 
   const object: Sounds = {} as Sounds;
   for (const sound of soundNames) {
@@ -19,10 +18,7 @@ export async function useGetInitialSounds() {
       return;
     }
 
-    object[sound.name] = {
-      category: sound.category,
-      audio: audio
-    }
+    object[sound.name] = { category: sound.category, audio: audio };
   }
 
   return object;

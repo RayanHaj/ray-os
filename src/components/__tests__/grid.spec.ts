@@ -5,11 +5,7 @@ import { test, expect } from 'vitest';
 function generateTiles(count: number): Item[] {
   const tiles = [];
   for (let i = 1; i < count; i++) {
-    tiles.push({
-      id: i,
-      iconUrl: `@/assets/icons/icon${i}.png`,
-      label: `app${i}`,
-    });
+    tiles.push({ id: i, iconUrl: `@/assets/icons/icon${i}.png`, label: `app${i}` });
   }
 
   return tiles;

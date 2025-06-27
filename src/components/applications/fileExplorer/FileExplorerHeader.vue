@@ -2,11 +2,7 @@
 import type { PropType } from 'vue';
 
 defineProps({
-  currentPath: {
-    required: false,
-    type: Array as PropType<string[]>,
-    default: () => ['C:/'],
-  },
+  currentPath: { required: false, type: Array as PropType<string[]>, default: () => ['C:/'] },
 });
 const emits = defineEmits(['header-event:back']);
 </script>
@@ -31,7 +27,8 @@ const emits = defineEmits(['header-event:back']);
   color: var(--text-color);
 }
 
-.left-side, .back-button {
+.left-side,
+.back-button {
   width: 150px;
 }
 

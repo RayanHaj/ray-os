@@ -22,7 +22,7 @@ const windowContentComponents = shallowRef<{ [componentName: string]: Component 
   calculator: CalculatorMain,
   paint: PaintMain,
   fileExplorer: FileExplorerMain,
-  sereneSounds: SereneSoundsMain
+  sereneSounds: SereneSoundsMain,
 });
 
 const references: ComputedRef<WindowFlatReference[]> = useFlatOpenWindowsReferencesFull();

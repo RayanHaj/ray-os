@@ -1,24 +1,18 @@
 <script setup lang="ts">
-import { useFileStore } from '@/stores/file.ts';
 import { useTaskbarStore } from '@/stores/taskbar.ts';
 import { useWindowStore } from '@/stores/window.ts';
-import { type Component, computed, onBeforeMount, ref } from 'vue';
+import { type Component, computed, onBeforeMount, ref, shallowRef } from 'vue';
 import type { Item } from '@/types/Item.ts';
 import TaskbarTabs from '@/components/TaskbarTabs.vue';
+import { useSvgOrFallback } from '@/composables/useSvgOrFallback.ts';
 
-const fileStore = useFileStore();
 const taskbarStore = useTaskbarStore();
-const props = defineProps({
-  id: {
-    required: true,
-    type: Number,
-  },
-});
+const props = defineProps({ id: { required: true, type: Number } });
 
 const isHoveringOnTile = ref(false);
 
 const item = ref<Item>();
-const svg = ref<Component>();
+const svg = shallowRef<Component>();
 onBeforeMount(() => {
   updateTile();
 });
@@ -27,7 +21,7 @@ function updateTile() {
   item.value = taskbarStore.items.find((item) => item.content.id === props.id);
 
   if (item.value && item.value.content.type === 'application' && item.value.label !== '') {
-    svg.value = fileStore.fileSvgs[item.value.label];
+    svg.value = useSvgOrFallback(item.value.label);
   }
 }
 

@@ -1,0 +1,21 @@
+export const allSvgs = [
+  'Close',
+  'Copy',
+  'Delete',
+  'Directory',
+  'Maximize',
+  'Minimize',
+  'Paste',
+  'Pause',
+  'Play',
+  'Search',
+  'TextFile',
+  'Calculator',
+  'FileExplorer',
+  'SereneSounds',
+  'Terminal',
+  'Paint',
+  'Portfolio',
+  'Settings',
+] as const;
+export type AllSvgs = (typeof allSvgs)[number];

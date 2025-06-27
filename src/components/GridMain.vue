@@ -21,9 +21,7 @@ function onRightClick(event: MouseEvent) {
       { id: 'properties', label: 'open properties', disabled: false },
     ],
     { left: event.clientX, top: event.clientY },
-    {
-      Copy: () => {},
-    },
+    { Copy: () => {} },
   );
 
   contextMenuStore.show();

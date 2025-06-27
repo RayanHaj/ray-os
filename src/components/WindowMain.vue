@@ -11,14 +11,8 @@ import { useWindowSnappingManager } from '@/composables/useWindowSnappingManager
 import type { WindowStyleObject } from '@/types/WindowStyleObject.ts';
 
 const props = defineProps({
-  reference: {
-    required: true,
-    type: Object as PropType<WindowFlatReference>,
-  },
-  windowContentComponent: {
-    required: true,
-    type: Object as PropType<Component>,
-  },
+  reference: { required: true, type: Object as PropType<WindowFlatReference> },
+  windowContentComponent: { required: true, type: Object as PropType<Component> },
   selectedLayout: {
     required: true,
     type: Object as PropType<{ layout: string; windowId: string }>,
@@ -38,12 +32,7 @@ const styles: Ref<WindowStyleObject> = ref({
   transition: 'width 0.5s, height 0.5s, left 0.5s, top 0.5s',
 });
 
-const cachedStyles = ref({
-  left: '0',
-  top: '0',
-  width: '50%',
-  height: '50%',
-});
+const cachedStyles = ref({ left: '0', top: '0', width: '50%', height: '50%' });
 
 const emits = defineEmits(['showSnapLayout']);
 watch(
@@ -55,10 +44,7 @@ watch(
   },
 );
 
-const oldPosition = ref({
-  clientX: 0,
-  clientY: 0,
-});
+const oldPosition = ref({ clientX: 0, clientY: 0 });
 
 const window = ref();
 const windowStateManager = useWindowStateManager(styles, props.reference);
@@ -120,7 +106,9 @@ function maximizeWindow() {
     :id="windowStateManager.constructedId"
     :style="{
       ...styles,
-      borderRadius: windowStateManager.isMaximized.value || windowStateManager.isSnapped.value ? '0px' : '10px'      }"
+      borderRadius:
+        windowStateManager.isMaximized.value || windowStateManager.isSnapped.value ? '0px' : '10px',
+    }"
     @mousemove="windowResizeManager.onMouseMoveWindow($event)"
     @mousedown="windowResizeManager.onMouseDownWindow()"
   >

@@ -1,51 +1,9 @@
 [
-  {
-    "label": "File Explorer",
-    "content": {
-      "id": 1,
-      "type": "application"
-    }
-  },
-  {
-    "label": "Calculator",
-    "content": {
-      "id": 2,
-      "type": "application"
-    }
-  },
-  {
-    "label": "Serene Sounds",
-    "content": {
-      "id": 3,
-      "type": "application"
-    }
-  },
-  {
-    "label": "Settings",
-    "content": {
-      "id": 4,
-      "type": "application"
-    }
-  },
-  {
-    "label": "Terminal",
-    "content": {
-      "id": 5,
-      "type": "application"
-    }
-  },
-  {
-    "label": "Paint",
-    "content": {
-      "id": 6,
-      "type": "application"
-    }
-  },
-  {
-    "label": "Portfolio",
-    "content": {
-      "id": 7,
-      "type": "application"
-    }
-  }
+  { "label": "File Explorer", "content": { "id": 1, "type": "application" } },
+  { "label": "Calculator", "content": { "id": 2, "type": "application" } },
+  { "label": "Serene Sounds", "content": { "id": 3, "type": "application" } },
+  { "label": "Settings", "content": { "id": 4, "type": "application" } },
+  { "label": "Terminal", "content": { "id": 5, "type": "application" } },
+  { "label": "Paint", "content": { "id": 6, "type": "application" } },
+  { "label": "Portfolio", "content": { "id": 7, "type": "application" } }
 ]

@@ -2,10 +2,7 @@
 import { computed, type PropType, ref, watch } from 'vue';
 
 const props = defineProps({
-  showSnapLayout: {
-    required: true,
-    type: Object as PropType<{ show: boolean; windowId: string }>,
-  },
+  showSnapLayout: { required: true, type: Object as PropType<{ show: boolean; windowId: string }> },
 });
 
 const emits = defineEmits(['selectedLayout']);

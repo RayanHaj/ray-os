@@ -11,7 +11,7 @@ import type {
 const primaryActionsSvgs = shallowRef<Record<string, Component>>({});
 onBeforeMount(async () => {
   for (const action of ['Copy', 'Paste', 'Delete', 'Rename'] as AllPrimaryActionsContextMenu) {
-    const svg = await useSvgByFileNameAndDirectory('ui', action);
+    const svg = await useSvgByFileNameAndDirectory(action);
     if (svg) {
       primaryActionsSvgs.value[action] = svg;
     }

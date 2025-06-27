@@ -1,1 +1,1 @@
-export type AllowedSoundCategories = 'water' | 'fire'
+export type AllowedSoundCategories = 'water' | 'fire';

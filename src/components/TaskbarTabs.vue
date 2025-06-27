@@ -3,12 +3,7 @@ import { computed, onBeforeUnmount } from 'vue';
 import { useWindowStore } from '@/stores/window.ts';
 import TaskbarTab from '@/components/TaskbarTab.vue';
 
-const props = defineProps({
-  applicationName: {
-    required: true,
-    type: String,
-  },
-});
+const props = defineProps({ applicationName: { required: true, type: String } });
 
 const emits = defineEmits(['mouseLeft', 'mouseEntered', 'tabsUnmounted']);
 

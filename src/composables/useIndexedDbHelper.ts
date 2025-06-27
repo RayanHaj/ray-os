@@ -6,10 +6,7 @@ import { useGetRootDirectory } from '@/composables/useGetRootDirectory.ts';
 export async function insertItemIntoFileSystem(
   rayDb: RayDb,
   parents: number[],
-  item: {
-    file?: { name: string; id: number };
-    directory?: { name: string; children: number[] };
-  },
+  item: { file?: { name: string; id: number }; directory?: { name: string; children: number[] } },
 ) {
   const foundItems = await rayDb.findAll<FileSystemItem>('fileSystem');
   if (
@@ -96,7 +93,11 @@ export async function fileSystemLookup(rayDb: RayDb, path: string) {
  * @param pathArray
  * @returns The FileSystemItem found at the end of the path, or undefined if not found.
  */
-export async function getFileSystemItem(rayDb: RayDb, startItem: FileSystemItem, pathArray: string[]) {
+export async function getFileSystemItem(
+  rayDb: RayDb,
+  startItem: FileSystemItem,
+  pathArray: string[],
+) {
   if (pathArray.length === 0) {
     return startItem;
   }
@@ -110,7 +111,10 @@ export async function getFileSystemItem(rayDb: RayDb, startItem: FileSystemItem,
 
   for (const child of startItem.directory.children) {
     currentItem = await rayDb.findOne<FileSystemItem>('fileSystem', 'id', child);
-    if (currentItem && (currentItem.directory?.name === nextPathName || currentItem.file?.name === nextPathName)) {
+    if (
+      currentItem &&
+      (currentItem.directory?.name === nextPathName || currentItem.file?.name === nextPathName)
+    ) {
       pathArray.shift();
       return await getFileSystemItem(rayDb, currentItem, pathArray);
     }

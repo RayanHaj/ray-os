@@ -1,16 +1,14 @@
 <script setup lang="ts">
 import type { FileSystemItem } from '@/types/FileSystemItem.ts';
 import { type Component, onBeforeMount, type PropType, shallowRef } from 'vue';
-import { useSvgByFileNameAndDirectory } from '@/composables/useSvgByFileNameAndDirectory.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import { useContextMenuStore } from '@/stores/contextMenu.ts';
-import { useFileSystemStore } from '@/stores/fileSystem.ts';
 import type { SecondaryActionsContextMenu } from '@/types/SecondaryActionsContextMenu.ts';
 import type { PrimaryActionsContextMenu } from '@/types/PrimaryActionsContextMenu.ts';
-import { useFileStore } from '@/stores/file.ts';
 import type { FileItem } from '@/types/FileItem.ts';
 import type { Item } from '@/types/Item.ts';
-import { deleteFileSystemItem, getFileSystemItem } from '@/composables/useIndexedDbHelper.ts';
+import { useDeleteFIleSystemItem } from '@/composables/useDeleteFIleSystemItem.ts';
+import { useSvgOrFallback } from '@/composables/useSvgOrFallback.ts';
 
 const props = defineProps({
   currentDirectories: {
@@ -24,13 +22,13 @@ const props = defineProps({
 
 const emits = defineEmits(['itemEvent:dblClick', 'addNewDirectory']);
 
-const directorySvg = shallowRef<Component | undefined>();
-const fileSvg = shallowRef<Component | undefined>();
+const directorySvg = shallowRef<Component | null>();
+const fileSvg = shallowRef<Component | null>();
 
 const contextMenuStore = useContextMenuStore();
 onBeforeMount(async () => {
-  directorySvg.value = (await useSvgByFileNameAndDirectory('ui', 'Directory')) ?? undefined;
-  fileSvg.value = (await useSvgByFileNameAndDirectory('ui', 'TextFile')) ?? undefined;
+  directorySvg.value = useSvgOrFallback('Directory');
+  fileSvg.value = useSvgOrFallback('TextFile');
 });
 
 const primaryActionsGrid: PrimaryActionsContextMenu[] = [];
@@ -47,22 +45,14 @@ const actionsGrid = () => {
 
 const primaryActionsGridItem: PrimaryActionsContextMenu[] = ['Copy', 'Paste', 'Delete'];
 const secondaryActionsGridItem: SecondaryActionsContextMenu[] = [];
-const actionsGridItem = (file: FileSystemItem | null) => {
+const actionsGridItem = (item: FileSystemItem | null) => {
   return {
     Copy: async () => {},
     Delete: async () => {
-      if (!file) {
-        return;
+      if (item) {
+        await useDeleteFIleSystemItem(props.rayDb, item);
+        useContextMenuStore().hide();
       }
-
-      if (file.directory && file.id) {
-        await deleteFileSystemItem(props.rayDb, file.id);
-      } else if (file.file) {
-        await deleteFileSystemItem(props.rayDb, file.file.id);
-      }
-
-      useFileSystemStore().updateFileSystem();
-      useContextMenuStore().hide();
     },
   };
 };
@@ -84,10 +74,11 @@ function onRightClick(
 function getSvg(fileSystemItem: FileSystemItem & { type: string }) {
   switch (fileSystemItem.type) {
     case 'application': {
-      if (!fileSystemItem.file?.name) {
+      if (fileSystemItem.file?.name) {
+        return useSvgOrFallback(fileSystemItem.file.name);
+      } else {
         return fileSvg.value;
       }
-      return useFileStore().fileSvgs[fileSystemItem.file?.name];
     }
     case 'file': {
       return fileSvg.value;

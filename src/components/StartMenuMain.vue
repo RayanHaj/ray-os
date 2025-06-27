@@ -5,17 +5,18 @@ const taskbarStore = useTaskbarStore();
 </script>
 
 <template>
-  <div class="start-menu-wrapper" :style="{
-    bottom: `${taskbarStore.taskbarHeight}px`,
-    height: `calc(100% - ${taskbarStore.taskbarHeight}px)`
-  }">
+  <div
+    class="start-menu-wrapper"
+    :style="{
+      bottom: `${taskbarStore.taskbarHeight}px`,
+      height: `calc(100% - ${taskbarStore.taskbarHeight}px)`,
+    }"
+  >
     <div class="start-menu">
       <div class="start-menu-header">
-        <input type="text" placeholder="search">
+        <input type="text" placeholder="search" />
       </div>
-      <div class="start-menu-footer">
-
-      </div>
+      <div class="start-menu-footer"></div>
     </div>
   </div>
 </template>
@@ -39,7 +40,8 @@ const taskbarStore = useTaskbarStore();
   border-radius: 15px;
 }
 
-.start-menu-header, .start-menu-footer {
+.start-menu-header,
+.start-menu-footer {
   display: flex;
   justify-content: center;
   align-items: center;

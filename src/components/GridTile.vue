@@ -1,23 +1,17 @@
 <script setup lang="ts">
 import { useGridStore } from '@/stores/grid.ts';
-import { useFileStore } from '@/stores/file.ts';
 import { useTileCountGrid } from '@/composables/useTileCountGrid.ts';
 import { type Component, computed, onMounted, ref, shallowRef, watchEffect } from 'vue';
 import type { Item } from '@/types/Item.ts';
 import { useWindowStore } from '@/stores/window.ts';
+import { useSvgOrFallback } from '@/composables/useSvgOrFallback.ts';
 
-const props = defineProps({
-  position: {
-    type: Object,
-    required: true,
-  },
-});
+const props = defineProps({ position: { type: Object, required: true } });
 
 const tileCountVertical = useTileCountGrid().y;
 
 const windowStore = useWindowStore();
 const gridStore = useGridStore();
-const fileStore = useFileStore();
 const item = ref<Item>();
 const id = ref<number>(0);
 const svg = shallowRef<Component>();
@@ -26,7 +20,7 @@ function updateTile() {
   id.value = (props.position.x - 1) * tileCountVertical.value + props.position.y;
   item.value = gridStore.items.find((tile) => tile.content.id === id.value);
   if (item.value && item.value.content.type === 'application' && item.value.label !== '') {
-    svg.value = fileStore.fileSvgs[item.value.label];
+    svg.value = useSvgOrFallback(item.value.label);
   }
 }
 
@@ -37,8 +31,6 @@ onMounted(() => {
 watchEffect(() => {
   updateTile();
 });
-
-const getSvg = computed(() => svg.value);
 
 const tileContainsApplication = computed(() => {
   if (!item.value) {
@@ -53,10 +45,7 @@ const tileContainsApplication = computed(() => {
 
   return item.value.content.type === 'application';
 });
-const tileStyling = {
-  width: `${gridStore.tileWidth}px`,
-  height: `${gridStore.tileHeight}px`,
-};
+const tileStyling = { width: `${gridStore.tileWidth}px`, height: `${gridStore.tileHeight}px` };
 
 function onDragStart(event: DragEvent) {
   const id = item.value?.content.id;
@@ -115,7 +104,7 @@ function openWindow() {
     @dblclick="openWindow"
   >
     <div class="content" v-if="item">
-      <component v-if="svg" :is="getSvg" :custom-width="50" :custom-height="50" />
+      <component v-if="svg" :is="svg" :custom-width="50" :custom-height="50" />
       <div>{{ item.label }}</div>
     </div>
   </div>

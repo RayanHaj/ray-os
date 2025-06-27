@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { useSereneSoundsStore } from '@/stores/sereneSounds.ts';
-import SoundCardsCategory
-  from '@/components/applications/sereneSounds/collection/SoundCardsCategory.vue';
+import SoundCardsCategory from '@/components/applications/sereneSounds/collection/SoundCardsCategory.vue';
 import { onBeforeMount, ref } from 'vue';
 import { useGetCategoriesFromSounds } from '@/composables/useGetCategoriesFromSounds.ts';
 import type { AllowedSoundCategories } from '@/types/AllowedSoundCategories.ts';
 
 const sereneSoundsStore = useSereneSoundsStore();
-const categories = ref<AllowedSoundCategories[]>(useGetCategoriesFromSounds(sereneSoundsStore.sounds));
+const categories = ref<AllowedSoundCategories[]>(
+  useGetCategoriesFromSounds(sereneSoundsStore.sounds),
+);
 onBeforeMount(() => {
   categories.value = useGetCategoriesFromSounds(sereneSoundsStore.sounds);
 });
@@ -15,7 +16,7 @@ onBeforeMount(() => {
 
 <template>
   <div class="serene-sounds-collection">
-    <SoundCardsCategory v-for="category of categories" :key="category" :category="category"/>
+    <SoundCardsCategory v-for="category of categories" :key="category" :category="category" />
   </div>
 </template>
 

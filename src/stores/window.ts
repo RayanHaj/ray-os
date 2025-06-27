@@ -3,9 +3,7 @@ import { ref } from 'vue';
 import type { WindowReference } from '@/types/WindowReference.ts';
 import type { WindowFlatReference } from '@/types/WindowFlatReference.ts';
 
-type WindowReferences = {
-  [applicationName: string]: WindowReference[];
-};
+type WindowReferences = { [applicationName: string]: WindowReference[] };
 
 export const useWindowStore = defineStore('window', () => {
   const openWindowsReferences = ref<WindowReferences>({});
@@ -105,6 +103,6 @@ export const useWindowStore = defineStore('window', () => {
     removeOpenWindowReference,
     setWindowMinimized,
     setWindowZIndexToTop,
-    getWindowCountByName
+    getWindowCountByName,
   };
 });

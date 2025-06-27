@@ -8,20 +8,17 @@ import {
   ref,
   shallowRef,
 } from 'vue';
-import { useSvgByFileNameAndDirectory } from '@/composables/useSvgByFileNameAndDirectory.ts';
 import type { WindowFlatReference } from '@/types/WindowFlatReference.ts';
+import { useSvgOrFallback } from '@/composables/useSvgOrFallback.ts';
 
 const props = defineProps({
-  reference: {
-    required: true,
-    type: Object as PropType<WindowFlatReference>,
-  },
+  reference: { required: true, type: Object as PropType<WindowFlatReference> },
 });
 
 const windowControlButtons = ref<{ name: string; svg: Raw<Component> | null }[]>([]);
 const svg = shallowRef<Component | null>(null);
 onBeforeMount(async () => {
-  svg.value = await useSvgByFileNameAndDirectory('applications', props.reference.label);
+  svg.value = useSvgOrFallback(props.reference.label);
 
   const buttons = [
     { name: 'Minimize', svg: null },
@@ -30,7 +27,7 @@ onBeforeMount(async () => {
   ];
   windowControlButtons.value = await Promise.all(
     buttons.map(async (button) => {
-      const svg = await useSvgByFileNameAndDirectory('ui', button.name);
+      const svg = useSvgOrFallback(button.name);
       return { name: button.name, svg: svg ? markRaw(svg) : null };
     }),
   );

@@ -1,10 +1,11 @@
 import type { Component } from 'vue';
+import type { AllSvgs } from '@/types/AllSvgs.ts';
+import { useFormatValueToIconString } from '@/composables/useFormatValueToIconString.ts';
 
-const svgs = import.meta.glob(`@/components/icons/*/*.vue`);
-export async function useSvgByFileNameAndDirectory(directory: string, name: string) {
-  const formattedName = formatName(name);
-  console.log(formattedName);
-  const path = `/src/components/icons/${directory}/${formattedName}${!formattedName.includes('.vue') ? '.vue' : ''}`;
+const svgs = import.meta.glob(`@/components/icons/*.vue`);
+export async function useSvgByFileNameAndDirectory(name: AllSvgs) {
+  const formattedName = useFormatValueToIconString(name);
+  const path = `/src/components/icons/${formattedName}${!formattedName.includes('.vue') ? '.vue' : ''}`;
 
   const loader = svgs[path];
   if (!loader) {
@@ -13,13 +14,4 @@ export async function useSvgByFileNameAndDirectory(directory: string, name: stri
 
   const module = (await loader()) as { default: Component };
   return module.default;
-}
-
-function formatName(name: string) {
-  const trimmedName = name.replace(' ', '');
-  if (name.substring(0, 4).includes('Icon')) {
-    return trimmedName;
-  }
-
-  return 'Icon'.concat(trimmedName);
 }

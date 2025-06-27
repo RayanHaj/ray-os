@@ -8,8 +8,6 @@ export function useOnOuterClickCloseContextMenu(target: HTMLElement) {
     }
   }
   if (!target.closest('.start-menu-wrapper') && !target.closest('.taskbar-search-button')) {
-    if (useStartMenuStore().isShown())
-
-    useStartMenuStore().hide();
+    if (useStartMenuStore().isShown()) useStartMenuStore().hide();
   }
 }

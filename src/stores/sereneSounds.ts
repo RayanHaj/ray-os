@@ -2,10 +2,20 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import type { AllowedSoundNames } from '@/types/AllowedSoundNames.ts';
 import type { Sounds } from '@/types/Sounds.ts';
+import { useGetInitialSounds } from '@/composables/useGetInitialSounds.ts';
 
 export const useSereneSoundsStore = defineStore('sereneSounds', () => {
   const sounds = ref<Sounds>({} as Sounds);
   const playingSounds = ref<AllowedSoundNames[]>([]);
+
+  async function initializeSounds() {
+    if (Object.keys(sounds.value).length === 0) {
+      const initSounds = await useGetInitialSounds();
+      if (initSounds) {
+        sounds.value = initSounds;
+      }
+    }
+  }
 
   async function playSound(soundName: AllowedSoundNames) {
     const audio = sounds.value[soundName].audio;
@@ -14,6 +24,7 @@ export const useSereneSoundsStore = defineStore('sereneSounds', () => {
     }
 
     playingSounds.value = [...playingSounds.value, soundName];
+    audio.loop = true;
     await audio.play();
   }
 
@@ -23,7 +34,7 @@ export const useSereneSoundsStore = defineStore('sereneSounds', () => {
       return;
     }
 
-    playingSounds.value = playingSounds.value.filter(sound => sound !== soundName);
+    playingSounds.value = playingSounds.value.filter((sound) => sound !== soundName);
     audio.pause();
   }
 
@@ -38,5 +49,17 @@ export const useSereneSoundsStore = defineStore('sereneSounds', () => {
     }
   }
 
-  return { sounds, playingSounds, playSound, pauseSound, pauseAllSounds }
+  function adjustVolume(soundName: AllowedSoundNames, volumeLevel: number) {
+    sounds.value[soundName].audio.volume = volumeLevel;
+  }
+
+  return {
+    initializeSounds,
+    sounds,
+    playingSounds,
+    playSound,
+    pauseSound,
+    pauseAllSounds,
+    adjustVolume,
+  };
 });

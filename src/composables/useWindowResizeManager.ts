@@ -163,12 +163,7 @@ export function useWindowResizeManager(
   }
 
   function maximizeWindow(
-    cachedStyles: Ref<{
-      left: string;
-      top: string;
-      width: string;
-      height: string;
-    }>,
+    cachedStyles: Ref<{ left: string; top: string; width: string; height: string }>,
   ) {
     // if already maximized, put window back into its position before it was maximized
     if (windowStateManager.isMaximized.value) {
@@ -184,12 +179,7 @@ export function useWindowResizeManager(
   }
 
   function cacheStyles(
-    cachedStyles: Ref<{
-      left: string;
-      top: string;
-      width: string;
-      height: string;
-    }>,
+    cachedStyles: Ref<{ left: string; top: string; width: string; height: string }>,
   ) {
     cachedStyles.value.height = styles.value.height;
     cachedStyles.value.width = styles.value.width;

@@ -12,7 +12,7 @@ const taskbarHeight = taskbarStore.taskbarHeight;
 
 const searchSvg = shallowRef<Component | undefined>();
 onBeforeMount(async () => {
-  searchSvg.value = (await useSvgByFileNameAndDirectory('ui', 'Search')) ?? undefined;
+  searchSvg.value = (await useSvgByFileNameAndDirectory('Search')) ?? undefined;
 });
 
 const startMenuStore = useStartMenuStore();

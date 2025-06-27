@@ -40,11 +40,5 @@ export const useGridStore = defineStore('grid', () => {
     }
   }
 
-  return {
-    items,
-    tileWidth,
-    tileHeight,
-    updateTileContent,
-    pushTile,
-  };
+  return { items, tileWidth, tileHeight, updateTileContent, pushTile };
 });

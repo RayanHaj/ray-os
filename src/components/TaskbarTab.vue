@@ -3,21 +3,11 @@ import { type Component, onBeforeMount, type PropType, shallowRef } from 'vue';
 import { useWindowStore } from '@/stores/window.ts';
 import { useSvgByFileNameAndDirectory } from '@/composables/useSvgByFileNameAndDirectory.ts';
 
-type WindowReference = {
-  id: number;
-  zIndex: number;
-  minimized: boolean;
-};
+type WindowReference = { id: number; zIndex: number; minimized: boolean };
 
 const props = defineProps({
-  windowReference: {
-    required: true,
-    type: Object as PropType<WindowReference>,
-  },
-  applicationName: {
-    required: true,
-    type: String,
-  },
+  windowReference: { required: true, type: Object as PropType<WindowReference> },
+  applicationName: { required: true, type: String },
 });
 
 const windowStore = useWindowStore();
@@ -27,7 +17,7 @@ function closeWindow() {
 
 const closeSvg = shallowRef<Component | null>(null);
 onBeforeMount(async () => {
-  closeSvg.value = await useSvgByFileNameAndDirectory('ui', 'Close');
+  closeSvg.value = await useSvgByFileNameAndDirectory('Close');
 });
 
 function onClickTab() {

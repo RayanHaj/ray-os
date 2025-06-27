@@ -9,10 +9,5 @@ export const useFileSystemStore = defineStore('fileSystem', () => {
   function updateFileSystem() {
     updateFileSystemVal.value = !updateFileSystemVal.value;
   }
-  return {
-    rootDirectory,
-    updateFileSystemVal,
-    updateFileSystem,
-    rootId
-  };
+  return { rootDirectory, updateFileSystemVal, updateFileSystem, rootId };
 });

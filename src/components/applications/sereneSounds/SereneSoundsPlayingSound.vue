@@ -11,8 +11,8 @@ const playing = ref(false);
 
 const sereneSoundsStore = useSereneSoundsStore();
 onBeforeMount(async () => {
-  playSvg.value = await useSvgByFileNameAndDirectory('ui', 'Play');
-  pauseSvg.value = await useSvgByFileNameAndDirectory('ui', 'Pause');
+  playSvg.value = await useSvgByFileNameAndDirectory('Play');
+  pauseSvg.value = await useSvgByFileNameAndDirectory('Pause');
 });
 
 watch(

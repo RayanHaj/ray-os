@@ -23,7 +23,7 @@ watch(
 <template>
   <div class="time-process-wrapper" :class="showSoundProcess ? 'show-background-color' : ''">
     {{ time }}
-    <SereneSoundsPlayingSound v-show="showSoundProcess"/>
+    <SereneSoundsPlayingSound v-show="showSoundProcess" />
   </div>
 </template>
 

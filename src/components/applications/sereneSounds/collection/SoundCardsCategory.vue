@@ -14,15 +14,17 @@ const props = defineProps({
 
 const sereneSoundsStore = useSereneSoundsStore();
 
-const filteredSounds = ref<Sounds>(useFilterSoundsByCategory(sereneSoundsStore.sounds, props.category));
+const filteredSounds = ref<Sounds>(
+  useFilterSoundsByCategory(sereneSoundsStore.sounds, props.category),
+);
 const color = useGetBackgroundColorBySoundCategory(props.category);
 </script>
 
 <template>
-  <div class="sound-card-category" :style="{
-    backgroundColor: color.background,
-    color: color.font
-  }">
+  <div
+    class="sound-card-category"
+    :style="{ backgroundColor: color.background, color: color.font }"
+  >
     <div class="label-wrapper">
       <h3>{{ category }}</h3>
     </div>

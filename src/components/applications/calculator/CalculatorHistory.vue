@@ -2,13 +2,7 @@
 import { inject, ref, watch } from 'vue';
 import type { useCalculatorManager } from '@/composables/useCalculatorManager.ts';
 
-defineProps({
-  isToggled: {
-    required: true,
-    type: Boolean,
-    default: false,
-  },
-});
+defineProps({ isToggled: { required: true, type: Boolean, default: false } });
 
 const injectedCalculatorManager =
   inject<ReturnType<typeof useCalculatorManager>>('calculatorManager');
