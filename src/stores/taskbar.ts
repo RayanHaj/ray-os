@@ -1,6 +1,6 @@
 import { ref } from 'vue';
 import { defineStore } from 'pinia';
-import type { Item } from '@/types/Item.ts';
+import type { Item } from '@/types/ItemTypes.ts';
 import { useFileStore } from '@/stores/file.ts';
 
 export const useTaskbarStore = defineStore('taskbar', () => {

@@ -1,9 +1,9 @@
 import type { Component } from 'vue';
-import type { AllSvgs } from '@/types/AllSvgs.ts';
+import type { AvailableSvgs } from '@/types/AvailableSvgs.ts';
 import { useFormatValueToIconString } from '@/composables/useFormatValueToIconString.ts';
 
 const svgs = import.meta.glob(`@/components/icons/*.vue`);
-export async function useSvgByFileNameAndDirectory(name: AllSvgs) {
+export async function useSvgByFileNameAndDirectory(name: AvailableSvgs) {
   const formattedName = useFormatValueToIconString(name);
   const path = `/src/components/icons/${formattedName}${!formattedName.includes('.vue') ? '.vue' : ''}`;
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { type Component, type PropType, type Ref, ref, watch } from 'vue';
-import type { WindowFlatReference } from '@/types/WindowFlatReference.ts';
+import type { WindowFlatReference, WindowStyleObject } from '@/types/WindowTypes.ts';
 import { useWindowStore } from '@/stores/window.ts';
 import WindowHeader from '@/components/WindowHeader.vue';
 import { useWindowStylesManager } from '@/composables/useWindowStylesManager.ts';
@@ -8,7 +8,6 @@ import { useWindowStateManager } from '@/composables/useWindowStateManager.ts';
 import { useWindowPositionManager } from '@/composables/useWindowPositionManager.ts';
 import { useWindowResizeManager } from '@/composables/useWindowResizeManager.ts';
 import { useWindowSnappingManager } from '@/composables/useWindowSnappingManager.ts';
-import type { WindowStyleObject } from '@/types/WindowStyleObject.ts';
 
 const props = defineProps({
   reference: { required: true, type: Object as PropType<WindowFlatReference> },

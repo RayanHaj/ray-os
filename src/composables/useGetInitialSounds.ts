@@ -1,7 +1,6 @@
-import type { AllowedSoundNames } from '@/types/AllowedSoundNames.ts';
-import type { Sounds } from '@/types/Sounds.ts';
+import type { Sounds } from '@/types/SoundTypes.ts';
 import { useGetAudioForSereneSounds } from '@/composables/useGetAudioForSereneSounds.ts';
-import type { AllowedSoundCategories } from '@/types/AllowedSoundCategories.ts';
+import type { AllowedSoundCategories, AllowedSoundNames } from '@/types/SereneSoundsTypes.ts';
 
 export async function useGetInitialSounds() {
   const soundNames: { name: AllowedSoundNames; category: AllowedSoundCategories }[] = [

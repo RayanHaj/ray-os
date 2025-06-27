@@ -8,7 +8,7 @@ import {
   ref,
   shallowRef,
 } from 'vue';
-import type { WindowFlatReference } from '@/types/WindowFlatReference.ts';
+import type { WindowFlatReference } from '@/types/WindowTypes.ts';
 import { useSvgOrFallback } from '@/composables/useSvgOrFallback.ts';
 
 const props = defineProps({
@@ -88,6 +88,7 @@ onBeforeMount(async () => {
   justify-content: center;
   align-items: center;
 }
+
 button {
   background-color: transparent;
   padding: 0;

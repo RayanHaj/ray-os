@@ -4,12 +4,11 @@ import { fileSystemLookup, insertItemIntoFileSystem } from '@/composables/useInd
 import type { RayDb } from 'ray-db-wrapper';
 import FileExplorerHeader from '@/components/applications/fileExplorer/FileExplorerHeader.vue';
 import FileExplorerGrid from '@/components/applications/fileExplorer/FileExplorerGrid.vue';
-import type { FileSystemItem } from '@/types/FileSystemItem.ts';
+import type { FileSystemItem, Item } from '@/types/ItemTypes.ts';
 import FileExplorerModal from '@/components/applications/fileExplorer/FileExplorerModal.vue';
 import { useContextMenuStore } from '@/stores/contextMenu.ts';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
 import { useInjectOrThrow } from '@/composables/useInjectOrThrow.ts';
-import type { Item } from '@/types/Item.ts';
 import { useWindowStore } from '@/stores/window.ts';
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');

@@ -1,13 +1,13 @@
 import { useSvgsStore } from '@/stores/svgs.ts';
-import type { AllSvgs } from '@/types/AllSvgs.ts';
+import type { AvailableSvgs } from '@/types/AvailableSvgs.ts';
 import { useSvgFallback } from '@/composables/useFallback.ts';
 
-export function useSvgOrFallback(value: string | AllSvgs) {
+export function useSvgOrFallback(value: string | AvailableSvgs) {
   const svgsStore = useSvgsStore();
   const formattedValueKey = value.charAt(0).toUpperCase() + value.slice(1).replace(' ', '');
 
   if (Object.keys(svgsStore.svgs).includes(formattedValueKey)) {
-    return svgsStore.svgs[formattedValueKey as AllSvgs];
+    return svgsStore.svgs[formattedValueKey as AvailableSvgs];
   } else {
     return useSvgFallback(formattedValueKey);
   }

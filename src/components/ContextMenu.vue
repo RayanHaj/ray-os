@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { type Component, computed, onBeforeMount, shallowRef } from 'vue';
 import { useSvgByFileNameAndDirectory } from '@/composables/useSvgByFileNameAndDirectory.ts';
-import type { SecondaryActionsContextMenu } from '@/types/SecondaryActionsContextMenu.ts';
-import { useContextMenuStore } from '@/stores/contextMenu.ts';
 import type {
+  SecondaryActionsContextMenu,
   AllPrimaryActionsContextMenu,
   PrimaryActionsContextMenu,
-} from '@/types/PrimaryActionsContextMenu.ts';
+} from '@/types/ContextMenuTypes.ts';
+import { useContextMenuStore } from '@/stores/contextMenu.ts';
 
 const primaryActionsSvgs = shallowRef<Record<string, Component>>({});
 onBeforeMount(async () => {

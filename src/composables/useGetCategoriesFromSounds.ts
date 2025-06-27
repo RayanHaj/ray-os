@@ -1,5 +1,5 @@
-import type { Sounds } from '@/types/Sounds.ts';
-import type { AllowedSoundCategories } from '@/types/AllowedSoundCategories.ts';
+import type { Sounds } from '@/types/SoundTypes.ts';
+import type { AllowedSoundCategories } from '@/types/SereneSoundsTypes.ts';
 
 export function useGetCategoriesFromSounds(sounds: Sounds) {
   return Object.entries(sounds).reduce((accumulator, value) => {

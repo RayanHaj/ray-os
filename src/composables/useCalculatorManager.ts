@@ -1,5 +1,5 @@
 import { ref } from 'vue';
-import type { CalculatorKey } from '@/types/CalculatorKey.ts';
+import type { CalculatorKey } from '@/types/CalculatorTypes.ts';
 
 type CalculationArray = CalculatorKey[];
 

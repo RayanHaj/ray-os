@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { onBeforeMount, type PropType, ref, shallowRef, watch } from 'vue';
-import type { AllowedSoundNames } from '@/types/AllowedSoundNames.ts';
 import { useSvgByFileNameAndDirectory } from '@/composables/useSvgByFileNameAndDirectory.ts';
 import { useSereneSoundsStore } from '@/stores/sereneSounds.ts';
-import type { AllowedSoundCategories } from '@/types/AllowedSoundCategories.ts';
+import type { AllowedSoundCategories, AllowedSoundNames } from '@/types/SereneSoundsTypes.ts';
 
 const props = defineProps({
   sound: {

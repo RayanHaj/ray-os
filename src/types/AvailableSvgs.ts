@@ -1,4 +1,4 @@
-export const allSvgs = [
+export const availableSvgs = [
   'Close',
   'Copy',
   'Delete',
@@ -18,4 +18,4 @@ export const allSvgs = [
   'Portfolio',
   'Settings',
 ] as const;
-export type AllSvgs = (typeof allSvgs)[number];
+export type AvailableSvgs = (typeof availableSvgs)[number];

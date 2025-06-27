@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { type PropType, ref } from 'vue';
 import { useGetBackgroundColorBySoundCategory } from '@/composables/useGetBackgroundColorBySoundCategory.ts';
-import type { AllowedSoundCategories } from '@/types/AllowedSoundCategories.ts';
-import type { Sounds } from '@/types/Sounds.ts';
+import type { AllowedSoundCategories, AllowedSoundNames } from '@/types/SereneSoundsTypes.ts';
+import type { Sounds } from '@/types/SoundTypes.ts';
 import { useFilterSoundsByCategory } from '@/composables/useFilterSoundsByCategory.ts';
 import { useSereneSoundsStore } from '@/stores/sereneSounds.ts';
-import type { AllowedSoundNames } from '@/types/AllowedSoundNames.ts';
 import SoundCard from '@/components/applications/sereneSounds/collection/SoundCard.vue';
 
 const props = defineProps({

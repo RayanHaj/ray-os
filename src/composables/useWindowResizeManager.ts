@@ -1,9 +1,8 @@
 import { ref, type Ref } from 'vue';
-import type { WindowFlatReference } from '@/types/WindowFlatReference.ts';
+import type { WindowFlatReference, WindowStyleObject } from '@/types/WindowTypes.ts';
 import { useWindowStateManager } from '@/composables/useWindowStateManager.ts';
 import { useBrowserStore } from '@/stores/browser.ts';
 import { useWindowStore } from '@/stores/window.ts';
-import type { WindowStyleObject } from '@/types/WindowStyleObject.ts';
 
 export function useWindowResizeManager(
   styles: Ref<WindowStyleObject>,

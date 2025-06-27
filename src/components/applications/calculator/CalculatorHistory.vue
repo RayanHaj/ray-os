@@ -48,6 +48,7 @@ watch(
   border: var(--window-border-color) solid 2px;
   background: var(--highlight-color);
 }
+
 ul {
   width: 100%;
   height: auto;
@@ -57,6 +58,7 @@ ul {
   gap: 5px;
   overflow: auto;
 }
+
 li {
   display: flex;
   flex-direction: row;

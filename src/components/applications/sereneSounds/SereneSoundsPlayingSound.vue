@@ -2,7 +2,7 @@
 import { onBeforeMount, ref, shallowRef, watch } from 'vue';
 import { useSvgByFileNameAndDirectory } from '@/composables/useSvgByFileNameAndDirectory.ts';
 import { useSereneSoundsStore } from '@/stores/sereneSounds.ts';
-import type { AllowedSoundNames } from '@/types/AllowedSoundNames.ts';
+import type { AllowedSoundNames } from '@/types/SereneSoundsTypes.ts';
 
 const sounds = ref<AllowedSoundNames[]>([]);
 const playSvg = shallowRef();

@@ -1,4 +1,4 @@
-import type { AllowedSoundCategories } from '@/types/AllowedSoundCategories.ts';
+import type { AllowedSoundCategories } from '@/types/SereneSoundsTypes.ts';
 
 export function useGetBackgroundColorBySoundCategory(category: AllowedSoundCategories) {
   switch (category) {

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useCalculatorManager } from '@/composables/useCalculatorManager.ts';
-import type { CalculatorKey } from '@/types/CalculatorKey.ts';
+import type { CalculatorKey } from '@/types/CalculatorTypes.ts';
 import { inject } from 'vue';
 
 const injectedCalculatorManager =
@@ -77,6 +77,7 @@ button {
 button:hover {
   background: var(--button-secondary-color);
 }
+
 .calculator-grid {
   display: grid;
   grid-template-columns: auto auto auto auto;

@@ -1,4 +1,4 @@
-import type { FileSystemItem } from '@/types/FileSystemItem.ts';
+import type { FileSystemItem } from '@/types/ItemTypes.ts';
 import { deleteFileSystemItem } from '@/composables/useIndexedDbHelper.ts';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
 import type { RayDb } from 'ray-db-wrapper';

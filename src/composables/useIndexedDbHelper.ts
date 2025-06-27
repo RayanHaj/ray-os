@@ -1,5 +1,5 @@
 import type { RayDb } from 'ray-db-wrapper';
-import type { FileSystemItem } from '@/types/FileSystemItem.ts';
+import type { FileSystemItem } from '@/types/ItemTypes.ts';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
 import { useGetRootDirectory } from '@/composables/useGetRootDirectory.ts';
 

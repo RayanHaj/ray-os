@@ -1,4 +1,4 @@
-import type { AllowedSoundNames } from '@/types/AllowedSoundNames.ts';
+import type { AllowedSoundNames } from '@/types/SereneSoundsTypes.ts';
 
 export async function useGetAudioForSereneSounds(
   name: AllowedSoundNames,

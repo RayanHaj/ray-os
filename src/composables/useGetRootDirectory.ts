@@ -1,6 +1,6 @@
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
 import type { RayDb } from 'ray-db-wrapper';
-import type { FileSystemItem } from '@/types/FileSystemItem.ts';
+import type { FileSystemItem } from '@/types/ItemTypes.ts';
 
 export async function useGetRootDirectory(rayDb: RayDb, onlyId: true): Promise<number | undefined>;
 export async function useGetRootDirectory(

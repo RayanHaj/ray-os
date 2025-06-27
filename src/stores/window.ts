@@ -1,8 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import type { WindowReference } from '@/types/WindowReference.ts';
-import type { WindowFlatReference } from '@/types/WindowFlatReference.ts';
 
+import type { WindowReference, WindowFlatReference } from '@/types/WindowTypes.ts';
 type WindowReferences = { [applicationName: string]: WindowReference[] };
 
 export const useWindowStore = defineStore('window', () => {

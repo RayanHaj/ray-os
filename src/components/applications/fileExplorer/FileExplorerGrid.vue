@@ -1,12 +1,9 @@
 <script setup lang="ts">
-import type { FileSystemItem } from '@/types/FileSystemItem.ts';
+import type { FileSystemItem, FileItem, Item } from '@/types/ItemTypes.ts';
 import { type Component, onBeforeMount, type PropType, shallowRef } from 'vue';
 import type { RayDb } from 'ray-db-wrapper';
 import { useContextMenuStore } from '@/stores/contextMenu.ts';
-import type { SecondaryActionsContextMenu } from '@/types/SecondaryActionsContextMenu.ts';
-import type { PrimaryActionsContextMenu } from '@/types/PrimaryActionsContextMenu.ts';
-import type { FileItem } from '@/types/FileItem.ts';
-import type { Item } from '@/types/Item.ts';
+import type { SecondaryActionsContextMenu, PrimaryActionsContextMenu } from '@/types/ContextMenuTypes.ts';
 import { useDeleteFIleSystemItem } from '@/composables/useDeleteFIleSystemItem.ts';
 import { useSvgOrFallback } from '@/composables/useSvgOrFallback.ts';
 

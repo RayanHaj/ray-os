@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import type { Item } from '@/types/Item.ts';
+import type { Item } from '@/types/ItemTypes.ts';
 import { useBrowserStore } from '@/stores/browser.ts';
 import { useFileStore } from '@/stores/file.ts';
 

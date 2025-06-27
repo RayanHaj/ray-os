@@ -3,7 +3,7 @@ import GridMain from '@/components/GridMain.vue';
 import TaskbarMain from '@/components/TaskbarMain.vue';
 import { type Component, type ComputedRef, ref, shallowRef } from 'vue';
 import WindowMain from '@/components/WindowMain.vue';
-import type { WindowFlatReference } from '@/types/WindowFlatReference.ts';
+import type { WindowFlatReference } from '@/types/WindowTypes.ts';
 import { useFlatOpenWindowsReferencesFull } from '@/composables/useFlatOpenWindowsReferencesFull.ts';
 
 import FallbackMain from '@/components/applications/FallbackMain.vue';

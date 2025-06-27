@@ -2,7 +2,7 @@
 import { useGridStore } from '@/stores/grid.ts';
 import { useTileCountGrid } from '@/composables/useTileCountGrid.ts';
 import { type Component, computed, onMounted, ref, shallowRef, watchEffect } from 'vue';
-import type { Item } from '@/types/Item.ts';
+import type { Item } from '@/types/ItemTypes.ts';
 import { useWindowStore } from '@/stores/window.ts';
 import { useSvgOrFallback } from '@/composables/useSvgOrFallback.ts';
 

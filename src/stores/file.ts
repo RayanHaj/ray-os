@@ -1,8 +1,7 @@
 import { ref } from 'vue';
 import { defineStore } from 'pinia';
-import type { Item } from '@/types/Item.ts';
+import type { ApplicationItem, Item } from '@/types/ItemTypes.ts';
 import initItems from '@/json/initTiles.json';
-import type { ApplicationItem } from '@/types/ApplicationItem.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import { fileSystemLookup, insertItemIntoFileSystem } from '@/composables/useIndexedDbHelper.ts';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';

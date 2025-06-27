@@ -49,35 +49,42 @@ onMounted(() => {
   height: calc(100% - 30px);
   color: var(--text-color);
 }
+
 .selected-setting-window {
   display: flex;
   gap: 15px;
   flex-direction: column;
   width: 100%;
 }
+
 .option-name {
   display: flex;
   flex-direction: column;
   gap: 3px;
   padding-inline: 10px;
 }
+
 .option-name h1 {
   padding-inline: 5px;
 }
+
 hr {
   width: 100%;
   border: var(--window-border-color) solid 2px;
   border-radius: 10px;
 }
+
 .current-option-settings {
   padding-bottom: 100px;
   padding-inline: 15px;
   height: 100%;
 }
+
 .settings.small {
   flex-direction: column;
   overflow-y: auto;
 }
+
 .sidebar.small {
   align-items: center;
 }
