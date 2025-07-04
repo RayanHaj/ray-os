@@ -1,14 +1,9 @@
 <script setup lang="ts">
 import { useCalculatorManager } from '@/composables/useCalculatorManager.ts';
 import type { CalculatorKey } from '@/types/CalculatorTypes.ts';
-import { inject } from 'vue';
+import { useInjectOrThrow } from '@/composables/useInjectOrThrow.ts';
 
-const injectedCalculatorManager =
-  inject<ReturnType<typeof useCalculatorManager>>('calculatorManager');
-if (!injectedCalculatorManager) {
-  throw Error('calculator manager not injected');
-}
-
+const calculatorManager = useInjectOrThrow<ReturnType<typeof useCalculatorManager>>('calculatorManager');
 const calculationGridItems: CalculatorKey[] = [
   { visual: '%', value: '%', type: 'special' },
   { visual: 'CE', value: 'CE', type: 'special' },
@@ -41,14 +36,15 @@ const calculationGridItems: CalculatorKey[] = [
   { visual: '=', value: '=', type: 'special' },
 ];
 
-const calculatorManager = injectedCalculatorManager;
 function onClickGridItem(key: CalculatorKey) {
   if (key.type === 'special') {
     calculatorManager.processSpecialKey(key);
     return;
   }
 
-  calculatorManager.pushToCalculationArray({ value: key.value, type: key.type });
+  console.log(key)
+
+  calculatorManager.pushToCalculationArray(key);
 }
 </script>
 
@@ -56,7 +52,7 @@ function onClickGridItem(key: CalculatorKey) {
   <div class="calculator-grid">
     <button
       v-for="item of calculationGridItems"
-      :key="item.value"
+      :key="item.visual"
       class="grid-item"
       @click="onClickGridItem(item)"
     >
@@ -67,11 +63,12 @@ function onClickGridItem(key: CalculatorKey) {
 
 <style scoped>
 button {
-  font-size: 20px;
+  font-size: var(--font-size-elg);
   color: var(--text-color);
   background: var(--button-primary-color);
   border: var(--window-border-color) 2px solid;
   height: 100%;
+  border-radius: 5px;
 }
 
 button:hover {
@@ -83,5 +80,7 @@ button:hover {
   grid-template-columns: auto auto auto auto;
   height: 80%;
   width: 100%;
+  gap: 3px;
+  padding: 5px;
 }
 </style>

@@ -14,6 +14,12 @@ body {
   --background-color: #ffffff;
   --text-color: #000000;
   --svg-color: '';
+  --font-size-sm: 10px;
+  --font-size-md: 12px;
+  --font-size-lg: 14px;
+  --font-size-elg: 19px;
+  --font-size-eelg: 29px;
+  --font-size-huge: 50px;
 }
 
 [data-theme='vintage-terminal'] {

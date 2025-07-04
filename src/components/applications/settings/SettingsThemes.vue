@@ -14,7 +14,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="themes">
+  <div class="settings-themes">
     <select v-model="selectedTheme" @change="useThemeSwitcher().setTheme(selectedTheme)">
       <option v-for="theme of Object.keys(themes)" :key="theme" :value="theme">{{ theme }}</option>
     </select>

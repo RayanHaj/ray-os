@@ -75,13 +75,13 @@ li {
 #calculation {
   color: var(--text-color);
   font-weight: bold;
-  font-size: 20px;
+  font-size: var(--font-size-elg);
 }
 
 @container calculation (max-width: 120px) {
   #answer,
   #calculation {
-    font-size: 12px;
+    font-size: var(--font-size-md);
   }
 }
 

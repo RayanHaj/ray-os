@@ -3,6 +3,7 @@ import SettingsSidebar from '@/components/applications/settings/SettingsSidebar.
 import SettingsThemes from '@/components/applications/settings/SettingsThemes.vue';
 import { onMounted, ref } from 'vue';
 import type { AllowedSettingsOptions } from '@/types/SettingsTypes.ts';
+import SettingsSystem from '@/components/applications/settings/SettingsSystem.vue';
 
 const selectedOption = ref<AllowedSettingsOptions>('Themes');
 
@@ -10,11 +11,7 @@ const settings = ref();
 const isSmall = ref(false);
 const resizeObserver = new ResizeObserver((entries) => {
   for (const entry of entries) {
-    if (entry.contentRect.width < 500) {
-      isSmall.value = true;
-    } else {
-      isSmall.value = false;
-    }
+    isSmall.value = entry.contentRect.width < 500;
   }
 });
 
@@ -26,7 +23,7 @@ onMounted(() => {
 <template>
   <div class="settings" ref="settings" :class="isSmall ? 'small' : undefined">
     <SettingsSidebar
-      @selected-option="selectedOption = $event"
+      @option-selected="selectedOption = $event"
       :class="isSmall ? 'small' : undefined"
     />
     <div class="selected-setting-window">
@@ -36,6 +33,7 @@ onMounted(() => {
       </div>
       <div class="current-option-settings">
         <SettingsThemes v-show="selectedOption === 'Themes'" />
+        <SettingsSystem v-show="selectedOption === 'System'" />
       </div>
     </div>
   </div>
@@ -75,9 +73,15 @@ hr {
 }
 
 .current-option-settings {
-  padding-bottom: 100px;
-  padding-inline: 15px;
+  align-self: center;
+  width: 98%;
+  padding: 10px;
   height: 100%;
+  background-color: var(--window-secondary-color);
+  border: var(--input-border-color) 1px solid;
+  border-bottom: none;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
 }
 
 .settings.small {

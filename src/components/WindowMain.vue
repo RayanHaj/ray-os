@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type Component, type PropType, type Ref, ref, watch } from 'vue';
+import { type Component, onBeforeMount, type PropType, type Ref, ref, watch } from 'vue';
 import type { WindowFlatReference, WindowStyleObject } from '@/types/WindowTypes.ts';
 import { useWindowStore } from '@/stores/window.ts';
 import WindowHeader from '@/components/WindowHeader.vue';
@@ -18,6 +18,22 @@ const props = defineProps({
   },
 });
 
+const windowStore = useWindowStore();
+onBeforeMount(() => {
+  styles.value.zIndex = windowStore.getZIndex(props.reference.label, props.reference.id);
+});
+
+watch(() => windowStore.zIndexesOrder, (newValue, oldValue) => {
+  const globalId = windowStore.getGlobalId(props.reference.label, props.reference.id);
+  const newIndex = newValue.indexOf(globalId);
+  const oldIndex = oldValue.indexOf(globalId);
+  if (newIndex === oldIndex) {
+    return;
+  }
+
+  styles.value.zIndex = windowStore.getZIndex(props.reference.label, props.reference.id);
+});
+
 const styles: Ref<WindowStyleObject> = ref({
   left: '25%',
   top: '25%',
@@ -25,7 +41,7 @@ const styles: Ref<WindowStyleObject> = ref({
   height: '50%',
   minWidth: '250px',
   minHeight: '50px',
-  zIndex: props.reference.zIndex,
+  zIndex: 10,
   display: 'block',
   cursor: 'auto',
   transition: 'width 0.5s, height 0.5s, left 0.5s, top 0.5s',
@@ -34,15 +50,6 @@ const styles: Ref<WindowStyleObject> = ref({
 const cachedStyles = ref({ left: '0', top: '0', width: '50%', height: '50%' });
 
 const emits = defineEmits(['showSnapLayout']);
-watch(
-  () => props.reference.zIndex,
-  (newValue, oldValue) => {
-    if (newValue !== oldValue) {
-      styles.value.zIndex = newValue;
-    }
-  },
-);
-
 const oldPosition = ref({ clientX: 0, clientY: 0 });
 
 const window = ref();
@@ -86,7 +93,6 @@ const windowPositionManager = useWindowPositionManager(
   oldPosition,
 );
 
-const windowStore = useWindowStore();
 function closeWindow() {
   windowStore.removeOpenWindowReference(props.reference.label, props.reference.id);
 }

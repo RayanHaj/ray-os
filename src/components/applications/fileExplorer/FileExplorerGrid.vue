@@ -169,7 +169,7 @@ async function onFileDrop(event: DragEvent) {
   width: 100px;
   color: var(--text-color);
   padding: 10px;
-  font-size: 12px;
+  font-size: var(--font-size-md);
 }
 
 .item:hover {

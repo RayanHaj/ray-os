@@ -2,14 +2,14 @@
 import { ref } from 'vue';
 import type { AllowedSettingsOptions } from '@/types/SettingsTypes.ts';
 
-const emits = defineEmits(['selectedOption']);
+const emits = defineEmits(['optionSelected']);
 
 const options = ref<AllowedSettingsOptions[]>(['Themes', 'System']);
 const selectedOption = ref<AllowedSettingsOptions>('Themes');
 
 function onClickOption(option: AllowedSettingsOptions) {
   selectedOption.value = option;
-  emits('selectedOption', selectedOption.value);
+  emits('optionSelected', selectedOption.value);
 }
 </script>
 
@@ -34,7 +34,12 @@ function onClickOption(option: AllowedSettingsOptions) {
   padding: 10px;
   gap: 5px;
   height: 100%;
+  width: 250px;
   background: var(--window-secondary-color);
+}
+
+.sidebar.small {
+  width: 100%;
 }
 
 .option {
@@ -42,7 +47,7 @@ function onClickOption(option: AllowedSettingsOptions) {
   border: none;
   color: var(--text-color);
   border-radius: 2px;
-  width: 200px;
+  width: 100%;
   height: 40px;
 }
 

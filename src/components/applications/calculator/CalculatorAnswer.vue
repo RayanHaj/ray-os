@@ -1,34 +1,20 @@
 <script setup lang="ts">
-import { inject, onMounted, ref, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { useCalculatorManager } from '@/composables/useCalculatorManager.ts';
+import { useInjectOrThrow } from '@/composables/useInjectOrThrow.ts';
 
-const injectedCalculatorManager =
-  inject<ReturnType<typeof useCalculatorManager>>('calculatorManager');
-if (!injectedCalculatorManager) {
-  throw Error('calculator manager not injected');
-}
+const calculatorManager =
+  useInjectOrThrow<ReturnType<typeof useCalculatorManager>>('calculatorManager');
 
-const calculatorManager = injectedCalculatorManager;
-const calculationString = ref('');
-
+const calculationString = ref<string>('');
 onMounted(() => {
-  calculationString.value = calculatorManager.calculationArray.value[0].value.toString();
+  calculationString.value = calculatorManager.calculationArray.value[0].visual;
 });
+
 watch(
   () => calculatorManager.calculationArray.value,
   () => {
-    calculationString.value = calculatorManager.calculationArray.value.reduce(
-      (accumulator: string, value, currentIndex) => {
-        accumulator +=
-          value.type === 'operator' ||
-          (value.type === 'input' &&
-            calculatorManager.calculationArray.value[currentIndex - 1]?.type === 'operator')
-            ? ` ${value.value}`
-            : value.value;
-        return accumulator;
-      },
-      '',
-    );
+    calculationString.value = calculatorManager.returnCalculationString();
   },
   { deep: true },
 );
@@ -51,13 +37,13 @@ watch(
 
 .calculator-answer {
   color: var(--text-color);
-  font-size: 55px;
+  font-size: var(--font-size-huge);
   padding-right: 10px;
 }
 
 @container calculatorName (max-height: 80px) {
   .calculator-answer {
-    font-size: 30px;
+    font-size: var(--font-size-eelg);
   }
 }
 </style>

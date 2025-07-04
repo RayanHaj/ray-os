@@ -5,8 +5,8 @@ import { useBrowserStore } from '@/stores/browser.ts';
 import { useFileStore } from '@/stores/file.ts';
 
 export const useGridStore = defineStore('grid', () => {
-  const tileWidth = ref(90);
-  const tileHeight = ref(90);
+  const tileWidth = ref(75);
+  const tileHeight = ref(75);
   const items = ref<Item[]>([]);
 
   const browserStore = useBrowserStore();

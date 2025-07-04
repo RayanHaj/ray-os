@@ -136,7 +136,7 @@ function onClickTile() {
       />
     </transition>
     <div class="content" @click="onClickTile">
-      <component v-if="svg" :is="svg" :custom-width="40" :custom-height="40" />
+      <component class="app-svg" v-if="svg" :is="svg" />
       <hr :class="getUnderlineClass" />
     </div>
   </div>
@@ -176,6 +176,18 @@ hr {
   width: 100%;
   height: 100%;
   padding: 10px;
+}
+
+.app-svg {
+  width: 40px;
+  height: 40px;
+}
+
+@media (max-width: 850px) {
+  .app-svg {
+    width: 30px;
+    height: 30px;
+  }
 }
 
 .underline.hidden {

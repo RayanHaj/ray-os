@@ -104,7 +104,7 @@ function openWindow() {
     @dblclick="openWindow"
   >
     <div class="content" v-if="item">
-      <component v-if="svg" :is="svg" :custom-width="50" :custom-height="50" />
+      <component v-if="svg" :is="svg" :custom-width="35" :custom-height="35" />
       <div>{{ item.label }}</div>
     </div>
   </div>
@@ -127,7 +127,7 @@ function openWindow() {
 
 .content {
   text-align: center;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   color: var(--text-color);
 }
 </style>

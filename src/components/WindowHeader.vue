@@ -74,7 +74,7 @@ onBeforeMount(async () => {
   justify-content: center;
   align-items: center;
   gap: 5px;
-  font-size: 13px;
+  font-size: var(--font-size-lg);
 }
 
 .window-name {

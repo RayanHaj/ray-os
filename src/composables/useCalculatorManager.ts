@@ -4,46 +4,56 @@ import type { CalculatorKey } from '@/types/CalculatorTypes.ts';
 type CalculationArray = CalculatorKey[];
 
 export function useCalculatorManager() {
-  const calculationArray = ref<CalculationArray>([{ value: 0, type: 'input' }]);
+  const defaultCalculation: CalculatorKey = { visual: '0', value: 0, type: 'input' };
+  const calculationArray = ref<CalculationArray>([defaultCalculation]);
   const calculationHistory = ref<{ calculationString: string; calculationAnswer: number }[]>([]);
 
   const hasCalculated = ref(false);
-
-  function pushToCalculationArray(currentKey: {
-    value: number | string;
-    type: 'input' | 'operator';
-  }) {
+  function pushToCalculationArray(currentKey: CalculatorKey) {
     if (hasCalculated.value) {
       handleHasCalculated(currentKey);
     }
 
-    const previousKey = calculationArray.value[calculationArray.value.length - 1];
-    if (calculationArray.value.length === 1) {
-      removeInitialZero(currentKey, previousKey);
+    if (hasOnlyZero()) {
+      removeInitialZero(currentKey);
     }
 
     if (calculationArray.value.length > 0) {
-      const hasTrailingKeys = handleTrailingKeys(previousKey, currentKey);
-      if (hasTrailingKeys) {
+      if (handleTrailingDot(currentKey)) {
         return;
       }
+    }
+
+    let hasTrailingKeys = false;
+    if (calculationArray.value.length > 0) {
+      hasTrailingKeys = handleTrailingKeys(currentKey);
     } else {
       if (currentKey.type === 'operator') {
         return;
       }
     }
 
+    if (hasTrailingKeys) {
+      return;
+    }
+
     calculate();
     calculationArray.value = [...calculationArray.value, currentKey];
   }
 
-  function removeInitialZero(currentKey: CalculatorKey, previousKey: CalculatorKey) {
+  function handleTrailingDot(currentKey: CalculatorKey) {
+    const previousKey: CalculatorKey = calculationArray.value[calculationArray.value.length - 1];
+    return previousKey.value.toString().includes('.') && currentKey.value.toString().includes('.');
+  }
+
+  function removeInitialZero(currentKey: CalculatorKey) {
+    const previousKey: CalculatorKey = calculationArray.value[calculationArray.value.length - 1];
     if (previousKey.value === 0) {
       if (currentKey.value === '.' || currentKey.type === 'operator') {
         return;
       }
 
-      emptyCalculationLists(false);
+      emptyCalculationArray(false);
     }
   }
 
@@ -56,18 +66,20 @@ export function useCalculatorManager() {
     return !calculationArray.value.some((key, index) => structure[index] !== key.type);
   }
 
-  function handleTrailingKeys(previousKey: CalculatorKey, currentKey: CalculatorKey) {
-    const isTrailingNumbers = previousKey.type === 'input' && currentKey.type === 'input';
+  function handleTrailingKeys(currentKey: CalculatorKey) {
+    const previousKey: CalculatorKey = calculationArray.value[calculationArray.value.length - 1];
+    const isTrailingInputs = previousKey.type === 'input' && currentKey.type === 'input';
     const isTrailingOperators = previousKey.type === 'operator' && currentKey.type === 'operator';
 
     let hasTrailingKeys = true;
-    if (isTrailingNumbers) {
-      onTrailingNumbers(previousKey, currentKey);
+    if (isTrailingInputs) {
+      onTrailingInputs(previousKey, currentKey);
     } else if (isTrailingOperators) {
       onTrailingOperators(previousKey, currentKey);
     } else {
       if (previousKey.type !== 'input' && currentKey.value === '.') {
         currentKey.value = '0.';
+        currentKey.visual = '0.';
       }
 
       hasTrailingKeys = false;
@@ -84,18 +96,14 @@ export function useCalculatorManager() {
 
     if (currentKey.type === 'input') {
       const elementIsDot = currentKey.value === '.';
-      emptyCalculationLists(elementIsDot);
+      emptyCalculationArray(elementIsDot);
     }
   }
 
-  function emptyCalculationLists(defaultValue: boolean) {
-    calculationArray.value = defaultValue ? [{ value: 0, type: 'input' }] : [];
-  }
-
-  function onTrailingNumbers(previousKey: CalculatorKey, currentKey: CalculatorKey) {
-    const previousKeyStr = String(previousKey.value);
-    const currentKeyStr = String(currentKey.value);
-    previousKey.value = previousKeyStr + currentKeyStr;
+  function onTrailingInputs(previousKey: CalculatorKey, currentKey: CalculatorKey) {
+    const concatenatedInputs = previousKey.visual + currentKey.visual;
+    const { index } = getLastCalculationKeyAndIndex();
+    updateKeyValue(index, concatenatedInputs);
   }
 
   function onTrailingOperators(previousKey: CalculatorKey, currentKey: CalculatorKey) {
@@ -106,10 +114,10 @@ export function useCalculatorManager() {
     calculationArray.value[calculationArray.value.length - 1] = currentKey;
   }
 
-  function calculate(): number {
+  function calculate() {
     let calculation = 0;
     if (!checkCalculationStructure()) {
-      return -1;
+      return;
     }
 
     calculationArray.value.forEach((currentKey, index) => {
@@ -137,9 +145,10 @@ export function useCalculatorManager() {
       },
     ];
 
-    calculationArray.value = [{ value: calculationAnswer, type: 'input' }];
+    calculationArray.value = [
+      { visual: calculationAnswer.toString(), value: calculationAnswer, type: 'input' },
+    ];
     hasCalculated.value = true;
-    return calculationAnswer;
   }
 
   function processCalculation(accumulator: number, currentNumber: number, operator: string) {
@@ -171,7 +180,7 @@ export function useCalculatorManager() {
     }
 
     if (calculationArray.value.length === 0) {
-      calculationArray.value[0] = { value: 0, type: 'input' };
+      calculationArray.value[0] = defaultCalculation;
     }
 
     hasCalculated.value = false;
@@ -180,7 +189,7 @@ export function useCalculatorManager() {
   function handleSquareRoot() {
     const lastKey = calculationArray.value[calculationArray.value.length - 1];
     if (lastKey.type === 'input') {
-      lastKey.value = Math.sqrt(Number(lastKey.value) as number);
+      lastKey.value = Math.sqrt(Number(lastKey.value));
     }
   }
 
@@ -192,44 +201,82 @@ export function useCalculatorManager() {
   }
 
   function handlePercentage() {
-    const lastKey = calculationArray.value[calculationArray.value.length - 1];
-    if (lastKey.type === 'input') {
-      lastKey.value = Number(lastKey.value) / 100;
+    const { index, key } = getLastCalculationKeyAndIndex();
+    if (key.type === 'input') {
       if (checkCalculationStructure()) {
+        const firstKey = Number(calculationArray.value[0].value);
+        const calc = firstKey - (firstKey / Number(key.value));
+        console.log(firstKey / Number(key.value))
+        updateKeyValue(index, calc);
+        console.log(calculationArray.value)
         calculate();
+        return;
       }
-    } else if (lastKey.type === 'operator') {
-      const key = calculationArray.value[calculationArray.value.length - 2];
-      if (key.type === 'input') {
-        key.value = key.value as number;
-        pushToCalculationArray({ value: key.value / 100, type: key.type });
+
+      const calculation = Number(key.value) / 100;
+      updateKeyValue(index, calculation);
+    } else if (key.type === 'operator') {
+      const firstKey = calculationArray.value[0];
+      if (firstKey.type === 'input') {
+        const calculation = (Number(firstKey.value)) / 100;
+        pushToCalculationArray({ visual: calculation.toString(), value: calculation.toString(), type: firstKey.type });
         calculate();
       }
     }
   }
 
-  function handleClear() {
-    calculationArray.value = [{ value: 0, type: 'input' }];
+  function emptyCalculationArray(addDefaultZeroValue: boolean) {
+    calculationArray.value = addDefaultZeroValue ? [defaultCalculation] : [];
   }
 
   function handleClearEntry() {
+    if (hasOnlyZero()) {
+      return;
+    }
+
+    if (calculationArray.value.length === 1) {
+      emptyCalculationArray(true);
+      return;
+    }
+
     calculationArray.value = calculationArray.value.filter(
       (_, index) => index !== calculationArray.value.length - 1,
     );
   }
 
-  function handleDevisionByOne() {
-    const lastKey = calculationArray.value[calculationArray.value.length - 1];
-    if (lastKey.type === 'input') {
-      lastKey.value = 1 / Number(lastKey.value);
+  function handleDivisionByOne() {
+    const { index, key } = getLastCalculationKeyAndIndex();
+    if (key.type === 'input') {
+      const calculation = (key.value = 1 / Number(key.value));
+      updateKeyValue(index, calculation);
     }
   }
 
   function handlePow() {
-    const lastKey = calculationArray.value[calculationArray.value.length - 1];
-    if (lastKey.type === 'input') {
-      lastKey.value = Math.pow(Number(lastKey.value), 2);
+    const { index, key } = getLastCalculationKeyAndIndex();
+    if (key.type === 'input') {
+      const calculation = Math.pow(Number(key.value), 2);
+      updateKeyValue(index, calculation);
     }
+  }
+
+  function getLastCalculationKeyAndIndex() {
+    const index = calculationArray.value.length - 1;
+    const key = calculationArray.value[index];
+    return { index, key };
+  }
+
+  function updateKeyValue(keyIndex: number, value: number | string) {
+    calculationArray.value[keyIndex] = {
+      ...calculationArray.value[keyIndex],
+      visual: value.toString(),
+      value: value,
+    };
+  }
+
+  function hasOnlyZero() {
+    const { index, key } = getLastCalculationKeyAndIndex();
+    return index === 0 && key.value.toString() === '0';
   }
 
   function processSpecialKey(key: CalculatorKey) {
@@ -238,7 +285,7 @@ export function useCalculatorManager() {
         calculate();
         break;
       case 'C':
-        handleClear();
+        emptyCalculationArray(true);
         break;
       case 'CE':
         handleClearEntry();
@@ -256,18 +303,29 @@ export function useCalculatorManager() {
         handlePercentage();
         break;
       case '1/x':
-        handleDevisionByOne();
+        handleDivisionByOne();
         break;
       case 'x^2':
         handlePow();
     }
   }
 
+  function returnCalculationString() {
+    return calculationArray.value
+      .map((key, index) => {
+        const addTrailingWhitespace =
+          key.type === 'operator' ||
+          (key.type === 'input' && calculationArray.value[index - 1]?.type === 'operator');
+        return addTrailingWhitespace ? ` ${key.visual}` : key.visual;
+      })
+      .join(' ');
+  }
+
   return {
-    calculate,
     calculationArray,
     calculationHistory,
     pushToCalculationArray,
     processSpecialKey,
+    returnCalculationString,
   };
 }

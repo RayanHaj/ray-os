@@ -32,7 +32,7 @@ watch(
   display: flex;
   flex-direction: column;
   justify-content: center;
-  font-size: 20px;
+  font-size: var(--font-size-elg);
   font-family: 'Courier New', sans-serif;
   align-items: end;
   padding: 10px;

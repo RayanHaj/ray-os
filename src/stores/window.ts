@@ -1,19 +1,19 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
-import type { WindowReference, WindowFlatReference } from '@/types/WindowTypes.ts';
+import type { WindowFlatReference, WindowReference } from '@/types/WindowTypes.ts';
+
 type WindowReferences = { [applicationName: string]: WindowReference[] };
 
 export const useWindowStore = defineStore('window', () => {
   const openWindowsReferences = ref<WindowReferences>({});
+  const zIndexesOrder = ref<string[]>([]);
 
   function pushOpenWindowReference(windowName: string) {
     let id = 1000;
 
     if (typeof openWindowsReferences.value[windowName] === 'undefined') {
-      openWindowsReferences.value[windowName] = [
-        { id: id, zIndex: generateNextZIndex(), minimized: false },
-      ];
+      openWindowsReferences.value[windowName] = [{ id: id, minimized: false }];
       return;
     }
 
@@ -26,11 +26,16 @@ export const useWindowStore = defineStore('window', () => {
     }, id);
     id += 1;
 
-    openWindowsReferences.value[windowName].push({
-      id: id,
-      zIndex: generateNextZIndex(),
-      minimized: false,
-    });
+    openWindowsReferences.value[windowName].push({ id: id, minimized: false });
+    pushWindowToFront(windowName, id);
+  }
+
+  function getGlobalId(windowName: string, id: number) {
+    return `${windowName}-${id}`;
+  }
+
+  function pushWindowToFront(windowName: string, id: number) {
+    zIndexesOrder.value.push(getGlobalId(windowName, id));
   }
 
   function getWindowCountByName(windowName: string) {
@@ -55,21 +60,6 @@ export const useWindowStore = defineStore('window', () => {
       !openWindowsReferences.value[windowName][index].minimized;
   }
 
-  function generateNextZIndex() {
-    const keys = Object.keys(openWindowsReferences.value);
-    return (
-      keys.reduce((accumulator, value) => {
-        openWindowsReferences.value[value].forEach((element) => {
-          if (element.zIndex > accumulator) {
-            accumulator = element.zIndex;
-          }
-        });
-
-        return accumulator;
-      }, 1) + 1
-    );
-  }
-
   function removeOpenWindowReference(windowName: string, reference: number) {
     if (typeof openWindowsReferences.value[windowName] === 'undefined') {
       return;
@@ -82,26 +72,38 @@ export const useWindowStore = defineStore('window', () => {
     if (openWindowsReferences.value[windowName].length === 0) {
       delete openWindowsReferences.value[windowName];
     }
+
+    const globalId = getGlobalId(windowName, reference);
+    if (zIndexesOrder.value.includes(globalId)) {
+      zIndexesOrder.value = zIndexesOrder.value.filter((value) => value !== globalId);
+    }
   }
 
   function setWindowZIndexToTop(reference: WindowFlatReference) {
-    const index = openWindowsReferences.value[reference.label].findIndex(
-      (value) => reference.id === value.id,
-    );
-    if (index !== -1) {
-      const value = openWindowsReferences.value[reference.label][index];
-      value.zIndex = generateNextZIndex();
+    const globalId = getGlobalId(reference.label, reference.id);
+    zIndexesOrder.value = zIndexesOrder.value.filter((value) => value !== globalId);
+    zIndexesOrder.value.push(globalId);
+  }
 
-      openWindowsReferences.value[reference.label][index] = value;
+  function getZIndex(windowName: string, id: number) {
+    const globalId = getGlobalId(windowName, id);
+    if (!zIndexesOrder.value.includes(globalId)) {
+      pushWindowToFront(windowName, id);
     }
+
+    const minZIndex = 10;
+    return zIndexesOrder.value.indexOf(globalId) + minZIndex;
   }
 
   return {
     openWindowsReferences,
+    zIndexesOrder,
     pushOpenWindowReference,
     removeOpenWindowReference,
     setWindowMinimized,
     setWindowZIndexToTop,
     getWindowCountByName,
+    getGlobalId,
+    getZIndex
   };
 });

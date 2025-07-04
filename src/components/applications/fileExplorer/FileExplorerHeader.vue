@@ -9,7 +9,7 @@ const emits = defineEmits(['header-event:back']);
 
 <template>
   <header class="file-explorer-header">
-    <div class="left-side">
+    <div class="start">
       <button class="back-button" @click="emits('header-event:back')">^</button>
     </div>
     <div class="middle-side">
@@ -27,7 +27,7 @@ const emits = defineEmits(['header-event:back']);
   color: var(--text-color);
 }
 
-.left-side,
+.start,
 .back-button {
   width: 150px;
 }

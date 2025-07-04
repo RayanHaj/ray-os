@@ -1,5 +1,5 @@
 export interface CalculatorKey {
-  visual?: string | number;
+  visual: string;
   value: string | number;
   type: 'input' | 'operator' | 'special';
 }

@@ -1,18 +1,19 @@
 <script setup lang="ts">
 import { useTaskbarStore } from '@/stores/taskbar.ts';
 import TaskbarTile from '@/components/TaskbarTile.vue';
-import { type Component, onBeforeMount, shallowRef } from 'vue';
-import { useSvgByFileNameAndDirectory } from '@/composables/useSvgByFileNameAndDirectory.ts';
 import StartMenuMain from '@/components/StartMenuMain.vue';
 import { useStartMenuStore } from '@/stores/startMenu.ts';
 import TimeProcessSection from '@/components/TimeProcessSection.vue';
+import { useSvgOrFallback } from '@/composables/useSvgOrFallback.ts';
+import { type Component, onBeforeMount, shallowRef } from 'vue';
 
 const taskbarStore = useTaskbarStore();
 const taskbarHeight = taskbarStore.taskbarHeight;
+const taskbarItems = taskbarStore.items;
 
-const searchSvg = shallowRef<Component | undefined>();
-onBeforeMount(async () => {
-  searchSvg.value = (await useSvgByFileNameAndDirectory('Search')) ?? undefined;
+const searchSvg = shallowRef<Component>();
+onBeforeMount( () => {
+  searchSvg.value = useSvgOrFallback('Search');
 });
 
 const startMenuStore = useStartMenuStore();
@@ -20,26 +21,25 @@ const startMenuStore = useStartMenuStore();
 <template>
   <StartMenuMain v-show="startMenuStore.isShown()" />
   <div class="taskbar" :style="{ height: `${taskbarHeight}px` }">
-    <div class="left-side">
+    <div class="start">
       <button
-        type="button"
         class="taskbar-search-button"
         @click="startMenuStore.show()"
         :style="{ backgroundColor: startMenuStore.isShown() ? 'var(--button-hover-color)' : '' }"
       >
-        <component :is="searchSvg" :custom-width="55" :custom-height="55" />
+        <component class="search-svg" :is="searchSvg" />
       </button>
     </div>
     <div class="middle">
-      <div class="tiles">
+      <div class="taskbar-tiles">
         <TaskbarTile
-          v-for="item of taskbarStore.items"
+          v-for="item of taskbarItems"
           :key="item.content.id"
           :id="item.content.id"
         />
       </div>
     </div>
-    <div class="right-side">
+    <div class="end">
       <TimeProcessSection />
     </div>
   </div>
@@ -67,15 +67,13 @@ const startMenuStore = useStartMenuStore();
   width: 60%;
 }
 
-.tiles {
+.taskbar-tiles {
   display: flex;
 }
 
 .taskbar-search-button {
   background: none;
   border: none;
-  width: 60px;
-  height: 60px;
   border-radius: 10px;
 }
 
@@ -83,14 +81,51 @@ const startMenuStore = useStartMenuStore();
   background: var(--button-hover-color);
 }
 
-.left-side,
-.right-side {
+.start,
+.end {
   width: 20%;
 }
 
-.right-side {
+.end {
   display: flex;
   flex-direction: row;
   justify-content: end;
+}
+
+.search-svg {
+  width: 55px;
+  height: 55px;
+}
+
+@media (max-width: 850px) {
+  .start {
+    display: none;
+  }
+  .middle {
+    display: flex;
+    justify-content: start;
+    width: 80%;
+  }
+  .taskbar-tiles {
+    align-items: start;
+  }
+  .search-svg {
+    width: 40px;
+    height: 40px;
+  }
+
+  .time-process-wrapper {
+    font-size: var(--font-size-md);
+  }
+}
+
+@media (max-width: 550px) {
+  .end {
+    display: none;
+  }
+  .middle {
+    justify-content: center;
+    width: 100%;
+  }
 }
 </style>

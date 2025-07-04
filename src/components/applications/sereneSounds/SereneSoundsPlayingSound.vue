@@ -64,8 +64,11 @@ async function onPlay() {
 }
 
 .sound-name {
-  font-size: 15px;
+  font-size: var(--font-size-lg);
   color: var(--text-color);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .play-button {
@@ -81,5 +84,17 @@ async function onPlay() {
 
 .play-button:hover {
   background-color: var(--button-hover-color);
+}
+
+@media (max-width: 1000px) {
+  .serene-sounds-playing-sound {
+    width: 150px;
+  }
+}
+
+@media (max-width: 600px) {
+  .serene-sounds-playing-sound {
+    width: 130px;
+  }
 }
 </style>
