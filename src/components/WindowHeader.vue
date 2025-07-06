@@ -10,6 +10,7 @@ import {
 } from 'vue';
 import type { WindowFlatReference } from '@/types/WindowTypes.ts';
 import { useSvgOrFallback } from '@/composables/useSvgOrFallback.ts';
+import { useWindowStore } from '@/stores/window.ts';
 
 const props = defineProps({
   reference: { required: true, type: Object as PropType<WindowFlatReference> },
@@ -35,7 +36,7 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <header class="window-header">
+  <header class="window-header" :style="{ height: `${useWindowStore().windowHeaderHeight}px` }">
     <div class="info-wrapper">
       <component class="svg" :is="svg" :custom-width="15" :custom-height="15" />
       <p class="window-name">{{ reference.label }}</p>
@@ -61,7 +62,6 @@ onBeforeMount(async () => {
   justify-content: space-between;
   top: 0;
   width: 100%;
-  height: 30px;
   color: var(--text-color);
   background-color: var(--window-secondary-color);
   padding-left: 12px;

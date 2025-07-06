@@ -16,10 +16,3 @@ onUnmounted(() => {
     <SereneSoundsFooter />
   </div>
 </template>
-
-<style scoped>
-.serene-sounds-main {
-  width: 100%;
-  height: calc(100% - 30px);
-}
-</style>

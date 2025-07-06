@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { inject, ref, watch } from 'vue';
-import type { useCalculatorManager } from '@/composables/useCalculatorManager.ts';
+import type { useCalculatorManager } from '@/composables/calculator/useCalculatorManager.ts';
 
 defineProps({ isToggled: { required: true, type: Boolean, default: false } });
 
@@ -10,7 +10,7 @@ if (!injectedCalculatorManager) {
   throw Error('calculator manager not injected');
 }
 
-const calculationHistory = ref<{ calculationString: string; calculationAnswer: number }[]>([]);
+const calculationHistory = ref<{ calculationString: string; calculationAnswer: string }[]>([]);
 watch(
   () => injectedCalculatorManager.calculationHistory.value,
   (newValue) => {
@@ -20,7 +20,6 @@ watch(
 </script>
 
 <template>
-  <transition name="slide">
     <div v-show="isToggled" class="calculator-history">
       <ul>
         <li v-if="calculationHistory.length === 0">No history items found</li>
@@ -34,19 +33,14 @@ watch(
         </li>
       </ul>
     </div>
-  </transition>
 </template>
 
 <style scoped>
 .calculator-history {
-  position: absolute;
-  top: 50%;
-  height: 50%;
+  position: relative;
   width: 100%;
   padding: 5px;
   overflow: auto;
-  border: var(--window-border-color) solid 2px;
-  background: var(--highlight-color);
 }
 
 ul {
@@ -83,20 +77,5 @@ li {
   #calculation {
     font-size: var(--font-size-md);
   }
-}
-
-.slide-enter-from,
-.slide-leave-to {
-  transform: translateY(100%);
-}
-
-.slide-enter-to,
-.slide-leave-from {
-  transform: translateY(0);
-}
-
-.slide-enter-active,
-.slide-leave-active {
-  transition: transform 0.3s ease;
 }
 </style>

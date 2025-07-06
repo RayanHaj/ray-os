@@ -1,14 +1,17 @@
 import { ref } from 'vue';
-import type { CalculatorKey } from '@/types/CalculatorTypes.ts';
+import type { CalculatorKey, SpecialKey } from '@/types/CalculatorTypes.ts';
+import { specialKeys } from '@/types/CalculatorTypes.ts';
+import { useProcessCalculation } from '@/composables/calculator/useProcessCalculation.ts';
 
 type CalculationArray = CalculatorKey[];
 
 export function useCalculatorManager() {
-  const defaultCalculation: CalculatorKey = { visual: '0', value: 0, type: 'input' };
+  const defaultCalculation: CalculatorKey = { visual: '0', value: '0', type: 'input' };
   const calculationArray = ref<CalculationArray>([defaultCalculation]);
-  const calculationHistory = ref<{ calculationString: string; calculationAnswer: number }[]>([]);
+  const calculationHistory = ref<{ calculationString: string; calculationAnswer: string }[]>([]);
 
   const hasCalculated = ref(false);
+
   function pushToCalculationArray(currentKey: CalculatorKey) {
     if (hasCalculated.value) {
       handleHasCalculated(currentKey);
@@ -18,37 +21,37 @@ export function useCalculatorManager() {
       removeInitialZero(currentKey);
     }
 
-    if (calculationArray.value.length > 0) {
-      if (handleTrailingDot(currentKey)) {
-        return;
-      }
-    }
-
-    let hasTrailingKeys = false;
-    if (calculationArray.value.length > 0) {
-      hasTrailingKeys = handleTrailingKeys(currentKey);
-    } else {
+    if (calculationArray.value.length === 0) {
       if (currentKey.type === 'operator') {
         return;
       }
+    } else {
+      const previousKey: CalculatorKey = calculationArray.value[calculationArray.value.length - 1];
+
+      const hasTrailingKeys = handleTrailingKeys(currentKey, previousKey);
+      if (hasTrailingKeys) {
+        return;
+      }
+
+      if (isEndingOnDot(currentKey, previousKey)) {
+        const dotRemovedKeyValue = previousKey.value.slice(0, previousKey.value.length - 1);
+        updateKeyValue(calculationArray.value.length - 1, dotRemovedKeyValue);
+      }
+      if (isStartingOnDot(currentKey, previousKey)) {
+        currentKey.value = '0.';
+        currentKey.visual = '0.';
+      }
     }
 
-    if (hasTrailingKeys) {
-      return;
+    const couldCalculate = calculate();
+    if (!couldCalculate) {
+      calculationArray.value = [...calculationArray.value, currentKey];
     }
-
-    calculate();
-    calculationArray.value = [...calculationArray.value, currentKey];
-  }
-
-  function handleTrailingDot(currentKey: CalculatorKey) {
-    const previousKey: CalculatorKey = calculationArray.value[calculationArray.value.length - 1];
-    return previousKey.value.toString().includes('.') && currentKey.value.toString().includes('.');
   }
 
   function removeInitialZero(currentKey: CalculatorKey) {
     const previousKey: CalculatorKey = calculationArray.value[calculationArray.value.length - 1];
-    if (previousKey.value === 0) {
+    if (previousKey.value === '0') {
       if (currentKey.value === '.' || currentKey.type === 'operator') {
         return;
       }
@@ -66,26 +69,33 @@ export function useCalculatorManager() {
     return !calculationArray.value.some((key, index) => structure[index] !== key.type);
   }
 
-  function handleTrailingKeys(currentKey: CalculatorKey) {
-    const previousKey: CalculatorKey = calculationArray.value[calculationArray.value.length - 1];
+  function handleTrailingKeys(currentKey: CalculatorKey, previousKey: CalculatorKey) {
     const isTrailingInputs = previousKey.type === 'input' && currentKey.type === 'input';
     const isTrailingOperators = previousKey.type === 'operator' && currentKey.type === 'operator';
 
-    let hasTrailingKeys = true;
     if (isTrailingInputs) {
       onTrailingInputs(previousKey, currentKey);
-    } else if (isTrailingOperators) {
-      onTrailingOperators(previousKey, currentKey);
-    } else {
-      if (previousKey.type !== 'input' && currentKey.value === '.') {
-        currentKey.value = '0.';
-        currentKey.visual = '0.';
-      }
-
-      hasTrailingKeys = false;
+      return true;
     }
 
-    return hasTrailingKeys;
+    if (isTrailingOperators) {
+      onTrailingOperators(previousKey, currentKey);
+      return true;
+    }
+
+    return false;
+  }
+
+  function isEndingOnDot(currentKey: CalculatorKey, previousKey: CalculatorKey) {
+    return (
+      previousKey.value.length > 1 &&
+      previousKey.value.endsWith('.') &&
+      (currentKey.type === 'operator' || currentKey.type === 'special')
+    );
+  }
+
+  function isStartingOnDot(currentKey: CalculatorKey, previousKey: CalculatorKey) {
+    return previousKey.type !== 'input' && currentKey.value === '.';
   }
 
   function handleHasCalculated(currentKey: CalculatorKey) {
@@ -117,7 +127,7 @@ export function useCalculatorManager() {
   function calculate() {
     let calculation = 0;
     if (!checkCalculationStructure()) {
-      return;
+      return false;
     }
 
     calculationArray.value.forEach((currentKey, index) => {
@@ -127,16 +137,16 @@ export function useCalculatorManager() {
       }
 
       if (currentKey.type === 'input' && previousKey.type === 'operator') {
-        const currentNumber = Number(currentKey.value) as number;
-        const operator = previousKey.value as string;
+        const currentNumber = Number(currentKey.value);
+        const operator = previousKey.value;
 
-        calculation = processCalculation(calculation, currentNumber, operator);
+        calculation = useProcessCalculation(calculation, currentNumber, operator);
       } else if (currentKey.type === 'operator' && previousKey.type === 'input') {
-        calculation = Number(previousKey.value) as number;
+        calculation = Number(previousKey.value);
       }
     });
 
-    const calculationAnswer = Number(calculation.toFixed(3));
+    const calculationAnswer = Number(calculation.toFixed(3)).toString();
     calculationHistory.value = [
       ...calculationHistory.value,
       {
@@ -146,24 +156,14 @@ export function useCalculatorManager() {
     ];
 
     calculationArray.value = [
-      { visual: calculationAnswer.toString(), value: calculationAnswer, type: 'input' },
+      {
+        visual: roundNumberToTenDecimals(calculationAnswer),
+        value: calculationAnswer,
+        type: 'input',
+      },
     ];
     hasCalculated.value = true;
-  }
-
-  function processCalculation(accumulator: number, currentNumber: number, operator: string) {
-    switch (operator) {
-      case '+':
-        return accumulator + currentNumber;
-      case '-':
-        return accumulator - currentNumber;
-      case '/':
-        return accumulator / currentNumber;
-      case '*':
-        return accumulator * currentNumber;
-      default:
-        return accumulator;
-    }
+    return true;
   }
 
   function removeLastKey() {
@@ -189,14 +189,14 @@ export function useCalculatorManager() {
   function handleSquareRoot() {
     const lastKey = calculationArray.value[calculationArray.value.length - 1];
     if (lastKey.type === 'input') {
-      lastKey.value = Math.sqrt(Number(lastKey.value));
+      lastKey.value = Math.sqrt(Number(lastKey.value)).toString();
     }
   }
 
   function handleSignToggle() {
     const lastKey = calculationArray.value[calculationArray.value.length - 1];
     if (lastKey.type === 'input') {
-      lastKey.value = Number(lastKey.value) * -1;
+      lastKey.value = (Number(lastKey.value) * -1).toString();
     }
   }
 
@@ -205,21 +205,23 @@ export function useCalculatorManager() {
     if (key.type === 'input') {
       if (checkCalculationStructure()) {
         const firstKey = Number(calculationArray.value[0].value);
-        const calc = firstKey - (firstKey / Number(key.value));
-        console.log(firstKey / Number(key.value))
+        const calc = (firstKey - firstKey / Number(key.value)).toString();
         updateKeyValue(index, calc);
-        console.log(calculationArray.value)
         calculate();
         return;
       }
 
-      const calculation = Number(key.value) / 100;
+      const calculation = (Number(key.value) / 100).toString();
       updateKeyValue(index, calculation);
     } else if (key.type === 'operator') {
       const firstKey = calculationArray.value[0];
       if (firstKey.type === 'input') {
-        const calculation = (Number(firstKey.value)) / 100;
-        pushToCalculationArray({ visual: calculation.toString(), value: calculation.toString(), type: firstKey.type });
+        const calculation = Number(firstKey.value) / 100;
+        pushToCalculationArray({
+          visual: calculation.toString(),
+          value: calculation.toString(),
+          type: firstKey.type,
+        });
         calculate();
       }
     }
@@ -247,7 +249,7 @@ export function useCalculatorManager() {
   function handleDivisionByOne() {
     const { index, key } = getLastCalculationKeyAndIndex();
     if (key.type === 'input') {
-      const calculation = (key.value = 1 / Number(key.value));
+      const calculation = (1 / Number(key.value)).toString();
       updateKeyValue(index, calculation);
     }
   }
@@ -255,7 +257,7 @@ export function useCalculatorManager() {
   function handlePow() {
     const { index, key } = getLastCalculationKeyAndIndex();
     if (key.type === 'input') {
-      const calculation = Math.pow(Number(key.value), 2);
+      const calculation = Math.pow(Number(key.value), 2).toString();
       updateKeyValue(index, calculation);
     }
   }
@@ -266,12 +268,20 @@ export function useCalculatorManager() {
     return { index, key };
   }
 
-  function updateKeyValue(keyIndex: number, value: number | string) {
+  function updateKeyValue(keyIndex: number, value: string) {
     calculationArray.value[keyIndex] = {
       ...calculationArray.value[keyIndex],
-      visual: value.toString(),
+      visual: roundNumberToTenDecimals(value),
       value: value,
     };
+  }
+
+  function roundNumberToTenDecimals(value: string): string {
+    if (isNaN(Number(value)) || value.endsWith('.')) {
+      return value;
+    }
+
+    return (Math.round(Number(value) * 10000000000) / 10000000000).toString();
   }
 
   function hasOnlyZero() {
@@ -279,33 +289,33 @@ export function useCalculatorManager() {
     return index === 0 && key.value.toString() === '0';
   }
 
-  function processSpecialKey(key: CalculatorKey) {
-    switch (key.value) {
-      case '=':
+  function processSpecialKey(key: SpecialKey) {
+    switch (key) {
+      case specialKeys.EQUAL:
         calculate();
         break;
-      case 'C':
+      case specialKeys.CLEAR:
         emptyCalculationArray(true);
         break;
-      case 'CE':
+      case specialKeys.CLEAR_ENTRY:
         handleClearEntry();
         break;
-      case 'back':
+      case specialKeys.BACK:
         removeLastKey();
         break;
-      case '√':
+      case specialKeys.SQUARE_ROOT:
         handleSquareRoot();
         break;
-      case '+/-':
+      case specialKeys.SIGN_CHANGE:
         handleSignToggle();
         break;
-      case '%':
+      case specialKeys.PERCENTAGE:
         handlePercentage();
         break;
-      case '1/x':
+      case specialKeys.DIVISION_BY_ONE:
         handleDivisionByOne();
         break;
-      case 'x^2':
+      case specialKeys.SQUARED:
         handlePow();
     }
   }
@@ -324,6 +334,7 @@ export function useCalculatorManager() {
   return {
     calculationArray,
     calculationHistory,
+    hasCalculated,
     pushToCalculationArray,
     processSpecialKey,
     returnCalculationString,

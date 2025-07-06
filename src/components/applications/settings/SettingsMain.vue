@@ -43,8 +43,6 @@ onMounted(() => {
 .settings {
   display: flex;
   flex-direction: row;
-  width: 100%;
-  height: calc(100% - 30px);
   color: var(--text-color);
 }
 
@@ -86,7 +84,6 @@ hr {
 
 .settings.small {
   flex-direction: column;
-  overflow-y: auto;
 }
 
 .sidebar.small {

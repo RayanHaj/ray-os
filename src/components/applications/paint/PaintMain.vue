@@ -14,7 +14,5 @@ import PaintToolbar from '@/components/applications/paint/PaintToolbar.vue';
 .paint {
   display: flex;
   flex-direction: column;
-  width: 100%;
-  height: calc(100% - 30px);
 }
 </style>

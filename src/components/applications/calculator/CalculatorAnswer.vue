@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue';
-import { useCalculatorManager } from '@/composables/useCalculatorManager.ts';
+import { useCalculatorManager } from '@/composables/calculator/useCalculatorManager.ts';
 import { useInjectOrThrow } from '@/composables/useInjectOrThrow.ts';
 
 const calculatorManager =

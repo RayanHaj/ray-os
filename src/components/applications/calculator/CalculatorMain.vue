@@ -2,23 +2,25 @@
 import CalculatorAnswer from '@/components/applications/calculator/CalculatorAnswer.vue';
 import CalculatorGrid from '@/components/applications/calculator/CalculatorGrid.vue';
 import CalculatorHistory from '@/components/applications/calculator/CalculatorHistory.vue';
-import { useCalculatorManager } from '@/composables/useCalculatorManager.ts';
+import { useCalculatorManager } from '@/composables/calculator/useCalculatorManager.ts';
 import { provide, ref } from 'vue';
 const historyIsToggled = ref(false);
 provide('calculatorManager', useCalculatorManager());
 </script>
 
 <template>
-  <CalculatorHistory :is-toggled="historyIsToggled" />
   <section class="calculator">
     <div class="header">
       <button id="showHistoryButton" @click="historyIsToggled = !historyIsToggled">
         Show history
       </button>
     </div>
-    <div class="calculator-wrapper" :class="{ toggled: historyIsToggled }">
+    <div v-show="!historyIsToggled" class="calculator-wrapper" :class="{ toggled: historyIsToggled }">
       <CalculatorAnswer />
       <CalculatorGrid />
+    </div>
+    <div v-show="historyIsToggled" class="history-wrapper">
+      <CalculatorHistory :is-toggled="historyIsToggled" />
     </div>
   </section>
 </template>
@@ -29,28 +31,27 @@ provide('calculatorManager', useCalculatorManager());
 }
 
 .calculator {
+  position: relative;
   display: flex;
   flex-direction: column;
-  width: 100%;
-  height: calc(100% - 30px);
-  overflow: auto;
 }
 
 .header {
-  height: 50px;
+  height: 70px;
+  padding: 10px;
 }
 
-.calculator-wrapper {
-  height: calc(100% - 50px);
+.calculator-wrapper, .history-wrapper {
+  height: calc(100% - 70px);
 }
 
 #showHistoryButton {
   background: var(--button-primary-color);
   color: var(--text-color);
-  border: var(--highlight-color) solid 1px;
+  border: var(--highlight-color) solid 2px;
   padding: 10px;
-  margin: 10px;
   height: 100%;
+  border-radius: 7px;
   cursor: pointer;
 }
 </style>

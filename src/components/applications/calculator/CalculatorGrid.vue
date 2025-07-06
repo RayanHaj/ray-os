@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { useCalculatorManager } from '@/composables/useCalculatorManager.ts';
-import type { CalculatorKey } from '@/types/CalculatorTypes.ts';
+import { useCalculatorManager } from '@/composables/calculator/useCalculatorManager.ts';
+import type { CalculatorKey, SpecialKey } from '@/types/CalculatorTypes.ts';
 import { useInjectOrThrow } from '@/composables/useInjectOrThrow.ts';
 
 const calculatorManager = useInjectOrThrow<ReturnType<typeof useCalculatorManager>>('calculatorManager');
@@ -15,34 +15,32 @@ const calculationGridItems: CalculatorKey[] = [
   { visual: '√', value: '√', type: 'special' },
   { visual: '÷', value: '/', type: 'operator' },
 
-  { visual: '7', value: 7, type: 'input' },
-  { visual: '8', value: 8, type: 'input' },
-  { visual: '9', value: 9, type: 'input' },
+  { visual: '7', value: '7', type: 'input' },
+  { visual: '8', value: '8', type: 'input' },
+  { visual: '9', value: '9', type: 'input' },
   { visual: '×', value: '*', type: 'operator' },
 
-  { visual: '4', value: 4, type: 'input' },
-  { visual: '5', value: 5, type: 'input' },
-  { visual: '6', value: 6, type: 'input' },
+  { visual: '4', value: '4', type: 'input' },
+  { visual: '5', value: '5', type: 'input' },
+  { visual: '6', value: '6', type: 'input' },
   { visual: '−', value: '-', type: 'operator' },
 
-  { visual: '1', value: 1, type: 'input' },
-  { visual: '2', value: 2, type: 'input' },
-  { visual: '3', value: 3, type: 'input' },
+  { visual: '1', value: '1', type: 'input' },
+  { visual: '2', value: '2', type: 'input' },
+  { visual: '3', value: '3', type: 'input' },
   { visual: '+', value: '+', type: 'operator' },
 
   { visual: '+/−', value: '+/-', type: 'special' },
-  { visual: '0', value: 0, type: 'input' },
+  { visual: '0', value: '0', type: 'input' },
   { visual: '.', value: '.', type: 'input' },
   { visual: '=', value: '=', type: 'special' },
 ];
 
 function onClickGridItem(key: CalculatorKey) {
   if (key.type === 'special') {
-    calculatorManager.processSpecialKey(key);
+    calculatorManager.processSpecialKey(key.value as SpecialKey);
     return;
   }
-
-  console.log(key)
 
   calculatorManager.pushToCalculationArray(key);
 }

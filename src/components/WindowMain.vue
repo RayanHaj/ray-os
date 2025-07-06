@@ -23,16 +23,19 @@ onBeforeMount(() => {
   styles.value.zIndex = windowStore.getZIndex(props.reference.label, props.reference.id);
 });
 
-watch(() => windowStore.zIndexesOrder, (newValue, oldValue) => {
-  const globalId = windowStore.getGlobalId(props.reference.label, props.reference.id);
-  const newIndex = newValue.indexOf(globalId);
-  const oldIndex = oldValue.indexOf(globalId);
-  if (newIndex === oldIndex) {
-    return;
-  }
+watch(
+  () => windowStore.zIndexesOrder,
+  (newValue, oldValue) => {
+    const globalId = windowStore.getGlobalId(props.reference.label, props.reference.id);
+    const newIndex = newValue.indexOf(globalId);
+    const oldIndex = oldValue.indexOf(globalId);
+    if (newIndex === oldIndex) {
+      return;
+    }
 
-  styles.value.zIndex = windowStore.getZIndex(props.reference.label, props.reference.id);
-});
+    styles.value.zIndex = windowStore.getZIndex(props.reference.label, props.reference.id);
+  },
+);
 
 const styles: Ref<WindowStyleObject> = ref({
   left: '25%',
@@ -96,9 +99,11 @@ const windowPositionManager = useWindowPositionManager(
 function closeWindow() {
   windowStore.removeOpenWindowReference(props.reference.label, props.reference.id);
 }
+
 function minimizeWindow() {
   windowStore.setWindowMinimized(props.reference.label, props.reference.id);
 }
+
 function maximizeWindow() {
   windowResizeManager.maximizeWindow(cachedStyles);
 }
@@ -124,7 +129,10 @@ function maximizeWindow() {
       @window-control-maximize="maximizeWindow"
       @window-control-minimize="minimizeWindow"
     />
-    <component :is="windowContentComponent" />
+    <component
+      :is="windowContentComponent"
+      :style="{ height: `calc(100% - ${windowStore.windowHeaderHeight}px`, width: '100%', overflow: 'auto' }"
+    />
   </div>
 </template>
 

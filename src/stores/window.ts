@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { readonly, ref } from 'vue';
 
 import type { WindowFlatReference, WindowReference } from '@/types/WindowTypes.ts';
 
@@ -8,6 +8,7 @@ type WindowReferences = { [applicationName: string]: WindowReference[] };
 export const useWindowStore = defineStore('window', () => {
   const openWindowsReferences = ref<WindowReferences>({});
   const zIndexesOrder = ref<string[]>([]);
+  const windowHeaderHeight = readonly(ref(30));
 
   function pushOpenWindowReference(windowName: string) {
     let id = 1000;
@@ -98,6 +99,7 @@ export const useWindowStore = defineStore('window', () => {
   return {
     openWindowsReferences,
     zIndexesOrder,
+    windowHeaderHeight,
     pushOpenWindowReference,
     removeOpenWindowReference,
     setWindowMinimized,

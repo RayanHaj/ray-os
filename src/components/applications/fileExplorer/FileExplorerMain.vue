@@ -127,8 +127,5 @@ async function handleModalInput(input: string) {
 .file-explorer {
   display: flex;
   flex-direction: column;
-  width: 100%;
-  height: calc(100% - 30px);
-  overflow: auto;
 }
 </style>
