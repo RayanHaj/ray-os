@@ -17,6 +17,7 @@ import SereneSoundsMain from '@/components/applications/sereneSounds/SereneSound
 import { useContextMenuStore } from '@/stores/contextMenu.ts';
 import { useOnOuterClickCloseContextMenu } from '@/composables/useOnOuterClickCloseContextMenu.ts';
 import UiToast from '@/ui/UiToast.vue';
+import TerminalMain from '@/components/applications/terminal/TerminalMain.vue';
 
 const windowContentComponents = shallowRef<{ [componentName: string]: Component }>({
   settings: SettingsMain,
@@ -24,6 +25,7 @@ const windowContentComponents = shallowRef<{ [componentName: string]: Component 
   paint: PaintMain,
   fileExplorer: FileExplorerMain,
   sereneSounds: SereneSoundsMain,
+  terminal: TerminalMain
 });
 
 const references: ComputedRef<WindowFlatReference[]> = useFlatOpenWindowsReferencesFull();
