@@ -16,6 +16,7 @@ import ContextMenu from '@/components/ContextMenu.vue';
 import SereneSoundsMain from '@/components/applications/sereneSounds/SereneSoundsMain.vue';
 import { useContextMenuStore } from '@/stores/contextMenu.ts';
 import { useOnOuterClickCloseContextMenu } from '@/composables/useOnOuterClickCloseContextMenu.ts';
+import UiToast from '@/ui/UiToast.vue';
 
 const windowContentComponents = shallowRef<{ [componentName: string]: Component }>({
   settings: SettingsMain,
@@ -46,6 +47,7 @@ const contextMenuStore = useContextMenuStore();
 
 <template>
   <main @click="useOnOuterClickCloseContextMenu($event.target as HTMLElement)">
+    <UiToast />
     <ContextMenu v-show="contextMenuStore.isShown()" />
     <DesktopSnapLayout
       :show-snap-layout="showSnapLayout"

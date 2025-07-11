@@ -1,11 +1,23 @@
 <script setup lang="ts">
-import type { FileSystemItem, FileItem, Item } from '@/types/ItemTypes.ts';
-import { type Component, onBeforeMount, type PropType, shallowRef } from 'vue';
+import {
+  type FileSystemItem,
+  type FileItem,
+  type Item,
+  fileExtensions
+} from '@/types/ItemTypes.ts';
+import { type Component, computed, onBeforeMount, type PropType, shallowRef, watch } from 'vue';
 import type { RayDb } from 'ray-db-wrapper';
 import { useContextMenuStore } from '@/stores/contextMenu.ts';
-import type { SecondaryActionsContextMenu, PrimaryActionsContextMenu } from '@/types/ContextMenuTypes.ts';
+import type {
+  SecondaryActionsContextMenu,
+  PrimaryActionsContextMenu,
+} from '@/types/ContextMenuTypes.ts';
 import { useDeleteFIleSystemItem } from '@/composables/useDeleteFIleSystemItem.ts';
 import { useSvgOrFallback } from '@/composables/useSvgOrFallback.ts';
+import { insertItemIntoFileSystem } from '@/composables/useIndexedDbHelper.ts';
+import { useHandleIDBErrorHandler } from '@/composables/useHandleIDBErrorHandler.ts';
+import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
+import { type ItemSize, type ItemSizeKeys, itemSizes } from '@/types/FileExplorerTypes.ts';
 
 const props = defineProps({
   currentDirectories: {
@@ -15,6 +27,7 @@ const props = defineProps({
   previousDirectories: { required: true, type: Array as PropType<FileSystemItem[][]> },
   currentPath: { required: true, type: Array as PropType<string[]> },
   rayDb: { required: true, type: Object as PropType<RayDb> },
+  parentId: { required: true, type: Number }
 });
 
 const emits = defineEmits(['itemEvent:dblClick', 'addNewDirectory']);
@@ -95,12 +108,11 @@ async function onFileDrop(event: DragEvent) {
     return;
   }
 
-  const allowedFileTypes = ['text/plain', 'image/png', 'image/jpeg'];
-  if (!allowedFileTypes.includes(file.type)) {
+  if (!Object.keys(fileExtensions).includes(file.type)) {
     return;
   }
 
-  const object = {
+  const FileObject = {
     type: file.type,
     name: file.name,
     size: file.size,
@@ -108,8 +120,22 @@ async function onFileDrop(event: DragEvent) {
     rawFile: file,
   };
 
-  await props.rayDb.insertOne<Item>('files', { label: file.name, content: object as FileItem });
+  if (props.parentId === -1) {
+    return;
+  }
+
+  try {
+    const fileId = await props.rayDb.insertOne<Item>('files', { label: file.name, content: FileObject as FileItem });
+    if (fileId && typeof fileId === 'number') {
+      await insertItemIntoFileSystem(props.rayDb, [props.parentId], { file: { name: file.name, id: fileId } });
+    }
+  } catch (e) {
+    useHandleIDBErrorHandler(e as Error);
+  }
 }
+
+const fileExplorerStore = useFileExplorerStore();
+const itemSize = computed<ItemSize>(() => itemSizes[fileExplorerStore.currentFileItemSizeKey]);
 </script>
 
 <template>
@@ -119,6 +145,9 @@ async function onFileDrop(event: DragEvent) {
     @click.right.prevent.stop="onRightClick($event, null, 'grid')"
     @dragover.prevent
     @drop.prevent="onFileDrop"
+    :style="{
+      fontSize: `${itemSize.font}px`
+    }"
   >
     <div class="grid">
       <div
@@ -129,12 +158,14 @@ async function onFileDrop(event: DragEvent) {
         @click.right.prevent.stop="onRightClick($event, fileSystemItem, 'gridItem')"
       >
         <component
+          class="file-svg"
           :is="getSvg(fileSystemItem)"
-          :custom-width="60"
-          :custom-height="60"
-          :style="{ marginLeft: '5px' }"
+          :custom-width="itemSize.size"
+          :custom-height="itemSize.size"
         />
-        {{ fileSystemItem.directory?.name ?? fileSystemItem.file?.name }}
+        <p class="file-name">
+          {{ fileSystemItem.directory?.name ?? fileSystemItem.file?.name }}
+        </p>
       </div>
     </div>
   </section>
@@ -166,13 +197,15 @@ async function onFileDrop(event: DragEvent) {
   gap: 5px;
   justify-content: center;
   align-items: center;
-  width: 100px;
+  height: max-content;
+  width: max-content;
+  max-width: 100px;
   color: var(--text-color);
   padding: 10px;
-  font-size: var(--font-size-md);
+  overflow-wrap: anywhere;
 }
 
 .item:hover {
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--button-hover-color);
 }
 </style>

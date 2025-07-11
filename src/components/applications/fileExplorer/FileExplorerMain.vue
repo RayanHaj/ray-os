@@ -10,6 +10,8 @@ import { useContextMenuStore } from '@/stores/contextMenu.ts';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
 import { useInjectOrThrow } from '@/composables/useInjectOrThrow.ts';
 import { useWindowStore } from '@/stores/window.ts';
+import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
+import type { ItemSizeKeys } from '@/types/FileExplorerTypes.ts';
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 const fileSystemStore = useFileSystemStore();
@@ -17,9 +19,19 @@ const fileSystemStore = useFileSystemStore();
 const currentPath = ref<string[]>([fileSystemStore.rootDirectory]);
 const currentItems = ref<Array<FileSystemItem & { type: string }>>([]);
 const previousItems = ref<Array<Array<FileSystemItem & { type: string }>>>([]);
+const currentItemId = ref<number>();
 
+const fileExplorerStore = useFileExplorerStore();
 onBeforeMount(async () => {
   await updateCurrentItems(fileSystemStore.rootDirectory);
+  currentItemId.value = fileSystemStore.rootId;
+
+  const fileItemSize = localStorage.getItem('fileItemSize');
+  if (fileItemSize) {
+    if (fileExplorerStore.currentFileItemSizeKey !== fileItemSize as ItemSizeKeys) {
+      fileExplorerStore.updateItemSize(fileItemSize as ItemSizeKeys);
+    }
+  }
 });
 
 watch(
@@ -65,6 +77,7 @@ async function onDblClickItem(item: FileSystemItem & { type: string }) {
     previousItems.value.push(currentItems.value);
     await updateCurrentItems(`${currentPath.value.join('/')}/${item.directory.name}`);
     currentPath.value.push(item.directory.name);
+    currentItemId.value = item.id;
   } else if (item.file) {
     switch (item.type) {
       case 'application':
@@ -72,10 +85,13 @@ async function onDblClickItem(item: FileSystemItem & { type: string }) {
         break;
       case 'file':
     }
+
+    currentItemId.value = item.id;
   }
 }
 
 const addNewItemModalOpen = ref(false);
+
 function toggleAddNewItemModal() {
   useContextMenuStore().hide();
   addNewItemModalOpen.value = true;
@@ -113,6 +129,7 @@ async function handleModalInput(input: string) {
     />
     <FileExplorerHeader :current-path="currentPath" @header-event:back="handleBackClick" />
     <FileExplorerGrid
+      :parent-id="currentItemId ?? -1"
       :current-directories="currentItems"
       :previous-directories="previousItems"
       :current-path="currentPath"

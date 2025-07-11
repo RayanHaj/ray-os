@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onBeforeMount, ref } from 'vue';
 import themes from '@/json/themes.json';
 import { useThemeSwitcher } from '@/composables/useThemeSwitcher.ts';
+import UiDropdown from '@/ui/UiDropdown.vue';
 
 const selectedTheme = ref(Object.keys(themes)[0]);
 
-onMounted(() => {
+onBeforeMount(() => {
   const currentTheme = localStorage.getItem('theme');
   if (currentTheme) {
     selectedTheme.value = currentTheme;
@@ -15,8 +16,14 @@ onMounted(() => {
 
 <template>
   <div class="settings-themes">
-    <select v-model="selectedTheme" @change="useThemeSwitcher().setTheme(selectedTheme)">
-      <option v-for="theme of Object.keys(themes)" :key="theme" :value="theme">{{ theme }}</option>
-    </select>
+    <UiDropdown
+      class="theme-dropdown"
+      :options="Object.keys(themes)"
+      :default-value="selectedTheme"
+      :custom-styles-select="{
+      width: '200px'
+      }"
+      @dropdown:value="useThemeSwitcher().setTheme($event)"
+    />
   </div>
 </template>

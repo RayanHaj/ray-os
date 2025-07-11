@@ -27,3 +27,13 @@ export type FileSystemItem = {
   directory?: { name: string; children: number[] };
   id?: number;
 };
+
+export const fileExtensions = {
+  'text/plain': 'txt',
+  'video/mp4': 'mp4',
+  'image/jpeg': 'jpeg',
+  'image/png': 'png'
+} as const;
+
+export type FileTypes = keyof typeof fileExtensions;
+export type FileExtension = typeof fileExtensions[FileTypes];

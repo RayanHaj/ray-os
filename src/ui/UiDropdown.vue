@@ -1,21 +1,26 @@
 <script setup lang="ts">
-import type { CSSProperties } from 'vue';
-
-type test = string[];
+import { type CSSProperties, onBeforeMount, ref } from 'vue';
 
 const emit = defineEmits(['dropdown:value']);
 
-const { options, customStylesSelect, customStylesOptions } = defineProps<{
-  options: test;
+const { options, defaultValue, customStylesSelect, customStylesOptions } = defineProps<{
+  options: string[];
+  defaultValue?: string;
   customStylesSelect?: Partial<CSSProperties>;
   customStylesOptions?: Partial<CSSProperties>;
 }>();
 
+const selectedOption = ref<string>('');
+onBeforeMount(() => {
+  selectedOption.value = defaultValue ?? options[0];
+});
 function handleSelectedOption(event: Event) {
   const target = event.target as HTMLSelectElement;
   if (!target) {
     return;
   }
+
+  console.log(target.value)
 
   emit('dropdown:value', target.value);
 }
@@ -23,7 +28,7 @@ function handleSelectedOption(event: Event) {
 <template>
   <div class="dropdown">
     <select :style="customStylesSelect" @change="handleSelectedOption($event)">
-      <option :style="customStylesOptions" v-for="option of options" :key="option">
+      <option :style="customStylesOptions" v-for="option of options" :key="option" :selected="selectedOption === option">
         {{ option }}
       </option>
     </select>
