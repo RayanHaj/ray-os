@@ -1,46 +1,46 @@
 <script setup lang="ts">
-import { nextTick, onBeforeMount, onMounted, ref } from 'vue';
+import { onBeforeMount, ref, watchEffect } from 'vue';
 
-const { inputValue, readonly } = defineProps<{ inputValue: string | null; readonly: boolean }>();
+const { inputValue, isReadonly } = defineProps<{ inputValue: string | null; isReadonly: boolean }>();
 
 const currentLocation = ref<string>();
 onBeforeMount(() => {
-  if (!readonly) {
+  if (!isReadonly) {
     currentLocation.value = 'PS C:\\>';
   }
 });
 
-const terminalLine = ref();
-onMounted(async () => {
-  await nextTick();
+const terminalLineRef = ref();
+watchEffect( () => {
+  if (!terminalLineRef.value || isReadonly) {
+    return;
+  }
 
-  setTimeout(() => {
-    terminalLine.value.focus();
-  }, 0);
+  terminalLineRef.value.focus();
 });
 
 const emit = defineEmits(['enter-pressed']);
 function onEnter(event: KeyboardEvent) {
   const target = event.target as HTMLElement;
   if (target.textContent) {
-    const text = target.textContent ?? '';
-    emit('enter-pressed', text);
+    const command = target.textContent ?? '';
+    emit('enter-pressed', command);
   }
 }
 </script>
 
 <template>
-  <div v-if="!readonly" class="wrapper">
+  <div v-if="!isReadonly" class="wrapper">
     <p v-if="currentLocation" class="current-location">{{ currentLocation }}</p>
-    <div ref="terminalLine" class="terminal-line" contenteditable="true" @keydown.enter.prevent="onEnter($event)">
+    <div ref="terminalLineRef" class="terminal-line" contenteditable="true" @keydown.enter.prevent="onEnter($event)">
       <p v-if="inputValue">{{ inputValue }}</p>
     </div>
   </div>
 
-  <div v-else-if="readonly" class="wrapper">
+  <div v-else-if="isReadonly" class="wrapper">
     <p v-if="currentLocation" class="current-location">{{ currentLocation }}</p>
     <div class="terminal-line">
-      <p v-if="inputValue">{{ inputValue }}</p>
+      <p v-if="inputValue"><span class="input-value">{{ inputValue }}</span></p>
     </div>
   </div>
 
@@ -70,5 +70,6 @@ function onEnter(event: KeyboardEvent) {
   border: none;
   text-wrap: wrap;
   overflow-wrap: anywhere;
+  white-space: pre-wrap;
 }
 </style>

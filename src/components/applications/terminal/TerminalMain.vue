@@ -1,31 +1,40 @@
 <script setup lang="ts">
 import TerminalLine from '@/components/applications/terminal/TerminalLine.vue';
-import { onBeforeMount, ref } from 'vue';
+import { nextTick, ref } from 'vue';
+import { useHandleTerminalCommand } from '@/composables/useHandleTerminalCommand.ts';
+import { useInjectOrThrow } from '@/composables/useInjectOrThrow.ts';
 
-const terminalLineCount = ref<number>(1);
-const defaultLines = ['RayOS Terminal', ''];
+const lines = ref(['RayOS Terminal', '']);
+const terminal = ref();
 
-onBeforeMount(() => {
-  terminalLineCount.value = defaultLines.reduce((accumulator, _) => accumulator + 1, 1);
-});
+const windowIdObject = useInjectOrThrow<{ windowName: string, id: number }>('windowIdObject');
+async function onEnter(command: string) {
+  lines.value[lines.value.length - 1] = command;
 
-function onEnter(command: string) {
-  defaultLines.push(command);
-  terminalLineCount.value += 1;
+  const commandObject = useHandleTerminalCommand(command, lines, windowIdObject);
+  if (commandObject?.command === 'cls') {
+    await nextTick();
+  }
+
+  pushNewEmptyLine();
+}
+
+function pushNewEmptyLine() {
+  lines.value.push('');
 }
 
 function isReadonly(lineNumber: number) {
-  return lineNumber !== terminalLineCount.value;
+  return lineNumber < lines.value.length - 1;
 }
 </script>
 
 <template>
-  <div class="terminal">
+  <div ref="terminal" class="terminal">
     <TerminalLine
-      v-for="lineNumber of terminalLineCount"
-      :key="lineNumber"
-      :input-value="typeof defaultLines[lineNumber-1] !== 'undefined' ? defaultLines[lineNumber-1] : null"
-      :readonly="isReadonly(lineNumber)"
+      v-for="(_, index) of lines"
+      :key="index"
+      :input-value="typeof lines[index] !== 'undefined' ? lines[index] : null"
+      :isReadonly="isReadonly(index)"
       @enter-pressed="onEnter"
     />
   </div>

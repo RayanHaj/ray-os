@@ -1,5 +1,13 @@
 <script setup lang="ts">
-import { type Component, onBeforeMount, type PropType, type Ref, ref, watch } from 'vue';
+import {
+  type Component,
+  onBeforeMount,
+  type PropType,
+  provide,
+  type Ref,
+  ref,
+  watch
+} from 'vue';
 import type { WindowFlatReference, WindowStyleObject } from '@/types/WindowTypes.ts';
 import { useWindowStore } from '@/stores/window.ts';
 import WindowHeader from '@/components/WindowHeader.vue';
@@ -8,6 +16,7 @@ import { useWindowStateManager } from '@/composables/useWindowStateManager.ts';
 import { useWindowPositionManager } from '@/composables/useWindowPositionManager.ts';
 import { useWindowResizeManager } from '@/composables/useWindowResizeManager.ts';
 import { useWindowSnappingManager } from '@/composables/useWindowSnappingManager.ts';
+import { getWindowIdObjectFromWindowId } from '@/composables/getWindowIdObjectFromWindowId.ts';
 
 const props = defineProps({
   reference: { required: true, type: Object as PropType<WindowFlatReference> },
@@ -21,6 +30,8 @@ const props = defineProps({
 const windowStore = useWindowStore();
 onBeforeMount(() => {
   styles.value.zIndex = windowStore.getZIndex(props.reference.label, props.reference.id);
+  const windowIdObject = getWindowIdObjectFromWindowId(windowStore.getGlobalId(props.reference.label, props.reference.id));
+  provide('windowIdObject', windowIdObject);
 });
 
 watch(
