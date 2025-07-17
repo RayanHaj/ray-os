@@ -41,7 +41,7 @@ watch(
 
 async function updateCurrentItems(path: string) {
   const fileSystemItems = await fileSystemLookup(rayDb, path);
-  if (!fileSystemItems || !fileSystemItems.children) {
+  if (fileSystemItems instanceof Error || !fileSystemItems) {
     throw new Error(`No fileSystemItems (children) found with specified path: ${path}`);
   }
 
@@ -105,9 +105,12 @@ async function handleModalInput(input: string) {
   if (previousItem) {
     parentId = previousItem.find((el) => el.directory?.name === currentPathItemName)?.id ?? null;
   } else {
-    parentId = await fileSystemLookup(rayDb, fileSystemStore.rootDirectory).then((value) =>
-      value ? value.parent.id : null,
-    );
+    const value = await fileSystemLookup(rayDb, fileSystemStore.rootDirectory);
+    if (value instanceof Error || !value) {
+      throw new Error(`No fileSystemItems (children) found with specified path`);
+    }
+
+    parentId = value ? value.parent.id : null;
   }
 
   if (!parentId) {

@@ -51,7 +51,6 @@ async function onPlay() {
 const showRange = ref(false);
 function onRangeInput(e: Event) {
   const event = e.target as HTMLInputElement;
-  console.log(event.value);
   sereneSoundsStore.adjustVolume(props.sound.name, Number(event.value));
 }
 </script>

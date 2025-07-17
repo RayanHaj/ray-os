@@ -20,8 +20,6 @@ function handleSelectedOption(event: Event) {
     return;
   }
 
-  console.log(target.value)
-
   emit('dropdown:value', target.value);
 }
 </script>

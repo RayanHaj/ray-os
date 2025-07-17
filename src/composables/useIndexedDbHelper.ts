@@ -62,7 +62,7 @@ export async function fileSystemLookup(rayDb: RayDb, path: string) {
   });
 
   if (fileSystemItems.length === 0 || !startPoint) {
-    throw new Error(`no directory found with name ${pathArray[0]}`);
+    return new Error(`no directory found with name ${pathArray[0]}`);
   }
 
   pathArray.splice(0, 1);

@@ -1,17 +1,16 @@
 <script setup lang="ts">
-import { onBeforeMount, ref, watchEffect } from 'vue';
+import { computed, onBeforeMount, ref, watchEffect } from 'vue';
 
-const { inputValue, isReadonly } = defineProps<{ inputValue: string | null; isReadonly: boolean }>();
+const { currentPath, inputValue, isReadonly, isError } = defineProps<{
+  currentPath: string;
+  inputValue: { line: string | Error; isPlain: boolean };
+  isReadonly: boolean;
+  isError: boolean;
+}>();
 
-const currentLocation = ref<string>();
-onBeforeMount(() => {
-  if (!isReadonly) {
-    currentLocation.value = 'PS C:\\>';
-  }
-});
-
+const path = ref<string>('');
 const terminalLineRef = ref();
-watchEffect( () => {
+watchEffect(() => {
   if (!terminalLineRef.value || isReadonly) {
     return;
   }
@@ -19,7 +18,12 @@ watchEffect( () => {
   terminalLineRef.value.focus();
 });
 
+onBeforeMount(() => {
+  path.value = currentPath;
+});
+
 const emit = defineEmits(['enter-pressed']);
+
 function onEnter(event: KeyboardEvent) {
   const target = event.target as HTMLElement;
   if (target.textContent) {
@@ -27,24 +31,40 @@ function onEnter(event: KeyboardEvent) {
     emit('enter-pressed', command);
   }
 }
+
+const displayPath = computed(() => `PS ${path.value}>`);
 </script>
 
 <template>
-  <div v-if="!isReadonly" class="wrapper">
-    <p v-if="currentLocation" class="current-location">{{ currentLocation }}</p>
-    <div ref="terminalLineRef" class="terminal-line" contenteditable="true" @keydown.enter.prevent="onEnter($event)">
-      <p v-if="inputValue">{{ inputValue }}</p>
+  <div
+    v-if="!isReadonly"
+    class="wrapper"
+  >
+    <p v-if="!inputValue.isPlain" class="current-location">{{ displayPath }}</p>
+    <div
+      ref="terminalLineRef"
+      class="terminal-line"
+      contenteditable="true"
+      @keydown.enter.prevent="onEnter($event)"
+    >
+      <p v-if="inputValue.line">{{ inputValue.line }}</p>
     </div>
   </div>
 
-  <div v-else-if="isReadonly" class="wrapper">
-    <p v-if="currentLocation" class="current-location">{{ currentLocation }}</p>
+  <div
+    v-else-if="isReadonly"
+    class="wrapper"
+    :style="{ color: isError ? 'red' : 'var(--text-color)' }"
+  >
+    <p v-if="!inputValue.isPlain" class="current-location">{{ displayPath }}</p>
     <div class="terminal-line">
-      <p v-if="inputValue"><span class="input-value">{{ inputValue }}</span></p>
+      <p v-if="inputValue.line">
+        <span class="input-value">{{ inputValue.line }}</span>
+      </p>
     </div>
   </div>
 
-  <p v-else>{{ inputValue }}</p>
+  <p v-else>{{ inputValue.line }}</p>
 </template>
 
 <style scoped>
@@ -62,7 +82,6 @@ function onEnter(event: KeyboardEvent) {
 
 .terminal-line {
   width: 100%;
-  color: var(--text-color);
   height: fit-content;
   resize: none;
   outline: none;
