@@ -91,7 +91,6 @@ async function onDblClickItem(item: FileSystemItem & { type: string }) {
 }
 
 const addNewItemModalOpen = ref(false);
-
 function toggleAddNewItemModal() {
   useContextMenuStore().hide();
   addNewItemModalOpen.value = true;

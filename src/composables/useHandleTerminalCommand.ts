@@ -2,7 +2,11 @@ import { type CommandKeyword, commands } from '@/types/TerminalTypes.ts';
 import type { Ref } from 'vue';
 import { useWindowStore } from '@/stores/window.ts';
 import type { RayDb } from 'ray-db-wrapper';
-import { fileSystemLookup } from '@/composables/useIndexedDbHelper.ts';
+import {
+  fileSystemLookup,
+  getFileSystemItem,
+  insertItemIntoFileSystem
+} from '@/composables/useIndexedDbHelper.ts';
 
 type CommandObject = { command: CommandKeyword; value: string };
 
@@ -64,7 +68,7 @@ async function handleCommand(
     case 'cd':
       const hasError = await handleCd(rayDb, currentPath, commandObject.value);
       if (hasError) {
-        error = hasError
+        error = hasError;
       }
       break;
     case 'cd..':
@@ -81,6 +85,9 @@ async function handleCommand(
       break;
     case 'dir':
       await handleDir(rayDb, currentPath, lines);
+      break;
+    case 'mkdir':
+      await handleMkdir(rayDb, currentPath, commandObject.value);
   }
 
   return error;
@@ -124,4 +131,13 @@ async function handleDir(rayDb: RayDb, currentPath: Ref<string[]>, lines: Ref<Ar
   }
 
   lines.value.push({ line: childNameArray.map(value => `[${value}]: ${extension}`).join('\n'), isPlain: true });
+}
+
+async function handleMkdir(rayDb: RayDb, currentPath: Ref<string[]>, name: string) {
+  const value = await fileSystemLookup(rayDb, currentPath.value.join('/'));
+  if (value instanceof Error || !value?.parent.id) {
+    return;
+  }
+
+  await insertItemIntoFileSystem(rayDb, [value.parent.id], { directory: { name: name, children: [] } });
 }
