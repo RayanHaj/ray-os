@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest';
-import { parseCommandStringToArray } from '@/composables/useHandleTerminalCommand.ts';
+import { parseCommandStringToArray } from '@/composables/terminal/useHandleTerminalCommand.ts';
 
 describe('parseCommandStringToArray', () => {
   test('splitst commando zonder argument', () => {

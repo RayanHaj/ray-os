@@ -1,4 +1,4 @@
-import { useWindowStore } from '@/stores/window';
+import { useWindowStore } from '@/stores/window.ts';
 import { computed } from 'vue';
 
 export function useFlatOpenWindowsReferencesFull() {

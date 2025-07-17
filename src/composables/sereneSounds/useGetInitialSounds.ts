@@ -1,5 +1,5 @@
 import type { Sounds } from '@/types/SoundTypes.ts';
-import { useGetAudioForSereneSounds } from '@/composables/useGetAudioForSereneSounds.ts';
+import { useGetAudioForSereneSounds } from '@/composables/sereneSounds/useGetAudioForSereneSounds.ts';
 import type { AllowedSoundCategories, AllowedSoundNames } from '@/types/SereneSoundsTypes.ts';
 
 export async function useGetInitialSounds() {

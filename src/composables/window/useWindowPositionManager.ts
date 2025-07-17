@@ -1,6 +1,6 @@
 import type { Ref } from 'vue';
-import { useWindowStateManager } from '@/composables/useWindowStateManager.ts';
-import { useWindowSnappingManager } from '@/composables/useWindowSnappingManager.ts';
+import { useWindowStateManager } from '@/composables/window/useWindowStateManager.ts';
+import { useWindowSnappingManager } from '@/composables/window/useWindowSnappingManager.ts';
 import { useBrowserStore } from '@/stores/browser.ts';
 
 type StyleProps = {

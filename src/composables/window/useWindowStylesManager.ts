@@ -1,6 +1,6 @@
 import { type Ref, watch } from 'vue';
 import type { WindowFlatReference } from '@/types/WindowTypes.ts';
-import type { useWindowStateManager } from '@/composables/useWindowStateManager.ts';
+import type { useWindowStateManager } from '@/composables/window/useWindowStateManager.ts';
 
 type StyleProps = {
   left: string;

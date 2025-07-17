@@ -11,12 +11,12 @@ import {
 import type { WindowFlatReference, WindowStyleObject } from '@/types/WindowTypes.ts';
 import { useWindowStore } from '@/stores/window.ts';
 import WindowHeader from '@/components/WindowHeader.vue';
-import { useWindowStylesManager } from '@/composables/useWindowStylesManager.ts';
-import { useWindowStateManager } from '@/composables/useWindowStateManager.ts';
-import { useWindowPositionManager } from '@/composables/useWindowPositionManager.ts';
-import { useWindowResizeManager } from '@/composables/useWindowResizeManager.ts';
-import { useWindowSnappingManager } from '@/composables/useWindowSnappingManager.ts';
-import { getWindowIdObjectFromWindowId } from '@/composables/getWindowIdObjectFromWindowId.ts';
+import { useWindowStylesManager } from '@/composables/window/useWindowStylesManager.ts';
+import { useWindowStateManager } from '@/composables/window/useWindowStateManager.ts';
+import { useWindowPositionManager } from '@/composables/window/useWindowPositionManager.ts';
+import { useWindowResizeManager } from '@/composables/window/useWindowResizeManager.ts';
+import { useWindowSnappingManager } from '@/composables/window/useWindowSnappingManager.ts';
+import { useGetWindowIdObjectFromWindowId } from '@/composables/window/useGetWindowIdObjectFromWindowId.ts';
 
 const props = defineProps({
   reference: { required: true, type: Object as PropType<WindowFlatReference> },
@@ -30,7 +30,7 @@ const props = defineProps({
 const windowStore = useWindowStore();
 onBeforeMount(() => {
   styles.value.zIndex = windowStore.getZIndex(props.reference.label, props.reference.id);
-  const windowIdObject = getWindowIdObjectFromWindowId(windowStore.getGlobalId(props.reference.label, props.reference.id));
+  const windowIdObject = useGetWindowIdObjectFromWindowId(windowStore.getGlobalId(props.reference.label, props.reference.id));
   provide('windowIdObject', windowIdObject);
 });
 

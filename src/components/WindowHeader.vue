@@ -9,7 +9,7 @@ import {
   shallowRef,
 } from 'vue';
 import type { WindowFlatReference } from '@/types/WindowTypes.ts';
-import { useSvgOrFallback } from '@/composables/useSvgOrFallback.ts';
+import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
 import { useWindowStore } from '@/stores/window.ts';
 
 const props = defineProps({

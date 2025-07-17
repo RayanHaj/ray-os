@@ -2,13 +2,13 @@ import './assets/main.css';
 import themes from '@/json/themes.json';
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
-import { useThemeSwitcher } from '@/composables/useThemeSwitcher.ts';
+import { useThemeSwitcher } from '@/composables/helpers/useThemeSwitcher.ts';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
 import { RayDb } from 'ray-db-wrapper';
 
 import App from './App.vue';
 import router from './router';
-import { insertItemIntoFileSystem } from '@/composables/useIndexedDbHelper.ts';
+import { insertItemIntoFileSystem } from '@/composables/fileSystem/useIndexedDbHelper.ts';
 import { useFileStore } from '@/stores/file.ts';
 
 const app = createApp(App);

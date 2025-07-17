@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import GridTile from '@/components/GridTile.vue';
-import { useTileCountGrid } from '@/composables/useTileCountGrid.ts';
+import { useTileCountGrid } from '@/composables/desktop/useTileCountGrid.ts';
 import { computed } from 'vue';
 import { useBrowserStore } from '@/stores/browser.ts';
 import { useTaskbarStore } from '@/stores/taskbar.ts';

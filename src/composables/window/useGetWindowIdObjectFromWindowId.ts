@@ -1,4 +1,4 @@
-export function getWindowIdObjectFromWindowId(
+export function useGetWindowIdObjectFromWindowId(
   fullId: string,
 ): { windowName: string; id: number } {
   const splitId = fullId.split('-');

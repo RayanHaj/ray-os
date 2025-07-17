@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onBeforeMount, ref, watch } from 'vue';
-import { fileSystemLookup, insertItemIntoFileSystem } from '@/composables/useIndexedDbHelper.ts';
+import { fileSystemLookup, insertItemIntoFileSystem } from '@/composables/fileSystem/useIndexedDbHelper.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import FileExplorerHeader from '@/components/applications/fileExplorer/FileExplorerHeader.vue';
 import FileExplorerGrid from '@/components/applications/fileExplorer/FileExplorerGrid.vue';
@@ -8,7 +8,7 @@ import type { FileSystemItem, Item } from '@/types/ItemTypes.ts';
 import FileExplorerModal from '@/components/applications/fileExplorer/FileExplorerModal.vue';
 import { useContextMenuStore } from '@/stores/contextMenu.ts';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
-import { useInjectOrThrow } from '@/composables/useInjectOrThrow.ts';
+import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import { useWindowStore } from '@/stores/window.ts';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
 import type { ItemSizeKeys } from '@/types/FileExplorerTypes.ts';

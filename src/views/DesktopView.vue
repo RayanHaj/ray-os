@@ -4,7 +4,7 @@ import TaskbarMain from '@/components/TaskbarMain.vue';
 import { type Component, type ComputedRef, ref, shallowRef } from 'vue';
 import WindowMain from '@/components/WindowMain.vue';
 import type { WindowFlatReference } from '@/types/WindowTypes.ts';
-import { useFlatOpenWindowsReferencesFull } from '@/composables/useFlatOpenWindowsReferencesFull.ts';
+import { useFlatOpenWindowsReferencesFull } from '@/composables/window/useFlatOpenWindowsReferencesFull.ts';
 
 import FallbackMain from '@/components/applications/FallbackMain.vue';
 import SettingsMain from '@/components/applications/settings/SettingsMain.vue';
@@ -15,7 +15,7 @@ import DesktopSnapLayout from '@/components/DesktopSnapLayout.vue';
 import ContextMenu from '@/components/ContextMenu.vue';
 import SereneSoundsMain from '@/components/applications/sereneSounds/SereneSoundsMain.vue';
 import { useContextMenuStore } from '@/stores/contextMenu.ts';
-import { useOnOuterClickCloseContextMenu } from '@/composables/useOnOuterClickCloseContextMenu.ts';
+import { useOnOuterClickCloseContextMenu } from '@/composables/contextMenu/useOnOuterClickCloseContextMenu.ts';
 import UiToast from '@/ui/UiToast.vue';
 import TerminalMain from '@/components/applications/terminal/TerminalMain.vue';
 

@@ -3,7 +3,7 @@ import { defineStore } from 'pinia';
 import type { ApplicationItem, Item } from '@/types/ItemTypes.ts';
 import initItems from '@/json/initTiles.json';
 import type { RayDb } from 'ray-db-wrapper';
-import { fileSystemLookup, insertItemIntoFileSystem } from '@/composables/useIndexedDbHelper.ts';
+import { fileSystemLookup, insertItemIntoFileSystem } from '@/composables/fileSystem/useIndexedDbHelper.ts';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
 
 export const useFileStore = defineStore('file', () => {

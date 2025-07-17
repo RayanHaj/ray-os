@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { useGridStore } from '@/stores/grid.ts';
-import { useTileCountGrid } from '@/composables/useTileCountGrid.ts';
+import { useTileCountGrid } from '@/composables/desktop/useTileCountGrid.ts';
 import { type Component, computed, onMounted, ref, shallowRef, watchEffect } from 'vue';
 import type { Item } from '@/types/ItemTypes.ts';
 import { useWindowStore } from '@/stores/window.ts';
-import { useSvgOrFallback } from '@/composables/useSvgOrFallback.ts';
+import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
 
 const props = defineProps({ position: { type: Object, required: true } });
 

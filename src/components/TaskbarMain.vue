@@ -4,7 +4,7 @@ import TaskbarTile from '@/components/TaskbarTile.vue';
 import StartMenuMain from '@/components/StartMenuMain.vue';
 import { useStartMenuStore } from '@/stores/startMenu.ts';
 import TimeProcessSection from '@/components/TimeProcessSection.vue';
-import { useSvgOrFallback } from '@/composables/useSvgOrFallback.ts';
+import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
 import { type Component, onBeforeMount, shallowRef } from 'vue';
 
 const taskbarStore = useTaskbarStore();

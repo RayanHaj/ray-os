@@ -12,10 +12,10 @@ import type {
   SecondaryActionsContextMenu,
   PrimaryActionsContextMenu,
 } from '@/types/ContextMenuTypes.ts';
-import { useDeleteFIleSystemItem } from '@/composables/useDeleteFIleSystemItem.ts';
-import { useSvgOrFallback } from '@/composables/useSvgOrFallback.ts';
-import { insertItemIntoFileSystem } from '@/composables/useIndexedDbHelper.ts';
-import { useHandleIDBErrorHandler } from '@/composables/useHandleIDBErrorHandler.ts';
+import { useDeleteFIleSystemItem } from '@/composables/fileSystem/useDeleteFIleSystemItem.ts';
+import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
+import { insertItemIntoFileSystem } from '@/composables/fileSystem/useIndexedDbHelper.ts';
+import { useHandleIDBErrorHandler } from '@/composables/fileSystem/useHandleIDBErrorHandler.ts';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
 import { type ItemSize, type ItemSizeKeys, itemSizes } from '@/types/FileExplorerTypes.ts';
 

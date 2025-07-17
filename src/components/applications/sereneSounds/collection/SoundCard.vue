@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onBeforeMount, type PropType, ref, shallowRef, watch } from 'vue';
-import { useSvgByFileNameAndDirectory } from '@/composables/useSvgByFileNameAndDirectory.ts';
+import { useSvgByFileNameAndDirectory } from '@/composables/svg/useSvgByFileNameAndDirectory.ts';
 import { useSereneSoundsStore } from '@/stores/sereneSounds.ts';
 import type { AllowedSoundCategories, AllowedSoundNames } from '@/types/SereneSoundsTypes.ts';
 

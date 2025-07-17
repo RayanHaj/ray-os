@@ -1,7 +1,7 @@
 import type { RayDb } from 'ray-db-wrapper';
 import type { FileSystemItem } from '@/types/ItemTypes.ts';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
-import { useGetRootDirectory } from '@/composables/useGetRootDirectory.ts';
+import { useGetRootDirectory } from '@/composables/fileSystem/useGetRootDirectory.ts';
 
 export async function insertItemIntoFileSystem(
   rayDb: RayDb,

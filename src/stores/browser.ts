@@ -1,6 +1,6 @@
 import { ref } from 'vue';
 import { defineStore } from 'pinia';
-import { useDebounce } from '@/composables/useDebounce.ts';
+import { useDebounce } from '@/composables/helpers/useDebounce.ts';
 import { useGridStore } from '@/stores/grid.ts';
 import { useTaskbarStore } from '@/stores/taskbar.ts';
 

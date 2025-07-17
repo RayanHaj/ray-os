@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { type Component, computed, onBeforeMount, shallowRef } from 'vue';
-import { useSvgByFileNameAndDirectory } from '@/composables/useSvgByFileNameAndDirectory.ts';
+import { useSvgByFileNameAndDirectory } from '@/composables/svg/useSvgByFileNameAndDirectory.ts';
 import type {
   SecondaryActionsContextMenu,
   AllPrimaryActionsContextMenu,

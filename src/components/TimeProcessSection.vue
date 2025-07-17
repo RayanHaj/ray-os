@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import SereneSoundsPlayingSound from '@/components/applications/sereneSounds/SereneSoundsPlayingSound.vue';
-import { useDateTime } from '@/composables/UseDateTime.ts';
+import { useDateTime } from '@/composables/helpers/UseDateTime.ts';
 import { ref, watch } from 'vue';
 import { useSereneSoundsStore } from '@/stores/sereneSounds.ts';
 import { useWindowStore } from '@/stores/window.ts';

@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import type { AllowedSoundNames } from '@/types/SereneSoundsTypes.ts';
 import type { Sounds } from '@/types/SoundTypes.ts';
-import { useGetInitialSounds } from '@/composables/useGetInitialSounds.ts';
+import { useGetInitialSounds } from '@/composables/sereneSounds/useGetInitialSounds.ts';
 
 export const useSereneSoundsStore = defineStore('sereneSounds', () => {
   const sounds = ref<Sounds>({} as Sounds);

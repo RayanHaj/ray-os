@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import TerminalLine from '@/components/applications/terminal/TerminalLine.vue';
 import { nextTick, onBeforeMount, ref } from 'vue';
-import { useHandleTerminalCommand } from '@/composables/useHandleTerminalCommand.ts';
-import { useInjectOrThrow } from '@/composables/useInjectOrThrow.ts';
+import { useHandleTerminalCommand } from '@/composables/terminal/useHandleTerminalCommand.ts';
+import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
 

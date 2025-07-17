@@ -1,6 +1,6 @@
 import { ref, type Ref } from 'vue';
 import type { WindowFlatReference, WindowStyleObject } from '@/types/WindowTypes.ts';
-import { useWindowStateManager } from '@/composables/useWindowStateManager.ts';
+import { useWindowStateManager } from '@/composables/window/useWindowStateManager.ts';
 import { useBrowserStore } from '@/stores/browser.ts';
 import { useWindowStore } from '@/stores/window.ts';
 

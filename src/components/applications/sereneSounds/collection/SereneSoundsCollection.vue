@@ -2,7 +2,7 @@
 import { useSereneSoundsStore } from '@/stores/sereneSounds.ts';
 import SoundCardsCategory from '@/components/applications/sereneSounds/collection/SoundCardsCategory.vue';
 import { onBeforeMount, ref } from 'vue';
-import { useGetCategoriesFromSounds } from '@/composables/useGetCategoriesFromSounds.ts';
+import { useGetCategoriesFromSounds } from '@/composables/sereneSounds/useGetCategoriesFromSounds.ts';
 import type { AllowedSoundCategories } from '@/types/SereneSoundsTypes.ts';
 
 const sereneSoundsStore = useSereneSoundsStore();

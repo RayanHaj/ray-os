@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useCalculatorManager } from '@/composables/calculator/useCalculatorManager.ts';
 import type { CalculatorKey, SpecialKey } from '@/types/CalculatorTypes.ts';
-import { useInjectOrThrow } from '@/composables/useInjectOrThrow.ts';
+import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 
 const calculatorManager = useInjectOrThrow<ReturnType<typeof useCalculatorManager>>('calculatorManager');
 const calculationGridItems: CalculatorKey[] = [

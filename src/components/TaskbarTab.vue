@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { type Component, onBeforeMount, type PropType, shallowRef } from 'vue';
 import { useWindowStore } from '@/stores/window.ts';
-import { useSvgByFileNameAndDirectory } from '@/composables/useSvgByFileNameAndDirectory.ts';
+import { useSvgByFileNameAndDirectory } from '@/composables/svg/useSvgByFileNameAndDirectory.ts';
 
 type WindowReference = { id: number; zIndex: number; minimized: boolean };
 

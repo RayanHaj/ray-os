@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { type PropType, ref } from 'vue';
-import { useGetBackgroundColorBySoundCategory } from '@/composables/useGetBackgroundColorBySoundCategory.ts';
+import { useGetBackgroundColorBySoundCategory } from '@/composables/sereneSounds/useGetBackgroundColorBySoundCategory.ts';
 import type { AllowedSoundCategories, AllowedSoundNames } from '@/types/SereneSoundsTypes.ts';
 import type { Sounds } from '@/types/SoundTypes.ts';
-import { useFilterSoundsByCategory } from '@/composables/useFilterSoundsByCategory.ts';
+import { useFilterSoundsByCategory } from '@/composables/sereneSounds/useFilterSoundsByCategory.ts';
 import { useSereneSoundsStore } from '@/stores/sereneSounds.ts';
 import SoundCard from '@/components/applications/sereneSounds/collection/SoundCard.vue';
 

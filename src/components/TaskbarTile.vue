@@ -4,7 +4,7 @@ import { useWindowStore } from '@/stores/window.ts';
 import { type Component, computed, onBeforeMount, ref, shallowRef } from 'vue';
 import type { Item } from '@/types/ItemTypes.ts';
 import TaskbarTabs from '@/components/TaskbarTabs.vue';
-import { useSvgOrFallback } from '@/composables/useSvgOrFallback.ts';
+import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
 
 const taskbarStore = useTaskbarStore();
 const props = defineProps({ id: { required: true, type: Number } });
