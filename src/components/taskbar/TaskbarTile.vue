@@ -3,7 +3,7 @@ import { useTaskbarStore } from '@/stores/taskbar.ts';
 import { useWindowStore } from '@/stores/window.ts';
 import { type Component, computed, onBeforeMount, ref, shallowRef } from 'vue';
 import type { Item } from '@/types/ItemTypes.ts';
-import TaskbarTabs from '@/components/TaskbarTabs.vue';
+import TaskbarTabs from '@/components/taskbar/TaskbarTabs.vue';
 import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
 
 const taskbarStore = useTaskbarStore();

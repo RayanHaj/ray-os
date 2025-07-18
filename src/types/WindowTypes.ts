@@ -19,3 +19,6 @@ export type WindowStyleObject = {
   cursor: string;
   transition: string;
 };
+
+export const windowNames = ['settings', 'calculator', 'paint', 'fileExplorer', 'sereneSounds', 'terminal'] as const;
+export type WindowName = typeof windowNames[number];

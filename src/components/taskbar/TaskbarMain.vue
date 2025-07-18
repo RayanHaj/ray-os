@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useTaskbarStore } from '@/stores/taskbar.ts';
-import TaskbarTile from '@/components/TaskbarTile.vue';
+import TaskbarTile from '@/components/taskbar/TaskbarTile.vue';
 import StartMenuMain from '@/components/StartMenuMain.vue';
 import { useStartMenuStore } from '@/stores/startMenu.ts';
 import TimeProcessSection from '@/components/TimeProcessSection.vue';

@@ -1,44 +1,29 @@
 <script setup lang="ts">
-import GridMain from '@/components/GridMain.vue';
-import TaskbarMain from '@/components/TaskbarMain.vue';
-import { type Component, type ComputedRef, ref, shallowRef } from 'vue';
+import DesktopGridMain from '@/components/desktop/DesktopGridMain.vue';
+import TaskbarMain from '@/components/taskbar/TaskbarMain.vue';
+import { type Component, type ComputedRef, ref } from 'vue';
 import WindowMain from '@/components/WindowMain.vue';
-import type { WindowFlatReference } from '@/types/WindowTypes.ts';
+import { type WindowFlatReference, type WindowName, windowNames } from '@/types/WindowTypes.ts';
 import { useFlatOpenWindowsReferencesFull } from '@/composables/window/useFlatOpenWindowsReferencesFull.ts';
 
 import FallbackMain from '@/components/applications/FallbackMain.vue';
-import SettingsMain from '@/components/applications/settings/SettingsMain.vue';
-import CalculatorMain from '@/components/applications/calculator/CalculatorMain.vue';
-import PaintMain from '@/components/applications/paint/PaintMain.vue';
-import FileExplorerMain from '@/components/applications/fileExplorer/FileExplorerMain.vue';
 import DesktopSnapLayout from '@/components/DesktopSnapLayout.vue';
 import ContextMenu from '@/components/ContextMenu.vue';
-import SereneSoundsMain from '@/components/applications/sereneSounds/SereneSoundsMain.vue';
 import { useContextMenuStore } from '@/stores/contextMenu.ts';
 import { useOnOuterClickCloseContextMenu } from '@/composables/contextMenu/useOnOuterClickCloseContextMenu.ts';
 import UiToast from '@/ui/UiToast.vue';
-import TerminalMain from '@/components/applications/terminal/TerminalMain.vue';
-
-const windowContentComponents = shallowRef<{ [componentName: string]: Component }>({
-  settings: SettingsMain,
-  calculator: CalculatorMain,
-  paint: PaintMain,
-  fileExplorer: FileExplorerMain,
-  sereneSounds: SereneSoundsMain,
-  terminal: TerminalMain
-});
+import { useGetWindowContentComponent } from '@/composables/window/useGetWindowContentComponent.ts';
 
 const references: ComputedRef<WindowFlatReference[]> = useFlatOpenWindowsReferencesFull();
 
 function getWindowContentComponent(reference: WindowFlatReference): Component {
   const formattedComponentName =
     reference.label[0].toLowerCase() + reference.label.replace(' ', '').substring(1);
-  const component = windowContentComponents.value[formattedComponentName];
-  if (!component) {
+  if (!windowNames.includes(formattedComponentName as WindowName)) {
     return FallbackMain;
   }
 
-  return component;
+  return useGetWindowContentComponent(formattedComponentName as WindowName);
 }
 
 const showSnapLayout = ref<{ show: boolean; windowId: string }>({ show: false, windowId: '' });
@@ -63,7 +48,7 @@ const contextMenuStore = useContextMenuStore();
       :selected-layout="selectedLayout"
       @show-snap-layout="showSnapLayout = $event"
     />
-    <GridMain />
+    <DesktopGridMain />
     <TaskbarMain />
   </main>
 </template>

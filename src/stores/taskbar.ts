@@ -10,7 +10,7 @@ export const useTaskbarStore = defineStore('taskbar', () => {
   const fileStore = useFileStore();
 
   function initializeTaskbar() {
-    items.value = fileStore.files;
+    items.value = [...fileStore.files];
   }
 
   return { items, taskbarHeight, initializeTaskbar };

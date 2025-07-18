@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount } from 'vue';
 import { useWindowStore } from '@/stores/window.ts';
-import TaskbarTab from '@/components/TaskbarTab.vue';
+import TaskbarTab from '@/components/taskbar/TaskbarTab.vue';
 
 const props = defineProps({ applicationName: { required: true, type: String } });
 
