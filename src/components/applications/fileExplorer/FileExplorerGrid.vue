@@ -12,7 +12,7 @@ import type {
   SecondaryActionsContextMenu,
   PrimaryActionsContextMenu,
 } from '@/types/ContextMenuTypes.ts';
-import { useDeleteFIleSystemItem } from '@/composables/fileSystem/useDeleteFIleSystemItem.ts';
+import { useDeleteFileSystemItem } from '@/composables/fileSystem/useDeleteFileSystemItem.ts';
 import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
 import { insertItemIntoFileSystem } from '@/composables/fileSystem/useIndexedDbHelper.ts';
 import { useHandleIDBErrorHandler } from '@/composables/fileSystem/useHandleIDBErrorHandler.ts';
@@ -60,7 +60,7 @@ const actionsGridItem = (item: FileSystemItem | null) => {
     Copy: async () => {},
     Delete: async () => {
       if (item) {
-        await useDeleteFIleSystemItem(props.rayDb, item);
+        await useDeleteFileSystemItem(props.rayDb, item);
         useContextMenuStore().hide();
       }
     },

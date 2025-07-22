@@ -8,6 +8,7 @@ import { useHandleHelp } from '@/composables/terminal/commands/useHandleHelp.ts'
 import { useHandleExit } from '@/composables/terminal/commands/useHandleExit.ts';
 import { useHandleDir } from '@/composables/terminal/commands/useHandleDir.ts';
 import { useHandleMkdir } from '@/composables/terminal/commands/useHandleMkdir.ts';
+import { useHandleDel } from '@/composables/terminal/commands/useHandleDel.ts';
 
 type CommandObject = { command: CommandKeyword; value: string };
 
@@ -54,10 +55,10 @@ async function handleCommand(
   let commandError: Error | null = null;
   switch (commandObject.command) {
     case 'cd':
-      commandError = await useHandleCd(rayDb, currentPath, commandObject.value) ?? null;
+      commandError = (await useHandleCd(rayDb, currentPath, commandObject.value)) ?? null;
       break;
     case 'cd..':
-      useHandleCdDots(currentPath)
+      useHandleCdDots(currentPath);
       break;
     case 'cls':
       useHandleCls(lines);
@@ -72,8 +73,10 @@ async function handleCommand(
       await useHandleDir(rayDb, currentPath, lines);
       break;
     case 'mkdir':
-      commandError = await useHandleMkdir(rayDb, lines, currentPath, commandObject.value) ?? null;
+      commandError = (await useHandleMkdir(rayDb, lines, currentPath, commandObject.value)) ?? null;
       break;
+    case 'del':
+      commandError = (await useHandleDel(rayDb, lines, currentPath, commandObject.value)) ?? null;
   }
 
   return commandError;

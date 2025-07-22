@@ -27,6 +27,11 @@ export async function useHandleDir(
     }
   }
 
+  if (childNameArray.length === 0) {
+    lines.value.push({ line: `[]`, isPlain: true });
+    return;
+  }
+
   lines.value.push({
     line: childNameArray.map((value) => `[${value}]: ${extension}`).join('\n'),
     isPlain: true,
