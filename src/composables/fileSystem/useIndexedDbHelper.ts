@@ -3,85 +3,145 @@ import type { FileSystemItem } from '@/types/ItemTypes.ts';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
 import { useGetRootDirectory } from '@/composables/fileSystem/useGetRootDirectory.ts';
 
+function insertionCheck(
+  foundItems: FileSystemItem[],
+  item: { file?: { name: string; id: number }; directory?: { name: string; children: number[] } },
+  parents: number[],
+) {
+  if (item.file) {
+    let state: boolean | Error = true;
+    if (item.file.name.trim().length === 0) {
+      return new Error('provide a file name');
+    }
+
+    foundItems.some((foundItem) => {
+      const alreadyExists =
+        foundItem.parents.some((parent) => parents.includes(parent)) &&
+        foundItem.file?.name === item.file?.name;
+
+      if (alreadyExists) {
+        state = new Error(`file (${item.file?.name}) already exists in directory`);
+        return true;
+      }
+    });
+
+    return state;
+  } else if (item.directory) {
+    let state: boolean | Error = true;
+    if (item.directory.name.trim().length === 0) {
+      return new Error('provide a directory name');
+    }
+
+    foundItems.some((foundItem) => {
+      const isRootDirectoryName =
+        foundItem.directory?.name === useFileSystemStore().rootDirectory &&
+        item.directory?.name === useFileSystemStore().rootDirectory;
+
+      const hasDirectoryWithSameName =
+        foundItem.parents.some((parent) => parents.includes(parent)) &&
+        foundItem.directory?.name === item.directory?.name;
+
+      if (isRootDirectoryName) {
+        state = new Error(`directory cannot be named after root directory`);
+        return true;
+      } else if (hasDirectoryWithSameName) {
+        state = new Error(`directory (${item.directory?.name}) already exists in directory`);
+        return true;
+      }
+    });
+
+    return state;
+  }
+  return new Error('non existing item found');
+}
+
 export async function insertItemIntoFileSystem(
   rayDb: RayDb,
   parents: number[],
   item: { file?: { name: string; id: number }; directory?: { name: string; children: number[] } },
-) {
-  const foundItems = await rayDb.findAll<FileSystemItem>('fileSystem');
-  if (
-    foundItems.filter(
-      (foundItem) =>
-        foundItem.directory?.name === useFileSystemStore().rootDirectory &&
-        item.directory?.name === useFileSystemStore().rootDirectory,
-    ).length === 1
-  ) {
-    return;
-  }
+): Promise<Error | number | undefined> {
+  try {
+    const foundItems = await rayDb.findAll<FileSystemItem>('fileSystem');
 
-  let id = await rayDb.insertOne<FileSystemItem>('fileSystem', {
-    parents: parents,
-    [item.directory ? 'directory' : 'file']: item.directory || item.file,
-  });
+    const check = insertionCheck(foundItems, item, parents);
+    if (check && check instanceof Error) {
+      throw check;
+    }
 
-  if (Number.isNaN(id)) return;
+    let id = await rayDb.insertOne<FileSystemItem>('fileSystem', {
+      parents: parents,
+      [item.directory ? 'directory' : 'file']: item.directory || item.file,
+    });
 
-  id = id as number;
-  for (const parentId of parents) {
-    const parent = await rayDb.findOne<FileSystemItem>('fileSystem', 'id', parentId);
-    if (parent.directory !== undefined) {
-      if (!parent.directory.children.includes(id)) {
-        parent.directory.children.push(id);
-        await rayDb.updateOne<FileSystemItem>('fileSystem', parent);
+    if (Number.isNaN(id)) return new Error('hello');
+
+    id = id as number;
+    for (const parentId of parents) {
+      const parent = await rayDb.findOne<FileSystemItem>('fileSystem', 'id', parentId);
+      if (parent.directory !== undefined) {
+        if (!parent.directory.children.includes(id)) {
+          parent.directory.children.push(id);
+          await rayDb.updateOne<FileSystemItem>('fileSystem', parent);
+        }
       }
     }
-  }
 
-  useFileSystemStore().updateFileSystem();
-  return id;
+    useFileSystemStore().updateFileSystem();
+    return id;
+  } catch (e) {
+    return e as Error;
+  }
 }
 
-export async function fileSystemLookup(rayDb: RayDb, path: string) {
-  const pathArray: string[] = parseToPathArray(path);
-  const rootDirectoryId = await useGetRootDirectory(rayDb, true);
+export async function fileSystemLookup(
+  rayDb: RayDb,
+  path: string,
+): Promise<Error | { parent: FileSystemItem; children: FileSystemItem[] } | undefined> {
+  try {
+    const pathArray: string[] = parseToPathArray(path);
+    const rootDirectoryId = await useGetRootDirectory(rayDb, true);
 
-  if (!rootDirectoryId) {
-    return;
-  }
-
-  const fileSystemItems = await rayDb.findAll<FileSystemItem>('fileSystem');
-  const startPoint = fileSystemItems.find((fileSystemItem) => {
-    const isRootDirectory =
-      fileSystemItem.directory?.name === useFileSystemStore().rootDirectory &&
-      fileSystemItem.id === rootDirectoryId;
-    const isItemInRootDirectory = fileSystemItem.parents.includes(rootDirectoryId);
-
-    return (
-      fileSystemItem.directory?.name === pathArray[0] && (isRootDirectory || isItemInRootDirectory)
-    );
-  });
-
-  if (fileSystemItems.length === 0 || !startPoint) {
-    return new Error(`no directory found with name ${pathArray[0]}`);
-  }
-
-  pathArray.splice(0, 1);
-
-  const value = await getFileSystemItem(rayDb, startPoint, pathArray);
-  if (value && value.directory) {
-    if (value.directory.children.length === 0) {
-      return { parent: value, children: [] };
+    if (!rootDirectoryId) {
+      return;
     }
 
-    const children: FileSystemItem[] = [];
-    for (const childId of value.directory.children) {
-      const child = await rayDb.findOne<FileSystemItem>('fileSystem', 'id', childId);
-      if (child) {
-        children.push(child);
+    const fileSystemItems = await rayDb.findAll<FileSystemItem>('fileSystem');
+    const startPoint = fileSystemItems.find((fileSystemItem) => {
+      const isRootDirectory =
+        fileSystemItem.directory?.name === useFileSystemStore().rootDirectory &&
+        fileSystemItem.id === rootDirectoryId;
+      const isItemInRootDirectory = fileSystemItem.parents.includes(rootDirectoryId);
+
+      return (
+        fileSystemItem.directory?.name === pathArray[0] &&
+        (isRootDirectory || isItemInRootDirectory)
+      );
+    });
+
+    if (fileSystemItems.length === 0 || !startPoint) {
+      throw new Error(`no directory found with name ${pathArray[0]}`);
+    }
+
+    pathArray.splice(0, 1);
+
+    const value = await getFileSystemItem(rayDb, startPoint, pathArray);
+    if (value && value.directory) {
+      if (value.directory.children.length === 0) {
+        return { parent: value, children: [] };
       }
-    }
 
-    return { parent: value, children: children };
+      const children: FileSystemItem[] = [];
+      for (const childId of value.directory.children) {
+        const child = await rayDb.findOne<FileSystemItem>('fileSystem', 'id', childId);
+        if (child) {
+          children.push(child);
+        }
+      }
+
+      return { parent: value, children: children };
+    }
+  } catch (e) {
+    return e as Error;
   }
 }
 

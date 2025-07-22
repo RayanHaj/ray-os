@@ -34,7 +34,7 @@ const rayDb = await RayDb.create('desktop', 1, [
       { indexName: 'id', keyPath: 'id', unique: true },
       { indexName: 'parents', keyPath: 'parents', unique: false },
       { indexName: 'file', keyPath: 'file', unique: false },
-      { indexName: 'directory', keyPath: 'directory', unique: false },
+      { indexName: 'directory', keyPath: 'directory', unique: true },
     ],
     autoIncrement: true,
   },
@@ -47,12 +47,14 @@ const parentId = await insertItemIntoFileSystem(rayDb, [], {
   directory: { name: rootDirectory, children: [] },
 });
 
-useFileSystemStore().rootId = parentId;
+if (!(parentId instanceof Error)) {
+  useFileSystemStore().rootId = parentId;
 
-if (parentId) {
-  await insertItemIntoFileSystem(rayDb, [parentId], {
-    directory: { name: 'Applications', children: [] },
-  });
+  if (parentId) {
+    await insertItemIntoFileSystem(rayDb, [parentId], {
+      directory: { name: 'Applications', children: [] },
+    });
+  }
 }
 
 await useFileStore().initializeFiles(rayDb);

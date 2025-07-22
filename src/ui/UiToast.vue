@@ -89,7 +89,7 @@ function handleCloseToast(index: number) {
 .toast {
   position: fixed;
   padding: 10px;
-  border-radius: 10px;
+  border-radius: 5px;
   z-index: 9999;
   border: 2px solid;
   background: var(--button-primary-color);
@@ -111,7 +111,7 @@ function handleCloseToast(index: number) {
 
 .message {
   color: var(--text-color);
-  font-size: var(--font-size-elg);
+  font-size: var(--font-size-lg);
 }
 
 .close-toast {

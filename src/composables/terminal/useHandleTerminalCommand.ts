@@ -72,7 +72,7 @@ async function handleCommand(
       await useHandleDir(rayDb, currentPath, lines);
       break;
     case 'mkdir':
-      await useHandleMkdir(rayDb, currentPath, commandObject.value);
+      commandError = await useHandleMkdir(rayDb, lines, currentPath, commandObject.value) ?? null;
       break;
   }
 

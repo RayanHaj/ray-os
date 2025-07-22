@@ -12,6 +12,7 @@ import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import { useWindowStore } from '@/stores/window.ts';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
 import type { ItemSizeKeys } from '@/types/FileExplorerTypes.ts';
+import { useToastStore } from '@/stores/toast.ts';
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 const fileSystemStore = useFileSystemStore();
@@ -100,24 +101,32 @@ async function handleModalInput(input: string) {
   const currentPathItemName = currentPath.value[currentPath.value.length - 1];
   const previousItem = previousItems.value[previousItems.value.length - 1];
 
-  let parentId;
-  if (previousItem) {
-    parentId = previousItem.find((el) => el.directory?.name === currentPathItemName)?.id ?? null;
-  } else {
-    const value = await fileSystemLookup(rayDb, fileSystemStore.rootDirectory);
-    if (value instanceof Error || !value) {
-      throw new Error(`No fileSystemItems (children) found with specified path`);
+  try {
+    let parentId;
+    if (previousItem) {
+      parentId = previousItem.find((el) => el.directory?.name === currentPathItemName)?.id ?? null;
+    } else {
+      const value = await fileSystemLookup(rayDb, fileSystemStore.rootDirectory);
+      if (value instanceof Error) {
+        throw value;
+      }
+
+      parentId = value ? value.parent.id : null;
     }
 
-    parentId = value ? value.parent.id : null;
-  }
+    if (!parentId) {
+      return;
+    }
 
-  if (!parentId) {
-    return;
-  }
+    const hasInserted = await insertItemIntoFileSystem(rayDb, [parentId], { directory: { name: input, children: [] } });
+    if (hasInserted instanceof Error) {
+      throw hasInserted;
+    }
 
-  await insertItemIntoFileSystem(rayDb, [parentId], { directory: { name: input, children: [] } });
-  addNewItemModalOpen.value = false;
+    addNewItemModalOpen.value = false;
+  } catch (e) {
+    useToastStore().createToast((e as Error).message, 'error', 5000);
+  }
 }
 </script>
 
