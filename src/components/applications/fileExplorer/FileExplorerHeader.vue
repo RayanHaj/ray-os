@@ -67,6 +67,7 @@ function updateSelectedItemSizeButton(itemSizeKey: ItemSizeKeys) {
   background: var(--button-primary-color);
   border: var(--window-border-color) 1px solid;
   width: 100%;
+  min-width: calc(150px / 3);
   height: 50px;
   color: var(--text-color);
 }

@@ -1,6 +1,9 @@
+export const itemTypes = ['application', 'file'] as const;
+export type ItemType = typeof itemTypes[number]
+
 export interface BaseItem {
   id: number;
-  type: 'application' | 'file';
+  type: ItemType;
 }
 
 export interface ApplicationItem extends BaseItem {

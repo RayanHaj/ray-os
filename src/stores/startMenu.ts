@@ -1,8 +1,10 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
+import type { ItemType } from '@/types/ItemTypes.ts';
 
 export const useStartMenuStore = defineStore('startMenu', () => {
   const showStartMenu = ref(false);
+  const selectedTag = ref<ItemType>('application');
 
   function show() {
     showStartMenu.value = true;
@@ -16,5 +18,5 @@ export const useStartMenuStore = defineStore('startMenu', () => {
     return showStartMenu.value;
   }
 
-  return { isShown, show, hide };
+  return { isShown, show, hide, selectedTag };
 });

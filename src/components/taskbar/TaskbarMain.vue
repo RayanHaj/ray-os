@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useTaskbarStore } from '@/stores/taskbar.ts';
 import TaskbarTile from '@/components/taskbar/TaskbarTile.vue';
-import StartMenuMain from '@/components/StartMenuMain.vue';
+import StartMenuMain from '@/components/startMenu/StartMenuMain.vue';
 import { useStartMenuStore } from '@/stores/startMenu.ts';
 import TimeProcessSection from '@/components/TimeProcessSection.vue';
 import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
@@ -24,7 +24,7 @@ const startMenuStore = useStartMenuStore();
     <div class="start">
       <button
         class="taskbar-search-button"
-        @click="startMenuStore.show()"
+        @click="startMenuStore.isShown() ? startMenuStore.hide() : startMenuStore.show()"
         :style="{ backgroundColor: startMenuStore.isShown() ? 'var(--button-hover-color)' : '' }"
       >
         <component class="search-svg" :is="searchSvg" />
