@@ -29,7 +29,7 @@ export async function useHandleMkdir(
       throw insertValue;
     }
 
-    const successMassage = `created directory (${name}) in '${currentPath.value.join('/')}'`
+    const successMassage = `created directory (${name}) in '${currentPath.value.join('/')}'`;
     lines.value.push({ line: successMassage, isPlain: true });
   } catch (error) {
     return error as Error;

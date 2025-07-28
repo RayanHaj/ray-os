@@ -13,7 +13,7 @@ export const specialKeys = {
   SIGN_CHANGE: '+/-',
   PERCENTAGE: '%',
   DIVISION_BY_ONE: '1/x',
-  SQUARED: 'x^2'
+  SQUARED: 'x^2',
 } as const;
 
-export type SpecialKey = typeof specialKeys[keyof typeof specialKeys];
+export type SpecialKey = (typeof specialKeys)[keyof typeof specialKeys];

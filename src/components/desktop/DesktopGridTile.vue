@@ -6,7 +6,7 @@ import type { Item } from '@/types/ItemTypes.ts';
 import { useWindowStore } from '@/stores/window.ts';
 import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
 
-const { tilePosition } = defineProps<{ tilePosition: {x: number, y: number}}>();
+const { tilePosition } = defineProps<{ tilePosition: { x: number; y: number } }>();
 const verticalTileCount = useTileCountGrid().y;
 
 const tileItem = ref<Item>();
@@ -17,7 +17,11 @@ const gridStore = useGridStore();
 function updateTile() {
   tileId.value = (tilePosition.x - 1) * verticalTileCount.value + tilePosition.y;
   tileItem.value = gridStore.items.find((tile) => tile.content.id === tileId.value);
-  if (tileItem.value && tileItem.value.content.type === 'application' && tileItem.value.label !== '') {
+  if (
+    tileItem.value &&
+    tileItem.value.content.type === 'application' &&
+    tileItem.value.label !== ''
+  ) {
     tileSvg.value = useSvgOrFallback(tileItem.value.label);
   }
 }
@@ -56,7 +60,7 @@ function onDrop(event: DragEvent) {
   const targetId = Number((event.currentTarget as HTMLElement).id);
   const sourceId = Number(event.dataTransfer?.getData('text/plain'));
 
-  const sourceItem: Item | undefined = gridStore.items.find(item => item.content.id === sourceId);
+  const sourceItem: Item | undefined = gridStore.items.find((item) => item.content.id === sourceId);
   if (!sourceItem) {
     return;
   }

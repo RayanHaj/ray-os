@@ -1,4 +1,8 @@
-export function useProcessCalculation(accumulator: number, currentNumber: number, operator: string) {
+export function useProcessCalculation(
+  accumulator: number,
+  currentNumber: number,
+  operator: string,
+) {
   switch (operator) {
     case '+':
       return accumulator + currentNumber;

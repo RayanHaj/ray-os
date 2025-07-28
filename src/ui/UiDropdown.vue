@@ -26,28 +26,33 @@ function handleSelectedOption(event: Event) {
 <template>
   <div class="dropdown">
     <select :style="customStylesSelect" @change="handleSelectedOption($event)">
-      <option :style="customStylesOptions" v-for="option of options" :key="option" :selected="selectedOption === option">
+      <option
+        :style="customStylesOptions"
+        v-for="option of options"
+        :key="option"
+        :selected="selectedOption === option"
+      >
         {{ option }}
       </option>
     </select>
   </div>
 </template>
 <style scoped>
-  select {
-    width: 100%;
-    height: 30px;
-    border: var(--input-border-color) 1px solid;
-    font-size: var(--font-size-elg);
-    color: var(--text-color);
-    background-color: var(--input-primary-color);
-    border-radius: 5px;
-  }
+select {
+  width: 100%;
+  height: 30px;
+  border: var(--input-border-color) 1px solid;
+  font-size: var(--font-size-elg);
+  color: var(--text-color);
+  background-color: var(--input-primary-color);
+  border-radius: 5px;
+}
 
-  option:checked {
-    background-color: var(--input-secondary-color);
-  }
+option:checked {
+  background-color: var(--input-secondary-color);
+}
 
-  option:focus {
-    color: red;
-  }
+option:focus {
+  color: red;
+}
 </style>

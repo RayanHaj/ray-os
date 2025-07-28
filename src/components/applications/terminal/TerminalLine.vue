@@ -36,10 +36,7 @@ const displayPath = computed(() => `PS ${path.value}>`);
 </script>
 
 <template>
-  <div
-    v-if="!isReadonly"
-    class="wrapper"
-  >
+  <div v-if="!isReadonly" class="wrapper">
     <p v-if="!inputValue.isPlain" class="current-location">{{ displayPath }}</p>
     <div
       ref="terminalLineRef"

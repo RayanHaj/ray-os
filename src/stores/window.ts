@@ -106,6 +106,6 @@ export const useWindowStore = defineStore('window', () => {
     setWindowZIndexToTop,
     getWindowCountByName,
     getGlobalId,
-    getZIndex
+    getZIndex,
   };
 });

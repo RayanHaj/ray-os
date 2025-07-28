@@ -1,6 +1,9 @@
 import { defineStore } from 'pinia';
 import { ref, watch } from 'vue';
-import type { SecondaryActionsContextMenu, PrimaryActionsContextMenu } from '@/types/ContextMenuTypes.ts';
+import type {
+  SecondaryActionsContextMenu,
+  PrimaryActionsContextMenu,
+} from '@/types/ContextMenuTypes.ts';
 
 export const useContextMenuStore = defineStore('contextMenu', () => {
   const contextMenusProperties = ref<{

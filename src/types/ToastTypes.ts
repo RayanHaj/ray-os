@@ -1,12 +1,12 @@
 export interface Toast {
-  message: string,
-  type: ToastTypes,
-  milliseconds: number
+  message: string;
+  type: ToastTypes;
+  milliseconds: number;
 }
 
 export interface TimeoutId {
-  toastIndex: number,
-  id: number
+  toastIndex: number;
+  id: number;
 }
 
 export type ToastTypes = 'success' | 'warning' | 'error';

@@ -28,9 +28,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <RouterView v-if="initialised"/>
+  <RouterView v-if="initialised" />
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>

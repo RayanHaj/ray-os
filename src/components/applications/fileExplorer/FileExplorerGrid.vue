@@ -3,7 +3,7 @@ import {
   type FileSystemItem,
   type FileItem,
   type Item,
-  fileExtensions
+  fileExtensions,
 } from '@/types/ItemTypes.ts';
 import { type Component, computed, onBeforeMount, type PropType, shallowRef, watch } from 'vue';
 import type { RayDb } from 'ray-db-wrapper';
@@ -27,7 +27,7 @@ const props = defineProps({
   previousDirectories: { required: true, type: Array as PropType<FileSystemItem[][]> },
   currentPath: { required: true, type: Array as PropType<string[]> },
   rayDb: { required: true, type: Object as PropType<RayDb> },
-  parentId: { required: true, type: Number }
+  parentId: { required: true, type: Number },
 });
 
 const emits = defineEmits(['itemEvent:dblClick', 'addNewDirectory']);
@@ -125,9 +125,14 @@ async function onFileDrop(event: DragEvent) {
   }
 
   try {
-    const fileId = await props.rayDb.insertOne<Item>('files', { label: file.name, content: FileObject as FileItem });
+    const fileId = await props.rayDb.insertOne<Item>('files', {
+      label: file.name,
+      content: FileObject as FileItem,
+    });
     if (fileId && typeof fileId === 'number') {
-      await insertItemIntoFileSystem(props.rayDb, [props.parentId], { file: { name: file.name, id: fileId } });
+      await insertItemIntoFileSystem(props.rayDb, [props.parentId], {
+        file: { name: file.name, id: fileId },
+      });
     }
   } catch (e) {
     useHandleIDBErrorHandler(e as Error);
@@ -145,9 +150,7 @@ const itemSize = computed<ItemSize>(() => itemSizes[fileExplorerStore.currentFil
     @click.right.prevent.stop="onRightClick($event, null, 'grid')"
     @dragover.prevent
     @drop.prevent="onFileDrop"
-    :style="{
-      fontSize: `${itemSize.font}px`
-    }"
+    :style="{ fontSize: `${itemSize.font}px` }"
   >
     <div class="grid">
       <div

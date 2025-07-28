@@ -21,10 +21,7 @@ export async function useHandleDel(
     }
 
     await useDeleteFileSystemItem(rayDb, undefined, targetValue.id);
-    lines.value.push({
-      line: `directory (${name}) successfully deleted`,
-      isPlain: true
-    });
+    lines.value.push({ line: `directory (${name}) successfully deleted`, isPlain: true });
   } catch (e) {
     return e as Error;
   }

@@ -20,9 +20,7 @@ onBeforeMount(() => {
       class="theme-dropdown"
       :options="Object.keys(themes)"
       :default-value="selectedTheme"
-      :custom-styles-select="{
-      width: '200px'
-      }"
+      :custom-styles-select="{ width: '200px' }"
       @dropdown:value="useThemeSwitcher().setTheme($event)"
     />
   </div>

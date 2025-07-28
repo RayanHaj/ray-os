@@ -15,7 +15,11 @@ provide('calculatorManager', useCalculatorManager());
         Show history
       </button>
     </div>
-    <div v-show="!historyIsToggled" class="calculator-wrapper" :class="{ toggled: historyIsToggled }">
+    <div
+      v-show="!historyIsToggled"
+      class="calculator-wrapper"
+      :class="{ toggled: historyIsToggled }"
+    >
       <CalculatorAnswer />
       <CalculatorGrid />
     </div>
@@ -41,7 +45,8 @@ provide('calculatorManager', useCalculatorManager());
   padding: 10px;
 }
 
-.calculator-wrapper, .history-wrapper {
+.calculator-wrapper,
+.history-wrapper {
   height: calc(100% - 70px);
 }
 

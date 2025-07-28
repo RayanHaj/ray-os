@@ -20,19 +20,19 @@ watch(
 </script>
 
 <template>
-    <div v-show="isToggled" class="calculator-history">
-      <ul>
-        <li v-if="calculationHistory.length === 0">No history items found</li>
-        <li
-          v-else
-          v-for="(calculation, index) of calculationHistory"
-          :key="`${index}-${calculation.calculationAnswer}`"
-        >
-          <p id="calculation">{{ calculation.calculationString }} =</p>
-          <p id="answer">{{ calculation.calculationAnswer }}</p>
-        </li>
-      </ul>
-    </div>
+  <div v-show="isToggled" class="calculator-history">
+    <ul>
+      <li v-if="calculationHistory.length === 0">No history items found</li>
+      <li
+        v-else
+        v-for="(calculation, index) of calculationHistory"
+        :key="`${index}-${calculation.calculationAnswer}`"
+      >
+        <p id="calculation">{{ calculation.calculationString }} =</p>
+        <p id="answer">{{ calculation.calculationAnswer }}</p>
+      </li>
+    </ul>
+  </div>
 </template>
 
 <style scoped>

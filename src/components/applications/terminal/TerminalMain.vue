@@ -6,7 +6,7 @@ import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
 
-const emptyLine = { line: '', isPlain: false }
+const emptyLine = { line: '', isPlain: false };
 const lines = ref<Array<{ line: string; isPlain: boolean }>>([
   { line: 'RayOS Terminal', isPlain: true },
   emptyLine,

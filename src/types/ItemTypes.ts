@@ -32,8 +32,20 @@ export const fileExtensions = {
   'text/plain': 'txt',
   'video/mp4': 'mp4',
   'image/jpeg': 'jpeg',
-  'image/png': 'png'
+  'image/png': 'png',
 } as const;
 
+export const Applications = [
+  'File Explorer',
+  'Calculator',
+  'Serene Sounds',
+  'Settings',
+  'Terminal',
+  'Paint',
+  'Portfolio',
+  'Todo',
+] as const;
+export type Application = (typeof Applications)[number];
+
 export type FileTypes = keyof typeof fileExtensions;
-export type FileExtension = typeof fileExtensions[FileTypes];
+export type FileExtension = (typeof fileExtensions)[FileTypes];

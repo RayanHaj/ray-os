@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { onBeforeMount, ref, watch } from 'vue';
-import { fileSystemLookup, insertItemIntoFileSystem } from '@/composables/fileSystem/useIndexedDbHelper.ts';
+import {
+  fileSystemLookup,
+  insertItemIntoFileSystem,
+} from '@/composables/fileSystem/useIndexedDbHelper.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import FileExplorerHeader from '@/components/applications/fileExplorer/FileExplorerHeader.vue';
 import FileExplorerGrid from '@/components/applications/fileExplorer/FileExplorerGrid.vue';
@@ -29,7 +32,7 @@ onBeforeMount(async () => {
 
   const fileItemSize = localStorage.getItem('fileItemSize');
   if (fileItemSize) {
-    if (fileExplorerStore.currentFileItemSizeKey !== fileItemSize as ItemSizeKeys) {
+    if (fileExplorerStore.currentFileItemSizeKey !== (fileItemSize as ItemSizeKeys)) {
       fileExplorerStore.updateItemSize(fileItemSize as ItemSizeKeys);
     }
   }
@@ -118,7 +121,9 @@ async function handleModalInput(input: string) {
       return;
     }
 
-    const hasInserted = await insertItemIntoFileSystem(rayDb, [parentId], { directory: { name: input, children: [] } });
+    const hasInserted = await insertItemIntoFileSystem(rayDb, [parentId], {
+      directory: { name: input, children: [] },
+    });
     if (hasInserted instanceof Error) {
       throw hasInserted;
     }

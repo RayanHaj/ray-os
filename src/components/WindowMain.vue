@@ -1,13 +1,5 @@
 <script setup lang="ts">
-import {
-  type Component,
-  onBeforeMount,
-  type PropType,
-  provide,
-  type Ref,
-  ref,
-  watch
-} from 'vue';
+import { type Component, onBeforeMount, type PropType, provide, type Ref, ref, watch } from 'vue';
 import type { WindowFlatReference, WindowStyleObject } from '@/types/WindowTypes.ts';
 import { useWindowStore } from '@/stores/window.ts';
 import WindowHeader from '@/components/WindowHeader.vue';
@@ -30,7 +22,9 @@ const props = defineProps({
 const windowStore = useWindowStore();
 onBeforeMount(() => {
   styles.value.zIndex = windowStore.getZIndex(props.reference.label, props.reference.id);
-  const windowIdObject = useGetWindowIdObjectFromWindowId(windowStore.getGlobalId(props.reference.label, props.reference.id));
+  const windowIdObject = useGetWindowIdObjectFromWindowId(
+    windowStore.getGlobalId(props.reference.label, props.reference.id),
+  );
   provide('windowIdObject', windowIdObject);
 });
 
@@ -142,7 +136,11 @@ function maximizeWindow() {
     />
     <component
       :is="windowContentComponent"
-      :style="{ height: `calc(100% - ${windowStore.windowHeaderHeight}px`, width: '100%', overflow: 'auto' }"
+      :style="{
+        height: `calc(100% - ${windowStore.windowHeaderHeight}px`,
+        width: '100%',
+        overflow: 'auto',
+      }"
     />
   </div>
 </template>

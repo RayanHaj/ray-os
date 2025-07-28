@@ -12,7 +12,7 @@ const taskbarHeight = taskbarStore.taskbarHeight;
 const taskbarItems = taskbarStore.items;
 
 const searchSvg = shallowRef<Component>();
-onBeforeMount( () => {
+onBeforeMount(() => {
   searchSvg.value = useSvgOrFallback('Search');
 });
 
@@ -32,11 +32,7 @@ const startMenuStore = useStartMenuStore();
     </div>
     <div class="middle">
       <div class="taskbar-tiles">
-        <TaskbarTile
-          v-for="item of taskbarItems"
-          :key="item.content.id"
-          :id="item.content.id"
-        />
+        <TaskbarTile v-for="item of taskbarItems" :key="item.content.id" :id="item.content.id" />
       </div>
     </div>
     <div class="end">

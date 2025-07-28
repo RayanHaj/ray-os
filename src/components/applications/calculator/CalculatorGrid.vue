@@ -3,7 +3,8 @@ import { useCalculatorManager } from '@/composables/calculator/useCalculatorMana
 import type { CalculatorKey, SpecialKey } from '@/types/CalculatorTypes.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 
-const calculatorManager = useInjectOrThrow<ReturnType<typeof useCalculatorManager>>('calculatorManager');
+const calculatorManager =
+  useInjectOrThrow<ReturnType<typeof useCalculatorManager>>('calculatorManager');
 const calculationGridItems: CalculatorKey[] = [
   { visual: '%', value: '%', type: 'special' },
   { visual: 'CE', value: 'CE', type: 'special' },
