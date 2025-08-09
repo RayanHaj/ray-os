@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import DesktopGridTile from '@/components/desktop/DesktopGridTile.vue';
+import DesktopTile from '@/components/desktop/DesktopTile.vue';
 import { useTileCountGrid } from '@/composables/desktop/useTileCountGrid.ts';
 import { useBrowserStore } from '@/stores/browser.ts';
 import { useContextMenuStore } from '@/stores/contextMenu.ts';
@@ -28,7 +28,7 @@ function onGridRightClick(event: MouseEvent) {
     :style="{ height: `${useBrowserStore().heightExcTaskbar}px` }"
   >
     <div class="row" v-for="row in useTileCountGrid().x.value" :key="row">
-      <DesktopGridTile
+      <DesktopTile
         v-for="column in useTileCountGrid().y.value"
         :key="column"
         :tile-position="{ x: row, y: column }"

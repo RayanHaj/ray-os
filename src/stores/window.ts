@@ -2,20 +2,20 @@ import { defineStore } from 'pinia';
 import { readonly, ref } from 'vue';
 
 import type { WindowFlatReference, WindowReference } from '@/types/WindowTypes.ts';
+import type { Application } from '@/types/ItemTypes.ts';
 
 type WindowReferences = { [applicationName: string]: WindowReference[] };
-
 export const useWindowStore = defineStore('window', () => {
   const openWindowsReferences = ref<WindowReferences>({});
   const zIndexesOrder = ref<string[]>([]);
   const windowHeaderHeight = readonly(ref(30));
 
-  function pushOpenWindowReference(windowName: string) {
+  function pushOpenWindowReference(windowName: string | Application) {
     let id = 1000;
 
     if (typeof openWindowsReferences.value[windowName] === 'undefined') {
       openWindowsReferences.value[windowName] = [{ id: id, minimized: false }];
-      return;
+      return getWindowId(windowName, id);
     }
 
     id = openWindowsReferences.value[windowName].reduce((accumulator, value) => {
@@ -29,14 +29,15 @@ export const useWindowStore = defineStore('window', () => {
 
     openWindowsReferences.value[windowName].push({ id: id, minimized: false });
     pushWindowToFront(windowName, id);
+    return getWindowId(windowName, id);
   }
 
-  function getGlobalId(windowName: string, id: number) {
+  function getWindowId(windowName: string, id: number) {
     return `${windowName}-${id}`;
   }
 
   function pushWindowToFront(windowName: string, id: number) {
-    zIndexesOrder.value.push(getGlobalId(windowName, id));
+    zIndexesOrder.value.push(getWindowId(windowName, id));
   }
 
   function getWindowCountByName(windowName: string) {
@@ -48,7 +49,11 @@ export const useWindowStore = defineStore('window', () => {
     return reference.length;
   }
 
-  function setWindowMinimized(windowName: string, id: number) {
+  function setWindowMinimized(windowId: string) {
+    const windowIdSplit = windowId.split('-');
+    const windowName = windowIdSplit[0];
+    const id = Number(windowIdSplit[1]);
+
     const index = openWindowsReferences.value[windowName].findIndex(
       (reference) => reference.id === id,
     );
@@ -61,33 +66,36 @@ export const useWindowStore = defineStore('window', () => {
       !openWindowsReferences.value[windowName][index].minimized;
   }
 
-  function removeOpenWindowReference(windowName: string, reference: number) {
+  function removeOpenWindowReference(windowId: string) {
+    const windowIdSplit = windowId.split('-');
+    const windowName = windowIdSplit[0];
+    const id = Number(windowIdSplit[1]);
+
     if (typeof openWindowsReferences.value[windowName] === 'undefined') {
       return;
     }
 
     openWindowsReferences.value[windowName] = openWindowsReferences.value[windowName].filter(
-      (windowReference) => windowReference.id !== reference,
+      (windowReference) => windowReference.id !== id,
     );
 
     if (openWindowsReferences.value[windowName].length === 0) {
       delete openWindowsReferences.value[windowName];
     }
 
-    const globalId = getGlobalId(windowName, reference);
-    if (zIndexesOrder.value.includes(globalId)) {
-      zIndexesOrder.value = zIndexesOrder.value.filter((value) => value !== globalId);
+    if (zIndexesOrder.value.includes(windowId)) {
+      zIndexesOrder.value = zIndexesOrder.value.filter((value) => value !== windowId);
     }
   }
 
   function setWindowZIndexToTop(reference: WindowFlatReference) {
-    const globalId = getGlobalId(reference.label, reference.id);
+    const globalId = getWindowId(reference.label, reference.id);
     zIndexesOrder.value = zIndexesOrder.value.filter((value) => value !== globalId);
     zIndexesOrder.value.push(globalId);
   }
 
   function getZIndex(windowName: string, id: number) {
-    const globalId = getGlobalId(windowName, id);
+    const globalId = getWindowId(windowName, id);
     if (!zIndexesOrder.value.includes(globalId)) {
       pushWindowToFront(windowName, id);
     }
@@ -105,7 +113,7 @@ export const useWindowStore = defineStore('window', () => {
     setWindowMinimized,
     setWindowZIndexToTop,
     getWindowCountByName,
-    getGlobalId,
+    getGlobalId: getWindowId,
     getZIndex,
   };
 });

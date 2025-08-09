@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type Component, onBeforeMount, type PropType, provide, type Ref, ref, watch } from 'vue';
+import { type Component, onBeforeMount, provide, type Ref, ref, watch } from 'vue';
 import type { WindowFlatReference, WindowStyleObject } from '@/types/WindowTypes.ts';
 import { useWindowStore } from '@/stores/window.ts';
 import WindowHeader from '@/components/WindowHeader.vue';
@@ -8,37 +8,31 @@ import { useWindowStateManager } from '@/composables/window/useWindowStateManage
 import { useWindowPositionManager } from '@/composables/window/useWindowPositionManager.ts';
 import { useWindowResizeManager } from '@/composables/window/useWindowResizeManager.ts';
 import { useWindowSnappingManager } from '@/composables/window/useWindowSnappingManager.ts';
-import { useGetWindowIdObjectFromWindowId } from '@/composables/window/useGetWindowIdObjectFromWindowId.ts';
 
-const props = defineProps({
-  reference: { required: true, type: Object as PropType<WindowFlatReference> },
-  windowContentComponent: { required: true, type: Object as PropType<Component> },
-  selectedLayout: {
-    required: true,
-    type: Object as PropType<{ layout: string; windowId: string }>,
-  },
-});
+const { reference, windowContentComponent, selectedLayout } = defineProps<{
+  reference: WindowFlatReference;
+  windowContentComponent: Component;
+  selectedLayout: { layout: string; windowId: string };
+}>();
 
 const windowStore = useWindowStore();
+const windowId = windowStore.getGlobalId(reference.label, reference.id);
 onBeforeMount(() => {
-  styles.value.zIndex = windowStore.getZIndex(props.reference.label, props.reference.id);
-  const windowIdObject = useGetWindowIdObjectFromWindowId(
-    windowStore.getGlobalId(props.reference.label, props.reference.id),
-  );
-  provide('windowIdObject', windowIdObject);
+  styles.value.zIndex = windowStore.getZIndex(reference.label, reference.id);
+  provide('windowId', windowId);
 });
 
 watch(
   () => windowStore.zIndexesOrder,
   (newValue, oldValue) => {
-    const globalId = windowStore.getGlobalId(props.reference.label, props.reference.id);
+    const globalId = windowStore.getGlobalId(reference.label, reference.id);
     const newIndex = newValue.indexOf(globalId);
     const oldIndex = oldValue.indexOf(globalId);
     if (newIndex === oldIndex) {
       return;
     }
 
-    styles.value.zIndex = windowStore.getZIndex(props.reference.label, props.reference.id);
+    styles.value.zIndex = windowStore.getZIndex(reference.label, reference.id);
   },
 );
 
@@ -54,17 +48,16 @@ const styles: Ref<WindowStyleObject> = ref({
   cursor: 'auto',
   transition: 'width 0.5s, height 0.5s, left 0.5s, top 0.5s',
 });
-
 const cachedStyles = ref({ left: '0', top: '0', width: '50%', height: '50%' });
 
 const emits = defineEmits(['showSnapLayout']);
 const oldPosition = ref({ clientX: 0, clientY: 0 });
 
 const window = ref();
-const windowStateManager = useWindowStateManager(styles, props.reference);
-useWindowStylesManager(styles, props.reference, windowStateManager);
-
+const windowStateManager = useWindowStateManager(styles, reference);
 const windowSnappingManager = useWindowSnappingManager(styles);
+useWindowStylesManager(styles, reference, windowStateManager);
+
 watch(
   () => windowSnappingManager.showSnapLayout.value,
   (newValue) => {
@@ -72,12 +65,12 @@ watch(
   },
 );
 watch(
-  () => props.selectedLayout,
+  () => selectedLayout,
   (value) => {
     if (
       value.layout === '' ||
       value.windowId === '' ||
-      value.windowId !== windowStateManager.constructedId ||
+      value.windowId !== windowId ||
       windowStateManager.isMaximized.value
     )
       return;
@@ -88,7 +81,7 @@ watch(
 
 const windowResizeManager = useWindowResizeManager(
   styles,
-  props.reference,
+  reference,
   window,
   windowStateManager,
 );
@@ -99,18 +92,19 @@ const windowPositionManager = useWindowPositionManager(
   windowStateManager,
   windowSnappingManager,
   oldPosition,
+  windowId
 );
 
 function closeWindow() {
-  windowStore.removeOpenWindowReference(props.reference.label, props.reference.id);
+  windowStore.removeOpenWindowReference(windowId);
 }
 
 function minimizeWindow() {
-  windowStore.setWindowMinimized(props.reference.label, props.reference.id);
+  windowStore.setWindowMinimized(windowId);
 }
 
 function maximizeWindow() {
-  windowResizeManager.maximizeWindow(cachedStyles);
+  windowResizeManager.setWindowMaximized(cachedStyles);
 }
 </script>
 
@@ -118,7 +112,7 @@ function maximizeWindow() {
   <div
     class="window"
     ref="window"
-    :id="windowStateManager.constructedId"
+    :id="windowId"
     :style="{
       ...styles,
       borderRadius:
@@ -148,10 +142,10 @@ function maximizeWindow() {
 <style scoped>
 .window {
   height: 100%;
-  background-color: var(--window-primary-color);
   position: absolute;
-  border: var(--window-border-color) 2px solid;
   user-select: none;
   overflow: hidden;
+  background-color: var(--window-primary-color);
+  border: var(--window-border-color) 2px solid;
 }
 </style>

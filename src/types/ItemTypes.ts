@@ -1,16 +1,11 @@
-export const itemTypes = ['application', 'file'] as const;
+export const itemTypes = ['application', 'file', 'directory'] as const;
 export type ItemType = typeof itemTypes[number]
 
-export interface BaseItem {
-  id: number;
-  type: ItemType;
-}
-
-export interface ApplicationItem extends BaseItem {
+export interface ApplicationItem {
   type: 'application';
 }
 
-export interface FileItem extends BaseItem {
+export interface FileItem {
   type: 'file';
   name: string;
   size: number;
@@ -21,7 +16,13 @@ export interface FileItem extends BaseItem {
 
 export interface Item {
   label: string;
-  content: ApplicationItem | FileItem;
+  content: ApplicationItem | FileItem | FileSystemItem & { type: 'directory', path: string[], id: number };
+  id: number;
+}
+
+export interface ItemInsert {
+  label: string;
+  content: ApplicationItem | FileItem | FileSystemItem & { type: 'directory', path: string[], id: number };
 }
 
 export type FileSystemItem = {
@@ -29,6 +30,7 @@ export type FileSystemItem = {
   file?: { name: string; id: number };
   directory?: { name: string; children: number[] };
   id?: number;
+  isSystemFile?: boolean
 };
 
 export const fileExtensions = {
@@ -47,6 +49,7 @@ export const Applications = [
   'Paint',
   'Portfolio',
   'Todo',
+  'Notepad'
 ] as const;
 export type Application = (typeof Applications)[number];
 

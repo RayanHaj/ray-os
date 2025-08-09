@@ -1,18 +1,13 @@
 <script setup lang="ts">
-import { type Component, onBeforeMount, type PropType, shallowRef } from 'vue';
+import { type Component, onBeforeMount, shallowRef } from 'vue';
 import { useWindowStore } from '@/stores/window.ts';
 import { useSvgByFileNameAndDirectory } from '@/composables/svg/useSvgByFileNameAndDirectory.ts';
 
-type WindowReference = { id: number; zIndex: number; minimized: boolean };
-
-const props = defineProps({
-  windowReference: { required: true, type: Object as PropType<WindowReference> },
-  applicationName: { required: true, type: String },
-});
+const { windowId } = defineProps<{ windowId: string }>();
 
 const windowStore = useWindowStore();
 function closeWindow() {
-  windowStore.removeOpenWindowReference(props.applicationName, props.windowReference.id);
+  windowStore.removeOpenWindowReference(windowId);
 }
 
 const closeSvg = shallowRef<Component | null>(null);
@@ -21,13 +16,13 @@ onBeforeMount(async () => {
 });
 
 function onClickTab() {
-  windowStore.setWindowMinimized(props.applicationName, props.windowReference.id);
+  windowStore.setWindowMinimized(windowId);
 }
 </script>
 
 <template>
   <li class="tab" @click="onClickTab">
-    <div>{{ windowReference.id }}: {{ applicationName }}</div>
+    <div>{{ windowId }}</div>
     <button class="close-button" @click.stop="closeWindow">
       <component id="close-svg" :is="closeSvg" :custom-width="15" :custom-height="15" />
     </button>

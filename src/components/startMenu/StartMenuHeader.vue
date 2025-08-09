@@ -1,31 +1,34 @@
 <script setup lang="ts">
 import StartMenuTags from '@/components/startMenu/StartMenuTags.vue';
+import { useStartMenuStore } from '@/stores/startMenu.ts';
+import { ref } from 'vue';
+
+const inputValue = ref<string>('');
+async function handleInput() {
+  useStartMenuStore().searchQuery = inputValue.value;
+}
 </script>
 <template>
   <div class="start-menu-header">
     <StartMenuTags/>
-    <input type="text" placeholder="search" />
+    <input type="text" placeholder="search" v-model="inputValue" @input="handleInput"/>
   </div>
 </template>
 <style scoped>
 .start-menu-header {
-  top: 5px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  position: absolute;
   margin: auto;
-  left: 50%;
   gap: 10px;
-  transform: translateX(-50%);
   height: 100px;
-  width: 97%;
+  width: 100%;
 }
 
 .start-menu-header input {
-  width: 98%;
-  height: 90%;
+  width: 100%;
+  height: 100%;
   border-radius: 12px;
   background: var(--input-primary-color);
   color: var(--text-color);

@@ -1,7 +1,7 @@
 import { useContextMenuStore } from '@/stores/contextMenu.ts';
 import { useStartMenuStore } from '@/stores/startMenu.ts';
 
-export function useOnOuterClickCloseContextMenu(target: HTMLElement) {
+export function useOnOuterClickClose(target: HTMLElement) {
   if (!target.closest('.context-menu')) {
     if (useContextMenuStore().isShown()) {
       useContextMenuStore().hide();

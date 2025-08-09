@@ -1,59 +1,49 @@
 <script setup lang="ts">
-import { useTaskbarStore } from '@/stores/taskbar.ts';
 import { useWindowStore } from '@/stores/window.ts';
-import { type Component, computed, onBeforeMount, ref, shallowRef } from 'vue';
+import { computed, onBeforeMount, ref } from 'vue';
 import type { Item } from '@/types/ItemTypes.ts';
 import TaskbarTabs from '@/components/taskbar/TaskbarTabs.vue';
 import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
+import { useFileStore } from '@/stores/file.ts';
 
-const taskbarStore = useTaskbarStore();
-const props = defineProps({ id: { required: true, type: Number } });
-
+const fileStore = useFileStore();
 const isHoveringOnTile = ref(false);
 
-const item = ref<Item>();
-const svg = shallowRef<Component>();
+const { id } = defineProps<{ id: number }>();
+
+const application = ref<Item | null>(null);
 onBeforeMount(() => {
-  updateTile();
+  application.value = fileStore.applications.find((item) => item.id === id) ?? null;
 });
-
-function updateTile() {
-  item.value = taskbarStore.items.find((item) => item.content.id === props.id);
-
-  if (item.value && item.value.content.type === 'application' && item.value.label !== '') {
-    svg.value = useSvgOrFallback(item.value.label);
-  }
-}
 
 const windowStore = useWindowStore();
 const getUnderlineClass = computed(() => {
-  if (!item.value) {
+  if (!application.value) {
     return 'underline hidden';
   }
 
-  if (!windowStore.openWindowsReferences[item.value.label]) {
+  if (!windowStore.openWindowsReferences[application.value.label]) {
     return 'underline hidden';
   }
 
-  const openWindowsReferenceCount = windowStore.openWindowsReferences[item.value.label].length;
-  const minimizedCount = windowStore.openWindowsReferences[item.value.label].reduce(
+  const openWindowsReferenceCount = windowStore.openWindowsReferences[application.value.label].length;
+
+  const minimizedCount = windowStore.openWindowsReferences[application.value.label].reduce(
     (accumulator, value) => (value.minimized ? accumulator + 1 : accumulator),
     0,
   );
 
-  if (minimizedCount === openWindowsReferenceCount) {
-    return 'underline minimized';
-  } else {
-    return 'underline maximized';
-  }
+  return minimizedCount === openWindowsReferenceCount
+    ? 'underline minimized'
+    : 'underline maximized';
 });
 
 function hasTabs() {
-  if (!isHoveringOnTile.value) {
+  if (!isHoveringOnTile.value || !application.value) {
     return false;
   }
 
-  const reference = windowStore.openWindowsReferences[item.value ? item.value.label : ''];
+  const reference = windowStore.openWindowsReferences[application.value.label];
   if (!reference || reference.length === 0) {
     return false;
   }
@@ -64,6 +54,7 @@ function hasTabs() {
 const setClassOnHover = ref<string | null>(null);
 const setTimeoutId = ref<number | null>(null);
 const mouseOnTabs = ref(false);
+
 function onMouseEnter() {
   if (firstWindowOpenedOnClickTile.value) {
     firstWindowOpenedOnClickTile.value = false;
@@ -109,18 +100,20 @@ function onTabsUnmounted() {
 }
 
 const firstWindowOpenedOnClickTile = ref(false);
+
 function onClickTile() {
-  if (!item.value) {
+  if (!application.value) {
     return;
   }
 
-  windowStore.pushOpenWindowReference(item.value.label);
+  windowStore.pushOpenWindowReference(application.value.label);
   firstWindowOpenedOnClickTile.value = true;
 }
 </script>
 
 <template>
   <div
+    v-if="application"
     class="tile"
     :class="setClassOnHover"
     @mouseenter.prevent="onMouseEnter"
@@ -128,15 +121,15 @@ function onClickTile() {
   >
     <transition name="fade-shadow">
       <TaskbarTabs
-        v-if="hasTabs() && item && firstWindowOpenedOnClickTile === false"
-        :application-name="item.label"
+        v-if="hasTabs() && application && firstWindowOpenedOnClickTile === false"
+        :application-name="application.label"
         @mouse-entered="mouseOnTabs = true"
         @mouse-left="mouseOnTabs = false"
         @tabs-unmounted="onTabsUnmounted"
       />
     </transition>
     <div class="content" @click="onClickTile">
-      <component class="app-svg" v-if="svg" :is="svg" />
+      <component class="app-svg" :is="useSvgOrFallback(application.label).svg" />
       <hr :class="getUnderlineClass" />
     </div>
   </div>

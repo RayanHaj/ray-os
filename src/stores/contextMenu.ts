@@ -34,6 +34,8 @@ export const useContextMenuStore = defineStore('contextMenu', () => {
         if (actions && typeof actions?.[buttonName] === 'function') {
           await actions?.[buttonName]();
         }
+
+        hide();
       },
     );
   }

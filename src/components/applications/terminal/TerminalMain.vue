@@ -15,7 +15,7 @@ const lines = ref<Array<{ line: string; isPlain: boolean }>>([
 const terminal = ref();
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
-const windowIdObject = useInjectOrThrow<{ windowName: string; id: number }>('windowIdObject');
+const windowId = useInjectOrThrow<string>('windowId');
 const currentPath = ref<string[]>([]);
 
 onBeforeMount(() => {
@@ -30,7 +30,7 @@ async function onEnter(command: string) {
     command,
     lines,
     currentPath,
-    windowIdObject,
+    windowId,
   );
 
   if (commandObject instanceof Error) {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onBeforeMount, ref, watch } from 'vue';
+import { onBeforeMount, onBeforeUnmount, ref, watch } from 'vue';
 import {
   fileSystemLookup,
   insertItemIntoFileSystem,
@@ -16,6 +16,7 @@ import { useWindowStore } from '@/stores/window.ts';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
 import type { ItemSizeKeys } from '@/types/FileExplorerTypes.ts';
 import { useToastStore } from '@/stores/toast.ts';
+import { useNotepadStore } from '@/stores/notepad.ts';
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 const fileSystemStore = useFileSystemStore();
@@ -36,11 +37,33 @@ onBeforeMount(async () => {
       fileExplorerStore.updateItemSize(fileItemSize as ItemSizeKeys);
     }
   }
+
+  if (fileExplorerStore.filePathAtWindowId?.windowId === windowId) {
+    currentPath.value = fileExplorerStore.filePathAtWindowId.path;
+  }
+});
+
+onBeforeUnmount(() => {
+  if (fileExplorerStore.filePathAtWindowId?.windowId === windowId) {
+    fileExplorerStore.filePathAtWindowId = {windowId: '', path: []};
+  }
 });
 
 watch(
   () => fileSystemStore.updateFileSystemVal,
   async () => await updateCurrentItems(currentPath.value.join('/')),
+);
+const fileExplorerDiv = ref();
+
+const windowId = useInjectOrThrow<string>('windowId');
+watch(
+  () => fileExplorerStore.filePathAtWindowId,
+  (newVal) => {
+    if (newVal && newVal.windowId === windowId) {
+      currentPath.value = newVal.path;
+      fileSystemStore.updateFileSystem();
+    }
+  },
 );
 
 async function updateCurrentItems(path: string) {
@@ -68,10 +91,11 @@ async function mapItemsWithType(items: FileSystemItem[]) {
 }
 
 function handleBackClick() {
-  const poppedItem = previousItems.value.pop();
+  const poppedItems = previousItems.value.pop();
 
-  if (poppedItem && poppedItem.length > 0) {
-    currentItems.value = poppedItem;
+  if (poppedItems && poppedItems.length > 0) {
+    currentItems.value = poppedItems;
+    currentItemId.value = currentItems.value[0].parents[0];
     currentPath.value.pop();
   }
 }
@@ -87,7 +111,18 @@ async function onDblClickItem(item: FileSystemItem & { type: string }) {
       case 'application':
         useWindowStore().pushOpenWindowReference(item.file.name);
         break;
-      case 'file':
+      case 'file': {
+        const file = await rayDb.findOne<Item>('files', 'id', item.file.id);
+        if (!file) {
+          return;
+        }
+        if (file.content.type === 'file') {
+          if (file.content.rawFile) {
+            const newWindowId = useWindowStore().pushOpenWindowReference('Notepad');
+            useNotepadStore().initializeNotepadFile(newWindowId, file.content.name, await file.content.rawFile.text());
+          }
+        }
+      }
     }
 
     currentItemId.value = item.id;
@@ -136,7 +171,7 @@ async function handleModalInput(input: string) {
 </script>
 
 <template>
-  <div class="file-explorer">
+  <div class="file-explorer" ref="fileExplorerDiv">
     <FileExplorerModal
       v-show="addNewItemModalOpen"
       title="add new directory"
@@ -147,9 +182,6 @@ async function handleModalInput(input: string) {
     <FileExplorerGrid
       :parent-id="currentItemId ?? -1"
       :current-directories="currentItems"
-      :previous-directories="previousItems"
-      :current-path="currentPath"
-      :ray-db="rayDb!"
       @item-event:dbl-click="onDblClickItem"
       @add-new-directory="toggleAddNewItemModal"
     />

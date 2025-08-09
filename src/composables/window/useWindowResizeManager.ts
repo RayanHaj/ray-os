@@ -4,14 +4,26 @@ import { useWindowStateManager } from '@/composables/window/useWindowStateManage
 import { useBrowserStore } from '@/stores/browser.ts';
 import { useWindowStore } from '@/stores/window.ts';
 
+type WindowCornerPosition =
+  | 'default'
+  | 'north'
+  | 'east'
+  | 'south'
+  | 'west'
+  | 'north east'
+  | 'north west'
+  | 'south east'
+  | 'south west';
+
 export function useWindowResizeManager(
   styles: Ref<WindowStyleObject>,
   reference: WindowFlatReference,
   window: Ref,
   windowStateManager: ReturnType<typeof useWindowStateManager>,
 ) {
-  const currentCorner = ref('default');
+  const currentCorner = ref<WindowCornerPosition>('default');
   const isMouseDown = ref(false);
+
   function onMouseDownWindow() {
     useWindowStore().setWindowZIndexToTop(reference);
     if (currentCorner.value !== 'default') {
@@ -38,15 +50,16 @@ export function useWindowResizeManager(
     }
 
     styles.value.transition = 'none';
-    const splitValue = currentCorner.value.split(' ');
+
+    const splitValue = currentCorner.value.split(' ') as WindowCornerPosition[];
     if (splitValue.length === 1) {
-      resizeWindowOnCornerMouseDown(event, splitValue[0]);
+      resizeWindowOnCornerMouseDown(event, currentCorner.value);
     } else {
       splitValue.forEach((value) => resizeWindowOnCornerMouseDown(event, value));
     }
   }
 
-  function resizeWindowOnCornerMouseDown(event: MouseEvent, side: string) {
+  function resizeWindowOnCornerMouseDown(event: MouseEvent, side: WindowCornerPosition) {
     const rect = window.value.getBoundingClientRect();
 
     const minHeight = Number(styles.value.minHeight.replace('px', ''));
@@ -161,7 +174,7 @@ export function useWindowResizeManager(
     }
   }
 
-  function maximizeWindow(
+  function setWindowMaximized(
     cachedStyles: Ref<{ left: string; top: string; width: string; height: string }>,
   ) {
     // if already maximized, put window back into its position before it was maximized
@@ -173,17 +186,12 @@ export function useWindowResizeManager(
       return;
     }
 
-    cacheStyles(cachedStyles);
-    maximize();
-  }
-
-  function cacheStyles(
-    cachedStyles: Ref<{ left: string; top: string; width: string; height: string }>,
-  ) {
     cachedStyles.value.height = styles.value.height;
     cachedStyles.value.width = styles.value.width;
     cachedStyles.value.left = styles.value.left;
     cachedStyles.value.top = styles.value.top;
+
+    maximize();
   }
 
   function maximize() {
@@ -195,5 +203,10 @@ export function useWindowResizeManager(
     styles.value.top = '0';
   }
 
-  return { currentCorner, onMouseDownWindow, onMouseMoveWindow, maximizeWindow };
+  return {
+    currentCorner,
+    onMouseDownWindow,
+    onMouseMoveWindow,
+    setWindowMaximized,
+  };
 }

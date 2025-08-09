@@ -17,14 +17,14 @@ export async function useHandleTerminalCommand(
   command: string,
   lines: Ref<Array<{ line: string; isPlain: boolean }>>,
   currentPath: Ref<string[]>,
-  windowIdObject: { windowName: string; id: number },
+  windowId: string,
 ) {
   const commandObject = parseCommandStringToArray(command);
   if (commandObject instanceof Error) {
     return commandObject;
   }
 
-  const error = await handleCommand(rayDb, commandObject, lines, currentPath, windowIdObject);
+  const error = await handleCommand(rayDb, commandObject, lines, currentPath, windowId);
   if (error) {
     return error;
   }
@@ -50,7 +50,7 @@ async function handleCommand(
   commandObject: CommandObject,
   lines: Ref<Array<{ line: string; isPlain: boolean }>>,
   currentPath: Ref<string[]>,
-  windowIdObject: { windowName: string; id: number },
+  windowId: string,
 ) {
   let commandError: Error | null = null;
   switch (commandObject.command) {
@@ -67,7 +67,7 @@ async function handleCommand(
       useHandleHelp(lines);
       break;
     case 'exit':
-      useHandleExit(windowIdObject);
+      useHandleExit(windowId);
       break;
     case 'dir':
       await useHandleDir(rayDb, currentPath, lines);

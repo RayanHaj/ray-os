@@ -2,6 +2,8 @@ import type { RayDb } from 'ray-db-wrapper';
 import type { FileSystemItem } from '@/types/ItemTypes.ts';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
 import { useGetRootDirectory } from '@/composables/fileSystem/useGetRootDirectory.ts';
+import { useHandleIDBFileOperations } from '@/composables/fileSystem/useHandleIDBFileOperations.ts';
+import { useToastStore } from '@/stores/toast.ts';
 
 function insertionCheck(
   foundItems: FileSystemItem[],
@@ -58,7 +60,7 @@ function insertionCheck(
 export async function insertItemIntoFileSystem(
   rayDb: RayDb,
   parents: number[],
-  item: { file?: { name: string; id: number }; directory?: { name: string; children: number[] } },
+  item: { file?: { name: string; id: number }; directory?: { name: string; children: number[] }, isSystemFile?: boolean },
 ): Promise<Error | number | undefined> {
   try {
     const foundItems = await rayDb.findAll<FileSystemItem>('fileSystem');
@@ -68,14 +70,20 @@ export async function insertItemIntoFileSystem(
       throw check;
     }
 
+    if (!item.isSystemFile) {
+      item.isSystemFile = false;
+    }
+
+
     let id = await rayDb.insertOne<FileSystemItem>('fileSystem', {
       parents: parents,
       [item.directory ? 'directory' : 'file']: item.directory || item.file,
+      isSystemFile: item.isSystemFile
     });
 
     if (Number.isNaN(id)) return new Error('hello');
-
     id = id as number;
+
     for (const parentId of parents) {
       const parent = await rayDb.findOne<FileSystemItem>('fileSystem', 'id', parentId);
       if (parent.directory !== undefined) {
@@ -183,29 +191,31 @@ export async function getFileSystemItem(
 
 export async function deleteFileSystemItem(rayDb: RayDb, id: number) {
   const parent: FileSystemItem = await rayDb.findOne<FileSystemItem>('fileSystem', 'id', id);
-  if (!parent) {
+  if (!parent || !parent.id) {
     return;
+  }
+
+  if (parent.isSystemFile) {
+    useToastStore().createToast('cannot delete system files', 'error', 5000);
+    throw new Error('cannot delete system files');
   }
 
   if (parent.file) {
-    await rayDb.deleteOne('fileSystem', parent.file.id);
-    await rayDb.deleteOne('files', parent.file.id);
-    return;
-  }
-
-  if (parent.directory && parent.id) {
+    await useHandleIDBFileOperations(rayDb).remove(parent.file.id, parent.id, 'file');
+  } else if (parent.directory) {
     await rayDb.deleteOne('fileSystem', parent.id);
 
-    let currentItem: FileSystemItem;
     for (const child of parent.directory.children) {
-      currentItem = await rayDb.findOne<FileSystemItem>('fileSystem', 'id', child);
-      if (currentItem.id)
-        if (currentItem.directory) {
-          await deleteFileSystemItem(rayDb, currentItem.id);
-        } else if (currentItem.file) {
-          await rayDb.deleteOne('fileSystem', currentItem.id);
-          await rayDb.deleteOne('files', currentItem.id);
-        }
+      const fileSystemItem = await rayDb.findOne<FileSystemItem>('fileSystem', 'id', child);
+      if (!fileSystemItem.id) {
+        continue;
+      }
+
+      if (fileSystemItem.file) {
+        await useHandleIDBFileOperations(rayDb).remove(fileSystemItem.file.id, fileSystemItem.id, 'file');
+      } else if (fileSystemItem.directory) {
+        await deleteFileSystemItem(rayDb, fileSystemItem.id);
+      }
     }
   }
 }

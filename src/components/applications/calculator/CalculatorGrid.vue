@@ -65,9 +65,9 @@ button {
   font-size: var(--font-size-elg);
   color: var(--text-color);
   background: var(--button-primary-color);
-  border: var(--window-border-color) 2px solid;
+  border: none;
   height: 100%;
-  border-radius: 5px;
+  border-radius: 2px;
 }
 
 button:hover {
@@ -79,7 +79,7 @@ button:hover {
   grid-template-columns: auto auto auto auto;
   height: 80%;
   width: 100%;
-  gap: 3px;
+  gap: 5px;
   padding: 5px;
 }
 </style>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import DesktopGridMain from '@/components/desktop/DesktopGridMain.vue';
+import DesktopMain from '@/components/desktop/DesktopMain.vue';
 import TaskbarMain from '@/components/taskbar/TaskbarMain.vue';
 import { type Component, type ComputedRef, ref } from 'vue';
 import WindowMain from '@/components/WindowMain.vue';
@@ -10,7 +10,7 @@ import FallbackMain from '@/components/applications/FallbackMain.vue';
 import DesktopSnapLayout from '@/components/DesktopSnapLayout.vue';
 import ContextMenu from '@/components/ContextMenu.vue';
 import { useContextMenuStore } from '@/stores/contextMenu.ts';
-import { useOnOuterClickCloseContextMenu } from '@/composables/contextMenu/useOnOuterClickCloseContextMenu.ts';
+import { useOnOuterClickClose } from '@/composables/helpers/useOnOuterClickClose.ts';
 import UiToast from '@/ui/UiToast.vue';
 import { useGetWindowContentComponent } from '@/composables/window/useGetWindowContentComponent.ts';
 
@@ -33,7 +33,7 @@ const contextMenuStore = useContextMenuStore();
 </script>
 
 <template>
-  <main @click="useOnOuterClickCloseContextMenu($event.target as HTMLElement)">
+  <main @click="useOnOuterClickClose($event.target as HTMLElement)">
     <UiToast />
     <ContextMenu v-show="contextMenuStore.isShown()" />
     <DesktopSnapLayout
@@ -48,7 +48,7 @@ const contextMenuStore = useContextMenuStore();
       :selected-layout="selectedLayout"
       @show-snap-layout="showSnapLayout = $event"
     />
-    <DesktopGridMain />
+    <DesktopMain />
     <TaskbarMain />
   </main>
 </template>

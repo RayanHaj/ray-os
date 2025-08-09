@@ -7,8 +7,8 @@ export function useSvgOrFallback(value: string | AvailableSvgs) {
   const formattedValueKey = value.charAt(0).toUpperCase() + value.slice(1).replace(' ', '');
 
   if (Object.keys(svgsStore.svgs).includes(formattedValueKey)) {
-    return svgsStore.svgs[formattedValueKey as AvailableSvgs];
+    return {found: true, svg: svgsStore.svgs[formattedValueKey as AvailableSvgs]}
   } else {
-    return useSvgFallback(formattedValueKey);
+    return {found: false, svg: useSvgFallback(formattedValueKey)};
   }
 }

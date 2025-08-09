@@ -7,6 +7,7 @@ import FileExplorerMain from '@/components/applications/fileExplorer/FileExplore
 import SereneSoundsMain from '@/components/applications/sereneSounds/SereneSoundsMain.vue';
 import TerminalMain from '@/components/applications/terminal/TerminalMain.vue';
 import TodoMain from '@/components/applications/todo/todoMain.vue';
+import NotepadMain from '@/components/applications/notepad/NotepadMain.vue';
 
 const windowContentComponents: { [windowName in WindowName]: Component } = {
   settings: SettingsMain,
@@ -16,6 +17,7 @@ const windowContentComponents: { [windowName in WindowName]: Component } = {
   sereneSounds: SereneSoundsMain,
   terminal: TerminalMain,
   todo: TodoMain,
+  notepad: NotepadMain
 };
 
 export function useGetWindowContentComponent(windowName: WindowName) {

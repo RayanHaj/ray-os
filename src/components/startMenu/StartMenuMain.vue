@@ -1,8 +1,15 @@
 <script setup lang="ts">
 import { useTaskbarStore } from '@/stores/taskbar.ts';
 import StartMenuHeader from '@/components/startMenu/StartMenuHeader.vue';
+import StartMenuContent from '@/components/startMenu/StartMenuContent.vue';
+import { onUnmounted } from 'vue';
+import { useStartMenuStore } from '@/stores/startMenu.ts';
 
 const taskbarStore = useTaskbarStore();
+
+onUnmounted(() => {
+  useStartMenuStore().searchQuery = '';
+});
 </script>
 
 <template>
@@ -15,7 +22,7 @@ const taskbarStore = useTaskbarStore();
   >
     <div class="start-menu">
       <StartMenuHeader/>
-      <div class="start-menu-footer"></div>
+      <StartMenuContent/>
     </div>
   </div>
 </template>
@@ -35,27 +42,9 @@ const taskbarStore = useTaskbarStore();
   position: relative;
   width: 350px;
   height: 95%;
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: var(--background-color);
   border: var(--accent-color) solid 2px;
   border-radius: 15px;
-}
-
-.start-menu-footer {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: absolute;
-  margin: auto;
-  left: 50%;
-  transform: translateX(-50%);
-  height: 70px;
-  width: 97%;
-}
-
-.start-menu-footer {
-  bottom: 5px;
-  border-bottom-left-radius: 10px;
-  border-bottom-right-radius: 10px;
-  background: var(--accent-color);
+  padding: 10px;
 }
 </style>

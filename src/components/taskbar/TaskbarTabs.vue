@@ -24,7 +24,7 @@ onBeforeUnmount(() => emits('tabsUnmounted'));
     <TaskbarTab
       v-for="reference of references"
       :key="`${applicationName}-${reference.id}`"
-      :window-reference="reference"
+      :window-id="useWindowStore().getGlobalId(props.applicationName, reference.id)"
       :application-name="applicationName"
     />
   </ol>

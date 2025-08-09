@@ -2,6 +2,7 @@ export const availableSvgs = [
   'Close',
   'Copy',
   'Delete',
+  'Rename',
   'Directory',
   'Maximize',
   'Minimize',
@@ -17,5 +18,8 @@ export const availableSvgs = [
   'Paint',
   'Portfolio',
   'Settings',
+  'Upload',
+  'Notepad',
+  'Todo'
 ] as const;
 export type AvailableSvgs = (typeof availableSvgs)[number];

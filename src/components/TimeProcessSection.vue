@@ -11,6 +11,7 @@ const showSoundProcess = ref(false);
 
 const sereneSoundsStore = useSereneSoundsStore();
 const windowStore = useWindowStore();
+
 watch(
   () => sereneSoundsStore.playingSounds,
   (newVal, oldValue) => {

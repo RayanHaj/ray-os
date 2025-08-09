@@ -20,7 +20,12 @@ export async function useHandleDel(
       return new Error('could not find value');
     }
 
-    await useDeleteFileSystemItem(rayDb, undefined, targetValue.id);
+    try {
+      await useDeleteFileSystemItem(rayDb, undefined, targetValue.id);
+    } catch (e) {
+      return new Error((e as Error).message);
+    }
+
     lines.value.push({ line: `directory (${name}) successfully deleted`, isPlain: true });
   } catch (e) {
     return e as Error;

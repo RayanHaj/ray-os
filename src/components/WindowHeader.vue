@@ -3,23 +3,20 @@ import {
   type Component,
   markRaw,
   onBeforeMount,
-  type PropType,
   type Raw,
   ref,
   shallowRef,
 } from 'vue';
 import type { WindowFlatReference } from '@/types/WindowTypes.ts';
 import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
-import { useWindowStore } from '@/stores/window.ts';
+import { useWindowStore } from '@/stores/window';
 
-const props = defineProps({
-  reference: { required: true, type: Object as PropType<WindowFlatReference> },
-});
+const { reference } = defineProps<{ reference: WindowFlatReference }>();
 
 const windowControlButtons = ref<{ name: string; svg: Raw<Component> | null }[]>([]);
 const svg = shallowRef<Component | null>(null);
 onBeforeMount(async () => {
-  svg.value = useSvgOrFallback(props.reference.label);
+  svg.value = useSvgOrFallback(reference.label).svg;
 
   const buttons = [
     { name: 'Minimize', svg: null },
@@ -28,7 +25,7 @@ onBeforeMount(async () => {
   ];
   windowControlButtons.value = await Promise.all(
     buttons.map(async (button) => {
-      const svg = useSvgOrFallback(button.name);
+      const svg = useSvgOrFallback(button.name).svg;
       return { name: button.name, svg: svg ? markRaw(svg) : null };
     }),
   );

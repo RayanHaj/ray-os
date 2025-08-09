@@ -2,44 +2,31 @@
 import {
   type FileSystemItem,
   type FileItem,
-  type Item,
   fileExtensions,
+  type ItemInsert,
 } from '@/types/ItemTypes.ts';
-import { type Component, computed, onBeforeMount, type PropType, shallowRef, watch } from 'vue';
+import { computed } from 'vue';
 import type { RayDb } from 'ray-db-wrapper';
 import { useContextMenuStore } from '@/stores/contextMenu.ts';
 import type {
-  SecondaryActionsContextMenu,
   PrimaryActionsContextMenu,
+  SecondaryActionsContextMenu
 } from '@/types/ContextMenuTypes.ts';
 import { useDeleteFileSystemItem } from '@/composables/fileSystem/useDeleteFileSystemItem.ts';
 import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
 import { insertItemIntoFileSystem } from '@/composables/fileSystem/useIndexedDbHelper.ts';
-import { useHandleIDBErrorHandler } from '@/composables/fileSystem/useHandleIDBErrorHandler.ts';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
-import { type ItemSize, type ItemSizeKeys, itemSizes } from '@/types/FileExplorerTypes.ts';
+import { type ItemSize, itemSizes } from '@/types/FileExplorerTypes.ts';
+import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
+import { useToastStore } from '@/stores/toast.ts';
 
-const props = defineProps({
-  currentDirectories: {
-    required: true,
-    type: Array as PropType<Array<FileSystemItem & { type: string }>>,
-  },
-  previousDirectories: { required: true, type: Array as PropType<FileSystemItem[][]> },
-  currentPath: { required: true, type: Array as PropType<string[]> },
-  rayDb: { required: true, type: Object as PropType<RayDb> },
-  parentId: { required: true, type: Number },
-});
+const rayDb = useInjectOrThrow<RayDb>('rayDb');
+const { currentDirectories, parentId } = defineProps<{
+  currentDirectories: Array<FileSystemItem & { type: string }>;
+  parentId: number;
+}>();
 
 const emits = defineEmits(['itemEvent:dblClick', 'addNewDirectory']);
-
-const directorySvg = shallowRef<Component | null>();
-const fileSvg = shallowRef<Component | null>();
-
-const contextMenuStore = useContextMenuStore();
-onBeforeMount(async () => {
-  directorySvg.value = useSvgOrFallback('Directory');
-  fileSvg.value = useSvgOrFallback('TextFile');
-});
 
 const primaryActionsGrid: PrimaryActionsContextMenu[] = [];
 const secondaryActionsGrid: SecondaryActionsContextMenu[] = [
@@ -60,44 +47,50 @@ const actionsGridItem = (item: FileSystemItem | null) => {
     Copy: async () => {},
     Delete: async () => {
       if (item) {
-        await useDeleteFileSystemItem(props.rayDb, item);
+        await useDeleteFileSystemItem(rayDb, item);
         useContextMenuStore().hide();
       }
     },
   };
 };
 
-function onRightClick(
+const contextMenuStore = useContextMenuStore();
+
+async function onRightClick(
   event: MouseEvent,
-  file: FileSystemItem | null,
+  item: FileSystemItem | null,
   calledFrom: 'grid' | 'gridItem',
 ) {
   contextMenuStore.initializeContextMenu(
     calledFrom === 'grid' ? primaryActionsGrid : primaryActionsGridItem,
     calledFrom === 'grid' ? secondaryActionsGrid : secondaryActionsGridItem,
     { left: event.clientX, top: event.clientY },
-    calledFrom === 'grid' ? actionsGrid() : actionsGridItem(file),
+    calledFrom === 'grid' ? actionsGrid() : actionsGridItem(item),
   );
+
   contextMenuStore.show();
 }
+
+const fileSvg = useSvgOrFallback('TextFile');
+const directorySvg = useSvgOrFallback('Directory');
 
 function getSvg(fileSystemItem: FileSystemItem & { type: string }) {
   switch (fileSystemItem.type) {
     case 'application': {
       if (fileSystemItem.file?.name) {
-        return useSvgOrFallback(fileSystemItem.file.name);
+        return useSvgOrFallback(fileSystemItem.file.name).svg;
       } else {
-        return fileSvg.value;
+        return fileSvg.svg;
       }
     }
     case 'file': {
-      return fileSvg.value;
+      return fileSvg.svg;
     }
     case 'directory': {
-      return directorySvg.value;
+      return directorySvg.svg;
     }
     default: {
-      return fileSvg.value;
+      return fileSvg.svg;
     }
   }
 }
@@ -112,30 +105,42 @@ async function onFileDrop(event: DragEvent) {
     return;
   }
 
-  const FileObject = {
-    type: file.type,
+  const fileObject: FileItem = {
+    type: 'file',
     name: file.name,
     size: file.size,
     createdAt: file.lastModified.toString(),
     rawFile: file,
   };
 
-  if (props.parentId === -1) {
+  if (parentId === -1) {
     return;
   }
 
   try {
-    const fileId = await props.rayDb.insertOne<Item>('files', {
+    const fileId = await rayDb.insertOne<ItemInsert>('files', {
       label: file.name,
-      content: FileObject as FileItem,
+      content: fileObject as FileItem,
     });
     if (fileId && typeof fileId === 'number') {
-      await insertItemIntoFileSystem(props.rayDb, [props.parentId], {
-        file: { name: file.name, id: fileId },
-      });
+      await insertItemIntoFileSystem(rayDb, [parentId], { file: { name: file.name, id: fileId } });
     }
   } catch (e) {
-    useHandleIDBErrorHandler(e as Error);
+    useToastStore().createToast((e as Error).message, 'error', 5000);
+  }
+}
+
+function onDragStart(event: DragEvent, fileSystemItem: FileSystemItem) {
+  if (fileSystemItem.file) {
+    event.dataTransfer?.setData(
+      'text/plain',
+      `file-${fileSystemItem.file.id.toString()}`
+    );
+  } else if (fileSystemItem.directory && fileSystemItem.id) {
+    event.dataTransfer?.setData(
+      'text/plain',
+      `directory-${fileSystemItem.id}`
+    );
   }
 }
 
@@ -157,6 +162,8 @@ const itemSize = computed<ItemSize>(() => itemSizes[fileExplorerStore.currentFil
         class="item"
         v-for="fileSystemItem of currentDirectories"
         :key="fileSystemItem.id"
+        draggable="true"
+        @dragstart="onDragStart($event, fileSystemItem)"
         @dblclick="emits('itemEvent:dblClick', fileSystemItem)"
         @click.right.prevent.stop="onRightClick($event, fileSystemItem, 'gridItem')"
       >

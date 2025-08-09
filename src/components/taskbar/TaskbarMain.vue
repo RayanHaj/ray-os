@@ -5,37 +5,34 @@ import StartMenuMain from '@/components/startMenu/StartMenuMain.vue';
 import { useStartMenuStore } from '@/stores/startMenu.ts';
 import TimeProcessSection from '@/components/TimeProcessSection.vue';
 import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
-import { type Component, onBeforeMount, shallowRef } from 'vue';
+import { useFileStore } from '@/stores/file.ts';
 
 const taskbarStore = useTaskbarStore();
-const taskbarHeight = taskbarStore.taskbarHeight;
-const taskbarItems = taskbarStore.items;
+const fileStore = useFileStore();
 
-const searchSvg = shallowRef<Component>();
-onBeforeMount(() => {
-  searchSvg.value = useSvgOrFallback('Search');
-});
+const taskbarHeight = taskbarStore.taskbarHeight;
+const taskbarItems = fileStore.applications;
 
 const startMenuStore = useStartMenuStore();
 </script>
 <template>
-  <StartMenuMain v-show="startMenuStore.isShown()" />
+  <StartMenuMain v-if="startMenuStore.isShown()" />
   <div class="taskbar" :style="{ height: `${taskbarHeight}px` }">
-    <div class="start">
+    <div class="left-section">
       <button
         class="taskbar-search-button"
         @click="startMenuStore.isShown() ? startMenuStore.hide() : startMenuStore.show()"
         :style="{ backgroundColor: startMenuStore.isShown() ? 'var(--button-hover-color)' : '' }"
       >
-        <component class="search-svg" :is="searchSvg" />
+        <component class="search-svg" :is="useSvgOrFallback('Search').svg" />
       </button>
     </div>
-    <div class="middle">
+    <div class="middle-section">
       <div class="taskbar-tiles">
-        <TaskbarTile v-for="item of taskbarItems" :key="item.content.id" :id="item.content.id" />
+        <TaskbarTile v-for="item of taskbarItems" :key="item.id" :id="item.id" />
       </div>
     </div>
-    <div class="end">
+    <div class="right-section">
       <TimeProcessSection />
     </div>
   </div>
@@ -54,7 +51,7 @@ const startMenuStore = useStartMenuStore();
   padding-right: 25px;
 }
 
-.middle {
+.middle-section {
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -77,12 +74,12 @@ const startMenuStore = useStartMenuStore();
   background: var(--button-hover-color);
 }
 
-.start,
-.end {
+.left-section,
+.right-section {
   width: 20%;
 }
 
-.end {
+.right-section {
   display: flex;
   flex-direction: row;
   justify-content: end;
@@ -94,10 +91,10 @@ const startMenuStore = useStartMenuStore();
 }
 
 @media (max-width: 850px) {
-  .start {
+  .left-section {
     display: none;
   }
-  .middle {
+  .middle-section {
     display: flex;
     justify-content: start;
     width: 80%;
@@ -116,10 +113,10 @@ const startMenuStore = useStartMenuStore();
 }
 
 @media (max-width: 550px) {
-  .end {
+  .right-section {
     display: none;
   }
-  .middle {
+  .middle-section {
     justify-content: center;
     width: 100%;
   }

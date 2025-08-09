@@ -25,13 +25,13 @@ function updateSelectedItemSizeButton(itemSizeKey: ItemSizeKeys) {
 
 <template>
   <header class="file-explorer-header">
-    <div class="start">
+    <div class="left-section">
       <button class="back-button" @click="emits('header-event:back')">^</button>
     </div>
     <div class="middle-side">
       <input type="text" :value="currentPath.join('/')" disabled />
     </div>
-    <div class="end">
+    <div class="right-section">
       <button
         class="item-size-button"
         :class="{ selected: text === selectedItemSizeButton }"
@@ -54,7 +54,7 @@ function updateSelectedItemSizeButton(itemSizeKey: ItemSizeKeys) {
   color: var(--text-color);
 }
 
-.start,
+.left-section,
 .back-button {
   width: 150px;
 }
@@ -72,7 +72,7 @@ function updateSelectedItemSizeButton(itemSizeKey: ItemSizeKeys) {
   color: var(--text-color);
 }
 
-.end {
+.right-section {
   display: flex;
   flex-direction: row;
   width: 150px;

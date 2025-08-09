@@ -10,12 +10,12 @@ import {
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
 
 export const useFileStore = defineStore('file', () => {
-  const files = ref<Item[]>([]);
+  const applications = ref<Item[]>([]);
 
   async function initializeFiles(rayDb: RayDb) {
     const applicationItems = mapApplicationsToItems();
     await insertApplicationItemsIntoIndexedDb(rayDb, applicationItems);
-    files.value = applicationItems;
+    applications.value = applicationItems;
   }
 
   async function insertApplicationItemsIntoIndexedDb(rayDb: RayDb, applicationItems: Item[]) {
@@ -30,18 +30,19 @@ export const useFileStore = defineStore('file', () => {
 
     for (const applicationItem of applicationItems) {
       const containsApplicationItem = fileItems.some(
-        (item) => applicationItem.content.id === item.content.id,
+        (item) => applicationItem.id === item.id,
       );
       if (containsApplicationItem) break;
 
       const directoryContainsApplication = directory.children.some(
-        (child) => child.id === applicationItem.content.id,
+        (child) => child.id === applicationItem.id,
       );
       if (directoryContainsApplication) break;
 
       await rayDb.insertOne<Item>('files', applicationItem);
       await insertItemIntoFileSystem(rayDb, [directory.id], {
-        file: { name: applicationItem.label, id: applicationItem.content.id },
+        file: { name: applicationItem.label, id: applicationItem.id },
+        isSystemFile: true
       });
     }
   }
@@ -53,10 +54,10 @@ export const useFileStore = defineStore('file', () => {
 
   function mapApplicationsToItems(): Item[] {
     return Applications.map((application, index) => {
-      const item: Item = { label: application, content: { id: index + 1, type: 'application' } };
+      const item: Item = { label: application, content: { type: 'application' }, id: index + 1};
       return item;
     });
   }
 
-  return { initializeFiles, files };
+  return { initializeFiles, applications };
 });

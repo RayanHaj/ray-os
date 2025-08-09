@@ -21,6 +21,7 @@ export function useWindowPositionManager(
   windowStateManager: ReturnType<typeof useWindowStateManager>,
   windowSnappingManager: ReturnType<typeof useWindowSnappingManager>,
   oldPosition: Ref<{ clientX: number; clientY: number }>,
+  windowId: string
 ) {
   const browserStore = useBrowserStore();
 
@@ -46,7 +47,7 @@ export function useWindowPositionManager(
     if (windowSnappingManager.showSnapLayout.value.show) {
       windowSnappingManager.showSnapLayout.value = {
         show: false,
-        windowId: windowStateManager.constructedId,
+        windowId: windowId,
       };
     }
 
@@ -74,14 +75,14 @@ export function useWindowPositionManager(
       if (!windowSnappingManager.showSnapLayout.value.show) {
         windowSnappingManager.showSnapLayout.value = {
           show: true,
-          windowId: windowStateManager.constructedId,
+          windowId: windowId,
         };
       }
     } else {
       if (windowSnappingManager.showSnapLayout.value.show) {
         windowSnappingManager.showSnapLayout.value = {
           show: false,
-          windowId: windowStateManager.constructedId,
+          windowId: windowId,
         };
       }
     }
