@@ -160,7 +160,7 @@ function openWindow() {
 <template>
   <div
     :id="tileId.toString()"
-    class="tile"
+    class="application-name"
     :class="{ filled: tileContainsContent }"
     :style="{ width: `${desktopStore.tileWidth}px`, height: `${desktopStore.tileHeight}px` }"
     :draggable="tileContainsContent"
@@ -183,7 +183,7 @@ function openWindow() {
 </template>
 
 <style scoped>
-.tile {
+.application-name {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -192,7 +192,7 @@ function openWindow() {
   padding: 5px;
 }
 
-.tile.filled:hover {
+.application-name.filled:hover {
   background-color: var(--button-hover-color);
 }
 

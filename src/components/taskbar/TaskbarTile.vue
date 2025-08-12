@@ -114,11 +114,12 @@ function onClickTile() {
 <template>
   <div
     v-if="application"
-    class="tile"
+    class="application-name"
     :class="setClassOnHover"
     @mouseenter.prevent="onMouseEnter"
     @mouseleave.prevent="onMouseLeave"
   >
+    <div v-if="isHoveringOnTile && !hasTabs()" class="title-text-hover">{{ application.label }}</div>
     <transition name="fade-shadow">
       <TaskbarTabs
         v-if="hasTabs() && application && firstWindowOpenedOnClickTile === false"
@@ -128,7 +129,7 @@ function onClickTile() {
         @tabs-unmounted="onTabsUnmounted"
       />
     </transition>
-    <div class="content" @click="onClickTile">
+    <div class="content" @click="onClickTile" >
       <component class="app-svg" :is="useSvgOrFallback(application.label).svg" />
       <hr :class="getUnderlineClass" />
     </div>
@@ -136,7 +137,7 @@ function onClickTile() {
 </template>
 
 <style scoped>
-.tile {
+.application-name {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -145,9 +146,20 @@ function onClickTile() {
   position: relative;
 }
 
-.tile.active {
+.application-name.active {
   background-color: var(--button-hover-color);
   border-radius: 10px;
+}
+
+.title-text-hover {
+  position: absolute;
+  top: -50px;
+  width: max-content;
+  padding-block: 5px;
+  padding-inline: 10px;
+  background-color: var(--button-hover-color);
+  border-radius: 5px;
+  user-select: none;
 }
 
 hr {

@@ -4,6 +4,7 @@ import { useNotepadStore } from '@/stores/notepad.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import NotepadHeader from '@/components/applications/notepad/NotepadHeader.vue';
 import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
+import { useToastStore } from '@/stores/toast.ts';
 
 const windowId = useInjectOrThrow<string>('windowId');
 const notepadStore = useNotepadStore();
@@ -18,20 +19,28 @@ watchEffect(() => {
   loadedFile.value = notepadStore.loadedFile;
   notepadStore.loadedFile = undefined;
 });
+
+const preText = ref();
+function saveChanges() {
+  const updatedText = preText?.value.textContent;
+  if (updatedText === loadedFile.value?.text) {
+    useToastStore().createToast('no changes made', 'warning', 3000, 'window', windowId);
+  }
+}
 </script>
 
 <template>
   <div class="text-reader-container">
-    <div class="open-text-file-section" v-if="!loadedFile">
+    <div class="text-file-reader" v-if="loadedFile">
+      <NotepadHeader :file-name="loadedFile.fileName" @on-save-changes="saveChanges"/>
+      <div class="text" contenteditable="true">
+        <pre ref="preText">{{ loadedFile.text }}</pre>
+      </div>
+    </div>
+    <div class="open-text-file-section" v-else>
       <div class="open-text-file-block">
         <p class="select-text-file-p">Select a text file</p>
         <button class="select-text-file-button"><component :is="useSvgOrFallback('Upload').svg" :custom-height='50' :custom-width="50"/></button>
-      </div>
-    </div>
-    <div class="text-file-reader" v-else>
-      <NotepadHeader :file-name="loadedFile.fileName" />
-      <div class="text" contenteditable="true">
-        <pre>{{ loadedFile.text }}</pre>
       </div>
     </div>
   </div>
@@ -91,5 +100,9 @@ watchEffect(() => {
   height: 100%;
   min-height: fit-content;
   background-color: var(--button-primary-color);
+}
+
+*:focus {
+  outline: none;
 }
 </style>

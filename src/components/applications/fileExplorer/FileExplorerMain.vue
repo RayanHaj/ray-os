@@ -118,8 +118,8 @@ async function onDblClickItem(item: FileSystemItem & { type: string }) {
         }
         if (file.content.type === 'file') {
           if (file.content.rawFile) {
-            const newWindowId = useWindowStore().pushOpenWindowReference('Notepad');
-            useNotepadStore().initializeNotepadFile(newWindowId, file.content.name, await file.content.rawFile.text());
+            useNotepadStore().initializeNotepadFile(useWindowStore().getNextWindowId('Notepad'), file.content.name, await file.content.rawFile.text());
+            useWindowStore().pushOpenWindowReference('Notepad');
           }
         }
       }
@@ -165,7 +165,7 @@ async function handleModalInput(input: string) {
 
     addNewItemModalOpen.value = false;
   } catch (e) {
-    useToastStore().createToast((e as Error).message, 'error', 5000);
+    useToastStore().createToast((e as Error).message, 'error', 5000, 'desktop');
   }
 }
 </script>

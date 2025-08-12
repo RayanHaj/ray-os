@@ -79,12 +79,7 @@ watch(
   },
 );
 
-const windowResizeManager = useWindowResizeManager(
-  styles,
-  reference,
-  window,
-  windowStateManager,
-);
+const windowResizeManager = useWindowResizeManager(styles, reference, window, windowStateManager);
 const windowPositionManager = useWindowPositionManager(
   styles,
   window,
@@ -92,7 +87,7 @@ const windowPositionManager = useWindowPositionManager(
   windowStateManager,
   windowSnappingManager,
   oldPosition,
-  windowId
+  windowId,
 );
 
 function closeWindow() {
@@ -121,6 +116,7 @@ function maximizeWindow() {
     @mousemove="windowResizeManager.onMouseMoveWindow($event)"
     @mousedown="windowResizeManager.onMouseDownWindow()"
   >
+    <slot />
     <WindowHeader
       :reference="reference"
       @on-mousedown-header="windowPositionManager.onMouseDownHeader($event)"
@@ -133,7 +129,7 @@ function maximizeWindow() {
       :style="{
         height: `calc(100% - ${windowStore.windowHeaderHeight}px`,
         width: '100%',
-        overflow: 'auto',
+        overflow: 'auto'
       }"
     />
   </div>

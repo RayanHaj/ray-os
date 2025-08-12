@@ -39,7 +39,7 @@ function onClickCancel() {
   background: rgba(0, 0, 0, 0.5);
   width: 100%;
   height: 100%;
-  z-index: 9999;
+  z-index: 9998;
 }
 
 .modal {
@@ -55,7 +55,6 @@ function onClickCancel() {
   transform: translate(-50%, -50%);
   background: var(--tabs-background);
   border: var(--window-border-color) solid 2px;
-  z-index: 9999;
   border-radius: 10px;
   padding: 10px;
   gap: 5px;

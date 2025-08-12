@@ -5,11 +5,17 @@ import UiDropdown from '@/ui/UiDropdown.vue';
 <template>
   <div class="settings-system">
     <UiDropdown
-      class="desktop-tiles-adjustment-dropdown"
-      :options="['option 1', 'option 2', 'option 3']"
-      :custom-styles-select="{ width: '200px' }"
-      @dropdown:value="console.log($event)"
-    />
+      @change="($event.target as HTMLSelectElement).value ?? null"
+      :style="{ width: '100%' }"
+    >
+      <option
+        v-for="option of ['option 1', 'option 2', 'option 3']"
+        :key="option"
+        :selected="option === 'option 2'"
+      >
+        {{ option }}
+      </option>
+    </UiDropdown>
   </div>
 </template>
 

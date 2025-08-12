@@ -13,6 +13,7 @@ import { useContextMenuStore } from '@/stores/contextMenu.ts';
 import { useOnOuterClickClose } from '@/composables/helpers/useOnOuterClickClose.ts';
 import UiToast from '@/ui/UiToast.vue';
 import { useGetWindowContentComponent } from '@/composables/window/useGetWindowContentComponent.ts';
+import { useWindowStore } from '@/stores/window.ts';
 
 const references: ComputedRef<WindowFlatReference[]> = useFlatOpenWindowsReferencesFull();
 
@@ -34,7 +35,7 @@ const contextMenuStore = useContextMenuStore();
 
 <template>
   <main @click="useOnOuterClickClose($event.target as HTMLElement)">
-    <UiToast />
+    <UiToast toast-location="desktop"/>
     <ContextMenu v-show="contextMenuStore.isShown()" />
     <DesktopSnapLayout
       :show-snap-layout="showSnapLayout"
@@ -42,12 +43,15 @@ const contextMenuStore = useContextMenuStore();
     />
     <WindowMain
       v-for="reference of references"
-      :key="`${reference.label}-${reference.id}`"
+      :key="useWindowStore().getGlobalId(reference.label, reference.id)"
       :reference="reference"
       :window-content-component="getWindowContentComponent(reference)"
       :selected-layout="selectedLayout"
       @show-snap-layout="showSnapLayout = $event"
-    />
+    >
+
+      <UiToast toast-location="window" :window-id="useWindowStore().getGlobalId(reference.label, reference.id)"/>
+    </WindowMain>
     <DesktopMain />
     <TaskbarMain />
   </main>

@@ -7,14 +7,12 @@ import { useFileSystemStore } from '@/stores/fileSystem.ts';
 import { RayDb } from 'ray-db-wrapper';
 
 import App from './App.vue';
-import router from './router';
 import { insertItemIntoFileSystem } from '@/composables/fileSystem/useIndexedDbHelper.ts';
 import { useFileStore } from '@/stores/file.ts';
 
 const app = createApp(App);
 
 app.use(createPinia());
-app.use(router);
 
 const rayDb = await RayDb.create('desktop', 1, [
   {

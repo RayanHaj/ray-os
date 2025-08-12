@@ -1,22 +1,28 @@
 <script setup lang="ts">
 import { useToastStore } from '@/stores/toast.ts';
 import { useTaskbarStore } from '@/stores/taskbar.ts';
-import { nextTick, ref, watch } from 'vue';
+import { nextTick, onBeforeMount, ref, watch } from 'vue';
 import { useSvgsStore } from '@/stores/svgs.ts';
+import type { Toast } from '@/types/ToastTypes.ts';
 
 const taskbarStore = useTaskbarStore();
 const toastStore = useToastStore();
 const toastHeight = ref(150);
 const toastWidth = ref(350);
 
+const { toastLocation, windowId } = defineProps<{
+  toastLocation: 'window' | 'desktop';
+  windowId?: string;
+}>();
+
 const toastRefs = ref<(HTMLElement | null)[]>([]);
 
 const styles = ref<{ top: string; right: string; width?: string; height?: string }[]>([]);
 
-const updateStyles = () => {
+function updateStyles(toasts: Toast[]) {
   let topValueToast = 0;
 
-  styles.value = toastStore.toasts.map((_, index) => {
+  styles.value = toasts.map((_, index) => {
     let width = toastRefs.value[index]?.clientWidth;
     let height = toastRefs.value[index]?.clientHeight;
 
@@ -29,26 +35,44 @@ const updateStyles = () => {
       width = toastWidth.value;
       height = toastHeight.value;
 
+      if (toastLocation === 'desktop') {
+        height = toastHeight.value + taskbarStore.taskbarHeight;
+      }
+
       return {
-        top: `calc((100% - ${height + taskbarStore.taskbarHeight + topValueToast}px) - 1%)`,
+        top: `calc((100% - ${height + topValueToast}px) - 1%)`,
         right: '1%',
         width: `${width}px`,
         height: `${height}px`,
       };
     }
 
-    return {
-      top: `calc((100% - ${height + taskbarStore.taskbarHeight + topValueToast}px) - 1%)`,
-      right: '1%',
-    };
-  });
-};
+    if (toastLocation === 'desktop') {
+      height += taskbarStore.taskbarHeight;
+    }
 
+    return { top: `calc((100% - ${height + topValueToast}px) - 1%)`, right: '1%' };
+  });
+}
+
+const showToasts = ref<boolean>(false);
 watch(
   () => toastStore.toasts,
-  async () => {
-    await nextTick();
-    updateStyles();
+  async (newToasts) => {
+    if (toastLocation === 'window' && !newToasts.some((toast) => toast.windowId === windowId)) {
+      showToasts.value = false;
+      return;
+    }
+
+    const filteredToasts = newToasts.filter((toast) => toast.location === toastLocation);
+    if (filteredToasts.length === 0) {
+      showToasts.value = false;
+    } else {
+      showToasts.value = true;
+
+      await nextTick();
+      updateStyles(filteredToasts);
+    }
   },
   { immediate: true },
 );
@@ -60,6 +84,7 @@ function handleCloseToast(index: number) {
 
 <template>
   <div
+    v-show="showToasts"
     :ref="
       (el) => {
         if (el) toastRefs[index] = el as HTMLElement;
@@ -87,7 +112,7 @@ function handleCloseToast(index: number) {
 
 <style scoped>
 .toast {
-  position: fixed;
+  position: absolute;
   padding: 10px;
   border-radius: 5px;
   z-index: 9999;

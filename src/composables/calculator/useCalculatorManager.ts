@@ -9,7 +9,6 @@ export function useCalculatorManager() {
   const defaultCalculation: CalculatorKey = { visual: '0', value: '0', type: 'input' };
   const calculationArray = ref<CalculationArray>([defaultCalculation]);
   const calculationHistory = ref<{ calculationString: string; calculationAnswer: string }[]>([]);
-
   const hasCalculated = ref(false);
 
   function pushToCalculationArray(currentKey: CalculatorKey) {
@@ -35,7 +34,7 @@ export function useCalculatorManager() {
 
       if (isEndingOnDot(currentKey, previousKey)) {
         const dotRemovedKeyValue = previousKey.value.slice(0, previousKey.value.length - 1);
-        updateKeyValue(calculationArray.value.length - 1, dotRemovedKeyValue);
+        updateKeyValue(dotRemovedKeyValue);
       }
       if (isStartingOnDot(currentKey, previousKey)) {
         currentKey.value = '0.';
@@ -112,8 +111,7 @@ export function useCalculatorManager() {
 
   function onTrailingInputs(previousKey: CalculatorKey, currentKey: CalculatorKey) {
     const concatenatedInputs = previousKey.visual + currentKey.visual;
-    const { index } = getLastCalculationKeyAndIndex();
-    updateKeyValue(index, concatenatedInputs);
+    updateKeyValue(concatenatedInputs);
   }
 
   function onTrailingOperators(previousKey: CalculatorKey, currentKey: CalculatorKey) {
@@ -171,12 +169,12 @@ export function useCalculatorManager() {
       return;
     }
 
-    const lastKey = calculationArray.value[calculationArray.value.length - 1];
-    const lastKeyAsString = lastKey.value.toString() as string;
-    if (lastKey.type === 'input' && lastKeyAsString.length > 1) {
-      lastKey.value = lastKeyAsString.slice(0, lastKeyAsString.length - 1);
+    const { key, index } = getLastCalculationKeyAndIndex();
+    const lastKeyAsString = key.value.toString();
+    if (key.type === 'input' && lastKeyAsString.length > 1) {
+      updateKeyValue(lastKeyAsString.slice(0, lastKeyAsString.length - 1))
     } else {
-      calculationArray.value.splice(calculationArray.value.length - 1, 1);
+      updateKeyValue(calculationArray.value.splice(index, 1).toString());
     }
 
     if (calculationArray.value.length === 0) {
@@ -187,32 +185,32 @@ export function useCalculatorManager() {
   }
 
   function handleSquareRoot() {
-    const lastKey = calculationArray.value[calculationArray.value.length - 1];
-    if (lastKey.type === 'input') {
-      lastKey.value = Math.sqrt(Number(lastKey.value)).toString();
+    const { key } = getLastCalculationKeyAndIndex();
+    if (key.type === 'input') {
+      updateKeyValue(Math.sqrt(Number(key.value)).toString());
     }
   }
 
   function handleSignToggle() {
-    const lastKey = calculationArray.value[calculationArray.value.length - 1];
-    if (lastKey.type === 'input') {
-      lastKey.value = (Number(lastKey.value) * -1).toString();
+    const { key } = getLastCalculationKeyAndIndex();
+    if (key.type === 'input') {
+      updateKeyValue((Number(key.value) * -1).toString())
     }
   }
 
   function handlePercentage() {
-    const { index, key } = getLastCalculationKeyAndIndex();
+    const { key } = getLastCalculationKeyAndIndex();
     if (key.type === 'input') {
       if (checkCalculationStructure()) {
         const firstKey = Number(calculationArray.value[0].value);
         const calc = (firstKey - firstKey / Number(key.value)).toString();
-        updateKeyValue(index, calc);
+        updateKeyValue(calc);
         calculate();
         return;
       }
 
       const calculation = (Number(key.value) / 100).toString();
-      updateKeyValue(index, calculation);
+      updateKeyValue(calculation);
     } else if (key.type === 'operator') {
       const firstKey = calculationArray.value[0];
       if (firstKey.type === 'input') {
@@ -247,18 +245,18 @@ export function useCalculatorManager() {
   }
 
   function handleDivisionByOne() {
-    const { index, key } = getLastCalculationKeyAndIndex();
+    const { key } = getLastCalculationKeyAndIndex();
     if (key.type === 'input') {
       const calculation = (1 / Number(key.value)).toString();
-      updateKeyValue(index, calculation);
+      updateKeyValue(calculation);
     }
   }
 
   function handlePow() {
-    const { index, key } = getLastCalculationKeyAndIndex();
+    const { key } = getLastCalculationKeyAndIndex();
     if (key.type === 'input') {
       const calculation = Math.pow(Number(key.value), 2).toString();
-      updateKeyValue(index, calculation);
+      updateKeyValue(calculation);
     }
   }
 
@@ -268,9 +266,10 @@ export function useCalculatorManager() {
     return { index, key };
   }
 
-  function updateKeyValue(keyIndex: number, value: string) {
-    calculationArray.value[keyIndex] = {
-      ...calculationArray.value[keyIndex],
+  function updateKeyValue(value: string) {
+    const { index } = getLastCalculationKeyAndIndex();
+    calculationArray.value[index] = {
+      ...calculationArray.value[index],
       visual: roundNumberToTenDecimals(value),
       value: value,
     };

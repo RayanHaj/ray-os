@@ -126,7 +126,7 @@ async function onFileDrop(event: DragEvent) {
       await insertItemIntoFileSystem(rayDb, [parentId], { file: { name: file.name, id: fileId } });
     }
   } catch (e) {
-    useToastStore().createToast((e as Error).message, 'error', 5000);
+    useToastStore().createToast((e as Error).message, 'error', 5000, 'desktop');
   }
 }
 

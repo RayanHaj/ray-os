@@ -1,17 +1,15 @@
 <script setup lang="ts">
-import { RouterView } from 'vue-router';
 import { useBrowserStore } from '@/stores/browser.ts';
 import { onBeforeMount, onUnmounted, ref } from 'vue';
-import { useTaskbarStore } from '@/stores/taskbar.ts';
 import { useDesktopStore } from '@/stores/desktop.ts';
 import { useSereneSoundsStore } from '@/stores/sereneSounds.ts';
 import { useSvgsStore } from '@/stores/svgs.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import { RayDb } from 'ray-db-wrapper';
+import DesktopView from '@/views/DesktopView.vue';
 
 const sereneSoundsStore = useSereneSoundsStore();
 const browserStore = useBrowserStore();
-const taskbarStore = useTaskbarStore();
 const gridStore = useDesktopStore();
 const svgsStore = useSvgsStore();
 
@@ -30,7 +28,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <RouterView v-if="initialised" />
+  <DesktopView v-if="initialised"/>
 </template>
 
 <style scoped></style>

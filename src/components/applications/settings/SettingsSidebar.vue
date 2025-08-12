@@ -52,6 +52,7 @@ function onClickOption(option: AllowedSettingsOptions) {
 }
 
 .option.selected {
-  background: var(--button-secondary-color);
+  background: var(--button-hover-color);
+  border: var(--accent-color) 2px solid;
 }
 </style>

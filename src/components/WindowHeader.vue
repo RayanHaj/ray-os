@@ -54,6 +54,7 @@ onBeforeMount(async () => {
 
 <style scoped>
 .window-header {
+  position: relative;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -63,6 +64,7 @@ onBeforeMount(async () => {
   background-color: var(--window-secondary-color);
   padding-left: 12px;
   border-bottom: var(--window-border-color) solid 1px;
+  z-index: 9999;
 }
 
 .info-wrapper {

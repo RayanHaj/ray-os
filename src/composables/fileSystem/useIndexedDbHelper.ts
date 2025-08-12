@@ -196,7 +196,7 @@ export async function deleteFileSystemItem(rayDb: RayDb, id: number) {
   }
 
   if (parent.isSystemFile) {
-    useToastStore().createToast('cannot delete system files', 'error', 5000);
+    useToastStore().createToast('cannot delete system files', 'error', 5000, 'desktop');
     throw new Error('cannot delete system files');
   }
 

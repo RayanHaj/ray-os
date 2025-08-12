@@ -3,13 +3,12 @@ import { computed, onBeforeUnmount } from 'vue';
 import { useWindowStore } from '@/stores/window.ts';
 import TaskbarTab from '@/components/taskbar/TaskbarTab.vue';
 
-const props = defineProps({ applicationName: { required: true, type: String } });
-
+const { applicationName } = defineProps<{ applicationName: string }>();
 const emits = defineEmits(['mouseLeft', 'mouseEntered', 'tabsUnmounted']);
 
 const windowStore = useWindowStore();
 const references = computed(() => {
-  return windowStore.openWindowsReferences[props.applicationName];
+  return windowStore.openWindowsReferences[applicationName];
 });
 
 onBeforeUnmount(() => emits('tabsUnmounted'));
@@ -18,13 +17,13 @@ onBeforeUnmount(() => emits('tabsUnmounted'));
 <template>
   <ol
     class="tabs"
-    @mouseenter="$emit('mouseEntered', true)"
-    @mouseleave="$emit('mouseLeft', false)"
+    @mouseenter="$emit('mouseEntered')"
+    @mouseleave="$emit('mouseLeft')"
   >
     <TaskbarTab
       v-for="reference of references"
-      :key="`${applicationName}-${reference.id}`"
-      :window-id="useWindowStore().getGlobalId(props.applicationName, reference.id)"
+      :key="useWindowStore().getGlobalId(applicationName, reference.id)"
+      :window-id="useWindowStore().getGlobalId(applicationName, reference.id)"
       :application-name="applicationName"
     />
   </ol>

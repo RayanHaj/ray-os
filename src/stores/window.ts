@@ -11,25 +11,37 @@ export const useWindowStore = defineStore('window', () => {
   const windowHeaderHeight = readonly(ref(30));
 
   function pushOpenWindowReference(windowName: string | Application) {
-    let id = 1000;
+    const id = getNextWindowId(windowName);
+    const idNumber = Number(id.split('-')[1]);
+    console.log(idNumber)
 
     if (typeof openWindowsReferences.value[windowName] === 'undefined') {
-      openWindowsReferences.value[windowName] = [{ id: id, minimized: false }];
-      return getWindowId(windowName, id);
+      openWindowsReferences.value[windowName] = [{ id: idNumber, minimized: false }];
+      return id;
     }
 
-    id = openWindowsReferences.value[windowName].reduce((accumulator, value) => {
+    openWindowsReferences.value[windowName].push({ id: idNumber, minimized: false });
+    pushWindowToFront(windowName, idNumber);
+    return id;
+  }
+
+  function getNextWindowId(windowName: string | Application) {
+    const minId = 1000;
+
+    const windowReferences = openWindowsReferences.value[windowName];
+    if (!windowReferences) {
+      return getWindowId(windowName, minId);
+    }
+
+    const id = openWindowsReferences.value[windowName].reduce((accumulator, value) => {
       if (value.id > accumulator) {
         accumulator = value.id;
       }
 
       return accumulator;
-    }, id);
-    id += 1;
+    }, minId);
 
-    openWindowsReferences.value[windowName].push({ id: id, minimized: false });
-    pushWindowToFront(windowName, id);
-    return getWindowId(windowName, id);
+    return getWindowId(windowName, id + 1);
   }
 
   function getWindowId(windowName: string, id: number) {
@@ -55,7 +67,7 @@ export const useWindowStore = defineStore('window', () => {
     const id = Number(windowIdSplit[1]);
 
     const index = openWindowsReferences.value[windowName].findIndex(
-      (reference) => reference.id === id,
+      (reference) => reference.id === id
     );
 
     if (index === -1) {
@@ -76,7 +88,7 @@ export const useWindowStore = defineStore('window', () => {
     }
 
     openWindowsReferences.value[windowName] = openWindowsReferences.value[windowName].filter(
-      (windowReference) => windowReference.id !== id,
+      (windowReference) => windowReference.id !== id
     );
 
     if (openWindowsReferences.value[windowName].length === 0) {
@@ -113,7 +125,8 @@ export const useWindowStore = defineStore('window', () => {
     setWindowMinimized,
     setWindowZIndexToTop,
     getWindowCountByName,
+    getNextWindowId,
     getGlobalId: getWindowId,
-    getZIndex,
+    getZIndex
   };
 });

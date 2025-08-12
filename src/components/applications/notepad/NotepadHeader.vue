@@ -1,12 +1,13 @@
 <script setup lang="ts">
 const { fileName } = defineProps<{ fileName: string }>();
+const emit = defineEmits(['onSaveChanges']);
 </script>
 
 <template>
   <div class="notepad-header">
     <p class="file-name">{{ fileName }}</p>
     <div class="buttons">
-      <button class="save-edits-button button">save changes</button>
+      <button class="save-edits-button button" @click="emit('onSaveChanges')">save changes</button>
     </div>
   </div>
 </template>

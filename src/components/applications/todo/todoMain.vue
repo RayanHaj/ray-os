@@ -20,6 +20,7 @@ onBeforeMount(() => {
         `could not fetch todos from the browser storage, try restarting the application`,
         'error',
         5000,
+        'desktop'
       );
     }
   }
