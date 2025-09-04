@@ -8,7 +8,6 @@ export function useFlatOpenWindowsReferencesFull() {
       return windowStore.openWindowsReferences[key].map((element) => ({
         id: element.id,
         label: key,
-        zIndex: element.zIndex,
         minimized: element.minimized,
       }));
     });

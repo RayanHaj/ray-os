@@ -208,7 +208,7 @@ async function handleModalInput(contentType: 'directory' | 'text file', input: s
 
         hasInserted = await insertItemIntoFileSystem(rayDb, [parentId], { file: { name: fileName, id: Number(fileId) } });
 
-        useNotepadStore().initializeNotepadFile(useWindowStore().getNextWindowId('Notepad'), fileId, fileName, await file.text());
+        useNotepadStore().initializeNotepadFile(useWindowStore().getNextWindowId('Notepad'), Number(fileId), fileName, await file.text());
         useWindowStore().pushOpenWindowReference('Notepad');
       }
     }

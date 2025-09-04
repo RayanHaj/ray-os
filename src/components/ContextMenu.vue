@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { type Component, computed, onBeforeMount, shallowRef } from 'vue';
 import { useSvgByFileNameAndDirectory } from '@/composables/svg/useSvgByFileNameAndDirectory.ts';
-import type {
-  SecondaryActionsContextMenu,
-  AllPrimaryActionsContextMenu,
-  PrimaryActionsContextMenu,
+import {
+  type SecondaryActionsContextMenu,
+  type AllPrimaryActionsContextMenu,
+  type PrimaryActionsContextMenu,
 } from '@/types/ContextMenuTypes.ts';
 import { useContextMenuStore } from '@/stores/contextMenu.ts';
 
@@ -22,11 +22,21 @@ const contextMenuStore = useContextMenuStore();
 const mousePosition = computed<{ left: number; top: number }>(
   () => contextMenuStore.contextMenusProperties.mousePosition ?? { left: 100, top: 100 },
 );
+
+const fallbackPrimaryActions: PrimaryActionsContextMenu[] = ['Copy', 'Paste', 'Delete', 'Rename'];
+
 const primaryActions = computed<PrimaryActionsContextMenu[]>(
-  () => contextMenuStore.contextMenusProperties.primaryActions ?? ['Copy', 'Paste', 'Delete'],
+  () =>
+    (contextMenuStore.contextMenusProperties.primaryActions as
+      | PrimaryActionsContextMenu[]
+      | undefined) ?? fallbackPrimaryActions,
 );
+
 const secondaryActions = computed<SecondaryActionsContextMenu[]>(
-  () => contextMenuStore.contextMenusProperties.secondaryActions ?? [],
+  () =>
+    (contextMenuStore.contextMenusProperties.secondaryActions as
+      | SecondaryActionsContextMenu[]
+      | undefined) ?? [],
 );
 </script>
 
