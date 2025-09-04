@@ -9,6 +9,7 @@ import { useHandleExit } from '@/composables/terminal/commands/useHandleExit.ts'
 import { useHandleDir } from '@/composables/terminal/commands/useHandleDir.ts';
 import { useHandleMkdir } from '@/composables/terminal/commands/useHandleMkdir.ts';
 import { useHandleDel } from '@/composables/terminal/commands/useHandleDel.ts';
+import { useHandleStart } from '@/composables/terminal/commands/useHandleStart.ts';
 
 type CommandObject = { command: CommandKeyword; value: string };
 
@@ -77,6 +78,9 @@ async function handleCommand(
       break;
     case 'del':
       commandError = (await useHandleDel(rayDb, lines, currentPath, commandObject.value)) ?? null;
+      break;
+    case 'start':
+      await useHandleStart(rayDb, lines, currentPath, commandObject.value);
   }
 
   return commandError;

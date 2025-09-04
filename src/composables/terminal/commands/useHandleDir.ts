@@ -12,28 +12,28 @@ export async function useHandleDir(
     return;
   }
 
-  const childNameArray = [];
+  const childNames = [];
   let extension = '';
   for (const child of value.children) {
     const directory = child.directory;
     const file = child.file;
 
     if (directory) {
-      childNameArray.push(directory.name);
+      childNames.push(directory.name);
       extension = 'directory';
     } else if (file) {
-      childNameArray.push(file.name);
+      childNames.push(file.name);
       extension = 'application';
     }
   }
 
-  if (childNameArray.length === 0) {
+  if (childNames.length === 0) {
     lines.value.push({ line: `[]`, isPlain: true });
     return;
   }
 
   lines.value.push({
-    line: childNameArray.map((value) => `[${value}]: ${extension}`).join('\n'),
+    line: childNames.map((value) => `[${value}]: ${extension}`).join('\n'),
     isPlain: true,
   });
 }

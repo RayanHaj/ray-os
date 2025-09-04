@@ -1,15 +1,15 @@
 import { defineStore } from 'pinia';
 import { ref, watch } from 'vue';
 import type {
+  primaryActionsContextMenu,
   SecondaryActionsContextMenu,
-  PrimaryActionsContextMenu,
 } from '@/types/ContextMenuTypes.ts';
 
 export const useContextMenuStore = defineStore('contextMenu', () => {
   const contextMenusProperties = ref<{
     show: boolean;
-    primaryActions?: PrimaryActionsContextMenu[];
-    secondaryActions?: SecondaryActionsContextMenu[];
+    primaryActions?: readonly typeof primaryActionsContextMenu[number][];
+    secondaryActions?: readonly SecondaryActionsContextMenu[];
     mousePosition?: { left: number; top: number };
   }>({ show: false });
 
@@ -17,8 +17,8 @@ export const useContextMenuStore = defineStore('contextMenu', () => {
   const buttonClicked = ref<{ [button: string]: boolean }>({});
 
   function initializeContextMenu(
-    primaryActions?: PrimaryActionsContextMenu[],
-    secondaryActions?: SecondaryActionsContextMenu[],
+    primaryActions?: readonly typeof primaryActionsContextMenu[number][],
+    secondaryActions?: readonly SecondaryActionsContextMenu[],
     mousePosition?: { left: number; top: number },
     actions?: { [buttonName: string]: () => unknown | Promise<unknown> },
   ) {

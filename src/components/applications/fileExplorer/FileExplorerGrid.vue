@@ -4,14 +4,11 @@ import {
   type FileItem,
   fileExtensions,
   type ItemInsert,
+  type FileType,
+  type Item,
 } from '@/types/ItemTypes.ts';
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
 import type { RayDb } from 'ray-db-wrapper';
-import { useContextMenuStore } from '@/stores/contextMenu.ts';
-import type {
-  PrimaryActionsContextMenu,
-  SecondaryActionsContextMenu
-} from '@/types/ContextMenuTypes.ts';
 import { useDeleteFileSystemItem } from '@/composables/fileSystem/useDeleteFileSystemItem.ts';
 import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
 import { insertItemIntoFileSystem } from '@/composables/fileSystem/useIndexedDbHelper.ts';
@@ -19,56 +16,81 @@ import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
 import { type ItemSize, itemSizes } from '@/types/FileExplorerTypes.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import { useToastStore } from '@/stores/toast.ts';
+import { useInitializeContextMenu } from '@/composables/contextMenu/useInitializeContextMenu.ts';
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
-const { currentDirectories, parentId } = defineProps<{
+const { currentDirectories, parentId, filterByFileType } = defineProps<{
   currentDirectories: Array<FileSystemItem & { type: string }>;
   parentId: number;
+  filterByFileType: FileType[];
 }>();
 
-const emits = defineEmits(['itemEvent:dblClick', 'addNewDirectory']);
+const files = ref<Item[]>([]);
+watch(
+  () => currentDirectories,
+  async () => {
+    await updateFilesList();
+  },
+);
 
-const primaryActionsGrid: PrimaryActionsContextMenu[] = [];
-const secondaryActionsGrid: SecondaryActionsContextMenu[] = [
-  { id: 'newDirectory', label: 'add new directory', disabled: false },
-];
-const actionsGrid = () => {
-  return {
-    newDirectory: async () => {
-      emits('addNewDirectory');
-    },
-  };
-};
+async function updateFilesList() {
+  for (const fileSystemItem of currentDirectories) {
+    if (!fileSystemItem.file) {
+      continue;
+    }
 
-const primaryActionsGridItem: PrimaryActionsContextMenu[] = ['Copy', 'Paste', 'Delete'];
-const secondaryActionsGridItem: SecondaryActionsContextMenu[] = [];
-const actionsGridItem = (item: FileSystemItem | null) => {
-  return {
-    Copy: async () => {},
-    Delete: async () => {
-      if (item) {
-        await useDeleteFileSystemItem(rayDb, item);
-        useContextMenuStore().hide();
+    const file = await rayDb.findOne<Item>('files', 'id', fileSystemItem.file.id);
+    if (file.content.type === 'file') {
+      if (!file.content.rawFile) {
+        continue;
       }
-    },
-  };
-};
 
-const contextMenuStore = useContextMenuStore();
+      if (files.value.some((listFile) => listFile.id === file.id)) {
+        continue;
+      }
+
+      files.value.push(file);
+    }
+  }
+}
+
+const emits = defineEmits(['itemEvent:dblClick', 'newDirectory', 'newTextFile']);
 
 async function onRightClick(
   event: MouseEvent,
   item: FileSystemItem | null,
   calledFrom: 'grid' | 'gridItem',
 ) {
-  contextMenuStore.initializeContextMenu(
-    calledFrom === 'grid' ? primaryActionsGrid : primaryActionsGridItem,
-    calledFrom === 'grid' ? secondaryActionsGrid : secondaryActionsGridItem,
-    { left: event.clientX, top: event.clientY },
-    calledFrom === 'grid' ? actionsGrid() : actionsGridItem(item),
-  );
-
-  contextMenuStore.show();
+  if (calledFrom === 'grid') {
+    useInitializeContextMenu(event)
+      .fileExplorerGrid()
+      .initialize(
+        {},
+        {
+          newDirectory: () => {
+            emits('newDirectory', {contentType: 'directory'});
+          },
+          newTextFile: () => {
+            emits('newTextFile', {contentType: 'text file'});
+          }
+        },
+      );
+  } else if (calledFrom === 'gridItem') {
+    useInitializeContextMenu(event)
+      .fileExplorerGridItem()
+      .initialize(
+        {
+          Copy: () => {},
+          Paste: () => {},
+          Delete: async () => {
+            if (item) {
+              await useDeleteFileSystemItem(rayDb, item);
+            }
+          },
+        },
+        {},
+      );
+  }
 }
 
 const fileSvg = useSvgOrFallback('TextFile');
@@ -132,16 +154,23 @@ async function onFileDrop(event: DragEvent) {
 
 function onDragStart(event: DragEvent, fileSystemItem: FileSystemItem) {
   if (fileSystemItem.file) {
-    event.dataTransfer?.setData(
-      'text/plain',
-      `file-${fileSystemItem.file.id.toString()}`
-    );
+    event.dataTransfer?.setData('text/plain', `file-${fileSystemItem.file.id.toString()}`);
   } else if (fileSystemItem.directory && fileSystemItem.id) {
-    event.dataTransfer?.setData(
-      'text/plain',
-      `directory-${fileSystemItem.id}`
-    );
+    event.dataTransfer?.setData('text/plain', `directory-${fileSystemItem.id}`);
   }
+}
+
+function handleDisabledItem(item: FileSystemItem) {
+  if (!item.file || filterByFileType.length === 0) {
+    return false;
+  }
+
+  const file = files.value.find((file) => file.id === item.file?.id);
+  if (file?.content.type === 'file') {
+    return !filterByFileType.includes(file.content.rawFile?.type as FileType);
+  }
+
+  return true;
 }
 
 const fileExplorerStore = useFileExplorerStore();
@@ -157,9 +186,12 @@ const itemSize = computed<ItemSize>(() => itemSizes[fileExplorerStore.currentFil
     @drop.prevent="onFileDrop"
     :style="{ fontSize: `${itemSize.font}px` }"
   >
-    <div class="grid">
+    <div class="desktop-grid">
       <div
         class="item"
+        :style="{
+          pointerEvents: handleDisabledItem(fileSystemItem) ? 'none' : 'auto'
+        }"
         v-for="fileSystemItem of currentDirectories"
         :key="fileSystemItem.id"
         draggable="true"
@@ -193,12 +225,17 @@ const itemSize = computed<ItemSize>(() => itemSizes[fileExplorerStore.currentFil
   padding-left: 0;
 }
 
-.grid {
+.desktop-grid {
   display: flex;
   flex-wrap: wrap;
   width: 100%;
   user-select: none;
   padding: 10px;
+}
+
+button {
+  all: unset;
+  display: inline-block;
 }
 
 .item {

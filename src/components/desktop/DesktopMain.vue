@@ -2,53 +2,58 @@
 import DesktopTile from '@/components/desktop/DesktopTile.vue';
 import { useTileCountGrid } from '@/composables/desktop/useTileCountGrid.ts';
 import { useBrowserStore } from '@/stores/browser.ts';
-import { useContextMenuStore } from '@/stores/contextMenu.ts';
+import { computed } from 'vue';
+import {
+  useInitializeContextMenu
+} from '@/composables/contextMenu/useInitializeContextMenu.ts';
 
-function onGridRightClick(event: MouseEvent) {
-  useContextMenuStore().initializeContextMenu(
-    ['Copy', 'Paste'],
-    [
-      { id: 'test', label: 'this is a test', disabled: false },
-      { id: 'properties', label: 'open properties', disabled: false },
-    ],
-    { left: event.clientX, top: event.clientY },
-    { Copy: () => {} },
+const rowCount = computed(() => useTileCountGrid().x.value);
+const columnCount = computed(() => useTileCountGrid().y.value);
+
+function onDesktopRightClick(event: MouseEvent) {
+  useInitializeContextMenu(event).desktop().initialize(
+    {
+      Copy: () => {
+        console.log('copy');
+      },
+      Paste: () => {
+        console.log('paste');
+      }
+    },
+    {
+      test: () => {
+        console.log('test');
+      },
+      properties: () => {
+        console.log('properties');
+      }
+    }
   );
-
-  useContextMenuStore().show();
 }
 </script>
 
 <template>
   <div
-    class="grid"
+    class="desktop-grid"
     @dragover.prevent
     @dragenter.prevent
-    @click.right.prevent="onGridRightClick"
+    @click.right.prevent="onDesktopRightClick"
     :style="{ height: `${useBrowserStore().heightExcTaskbar}px` }"
   >
-    <div class="row" v-for="row in useTileCountGrid().x.value" :key="row">
+    <div v-for="rowPosition in rowCount" :key="rowPosition">
       <DesktopTile
-        v-for="column in useTileCountGrid().y.value"
-        :key="column"
-        :tile-position="{ x: row, y: column }"
+        v-for="columnPosition in columnCount"
+        :key="columnPosition"
+        :tile-position="{ x: rowPosition, y: columnPosition }"
       />
     </div>
   </div>
 </template>
 
 <style scoped>
-.grid {
+.desktop-grid {
   display: flex;
-  flex-direction: row;
   justify-content: center;
   align-items: center;
-  width: 100%;
-  height: 100%;
-}
-
-.row {
-  display: flex;
-  flex-direction: column;
 }
 </style>

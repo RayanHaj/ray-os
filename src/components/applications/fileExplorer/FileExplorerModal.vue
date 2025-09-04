@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 
-defineProps({ title: { required: true, type: String } });
+const { title } = defineProps<{ title: 'directory' | 'text file' }>();
 
 const input = ref('');
 const emits = defineEmits(['modalEvent:submitClick', 'modalEvent:cancelClick']);
 
 function onClickSubmit() {
-  emits('modalEvent:submitClick', input.value);
+  emits('modalEvent:submitClick', { contentType: title, input: input.value });
   input.value = '';
 }
 

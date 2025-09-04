@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onBeforeMount, onBeforeUnmount, ref, watch } from 'vue';
+import { onBeforeMount, ref, watch } from 'vue';
 import {
   fileSystemLookup,
   insertItemIntoFileSystem,
@@ -7,7 +7,7 @@ import {
 import type { RayDb } from 'ray-db-wrapper';
 import FileExplorerHeader from '@/components/applications/fileExplorer/FileExplorerHeader.vue';
 import FileExplorerGrid from '@/components/applications/fileExplorer/FileExplorerGrid.vue';
-import type { FileSystemItem, Item } from '@/types/ItemTypes.ts';
+import type { FileItem, FileSystemItem, FileType, Item, ItemInsert } from '@/types/ItemTypes.ts';
 import FileExplorerModal from '@/components/applications/fileExplorer/FileExplorerModal.vue';
 import { useContextMenuStore } from '@/stores/contextMenu.ts';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
@@ -25,6 +25,11 @@ const currentPath = ref<string[]>([fileSystemStore.rootDirectory]);
 const currentItems = ref<Array<FileSystemItem & { type: string }>>([]);
 const previousItems = ref<Array<Array<FileSystemItem & { type: string }>>>([]);
 const currentItemId = ref<number>();
+const isInFileSelectState = ref<{
+  value: boolean;
+  windowId: string;
+  allowedFileTypes: FileType[];
+} | null>(null);
 
 const fileExplorerStore = useFileExplorerStore();
 onBeforeMount(async () => {
@@ -38,14 +43,15 @@ onBeforeMount(async () => {
     }
   }
 
-  if (fileExplorerStore.filePathAtWindowId?.windowId === windowId) {
-    currentPath.value = fileExplorerStore.filePathAtWindowId.path;
+  if (fileExplorerStore.isInFileSelectState?.value) {
+    isInFileSelectState.value = fileExplorerStore.isInFileSelectState;
+  } else {
+    isInFileSelectState.value = null;
   }
-});
 
-onBeforeUnmount(() => {
-  if (fileExplorerStore.filePathAtWindowId?.windowId === windowId) {
-    fileExplorerStore.filePathAtWindowId = {windowId: '', path: []};
+  if (fileExplorerStore.filePathAtWindow?.windowId === windowId) {
+    currentPath.value = fileExplorerStore.filePathAtWindow.path;
+    fileExplorerStore.filePathAtWindow = { windowId: '', path: [] };
   }
 });
 
@@ -57,7 +63,7 @@ const fileExplorerDiv = ref();
 
 const windowId = useInjectOrThrow<string>('windowId');
 watch(
-  () => fileExplorerStore.filePathAtWindowId,
+  () => fileExplorerStore.filePathAtWindow,
   (newVal) => {
     if (newVal && newVal.windowId === windowId) {
       currentPath.value = newVal.path;
@@ -117,8 +123,20 @@ async function onDblClickItem(item: FileSystemItem & { type: string }) {
           return;
         }
         if (file.content.type === 'file') {
-          if (file.content.rawFile) {
-            useNotepadStore().initializeNotepadFile(useWindowStore().getNextWindowId('Notepad'), file.content.name, await file.content.rawFile.text());
+          if (isInFileSelectState.value?.value) {
+            fileExplorerStore.isInFileSelectStateReturnValue = {
+              windowId: isInFileSelectState.value.windowId,
+              fileId: item.file.id,
+              value: file.content,
+            };
+            return;
+          } else if (file.content.rawFile) {
+            useNotepadStore().initializeNotepadFile(
+              useWindowStore().getNextWindowId('Notepad'),
+              item.file.id,
+              file.content.name,
+              await file.content.rawFile.text(),
+            );
             useWindowStore().pushOpenWindowReference('Notepad');
           }
         }
@@ -129,13 +147,16 @@ async function onDblClickItem(item: FileSystemItem & { type: string }) {
   }
 }
 
-const addNewItemModalOpen = ref(false);
-function toggleAddNewItemModal() {
+const modalOpened = ref(false);
+const modalContentType = ref<'directory' | 'text file'>('directory');
+
+function toggleAddNewItemModal(contentType: 'directory' | 'text file') {
   useContextMenuStore().hide();
-  addNewItemModalOpen.value = true;
+  modalContentType.value = contentType;
+  modalOpened.value = true;
 }
 
-async function handleModalInput(input: string) {
+async function handleModalInput(contentType: 'directory' | 'text file', input: string) {
   const currentPathItemName = currentPath.value[currentPath.value.length - 1];
   const previousItem = previousItems.value[previousItems.value.length - 1];
 
@@ -156,14 +177,47 @@ async function handleModalInput(input: string) {
       return;
     }
 
-    const hasInserted = await insertItemIntoFileSystem(rayDb, [parentId], {
-      directory: { name: input, children: [] },
-    });
+    let hasInserted;
+    switch (contentType) {
+      case 'directory': {
+        hasInserted = await insertItemIntoFileSystem(rayDb, [parentId], {
+          directory: { name: input, children: [] },
+        });
+      } break;
+      case 'text file': {
+        const createdAt = Date.now();
+        const fileName = `${input}.txt`;
+        const file = new File([''], fileName, { type: 'text/plain', lastModified: createdAt });
+
+        const item: FileItem = {
+          type: 'file',
+          name: fileName,
+          size: file.size,
+          createdAt: file.lastModified.toString(),
+          rawFile: file,
+        };
+
+        const fileId = await rayDb.insertOne<ItemInsert>('files', {
+          label: fileName,
+          content: item,
+        });
+
+        if (!fileId) {
+          return;
+        }
+
+        hasInserted = await insertItemIntoFileSystem(rayDb, [parentId], { file: { name: fileName, id: Number(fileId) } });
+
+        useNotepadStore().initializeNotepadFile(useWindowStore().getNextWindowId('Notepad'), fileId, fileName, await file.text());
+        useWindowStore().pushOpenWindowReference('Notepad');
+      }
+    }
+
     if (hasInserted instanceof Error) {
       throw hasInserted;
     }
 
-    addNewItemModalOpen.value = false;
+    modalOpened.value = false;
   } catch (e) {
     useToastStore().createToast((e as Error).message, 'error', 5000, 'desktop');
   }
@@ -173,17 +227,19 @@ async function handleModalInput(input: string) {
 <template>
   <div class="file-explorer" ref="fileExplorerDiv">
     <FileExplorerModal
-      v-show="addNewItemModalOpen"
-      title="add new directory"
-      @modal-event:submit-click="handleModalInput"
-      @modal-event:cancel-click="addNewItemModalOpen = false"
+      v-show="modalOpened"
+      :title="modalContentType"
+      @modal-event:submit-click="handleModalInput($event.contentType, $event.input)"
+      @modal-event:cancel-click="modalOpened = false"
     />
     <FileExplorerHeader :current-path="currentPath" @header-event:back="handleBackClick" />
     <FileExplorerGrid
       :parent-id="currentItemId ?? -1"
       :current-directories="currentItems"
+      :filter-by-file-type="isInFileSelectState?.allowedFileTypes ?? []"
       @item-event:dbl-click="onDblClickItem"
-      @add-new-directory="toggleAddNewItemModal"
+      @new-directory="toggleAddNewItemModal($event.contentType)"
+      @new-text-file="toggleAddNewItemModal($event.contentType)"
     />
   </div>
 </template>

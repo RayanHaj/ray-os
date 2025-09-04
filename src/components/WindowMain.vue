@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type Component, onBeforeMount, provide, type Ref, ref, watch } from 'vue';
+import { type Component, nextTick, onBeforeMount, provide, type Ref, ref, watch } from 'vue';
 import type { WindowFlatReference, WindowStyleObject } from '@/types/WindowTypes.ts';
 import { useWindowStore } from '@/stores/window.ts';
 import WindowHeader from '@/components/WindowHeader.vue';
@@ -8,11 +8,11 @@ import { useWindowStateManager } from '@/composables/window/useWindowStateManage
 import { useWindowPositionManager } from '@/composables/window/useWindowPositionManager.ts';
 import { useWindowResizeManager } from '@/composables/window/useWindowResizeManager.ts';
 import { useWindowSnappingManager } from '@/composables/window/useWindowSnappingManager.ts';
+import { useSnapLayoutStore } from '@/stores/snapLayout.ts';
 
-const { reference, windowContentComponent, selectedLayout } = defineProps<{
+const { reference, windowContentComponent } = defineProps<{
   reference: WindowFlatReference;
   windowContentComponent: Component;
-  selectedLayout: { layout: string; windowId: string };
 }>();
 
 const windowStore = useWindowStore();
@@ -50,7 +50,6 @@ const styles: Ref<WindowStyleObject> = ref({
 });
 const cachedStyles = ref({ left: '0', top: '0', width: '50%', height: '50%' });
 
-const emits = defineEmits(['showSnapLayout']);
 const oldPosition = ref({ clientX: 0, clientY: 0 });
 
 const window = ref();
@@ -58,36 +57,31 @@ const windowStateManager = useWindowStateManager(styles, reference);
 const windowSnappingManager = useWindowSnappingManager(styles);
 useWindowStylesManager(styles, reference, windowStateManager);
 
+const snapLayoutStore = useSnapLayoutStore();
 watch(
-  () => windowSnappingManager.showSnapLayout.value,
-  (newValue) => {
-    emits('showSnapLayout', newValue);
-  },
-);
-watch(
-  () => selectedLayout,
-  (value) => {
+  () => snapLayoutStore.currentSnapLayoutSession,
+  async (newValue) => {
     if (
-      value.layout === '' ||
-      value.windowId === '' ||
-      value.windowId !== windowId ||
+      newValue.selectedLayout === '' ||
+      newValue.windowId !== windowId ||
       windowStateManager.isMaximized.value
     )
       return;
-    windowSnappingManager.snapWindow(value.layout);
+
+    windowSnappingManager.snapWindow(newValue.selectedLayout);
     windowStateManager.isSnapped.value = true;
   },
+  { deep: true },
 );
 
 const windowResizeManager = useWindowResizeManager(styles, reference, window, windowStateManager);
 const windowPositionManager = useWindowPositionManager(
   styles,
   window,
+  windowId,
   windowResizeManager.currentCorner,
   windowStateManager,
-  windowSnappingManager,
   oldPosition,
-  windowId,
 );
 
 function closeWindow() {
@@ -129,7 +123,7 @@ function maximizeWindow() {
       :style="{
         height: `calc(100% - ${windowStore.windowHeaderHeight}px`,
         width: '100%',
-        overflow: 'auto'
+        overflow: 'auto',
       }"
     />
   </div>

@@ -9,5 +9,6 @@ export const commands = [
   'cls',
   'help',
   'exit',
+  'start'
 ] as const;
 export type CommandKeyword = (typeof commands)[number];

@@ -1,65 +1,73 @@
 <script setup lang="ts">
-import { computed, type PropType, ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
+import { useSnapLayoutStore } from '@/stores/snapLayout.ts';
 
-const props = defineProps({
-  showSnapLayout: { required: true, type: Object as PropType<{ show: boolean; windowId: string }> },
-});
+const snapLayoutStore = useSnapLayoutStore();
 
-const emits = defineEmits(['selectedLayout']);
-const showLayoutAndHidePreview = ref(false);
+const currentSnapLayout = ref<string>('');
 
-const selectedLayout = ref('');
-function onMouseOver(element: EventTarget | null) {
-  if (!(element instanceof HTMLDivElement)) return;
-
-  const classList = element.classList;
-  if (classList.contains('layout-option')) {
-    selectedLayout.value = element.id;
-  } else {
-    selectedLayout.value = '';
-  }
+function onMouseOver(element: HTMLDivElement) {
+  currentSnapLayout.value = element.classList.contains('layout-option') ? element.id : '';
 }
 
-watch(
-  () => props.showSnapLayout,
-  (newValue) => {
-    if (!selectedLayout.value) return;
-    if (newValue.show) return;
+async function onMouseUp() {
+  snapLayoutStore.currentSnapLayoutSession.selectedLayout = currentSnapLayout.value
+    ? currentSnapLayout.value
+    : '';
 
-    emits('selectedLayout', {
-      layout: selectedLayout.value,
-      windowId: props.showSnapLayout.windowId,
-    });
-    selectedLayout.value = '';
+  setTimeout(() => {
+    snapLayoutStore.closeSnapLayout();
+  }, 100);
+}
+
+const showLayoutAs = computed(() => snapLayoutStore.currentSnapLayoutSession.showSnapLayout);
+
+const showSnapLayout = ref<'beam' | 'full' | ''>('');
+watch(
+  () => snapLayoutStore.currentSnapLayoutSession,
+  (newValue, oldValue) => {
+    if (
+      newValue.showSnapLayout === oldValue?.showSnapLayout &&
+      showSnapLayout.value === newValue.showSnapLayout
+    )
+      return;
+
+    showSnapLayout.value = newValue.showSnapLayout;
   },
 );
-
-const showBeam = computed(() => props.showSnapLayout.show && !showLayoutAndHidePreview.value);
 </script>
 
 <template>
-  <transition name="slide">
-    <hr v-if="showBeam" class="preview-beam" @mouseenter="showLayoutAndHidePreview = true" />
-  </transition>
-  <transition name="slide">
-    <div
-      v-if="!showBeam && props.showSnapLayout.show"
-      class="snap-layout border-radius-bottom-left border-radius-bottom-right"
-      @mouseleave="showLayoutAndHidePreview = false"
-      @mouseover="onMouseOver($event.target)"
-    >
-      <div class="half-layout">
-        <div id="left" class="layout-option border-radius-bottom-left border-radius-top-left" />
-        <div id="right" class="layout-option border-radius-bottom-right border-radius-top-right" />
+  <div>
+    <transition name="slide">
+      <div
+        v-if="showLayoutAs === 'full' && showSnapLayout"
+        class="snap-layout border-radius-bottom-left border-radius-bottom-right"
+        @mouseleave="snapLayoutStore.currentSnapLayoutSession.showSnapLayout = 'beam'"
+        @mouseover="onMouseOver($event.target as HTMLDivElement)"
+        @mouseup="onMouseUp"
+      >
+        <div class="half-layout">
+          <div id="left" class="layout-option border-radius-bottom-left border-radius-top-left" />
+          <div
+            id="right"
+            class="layout-option border-radius-bottom-right border-radius-top-right"
+          />
+        </div>
+        <div class="quarter-layout">
+          <div id="topLeft" class="layout-option border-radius-top-left" />
+          <div id="topRight" class="layout-option border-radius-top-right" />
+          <div id="bottomLeft" class="layout-option border-radius-bottom-left" />
+          <div id="bottomRight" class="layout-option border-radius-bottom-right" />
+        </div>
       </div>
-      <div class="quarter-layout">
-        <div id="topLeft" class="layout-option border-radius-top-left" />
-        <div id="topRight" class="layout-option border-radius-top-right" />
-        <div id="bottomLeft" class="layout-option border-radius-bottom-left" />
-        <div id="bottomRight" class="layout-option border-radius-bottom-right" />
-      </div>
-    </div>
-  </transition>
+      <hr
+        v-else-if="showLayoutAs === 'beam' && showSnapLayout"
+        class="preview-beam"
+        @mouseenter="snapLayoutStore.currentSnapLayoutSession.showSnapLayout = 'full'"
+      />
+    </transition>
+  </div>
 </template>
 
 <style scoped>

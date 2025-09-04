@@ -1,19 +1,44 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { type ItemSizeKeys } from '@/types/FileExplorerTypes.ts';
+import type { FileItem, FileType } from '@/types/ItemTypes.ts';
 
 export const useFileExplorerStore = defineStore('fileExplorer', () => {
   const currentFileItemSizeKey = ref<ItemSizeKeys>('medium');
 
-  const filePathAtWindowId = ref<{ windowId: string, path: string[] }>();
+  const filePathAtWindow = ref<{ windowId: string; path: string[] }>();
+  const isInFileSelectState = ref<{
+    value: boolean;
+    windowId: string;
+    allowedFileTypes: FileType[];
+  } | null>(null);
+
+  const isInFileSelectStateReturnValue = ref<{ windowId: string; fileId: number; value: string | FileItem; }>();
+
   function updateItemSize(itemSizeKey: ItemSizeKeys) {
     currentFileItemSizeKey.value = itemSizeKey;
     localStorage.setItem('fileItemSize', currentFileItemSizeKey.value);
   }
 
-  function setFilePathAtWindow(windowId: string, path: string[]) {
-    filePathAtWindowId.value = { windowId: windowId, path: path };
+  function setFileExplorerWindowAsFileSelect(windowId: string, allowedFileTypes: FileType[]) {
+    isInFileSelectState.value = {
+      value: true,
+      windowId: windowId,
+      allowedFileTypes: allowedFileTypes,
+    };
   }
 
-  return { currentFileItemSizeKey, updateItemSize, filePathAtWindowId, setFilePathAtWindow };
+  function setFilePathAtWindow(windowId: string, path: string[]) {
+    filePathAtWindow.value = { windowId: windowId, path: path };
+  }
+
+  return {
+    currentFileItemSizeKey,
+    updateItemSize,
+    filePathAtWindow,
+    setFilePathAtWindow,
+    setFileExplorerWindowAsFileSelect,
+    isInFileSelectState,
+    isInFileSelectStateReturnValue,
+  };
 });

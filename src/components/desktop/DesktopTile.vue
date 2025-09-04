@@ -8,35 +8,45 @@ import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import type { RayDb } from 'ray-db-wrapper';
-import { useContextMenuStore } from '@/stores/contextMenu.ts';
 import { useBrowserStore } from '@/stores/browser.ts';
+import {
+  useInitializeContextMenu
+} from '@/composables/contextMenu/useInitializeContextMenu.ts';
+
+const rayDb = useInjectOrThrow<RayDb>('rayDb');
 
 const { tilePosition } = defineProps<{ tilePosition: { x: number; y: number } }>();
-const verticalTileCount = useTileCountGrid().y;
+const verticalTileCount = useTileCountGrid().y.value
+const tileId = computed(() => (tilePosition.x - 1) * verticalTileCount + tilePosition.y);
+
 const tileItem = ref<(Item & { tileId: number }) | null>();
-const rayDb = useInjectOrThrow<RayDb>('rayDb');
 const desktopStore = useDesktopStore();
-
-const tileId = computed(() => (tilePosition.x - 1) * verticalTileCount.value + tilePosition.y);
-
 function onTileRightClick(event: MouseEvent) {
-  useContextMenuStore().initializeContextMenu(
-    ['Copy', 'Paste', 'Delete'],
-    [
-      { id: 'test', label: 'this is a test', disabled: false },
-      { id: 'properties', label: 'open properties', disabled: false },
-    ],
-    { left: event.clientX, top: event.clientY },
-    { Copy: () => {}, Delete: async () => {
-      if (!tileItem.value) {
-        return;
+  useInitializeContextMenu(event).tile().initialize(
+    {
+      Copy: () => {
+        console.log('copy');
+      },
+      Paste: () => {
+        console.log('paste');
+      },
+      Delete: async () => {
+        if (!tileItem.value) {
+          return;
+        }
+
+        await desktopStore.deleteDesktopItem(rayDb, tileItem.value.id)
       }
-
-      await desktopStore.deleteDesktopItem(rayDb, tileItem.value.id)
-      } },
+    },
+    {
+      test: () => {
+        console.log('test');
+      },
+      properties: () => {
+        console.log('properties');
+      }
+    }
   );
-
-  useContextMenuStore().show();
 }
 
 onMounted(async () => await updateTile());

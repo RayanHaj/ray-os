@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import DesktopMain from '@/components/desktop/DesktopMain.vue';
 import TaskbarMain from '@/components/taskbar/TaskbarMain.vue';
-import { type Component, type ComputedRef, ref } from 'vue';
+import { type Component, type ComputedRef } from 'vue';
 import WindowMain from '@/components/WindowMain.vue';
 import { type WindowFlatReference, type WindowName, windowNames } from '@/types/WindowTypes.ts';
 import { useFlatOpenWindowsReferencesFull } from '@/composables/window/useFlatOpenWindowsReferencesFull.ts';
@@ -27,30 +27,24 @@ function getWindowContentComponent(reference: WindowFlatReference): Component {
   return useGetWindowContentComponent(formattedComponentName as WindowName);
 }
 
-const showSnapLayout = ref<{ show: boolean; windowId: string }>({ show: false, windowId: '' });
-const selectedLayout = ref<{ layout: string; windowId: string }>({ layout: '', windowId: '' });
-
 const contextMenuStore = useContextMenuStore();
 </script>
 
 <template>
   <main @click="useOnOuterClickClose($event.target as HTMLElement)">
-    <UiToast toast-location="desktop"/>
+    <UiToast toast-location="desktop" />
     <ContextMenu v-show="contextMenuStore.isShown()" />
-    <DesktopSnapLayout
-      :show-snap-layout="showSnapLayout"
-      @selected-layout="selectedLayout = $event"
-    />
+    <DesktopSnapLayout />
     <WindowMain
       v-for="reference of references"
       :key="useWindowStore().getGlobalId(reference.label, reference.id)"
       :reference="reference"
       :window-content-component="getWindowContentComponent(reference)"
-      :selected-layout="selectedLayout"
-      @show-snap-layout="showSnapLayout = $event"
     >
-
-      <UiToast toast-location="window" :window-id="useWindowStore().getGlobalId(reference.label, reference.id)"/>
+      <UiToast
+        toast-location="window"
+        :window-id="useWindowStore().getGlobalId(reference.label, reference.id)"
+      />
     </WindowMain>
     <DesktopMain />
     <TaskbarMain />

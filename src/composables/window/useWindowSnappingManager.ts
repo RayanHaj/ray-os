@@ -13,7 +13,7 @@ type StyleProps = {
 };
 
 export function useWindowSnappingManager(styles: Ref<StyleProps>) {
-  const showSnapLayout = ref<{ show: boolean; windowId: string }>({ show: false, windowId: '' });
+  const showSnapLayout = ref<string>('');
   const browserStore = useBrowserStore();
 
   function snapWindow(position: string) {

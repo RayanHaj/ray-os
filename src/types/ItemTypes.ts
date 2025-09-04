@@ -53,5 +53,5 @@ export const Applications = [
 ] as const;
 export type Application = (typeof Applications)[number];
 
-export type FileTypes = keyof typeof fileExtensions;
-export type FileExtension = (typeof fileExtensions)[FileTypes];
+export type FileType = keyof typeof fileExtensions;
+export type FileExtension = (typeof fileExtensions)[FileType];

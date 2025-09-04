@@ -1,7 +1,7 @@
-import type { Ref } from 'vue';
+import { nextTick, type Ref } from 'vue';
 import { useWindowStateManager } from '@/composables/window/useWindowStateManager.ts';
-import { useWindowSnappingManager } from '@/composables/window/useWindowSnappingManager.ts';
 import { useBrowserStore } from '@/stores/browser.ts';
+import { useSnapLayoutStore } from '@/stores/snapLayout.ts';
 
 type StyleProps = {
   left: string;
@@ -17,11 +17,10 @@ type StyleProps = {
 export function useWindowPositionManager(
   styles: Ref<StyleProps>,
   windowRef: Ref,
+  windowId: string,
   currentCorner: Ref<string>,
   windowStateManager: ReturnType<typeof useWindowStateManager>,
-  windowSnappingManager: ReturnType<typeof useWindowSnappingManager>,
-  oldPosition: Ref<{ clientX: number; clientY: number }>,
-  windowId: string
+  oldPosition: Ref<{ clientX: number; clientY: number }>
 ) {
   const browserStore = useBrowserStore();
 
@@ -36,19 +35,21 @@ export function useWindowPositionManager(
     oldPosition.value.clientX = event.clientX;
     oldPosition.value.clientY = event.clientY;
 
+    if (windowRef.value.getBoundingClientRect().top <= browserStore.heightExcTaskbar / 2) {
+      snapLayoutStore.openSnapLayout(windowId, 'beam');
+    }
+
     addEventListener('mousemove', onMouseMove);
     addEventListener('mouseup', onMouseUp);
   }
 
+  const snapLayoutStore = useSnapLayoutStore();
   function onMouseUp(event: MouseEvent) {
     event.preventDefault();
     windowStateManager.isDraggingWindow.value = false;
 
-    if (windowSnappingManager.showSnapLayout.value.show) {
-      windowSnappingManager.showSnapLayout.value = {
-        show: false,
-        windowId: windowId,
-      };
+    if (snapLayoutStore.currentSnapLayoutSession.showSnapLayout === 'beam') {
+      snapLayoutStore.currentSnapLayoutSession.showSnapLayout = '';
     }
 
     removeEventListener('mousemove', onMouseMove);
@@ -58,7 +59,7 @@ export function useWindowPositionManager(
   function onMouseMove(event: MouseEvent) {
     event.preventDefault();
 
-    if (windowStateManager.isSnapped.value === true) {
+    if (windowStateManager.isSnapped.value) {
       windowStateManager.isSnapped.value = false;
     }
 
@@ -70,22 +71,6 @@ export function useWindowPositionManager(
 
     oldPosition.value.clientX = event.clientX;
     oldPosition.value.clientY = event.clientY;
-
-    if (windowRef.value.getBoundingClientRect().top <= browserStore.heightExcTaskbar / 2) {
-      if (!windowSnappingManager.showSnapLayout.value.show) {
-        windowSnappingManager.showSnapLayout.value = {
-          show: true,
-          windowId: windowId,
-        };
-      }
-    } else {
-      if (windowSnappingManager.showSnapLayout.value.show) {
-        windowSnappingManager.showSnapLayout.value = {
-          show: false,
-          windowId: windowId,
-        };
-      }
-    }
   }
 
   return { onMouseDownHeader };

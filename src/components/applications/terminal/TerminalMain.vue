@@ -52,10 +52,33 @@ function pushNewEmptyLine() {
 function isReadonly(lineNumber: number) {
   return lineNumber < lines.value.length - 1;
 }
+
+const fontSize = ref(10);
+function onKeyDown(event: KeyboardEvent) {
+  if (event.key === 'Control')
+  document.addEventListener('wheel', onResizing, {passive: false});
+}
+
+function onKeyUp(event: KeyboardEvent) {
+  if (event.key === 'Control')
+  document.removeEventListener('wheel', onResizing);
+}
+
+const onResizing = (event: WheelEvent) => {
+  event.preventDefault();
+  if (event.deltaY < 0) {
+    if (fontSize.value < 100)
+      fontSize.value += 2;
+  } else {
+    if (fontSize.value > 2) {
+      fontSize.value -= 2;
+    }
+  }
+}
 </script>
 
 <template>
-  <div ref="terminal" class="terminal">
+  <div ref="terminal" class="terminal" @keydown="onKeyDown" @keyup="onKeyUp" :style="{ fontSize: `${fontSize}px` }">
     <TerminalLine
       v-for="(_, index) of lines"
       :key="index"

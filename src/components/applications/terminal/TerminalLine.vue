@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeMount, ref, watchEffect } from 'vue';
+import { computed, onBeforeMount, onMounted, ref } from 'vue';
 
 const { currentPath, inputValue, isReadonly, isError } = defineProps<{
   currentPath: string;
@@ -10,16 +10,13 @@ const { currentPath, inputValue, isReadonly, isError } = defineProps<{
 
 const path = ref<string>('');
 const terminalLineRef = ref();
-watchEffect(() => {
-  if (!terminalLineRef.value || isReadonly) {
-    return;
-  }
-
-  terminalLineRef.value.focus();
-});
 
 onBeforeMount(() => {
   path.value = currentPath;
+});
+
+onMounted(() => {
+  terminalLineRef.value?.focus();
 });
 
 const emit = defineEmits(['enter-pressed']);
@@ -43,6 +40,7 @@ const displayPath = computed(() => `PS ${path.value}>`);
       class="terminal-line"
       contenteditable="true"
       @keydown.enter.prevent="onEnter($event)"
+      @blur="() => terminalLineRef?.focus()"
     >
       <p v-if="inputValue.line">{{ inputValue.line }}</p>
     </div>

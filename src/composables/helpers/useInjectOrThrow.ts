@@ -8,7 +8,7 @@ export function useInjectOrThrow<T>(injectionString: string) {
   const value = inject<T>(injectionString);
 
   if (!value) {
-    throw new Error(`Injection could not process: ${injectionString}`);
+    throw new Error(`Injection of (${injectionString}) could not be processed`);
   }
 
   return value;
