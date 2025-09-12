@@ -26,7 +26,7 @@ const currentItems = ref<Array<FileSystemItem & { type: string }>>([]);
 const previousItems = ref<Array<Array<FileSystemItem & { type: string }>>>([]);
 const currentItemId = ref<number>();
 const isInFileSelectState = ref<{
-  value: boolean;
+  state: boolean;
   windowId: string;
   allowedFileTypes: FileType[];
 } | null>(null);
@@ -43,7 +43,7 @@ onBeforeMount(async () => {
     }
   }
 
-  if (fileExplorerStore.isInFileSelectState?.value) {
+  if (fileExplorerStore.isInFileSelectState?.state) {
     isInFileSelectState.value = fileExplorerStore.isInFileSelectState;
   } else {
     isInFileSelectState.value = null;
@@ -123,7 +123,7 @@ async function onDblClickItem(item: FileSystemItem & { type: string }) {
           return;
         }
         if (file.content.type === 'file') {
-          if (isInFileSelectState.value?.value) {
+          if (isInFileSelectState.value?.state) {
             fileExplorerStore.isInFileSelectStateReturnValue = {
               windowId: isInFileSelectState.value.windowId,
               fileId: item.file.id,
@@ -207,9 +207,6 @@ async function handleModalInput(contentType: 'directory' | 'text file', input: s
         }
 
         hasInserted = await insertItemIntoFileSystem(rayDb, [parentId], { file: { name: fileName, id: Number(fileId) } });
-
-        useNotepadStore().initializeNotepadFile(useWindowStore().getNextWindowId('Notepad'), Number(fileId), fileName, await file.text());
-        useWindowStore().pushOpenWindowReference('Notepad');
       }
     }
 

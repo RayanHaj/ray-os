@@ -8,7 +8,7 @@ export const useFileExplorerStore = defineStore('fileExplorer', () => {
 
   const filePathAtWindow = ref<{ windowId: string; path: string[] }>();
   const isInFileSelectState = ref<{
-    value: boolean;
+    state: boolean;
     windowId: string;
     allowedFileTypes: FileType[];
   } | null>(null);
@@ -22,7 +22,7 @@ export const useFileExplorerStore = defineStore('fileExplorer', () => {
 
   function setFileExplorerWindowAsFileSelect(windowId: string, allowedFileTypes: FileType[]) {
     isInFileSelectState.value = {
-      value: true,
+      state: true,
       windowId: windowId,
       allowedFileTypes: allowedFileTypes,
     };

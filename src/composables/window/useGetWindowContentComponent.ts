@@ -6,7 +6,6 @@ import PaintMain from '@/components/applications/paint/PaintMain.vue';
 import FileExplorerMain from '@/components/applications/fileExplorer/FileExplorerMain.vue';
 import SereneSoundsMain from '@/components/applications/sereneSounds/SereneSoundsMain.vue';
 import TerminalMain from '@/components/applications/terminal/TerminalMain.vue';
-import TodoMain from '@/components/applications/todo/todoMain.vue';
 import NotepadMain from '@/components/applications/notepad/NotepadMain.vue';
 
 const windowContentComponents: { [windowName in WindowName]: Component } = {
@@ -16,7 +15,6 @@ const windowContentComponents: { [windowName in WindowName]: Component } = {
   fileExplorer: FileExplorerMain,
   sereneSounds: SereneSoundsMain,
   terminal: TerminalMain,
-  todo: TodoMain,
   notepad: NotepadMain
 };
 

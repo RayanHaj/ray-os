@@ -8,7 +8,8 @@ import { useToastStore } from '@/stores/toast.ts';
 import { useWindowStore } from '@/stores/window.ts';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
 import type { RayDb } from 'ray-db-wrapper';
-import type { Item, ItemInsert } from '@/types/ItemTypes.ts';
+import type { FileSystemItem, Item, ItemInsert } from '@/types/ItemTypes.ts';
+import { useFileSystemStore } from '@/stores/fileSystem.ts';
 
 const windowId = useInjectOrThrow<string>('windowId');
 const notepadStore = useNotepadStore();
@@ -26,6 +27,12 @@ watchEffect(() => {
   notepadStore.loadedFile = undefined;
 });
 
+function formatFileName(fileName: string) {
+  return `${fileName.split('.')[0]}.txt`;
+}
+
+const notepadHeaderRef = ref();
+
 async function saveChanges() {
   if (!loadedFile.value) {
     return;
@@ -39,14 +46,29 @@ async function saveChanges() {
   try {
     const updatedText = loadedFile.value.text;
     const originalFileText = await fileItem.content.rawFile?.text();
-    if (updatedText === originalFileText) {
+    if (
+      updatedText === originalFileText &&
+      notepadHeaderRef.value.fileName === fileItem.content.name
+    ) {
       useToastStore().createToast('no changes made', 'warning', 3000, 'window', windowId);
     } else {
-      fileItem.content.rawFile = new File([updatedText], fileItem.content.name, {
-        type: 'text/plain',
-      });
+      let fileName = fileItem.content.name;
+      if (notepadHeaderRef.value.fileName !== fileItem.content.name) {
+        fileName = formatFileName(notepadHeaderRef.value.fileName);
+      }
+
+      fileItem.label = fileName;
+      fileItem.content.name = fileName;
+      fileItem.content.rawFile = new File([updatedText], fileName, { type: 'text/plain' });
 
       await rayDb.updateOne<ItemInsert>('files', fileItem);
+      await rayDb.updateManyByQuery<FileSystemItem>(
+        'fileSystem',
+        () => ({ file: { name: fileName } }),
+        (item) => item.file?.id === fileItem.id,
+      );
+      useFileSystemStore().updateFileSystem();
+
       useToastStore().createToast('saved changes', 'success', 2000, 'window', windowId);
     }
   } catch (e) {
@@ -88,7 +110,11 @@ watch(
 <template>
   <div class="text-reader-container">
     <div class="text-file-reader" v-if="loadedFile">
-      <NotepadHeader :file-name="loadedFile.fileName" @on-save-changes="saveChanges" />
+      <NotepadHeader
+        ref="notepadHeaderRef"
+        :file-name="loadedFile.fileName"
+        @on-save-changes="saveChanges"
+      />
       <textarea
         class="text"
         ref="preText"
@@ -115,7 +141,6 @@ watch(
 <style scoped>
 .text-reader-container {
   background-color: var(--background-color);
-  overflow: hidden;
   position: relative;
 }
 
@@ -133,6 +158,7 @@ watch(
 .open-text-file-section,
 .text-file-reader {
   height: 100%;
+  overflow: hidden;
 }
 
 .open-text-file-section {

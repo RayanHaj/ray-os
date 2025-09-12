@@ -1,11 +1,24 @@
 <script setup lang="ts">
+import { onBeforeMount, ref } from 'vue';
+
 const { fileName } = defineProps<{ fileName: string }>();
 const emit = defineEmits(['onSaveChanges']);
+
+const fileNameRef = ref('');
+onBeforeMount(() => {
+  fileNameRef.value = fileName;
+});
+
+defineExpose({'fileName': fileNameRef});
+
+function onInput(event: InputEvent) {
+  fileNameRef.value = (event.target as HTMLParagraphElement).innerText;
+}
 </script>
 
 <template>
   <div class="notepad-header">
-    <p class="file-name">{{ fileName }}</p>
+    <p class="file-name" contenteditable="true" @input="onInput($event as InputEvent)">{{ fileName }}</p>
     <div class="buttons">
       <button class="save-edits-button button" @click="emit('onSaveChanges')">save changes</button>
     </div>

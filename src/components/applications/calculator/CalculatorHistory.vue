@@ -2,7 +2,7 @@
 import { inject, ref, watch } from 'vue';
 import type { useCalculatorManager } from '@/composables/calculator/useCalculatorManager.ts';
 
-defineProps({ isToggled: { required: true, type: Boolean, default: false } });
+defineProps({ historyToggled: { required: true, type: Boolean, default: false } });
 
 const injectedCalculatorManager =
   inject<ReturnType<typeof useCalculatorManager>>('calculatorManager');
@@ -20,7 +20,7 @@ watch(
 </script>
 
 <template>
-  <div v-show="isToggled" class="calculator-history">
+  <div v-show="historyToggled" class="calculator-history">
     <ul>
       <li v-if="calculationHistory.length === 0">No history items found</li>
       <li

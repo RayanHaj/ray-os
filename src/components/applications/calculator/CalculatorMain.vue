@@ -4,27 +4,27 @@ import CalculatorGrid from '@/components/applications/calculator/CalculatorGrid.
 import CalculatorHistory from '@/components/applications/calculator/CalculatorHistory.vue';
 import { useCalculatorManager } from '@/composables/calculator/useCalculatorManager.ts';
 import { provide, ref } from 'vue';
-const historyIsToggled = ref(false);
+const historyToggled = ref(false);
 provide('calculatorManager', useCalculatorManager());
 </script>
 
 <template>
   <section class="calculator">
     <div class="header">
-      <button id="showHistoryButton" @click="historyIsToggled = !historyIsToggled">
+      <button id="showHistoryButton" @click="historyToggled = !historyToggled">
         Show history
       </button>
     </div>
     <div
-      v-show="!historyIsToggled"
+      v-show="!historyToggled"
       class="calculator-wrapper"
-      :class="{ toggled: historyIsToggled }"
+      :class="{ toggled: historyToggled }"
     >
       <CalculatorAnswer />
       <CalculatorGrid />
     </div>
-    <div v-show="historyIsToggled" class="history-wrapper">
-      <CalculatorHistory :is-toggled="historyIsToggled" />
+    <div v-show="historyToggled" class="history-wrapper">
+      <CalculatorHistory :history-toggled="historyToggled" />
     </div>
   </section>
 </template>
