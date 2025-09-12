@@ -16,8 +16,8 @@ import {
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 
 const { tilePosition } = defineProps<{ tilePosition: { x: number; y: number } }>();
-const verticalTileCount = useTileCountGrid().y.value
-const tileId = computed(() => (tilePosition.x - 1) * verticalTileCount + tilePosition.y);
+const verticalTileCount = useTileCountGrid().y
+const tileId = computed(() => (tilePosition.x - 1) * verticalTileCount.value + tilePosition.y);
 
 const tileItem = ref<(Item & { tileId: number }) | null>();
 const desktopStore = useDesktopStore();
