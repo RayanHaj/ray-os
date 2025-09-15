@@ -7,16 +7,19 @@ import {
 import type { RayDb } from 'ray-db-wrapper';
 import FileExplorerHeader from '@/components/applications/fileExplorer/FileExplorerHeader.vue';
 import FileExplorerGrid from '@/components/applications/fileExplorer/FileExplorerGrid.vue';
-import type { FileItem, FileSystemItem, FileType, Item, ItemInsert } from '@/types/ItemTypes.ts';
+import type { FileItem, FileSystemItem, FileType, ItemInsert } from '@/types/ItemTypes.ts';
 import FileExplorerModal from '@/components/applications/fileExplorer/FileExplorerModal.vue';
 import { useContextMenuStore } from '@/stores/contextMenu.ts';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
-import { useWindowStore } from '@/stores/window.ts';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
 import type { ItemSizeKeys } from '@/types/FileExplorerTypes.ts';
 import { useToastStore } from '@/stores/toast.ts';
-import { useNotepadStore } from '@/stores/notepad.ts';
+import { useUpdateItemsByCurrentPath } from '@/composables/fileExplorer/useUpdateItemsByCurrentPath.ts';
+import { useHandleExplorerDirectoryClicked } from '@/composables/fileExplorer/useHandleExplorerDirectoryClicked.ts';
+import { useHandleExplorerFileClicked } from '@/composables/fileExplorer/useHandleExplorerFileClicked.ts';
+import { useSanitizeFileName } from '@/composables/fileSystem/useSanitizeFileName.ts';
+import { useValidateFileName } from '@/composables/fileSystem/useValidateFileName.ts';
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 const fileSystemStore = useFileSystemStore();
@@ -24,7 +27,7 @@ const fileSystemStore = useFileSystemStore();
 const currentPath = ref<string[]>([fileSystemStore.rootDirectory]);
 const currentItems = ref<Array<FileSystemItem & { type: string }>>([]);
 const previousItems = ref<Array<Array<FileSystemItem & { type: string }>>>([]);
-const currentItemId = ref<number>();
+const currentParentItemId = ref<number>();
 const isInFileSelectState = ref<{
   state: boolean;
   windowId: string;
@@ -33,8 +36,8 @@ const isInFileSelectState = ref<{
 
 const fileExplorerStore = useFileExplorerStore();
 onBeforeMount(async () => {
-  await updateCurrentItems(fileSystemStore.rootDirectory);
-  currentItemId.value = fileSystemStore.rootId;
+  await useUpdateItemsByCurrentPath(rayDb, fileSystemStore.rootDirectory, currentItems);
+  currentParentItemId.value = fileSystemStore.rootId;
 
   const fileItemSize = localStorage.getItem('fileItemSize');
   if (fileItemSize) {
@@ -57,7 +60,7 @@ onBeforeMount(async () => {
 
 watch(
   () => fileSystemStore.updateFileSystemVal,
-  async () => await updateCurrentItems(currentPath.value.join('/')),
+  async () => await useUpdateItemsByCurrentPath(rayDb, currentPath.value.join('/'), currentItems),
 );
 const fileExplorerDiv = ref();
 
@@ -72,78 +75,31 @@ watch(
   },
 );
 
-async function updateCurrentItems(path: string) {
-  const fileSystemItems = await fileSystemLookup(rayDb, path);
-  if (fileSystemItems instanceof Error || !fileSystemItems) {
-    throw new Error(`No fileSystemItems (children) found with specified path: ${path}`);
-  }
-
-  currentItems.value = await mapItemsWithType(fileSystemItems.children);
-}
-
-async function mapItemsWithType(items: FileSystemItem[]) {
-  return await Promise.all(
-    items.map(async (item) => {
-      const updatedItems = { ...item, type: 'directory' };
-
-      if (item.file) {
-        const file = await rayDb.findOne<Item>('files', 'id', item.file.id);
-        updatedItems.type = file.content.type;
-      }
-
-      return updatedItems;
-    }),
-  );
-}
-
 function handleBackClick() {
   const poppedItems = previousItems.value.pop();
 
   if (poppedItems && poppedItems.length > 0) {
     currentItems.value = poppedItems;
-    currentItemId.value = currentItems.value[0].parents[0];
+    currentParentItemId.value = currentItems.value[0].parents[0];
     currentPath.value.pop();
   }
 }
 
 async function onDblClickItem(item: FileSystemItem & { type: string }) {
-  if (item.directory) {
-    previousItems.value.push(currentItems.value);
-    await updateCurrentItems(`${currentPath.value.join('/')}/${item.directory.name}`);
-    currentPath.value.push(item.directory.name);
-    currentItemId.value = item.id;
-  } else if (item.file) {
-    switch (item.type) {
-      case 'application':
-        useWindowStore().pushOpenWindowReference(item.file.name);
-        break;
-      case 'file': {
-        const file = await rayDb.findOne<Item>('files', 'id', item.file.id);
-        if (!file) {
-          return;
-        }
-        if (file.content.type === 'file') {
-          if (isInFileSelectState.value?.state) {
-            fileExplorerStore.isInFileSelectStateReturnValue = {
-              windowId: isInFileSelectState.value.windowId,
-              fileId: item.file.id,
-              value: file.content,
-            };
-            return;
-          } else if (file.content.rawFile) {
-            useNotepadStore().initializeNotepadFile(
-              useWindowStore().getNextWindowId('Notepad'),
-              item.file.id,
-              file.content.name,
-              await file.content.rawFile.text(),
-            );
-            useWindowStore().pushOpenWindowReference('Notepad');
-          }
-        }
-      }
-    }
+  if (!item.id) return;
 
-    currentItemId.value = item.id;
+  if (item.directory) {
+    await useHandleExplorerDirectoryClicked(
+      item.id,
+      item.directory,
+      previousItems,
+      currentItems,
+      currentParentItemId,
+      currentPath,
+      rayDb,
+    );
+  } else if (item.file) {
+    await useHandleExplorerFileClicked(item, currentParentItemId, isInFileSelectState, rayDb);
   }
 }
 
@@ -179,14 +135,21 @@ async function handleModalInput(contentType: 'directory' | 'text file', input: s
 
     let hasInserted;
     switch (contentType) {
-      case 'directory': {
-        hasInserted = await insertItemIntoFileSystem(rayDb, [parentId], {
-          directory: { name: input, children: [] },
-        });
-      } break;
+      case 'directory':
+        {
+          hasInserted = await insertItemIntoFileSystem(rayDb, [parentId], {
+            directory: { name: input, children: [] },
+          });
+        }
+        break;
       case 'text file': {
+        const fileName = useSanitizeFileName(input);
+        if (!useValidateFileName(fileName)) {
+          useToastStore().createToast('file name to long', 'error', 5000, 'window', windowId);
+          return;
+        }
+
         const createdAt = Date.now();
-        const fileName = `${input}.txt`;
         const file = new File([''], fileName, { type: 'text/plain', lastModified: createdAt });
 
         const item: FileItem = {
@@ -206,7 +169,9 @@ async function handleModalInput(contentType: 'directory' | 'text file', input: s
           return;
         }
 
-        hasInserted = await insertItemIntoFileSystem(rayDb, [parentId], { file: { name: fileName, id: Number(fileId) } });
+        hasInserted = await insertItemIntoFileSystem(rayDb, [parentId], {
+          file: { name: fileName, id: Number(fileId) },
+        });
       }
     }
 
@@ -231,7 +196,7 @@ async function handleModalInput(contentType: 'directory' | 'text file', input: s
     />
     <FileExplorerHeader :current-path="currentPath" @header-event:back="handleBackClick" />
     <FileExplorerGrid
-      :parent-id="currentItemId ?? -1"
+      :parent-id="currentParentItemId ?? -1"
       :current-directories="currentItems"
       :filter-by-file-type="isInFileSelectState?.allowedFileTypes ?? []"
       @item-event:dbl-click="onDblClickItem"

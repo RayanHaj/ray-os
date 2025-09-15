@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { useWindowStore } from '@/stores/window.ts';
-import { computed, onBeforeMount, ref } from 'vue';
+import { computed, nextTick, onBeforeMount, ref, watch } from 'vue';
 import type { Item } from '@/types/ItemTypes.ts';
 import TaskbarTabs from '@/components/taskbar/TaskbarTabs.vue';
 import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
 import { useFileStore } from '@/stores/file.ts';
+import { useBrowserStore } from '@/stores/browser.ts';
 
 const fileStore = useFileStore();
 const isHoveringOnTile = ref(false);
@@ -26,7 +27,8 @@ const getUnderlineClass = computed(() => {
     return 'underline hidden';
   }
 
-  const openWindowsReferenceCount = windowStore.openWindowsReferences[application.value.label].length;
+  const openWindowsReferenceCount =
+    windowStore.openWindowsReferences[application.value.label].length;
 
   const minimizedCount = windowStore.openWindowsReferences[application.value.label].reduce(
     (accumulator, value) => (value.minimized ? accumulator + 1 : accumulator),
@@ -109,6 +111,44 @@ function onClickTile() {
   windowStore.pushOpenWindowReference(application.value.label);
   firstWindowOpenedOnClickTile.value = true;
 }
+
+const titleRef = ref();
+const showTitle = computed(() => isHoveringOnTile.value && !hasTabs());
+const titleIsOverflowing = ref<'positive' | 'negative' | ''>('');
+
+watch(
+  () => showTitle.value,
+  async (value) => {
+    if (!value) {
+      titleIsOverflowing.value = '';
+    }
+
+    await nextTick();
+    if (!titleRef.value) {
+      return;
+    }
+
+    const rect = titleRef.value.getBoundingClientRect();
+
+    if (rect.x + rect.width >= useBrowserStore().width) {
+      titleIsOverflowing.value = 'positive';
+    } else if (rect.x < 0) {
+      titleIsOverflowing.value = 'negative';
+    } else {
+      titleIsOverflowing.value = '';
+    }
+  },
+);
+
+const getTitleOverflowStyle = computed(() => {
+  if (titleIsOverflowing.value === 'positive') {
+    return { right: 0 };
+  } else if (titleIsOverflowing.value === 'negative') {
+    return { left: 0 };
+  }
+
+  return '';
+})
 </script>
 
 <template>
@@ -119,7 +159,7 @@ function onClickTile() {
     @mouseenter.prevent="onMouseEnter"
     @mouseleave.prevent="onMouseLeave"
   >
-    <div v-if="isHoveringOnTile && !hasTabs()" class="title-text-hover">{{ application.label }}</div>
+    <div ref="titleRef" v-if="showTitle" class="title-text-hover" :style="getTitleOverflowStyle">{{ application.label }}</div>
     <transition name="fade-shadow">
       <TaskbarTabs
         v-if="hasTabs() && application && firstWindowOpenedOnClickTile === false"
@@ -129,7 +169,7 @@ function onClickTile() {
         @tabs-unmounted="onTabsUnmounted"
       />
     </transition>
-    <div class="content" @click="onClickTile" >
+    <div class="content" @click="onClickTile">
       <component class="app-svg" :is="useSvgOrFallback(application.label).svg" />
       <hr :class="getUnderlineClass" />
     </div>
@@ -192,6 +232,13 @@ hr {
   .app-svg {
     width: 30px;
     height: 30px;
+  }
+}
+
+@media (max-width: 475px) {
+  .app-svg {
+    width: 20px;
+    height: 20px;
   }
 }
 

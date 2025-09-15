@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type Component, computed, onBeforeMount, shallowRef } from 'vue';
+import { type Component, computed, onBeforeMount, ref, shallowRef, watchEffect } from 'vue';
 import { useSvgByFileNameAndDirectory } from '@/composables/svg/useSvgByFileNameAndDirectory.ts';
 import {
   type SecondaryActionsContextMenu,
@@ -7,6 +7,8 @@ import {
   type PrimaryActionsContextMenu,
 } from '@/types/ContextMenuTypes.ts';
 import { useContextMenuStore } from '@/stores/contextMenu.ts';
+import { useTaskbarStore } from '@/stores/taskbar.ts';
+import { useBrowserStore } from '@/stores/browser.ts';
 
 const primaryActionsSvgs = shallowRef<Record<string, Component>>({});
 onBeforeMount(async () => {
@@ -19,9 +21,28 @@ onBeforeMount(async () => {
 });
 
 const contextMenuStore = useContextMenuStore();
+const contextMenuHeight = ref(300);
+const contextMenuWidth = ref(200);
+
 const mousePosition = computed<{ left: number; top: number }>(
   () => contextMenuStore.contextMenusProperties.mousePosition ?? { left: 100, top: 100 },
 );
+
+watchEffect(() => {
+  const withinBorders = useBrowserStore().height - mousePosition.value.top - contextMenuHeight.value - useTaskbarStore().taskbarHeight > 0;
+  const maximumContextMenuTop = (useBrowserStore().height - useTaskbarStore().taskbarHeight - contextMenuHeight.value) - 10;
+  if (!withinBorders) {
+    mousePosition.value.top = maximumContextMenuTop;
+  }
+});
+
+watchEffect(() => {
+  const withinBorders = useBrowserStore().width - mousePosition.value.left - contextMenuWidth.value > 0;
+  const maximumContextMenuLeft = (useBrowserStore().width - contextMenuWidth.value) - 10;
+  if (!withinBorders) {
+    mousePosition.value.left = maximumContextMenuLeft;
+  }
+});
 
 const fallbackPrimaryActions: PrimaryActionsContextMenu[] = ['Copy', 'Paste', 'Delete', 'Rename'];
 
@@ -43,7 +64,7 @@ const secondaryActions = computed<SecondaryActionsContextMenu[]>(
 <template>
   <div
     class="context-menu"
-    :style="{ left: `${mousePosition.left}px`, top: `${mousePosition.top}px` }"
+    :style="{ left: `${mousePosition.left}px`, top: `${mousePosition.top}px`, height: `${contextMenuHeight}px`, width: `${contextMenuWidth}px` }"
   >
     <div class="primary-actions">
       <button
@@ -74,8 +95,6 @@ const secondaryActions = computed<SecondaryActionsContextMenu[]>(
   position: absolute;
   display: flex;
   flex-direction: column;
-  width: 200px;
-  height: 300px;
   background: var(--tabs-background);
   border: var(--window-border-color) solid 2px;
   border-radius: 10px;
@@ -104,13 +123,17 @@ const secondaryActions = computed<SecondaryActionsContextMenu[]>(
 .secondary-actions {
   display: flex;
   flex-direction: column;
-  gap: 10px;
 }
 
 .secondary-action {
   text-align: center;
   width: 100%;
-  height: 50px;
+  height: 25px;
+  border-bottom: 1px var(--input-border-color) solid;
+}
+
+.secondary-action:hover {
+  background-color: var(--button-hover-color);
 }
 
 hr {

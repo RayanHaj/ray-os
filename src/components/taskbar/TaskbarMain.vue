@@ -90,7 +90,7 @@ const startMenuStore = useStartMenuStore();
   height: 55px;
 }
 
-@media (max-width: 850px) {
+@media (max-width: 1120px) {
   .left-section {
     display: none;
   }
@@ -112,7 +112,7 @@ const startMenuStore = useStartMenuStore();
   }
 }
 
-@media (max-width: 550px) {
+@media (max-width: 690px) {
   .right-section {
     display: none;
   }

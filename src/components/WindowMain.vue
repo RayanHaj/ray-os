@@ -74,7 +74,7 @@ watch(
   { deep: true },
 );
 
-const windowResizeManager = useWindowResizeManager(styles, reference, window, windowStateManager);
+const windowResizeManager = useWindowResizeManager(styles, windowId, window, windowStateManager);
 const windowPositionManager = useWindowPositionManager(
   styles,
   window,

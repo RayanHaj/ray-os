@@ -13,7 +13,7 @@ export const useWindowStore = defineStore('window', () => {
   function pushOpenWindowReference(windowName: string | Application) {
     const id = getNextWindowId(windowName);
     const idNumber = Number(id.split('-')[1]);
-    console.log(idNumber)
+    console.log(idNumber);
 
     if (typeof openWindowsReferences.value[windowName] === 'undefined') {
       openWindowsReferences.value[windowName] = [{ id: idNumber, minimized: false }];
@@ -67,8 +67,10 @@ export const useWindowStore = defineStore('window', () => {
     const id = Number(windowIdSplit[1]);
 
     const index = openWindowsReferences.value[windowName].findIndex(
-      (reference) => reference.id === id
+      (reference) => reference.id === id,
     );
+
+    useWindowStore().setWindowZIndexToTop(windowId);
 
     if (index === -1) {
       return;
@@ -88,7 +90,7 @@ export const useWindowStore = defineStore('window', () => {
     }
 
     openWindowsReferences.value[windowName] = openWindowsReferences.value[windowName].filter(
-      (windowReference) => windowReference.id !== id
+      (windowReference) => windowReference.id !== id,
     );
 
     if (openWindowsReferences.value[windowName].length === 0) {
@@ -100,10 +102,9 @@ export const useWindowStore = defineStore('window', () => {
     }
   }
 
-  function setWindowZIndexToTop(reference: WindowFlatReference) {
-    const globalId = getWindowId(reference.label, reference.id);
-    zIndexesOrder.value = zIndexesOrder.value.filter((value) => value !== globalId);
-    zIndexesOrder.value.push(globalId);
+  function setWindowZIndexToTop(windowId: string) {
+    zIndexesOrder.value = zIndexesOrder.value.filter((value) => value !== windowId);
+    zIndexesOrder.value.push(windowId);
   }
 
   function getZIndex(windowName: string, id: number) {
@@ -127,6 +128,6 @@ export const useWindowStore = defineStore('window', () => {
     getWindowCountByName,
     getNextWindowId,
     getGlobalId: getWindowId,
-    getZIndex
+    getZIndex,
   };
 });

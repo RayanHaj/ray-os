@@ -62,9 +62,9 @@ watch(
     tileItem.value = item;
   },
 );
+
 watch(
   () => useBrowserStore().height, () => {
-
     const item = desktopStore.items.find((item) => item.tileId === tileId.value);
     if (!item) {
       tileItem.value = null;

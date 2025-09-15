@@ -17,7 +17,7 @@ type WindowCornerPosition =
 
 export function useWindowResizeManager(
   styles: Ref<WindowStyleObject>,
-  reference: WindowFlatReference,
+  windowId: string,
   window: Ref,
   windowStateManager: ReturnType<typeof useWindowStateManager>,
 ) {
@@ -25,7 +25,7 @@ export function useWindowResizeManager(
   const isMouseDown = ref(false);
 
   function onMouseDownWindow() {
-    useWindowStore().setWindowZIndexToTop(reference);
+    useWindowStore().setWindowZIndexToTop(windowId);
     if (currentCorner.value !== 'default') {
       isMouseDown.value = true;
       document.body.style.cursor = styles.value.cursor;
