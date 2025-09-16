@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type Component, nextTick, onBeforeMount, provide, type Ref, ref, watch } from 'vue';
+import { type Component, onBeforeMount, provide, type Ref, ref, watch } from 'vue';
 import type { WindowFlatReference, WindowStyleObject } from '@/types/WindowTypes.ts';
 import { useWindowStore } from '@/stores/window.ts';
 import WindowHeader from '@/components/WindowHeader.vue';

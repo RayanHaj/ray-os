@@ -17,7 +17,7 @@ type StyleProps = {
 export function useWindowStateManager(styles: Ref<StyleProps>, reference: WindowFlatReference) {
   const windowReference = computed(() =>
     useWindowStore().openWindowsReferences[reference.label].find(
-      (reference) => reference.id === reference.id,
+      (openWindowReference) => openWindowReference.id === reference.id,
     ),
   );
 

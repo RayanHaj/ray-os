@@ -57,7 +57,7 @@ const setClassOnHover = ref<string | null>(null);
 const setTimeoutId = ref<number | null>(null);
 const mouseOnTabs = ref(false);
 
-function onMouseEnter() {
+function onMouseEnter(useDelay: boolean) {
   if (firstWindowOpenedOnClickTile.value) {
     firstWindowOpenedOnClickTile.value = false;
   }
@@ -68,12 +68,16 @@ function onMouseEnter() {
     setTimeoutId.value = null;
   }
 
-  setTimeoutId.value = setTimeout(() => {
+  if (useDelay) {
+    setTimeoutId.value = setTimeout(() => {
+      isHoveringOnTile.value = true;
+    }, 500);
+  } else {
     isHoveringOnTile.value = true;
-  }, 250);
+  }
 }
 
-function onMouseLeave() {
+function onMouseLeave(useDelay: boolean) {
   if (firstWindowOpenedOnClickTile.value) {
     setClassOnHover.value = null;
   }
@@ -83,16 +87,18 @@ function onMouseLeave() {
     setTimeoutId.value = null;
   }
 
-  if (!hasTabs()) {
+  if (!hasTabs() || !useDelay) {
     setClassOnHover.value = null;
     isHoveringOnTile.value = false;
     return;
   }
 
-  setTimeoutId.value = setTimeout(() => {
-    setClassOnHover.value = null;
-    isHoveringOnTile.value = false;
-  }, 500);
+  if (useDelay) {
+    setTimeoutId.value = setTimeout(() => {
+      setClassOnHover.value = null;
+      isHoveringOnTile.value = false;
+    }, 500);
+  }
 }
 
 function onTabsUnmounted() {
@@ -108,8 +114,23 @@ function onClickTile() {
     return;
   }
 
-  windowStore.pushOpenWindowReference(application.value.label);
-  firstWindowOpenedOnClickTile.value = true;
+  const reference = windowStore.openWindowsReferences[application.value.label];
+  if (!reference || reference.length === 0) {
+    windowStore.pushOpenWindowReference(application.value.label);
+    firstWindowOpenedOnClickTile.value = true;
+    return;
+  }
+
+  clearTimeout(setTimeoutId.value ?? undefined);
+  isHoveringOnTile.value = false;
+
+  nextTick().then(() => (setClassOnHover.value = 'active'));
+
+  if (reference.length === 1) {
+    windowStore.setWindowMinimized(
+      windowStore.getGlobalId(application.value.label, reference[0].id),
+    );
+  }
 }
 
 const titleRef = ref();
@@ -148,7 +169,7 @@ const getTitleOverflowStyle = computed(() => {
   }
 
   return '';
-})
+});
 </script>
 
 <template>
@@ -156,13 +177,16 @@ const getTitleOverflowStyle = computed(() => {
     v-if="application"
     class="application-name"
     :class="setClassOnHover"
-    @mouseenter.prevent="onMouseEnter"
-    @mouseleave.prevent="onMouseLeave"
+    @mouseenter.prevent="onMouseEnter(true)"
+    @mouseleave.prevent="onMouseLeave(true)"
+    @contextmenu.prevent="onMouseEnter(false)"
   >
-    <div ref="titleRef" v-if="showTitle" class="title-text-hover" :style="getTitleOverflowStyle">{{ application.label }}</div>
+    <div ref="titleRef" v-if="showTitle" class="title-text-hover" :style="getTitleOverflowStyle">
+      {{ application.label }}
+    </div>
     <transition name="fade-shadow">
       <TaskbarTabs
-        v-if="hasTabs() && application && firstWindowOpenedOnClickTile === false"
+        v-if="hasTabs() && firstWindowOpenedOnClickTile === false"
         :application-name="application.label"
         @mouse-entered="mouseOnTabs = true"
         @mouse-left="mouseOnTabs = false"

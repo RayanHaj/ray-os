@@ -12,6 +12,7 @@ import { useBrowserStore } from '@/stores/browser.ts';
 import {
   useInitializeContextMenu
 } from '@/composables/contextMenu/useInitializeContextMenu.ts';
+import { useDblClick } from '@/composables/helpers/UseDblClick.ts';
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 
@@ -178,8 +179,8 @@ function openWindow() {
     @dragover.prevent
     @dragenter.prevent
     @drop.prevent="onDrop"
-    @dblclick="openWindow"
-    @click.right.prevent.stop="onTileRightClick"
+    @click="useDblClick(() => openWindow())"
+    @contextmenu.prevent="onTileRightClick"
   >
     <div class="content" v-if="tileItem && tileItem.id">
       <component

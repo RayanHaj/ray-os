@@ -37,7 +37,7 @@ function onDesktopRightClick(event: MouseEvent) {
     class="desktop-grid"
     @dragover.prevent
     @dragenter.prevent
-    @click.right.prevent="onDesktopRightClick"
+    @contextmenu.prevent="onDesktopRightClick"
     :style="{ height: `${useBrowserStore().heightExcTaskbar}px` }"
   >
     <div v-for="rowPosition in rowCount" :key="rowPosition">

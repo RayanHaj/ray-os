@@ -17,6 +17,7 @@ import { type ItemSize, itemSizes } from '@/types/FileExplorerTypes.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import { useToastStore } from '@/stores/toast.ts';
 import { useInitializeContextMenu } from '@/composables/contextMenu/useInitializeContextMenu.ts';
+import { useDblClick } from '@/composables/helpers/UseDblClick.ts';
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 const { currentDirectories, parentId, filterByFileType } = defineProps<{
@@ -68,11 +69,11 @@ async function onRightClick(
         {},
         {
           newDirectory: () => {
-            emits('newDirectory', {contentType: 'directory'});
+            emits('newDirectory', { contentType: 'directory' });
           },
           newTextFile: () => {
-            emits('newTextFile', {contentType: 'text file'});
-          }
+            emits('newTextFile', { contentType: 'text file' });
+          },
         },
       );
   } else if (calledFrom === 'gridItem') {
@@ -181,7 +182,7 @@ const itemSize = computed<ItemSize>(() => itemSizes[fileExplorerStore.currentFil
   <section
     class="file-explorer-grid"
     ref="gridRef"
-    @click.right.prevent.stop="onRightClick($event, null, 'grid')"
+    @contextmenu.prevent="onRightClick($event, null, 'grid')"
     @dragover.prevent
     @drop.prevent="onFileDrop"
     :style="{ fontSize: `${itemSize.font}px` }"
@@ -189,15 +190,13 @@ const itemSize = computed<ItemSize>(() => itemSizes[fileExplorerStore.currentFil
     <div class="desktop-grid">
       <div
         class="item"
-        :style="{
-          pointerEvents: handleDisabledItem(fileSystemItem) ? 'none' : 'auto'
-        }"
+        :style="{ pointerEvents: handleDisabledItem(fileSystemItem) ? 'none' : 'auto' }"
         v-for="fileSystemItem of currentDirectories"
         :key="fileSystemItem.id"
         draggable="true"
         @dragstart="onDragStart($event, fileSystemItem)"
-        @dblclick="emits('itemEvent:dblClick', fileSystemItem)"
-        @click.right.prevent.stop="onRightClick($event, fileSystemItem, 'gridItem')"
+        @click="useDblClick(() => $emit('itemEvent:dblClick', fileSystemItem))"
+        @contextmenu.prevent="onRightClick($event, fileSystemItem, 'gridItem')"
       >
         <component
           class="file-svg"
