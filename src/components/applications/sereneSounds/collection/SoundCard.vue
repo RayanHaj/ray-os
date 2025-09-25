@@ -86,8 +86,8 @@ function onRangeInput(e: Event) {
   width: 250px;
   padding: 10px;
   color: var(--text-color);
-  background-color: var(--tabs-background);
-  border-radius: 10px;
+  background-color: rgba(0, 0, 0, 0.7);
+  border-radius: 5px;
 }
 .play-sound-btn {
   display: flex;

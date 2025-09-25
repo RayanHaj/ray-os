@@ -30,20 +30,20 @@ onUnmounted(() => {
 <style scoped>
 .start-menu-wrapper {
   position: absolute;
-  width: 400px;
+  width: 200px;
+  padding: 10px;
   left: 0;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: end;
   z-index: 9999;
 }
 
 .start-menu {
   position: relative;
   width: 350px;
-  height: 95%;
+  height: 80%;
   background-color: var(--background-color);
-  border: var(--accent-color) solid 2px;
+  border: var(--window-border-color) solid 2px;
   border-radius: 15px;
   padding: 10px;
 }

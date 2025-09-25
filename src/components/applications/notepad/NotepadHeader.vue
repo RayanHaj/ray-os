@@ -17,7 +17,7 @@ defineExpose({'fileName': fileNameRef});
 
 const windowId = useInjectOrThrow<string>('windowId');
 function onInput(event: InputEvent) {
-  fileNameRef.value = (event.target as HTMLParagraphElement).innerText;
+  fileNameRef.value = (event.target as HTMLInputElement).value;
 }
 
 function onBlur(event: FocusEvent) {
@@ -32,7 +32,7 @@ function onBlur(event: FocusEvent) {
 
 <template>
   <div class="notepad-header">
-    <p class="file-name" contenteditable="true" @input="onInput($event as InputEvent)" @blur="onBlur($event as FocusEvent)">{{ fileName }}</p>
+    <input class="file-name" contenteditable="true" @input="onInput($event as InputEvent)" @blur="onBlur($event as FocusEvent)" :value="fileName"/>
     <div class="buttons">
       <button class="save-edits-button button" @click="emit('onSaveChanges')">save changes</button>
     </div>
@@ -55,12 +55,15 @@ function onBlur(event: FocusEvent) {
 .file-name {
   font-size: var(--font-size-elg);
   background-color: var(--input-primary-color);
+  color: var(--text-color);
+  border: var(--input-border-color) 2px solid;
   padding-inline: 10px;
   padding-block: 3px;
-  border-radius: 2px;
+  border-radius: 5px;
   width: 300px;
-  text-wrap: nowrap;
-  overflow-x: hidden;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .file-name:focus {
@@ -73,7 +76,7 @@ function onBlur(event: FocusEvent) {
   align-items: center;
   background-color: var(--button-primary-color);
   border: var(--input-border-color) 2px solid;
-  border-radius: 2px;
+  border-radius: 5px;
   color: var(--text-color);
   padding-block: 5px;
   padding-inline: 10px;
@@ -88,5 +91,22 @@ function onBlur(event: FocusEvent) {
 .button:hover {
   border-color: var(--button-hover-color);
   background-color: var(--button-hover-color);
+}
+
+@container notepadHeader (max-width: 440px) {
+  .notepad-header {
+    justify-content: center;
+    flex-direction: column;
+    gap: 10px;
+    height: fit-content;
+  }
+
+  .button, .buttons {
+    width: 100%;
+  }
+
+  .file-name {
+    width: 100%;
+  }
 }
 </style>

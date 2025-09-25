@@ -67,7 +67,7 @@ onMounted(() => {
 hr {
   width: 100%;
   border: var(--window-border-color) solid 2px;
-  border-radius: 10px;
+  border-radius: 5px;
 }
 
 .current-option-settings {

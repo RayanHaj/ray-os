@@ -46,8 +46,6 @@ function handleClick(content: string) {
 }
 
 .content {
-  display: flex;
-  align-items: center;
   padding: 10px;
   gap: 5px;
   width: 100%;

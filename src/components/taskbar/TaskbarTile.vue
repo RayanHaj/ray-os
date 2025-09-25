@@ -212,7 +212,7 @@ const getTitleOverflowStyle = computed(() => {
 
 .application-name.active {
   background-color: var(--button-hover-color);
-  border-radius: 10px;
+  border-radius: 5px;
 }
 
 .title-text-hover {
@@ -230,7 +230,7 @@ hr {
   height: 5px;
   border: none;
   background-color: var(--svg-color);
-  border-radius: 50px;
+  border-radius: 5px;
   bottom: 2px;
   width: 66%;
   position: absolute;

@@ -1,13 +1,17 @@
 <script setup lang="ts">
 import { onBeforeMount, type PropType, ref } from 'vue';
-import type { ItemSizeKeys } from '@/types/FileExplorerTypes.ts';
+import { type ItemSizeKeys, ItemSizeKeysArray } from '@/types/FileExplorerTypes.ts';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
+import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
 
 defineProps({
   currentPath: { required: false, type: Array as PropType<string[]>, default: () => ['C:/'] },
 });
 const emits = defineEmits(['header-event:back']);
-const itemSizeButtonsText: Array<ItemSizeKeys> = ['small', 'medium', 'large'];
+
+const directorySvg = useSvgOrFallback('Directory').svg;
+
+const itemSizeKeys = ItemSizeKeysArray;
 const selectedItemSizeButton = ref<ItemSizeKeys>('medium');
 
 onBeforeMount(() => {
@@ -28,18 +32,21 @@ function updateSelectedItemSizeButton(itemSizeKey: ItemSizeKeys) {
     <div class="left-section">
       <button class="back-button" @click="emits('header-event:back')">^</button>
     </div>
-    <div class="middle-side">
+    <div class="middle-section">
       <input type="text" :value="currentPath.join('/')" disabled />
     </div>
     <div class="right-section">
       <button
         class="item-size-button"
-        :class="{ selected: text === selectedItemSizeButton }"
-        v-for="text of itemSizeButtonsText"
-        :key="text"
-        @click="updateSelectedItemSizeButton(text)"
+        :class="{ selected: size === selectedItemSizeButton }"
+        v-for="(size, index) of itemSizeKeys"
+        :key="size"
+        @click="updateSelectedItemSizeButton(size)"
       >
-        {{ text }}
+        <Component
+          :is="directorySvg"
+          :style="{ width: `${10 * (index + 1)}px`, height: `${10 * (index + 1)}px` }"
+        />
       </button>
     </div>
   </header>
@@ -59,7 +66,7 @@ function updateSelectedItemSizeButton(itemSizeKey: ItemSizeKeys) {
   width: 150px;
 }
 
-.middle-side {
+.middle-section {
   width: 100%;
 }
 

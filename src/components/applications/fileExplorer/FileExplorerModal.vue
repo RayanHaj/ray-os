@@ -22,8 +22,8 @@ function onClickCancel() {
     <div class="modal">
       <h2>{{ title }}</h2>
       <div class="input-wrapper">
-        <label for="inputField">directory</label>
-        <input id="inputField" type="text" v-model="input" />
+        <label for="inputField">{{ `enter ${title} name` }}</label>
+        <input id="inputField" type="text" v-model="input"/>
       </div>
       <div class="buttons">
         <button class="submit-button" @click="onClickSubmit">submit</button>

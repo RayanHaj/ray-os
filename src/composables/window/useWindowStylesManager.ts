@@ -32,7 +32,6 @@ export function useWindowStylesManager(
   watch(
     () => windowStateManager.windowReference.value?.minimized,
     (minimized) => {
-      console.log(minimized)
       if (minimized) {
         styles.value.display = 'none';
       } else {

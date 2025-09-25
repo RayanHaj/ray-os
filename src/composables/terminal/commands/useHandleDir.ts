@@ -1,6 +1,7 @@
 import type { RayDb } from 'ray-db-wrapper';
 import type { Ref } from 'vue';
 import { fileSystemLookup } from '@/composables/fileSystem/useIndexedDbHelper.ts';
+import type { Item } from '@/types/ItemTypes.ts';
 
 export async function useHandleDir(
   rayDb: RayDb,
@@ -12,18 +13,15 @@ export async function useHandleDir(
     return;
   }
 
-  const childNames = [];
-  let extension = '';
+  const childNames: Array<{ fileName: string; fileType: string }> = [];
   for (const child of value.children) {
     const directory = child.directory;
     const file = child.file;
 
     if (directory) {
-      childNames.push(directory.name);
-      extension = 'directory';
+      childNames.push({ fileName: directory.name, fileType: 'directory' });
     } else if (file) {
-      childNames.push(file.name);
-      extension = 'application';
+      childNames.push({ fileName: file.name, fileType: await getFileTypeByFileId(rayDb, file.id) });
     }
   }
 
@@ -33,7 +31,16 @@ export async function useHandleDir(
   }
 
   lines.value.push({
-    line: childNames.map((value) => `[${value}]: ${extension}`).join('\n'),
+    line: childNames.map((value) => `[${value.fileName}]: ${value.fileType}`).join('\n'),
     isPlain: true,
   });
+}
+
+async function getFileTypeByFileId(rayDb: RayDb, id: number): Promise<string> {
+  const file = await rayDb.findOne<Item>('files', 'id', id);
+  if (!file) {
+    return '';
+  }
+
+  return file.content.type;
 }

@@ -67,7 +67,7 @@ const startMenuStore = useStartMenuStore();
 .taskbar-search-button {
   background: none;
   border: none;
-  border-radius: 10px;
+  border-radius: 5px;
 }
 
 .taskbar-search-button:hover {

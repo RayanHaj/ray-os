@@ -6,3 +6,4 @@ export const itemSizes = {
 
 export type ItemSize = (typeof itemSizes)[keyof typeof itemSizes];
 export type ItemSizeKeys = keyof typeof itemSizes;
+export const ItemSizeKeysArray = Object.keys(itemSizes) as ItemSizeKeys[];

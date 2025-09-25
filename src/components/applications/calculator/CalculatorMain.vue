@@ -56,7 +56,7 @@ provide('calculatorManager', useCalculatorManager());
   border: var(--highlight-color) solid 2px;
   padding: 10px;
   height: 100%;
-  border-radius: 7px;
+  border-radius: 5px;
   cursor: pointer;
 }
 </style>

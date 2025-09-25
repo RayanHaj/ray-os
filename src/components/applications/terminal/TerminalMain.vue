@@ -53,7 +53,7 @@ function isReadonly(lineNumber: number) {
   return lineNumber < lines.value.length - 1;
 }
 
-const fontSize = ref(10);
+const fontSize = ref(20);
 function onKeyDown(event: KeyboardEvent) {
   if (event.key === 'Control')
   document.addEventListener('wheel', onResizing, {passive: false});

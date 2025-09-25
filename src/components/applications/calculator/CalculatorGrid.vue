@@ -67,7 +67,6 @@ button {
   background: var(--button-primary-color);
   border: none;
   height: 100%;
-  border-radius: 2px;
 }
 
 button:hover {

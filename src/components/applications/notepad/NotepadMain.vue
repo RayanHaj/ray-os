@@ -142,6 +142,7 @@ watch(
 .text-reader-container {
   background-color: var(--background-color);
   position: relative;
+  container: notepadHeader / size;
 }
 
 .text {

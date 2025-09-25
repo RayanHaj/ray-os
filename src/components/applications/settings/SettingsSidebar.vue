@@ -46,7 +46,7 @@ function onClickOption(option: AllowedSettingsOptions) {
   background: var(--button-primary-color);
   border: none;
   color: var(--text-color);
-  border-radius: 2px;
+  border-radius: 5px;
   width: 100%;
   height: 40px;
 }

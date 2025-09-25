@@ -29,7 +29,7 @@ async function handleInput() {
 .start-menu-header input {
   width: 100%;
   height: 100%;
-  border-radius: 12px;
+  border-radius: 10px;
   background: var(--input-primary-color);
   color: var(--text-color);
   border: var(--input-border-color) 1px solid;
