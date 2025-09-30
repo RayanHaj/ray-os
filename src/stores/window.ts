@@ -9,6 +9,10 @@ export const useWindowStore = defineStore('window', () => {
   const openWindowsReferences = ref<WindowReferences>({});
   const zIndexesOrder = ref<string[]>([]);
   const windowHeaderHeight = readonly(ref(30));
+  const windowOutOfBounds = ref<{
+    side: 'right' | 'left' | 'top' | 'bottom' | '';
+    windowId: string;
+  }>({ side: '', windowId: '' });
 
   function pushOpenWindowReference(windowName: string | Application) {
     const id = getNextWindowId(windowName);
@@ -120,6 +124,7 @@ export const useWindowStore = defineStore('window', () => {
     openWindowsReferences,
     zIndexesOrder,
     windowHeaderHeight,
+    windowOutOfBounds,
     pushOpenWindowReference,
     removeOpenWindowReference,
     setWindowMinimized,

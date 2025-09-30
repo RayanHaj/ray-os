@@ -1,7 +1,8 @@
-import { nextTick, type Ref } from 'vue';
+import { type Ref } from 'vue';
 import { useWindowStateManager } from '@/composables/window/useWindowStateManager.ts';
 import { useBrowserStore } from '@/stores/browser.ts';
 import { useSnapLayoutStore } from '@/stores/snapLayout.ts';
+import { useWindowStore } from '@/stores/window.ts';
 
 type StyleProps = {
   left: string;
@@ -20,7 +21,7 @@ export function useWindowPositionManager(
   windowId: string,
   currentCorner: Ref<string>,
   windowStateManager: ReturnType<typeof useWindowStateManager>,
-  oldPosition: Ref<{ clientX: number; clientY: number }>
+  oldPosition: Ref<{ clientX: number; clientY: number }>,
 ) {
   const browserStore = useBrowserStore();
 
@@ -44,6 +45,7 @@ export function useWindowPositionManager(
   }
 
   const snapLayoutStore = useSnapLayoutStore();
+
   function onMouseUp(event: MouseEvent) {
     event.preventDefault();
     windowStateManager.isDraggingWindow.value = false;
@@ -65,6 +67,37 @@ export function useWindowPositionManager(
 
     const deltaX = oldPosition.value.clientX - event.clientX;
     const deltaY = oldPosition.value.clientY - event.clientY;
+
+    const left = windowRef.value.offsetLeft - deltaX;
+
+    const computedStyles = getComputedStyle(windowRef.value);
+    const windowWidth = Number(computedStyles.width.split('px')[0]);
+    const windowHeight = Number(computedStyles.height.split('px')[0]);
+
+    const windowStore = useWindowStore();
+    const rightOutOfBounds = left + windowWidth >= useBrowserStore().width;
+    const leftOutOfBounds = left <= 0;
+    const topOutOfBounds = event.clientY <= 0;
+    const bottomOutOfBounds = event.clientY > (useBrowserStore().heightExcTaskbar - windowHeight) + 25;
+
+    if (rightOutOfBounds || leftOutOfBounds || topOutOfBounds || bottomOutOfBounds) {
+      windowStore.windowOutOfBounds = { ...windowStore.windowOutOfBounds, windowId: windowId };
+    }
+
+    if (topOutOfBounds) {
+      windowStore.windowOutOfBounds = { ...windowStore.windowOutOfBounds, side: 'top' };
+    } else if (bottomOutOfBounds) {
+      windowStore.windowOutOfBounds = { ...windowStore.windowOutOfBounds, side: 'bottom' };
+    } else if (rightOutOfBounds) {
+      windowStore.windowOutOfBounds = { ...windowStore.windowOutOfBounds, side: 'right' };
+    } else if (leftOutOfBounds) {
+      windowStore.windowOutOfBounds = { ...windowStore.windowOutOfBounds, side: 'left' };
+    } else if (
+      windowStore.windowOutOfBounds.windowId !== '' &&
+      windowStore.windowOutOfBounds.side !== ''
+    ) {
+      windowStore.windowOutOfBounds = { windowId: '', side: '' };
+    }
 
     styles.value.left = `${windowRef.value.offsetLeft - deltaX}px`;
     styles.value.top = `${windowRef.value.offsetTop - deltaY}px`;

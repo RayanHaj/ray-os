@@ -6,6 +6,7 @@ import { computed } from 'vue';
 import {
   useInitializeContextMenu
 } from '@/composables/contextMenu/useInitializeContextMenu.ts';
+import WindowOutOfBounds from '@/WindowOutOfBounds.vue';
 
 const rowCount = computed(() => useTileCountGrid().x.value);
 const columnCount = computed(() => useTileCountGrid().y.value);
@@ -31,8 +32,8 @@ function onDesktopRightClick(event: MouseEvent) {
   );
 }
 </script>
-
 <template>
+  <WindowOutOfBounds />
   <div
     class="desktop-grid"
     @dragover.prevent
