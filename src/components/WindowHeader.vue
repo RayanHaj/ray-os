@@ -1,12 +1,5 @@
 <script setup lang="ts">
-import {
-  type Component,
-  markRaw,
-  onBeforeMount,
-  type Raw,
-  ref,
-  shallowRef,
-} from 'vue';
+import { type Component, markRaw, onBeforeMount, type Raw, ref, shallowRef } from 'vue';
 import type { WindowFlatReference } from '@/types/WindowTypes.ts';
 import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
 import { useWindowStore } from '@/stores/window';
@@ -23,12 +16,11 @@ onBeforeMount(async () => {
     { name: 'Maximize', svg: null },
     { name: 'Close', svg: null },
   ];
-  windowControlButtons.value = await Promise.all(
-    buttons.map(async (button) => {
-      const svg = useSvgOrFallback(button.name).svg;
-      return { name: button.name, svg: svg ? markRaw(svg) : null };
-    }),
-  );
+
+  windowControlButtons.value = buttons.map((button) => {
+    const svg = useSvgOrFallback(button.name).svg;
+    return { name: button.name, svg: svg ? markRaw(svg) : null };
+  });
 });
 </script>
 
@@ -38,7 +30,7 @@ onBeforeMount(async () => {
       <component class="svg" :is="svg" :custom-width="15" :custom-height="15" />
       <p class="window-name">{{ reference.label }}</p>
     </div>
-    <div :style="{ width: '100%' }" @mousedown="$emit('onMousedownHeader', $event)" />
+    <div :style="{ width: '100%' }" @mousedown="$emit('onMousedownHeader', $event)" @mouseup="$emit('onMouseupHeader', $event)"/>
     <div class="window-controls">
       <button
         v-for="button of windowControlButtons"

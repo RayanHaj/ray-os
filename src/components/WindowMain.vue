@@ -36,6 +36,25 @@ watch(
   },
 );
 
+let cachedZIndex: number;
+watch(
+  () => windowStore.windowOutOfBounds,
+  (newValue) => {
+    if (newValue.windowId !== windowId) {
+      if (cachedZIndex) {
+        styles.value.zIndex = cachedZIndex;
+      } else {
+        styles.value.zIndex = 10;
+      }
+
+      return;
+    }
+
+    cachedZIndex = styles.value.zIndex;
+    styles.value.zIndex = 9999;
+  },
+);
+
 const styles: Ref<WindowStyleObject> = ref({
   left: '25%',
   top: '25%',
@@ -95,6 +114,13 @@ function minimizeWindow() {
 function maximizeWindow() {
   windowResizeManager.setWindowMaximized(cachedStyles);
 }
+
+function handleOnMouseupHeader() {
+  if (windowStore.windowOutOfBounds.windowId === windowId) {
+    windowSnappingManager.snapWindow(windowStore.windowOutOfBounds.side);
+  }
+  windowStore.clearWindowOutOfBounds();
+}
 </script>
 
 <template>
@@ -114,6 +140,7 @@ function maximizeWindow() {
     <WindowHeader
       :reference="reference"
       @on-mousedown-header="windowPositionManager.onMouseDownHeader($event)"
+      @on-mouseup-header="handleOnMouseupHeader"
       @window-control-close="closeWindow"
       @window-control-maximize="maximizeWindow"
       @window-control-minimize="minimizeWindow"
@@ -131,6 +158,7 @@ function maximizeWindow() {
 
 <style scoped>
 .window {
+  z-index: 9999;
   height: 100%;
   position: absolute;
   user-select: none;

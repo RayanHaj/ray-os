@@ -86,8 +86,6 @@ export function useWindowPositionManager(
 
     if (topOutOfBounds) {
       windowStore.windowOutOfBounds = { ...windowStore.windowOutOfBounds, side: 'top' };
-    } else if (bottomOutOfBounds) {
-      windowStore.windowOutOfBounds = { ...windowStore.windowOutOfBounds, side: 'bottom' };
     } else if (rightOutOfBounds) {
       windowStore.windowOutOfBounds = { ...windowStore.windowOutOfBounds, side: 'right' };
     } else if (leftOutOfBounds) {

@@ -63,8 +63,8 @@ watch(
       </div>
       <hr
         v-else-if="showLayoutAs === 'beam' && showSnapLayout"
-        class="preview-beam"
         @mouseenter="snapLayoutStore.currentSnapLayoutSession.showSnapLayout = 'full'"
+        class="preview-beam"
       />
     </transition>
   </div>

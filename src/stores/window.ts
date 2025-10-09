@@ -120,11 +120,16 @@ export const useWindowStore = defineStore('window', () => {
     return zIndexesOrder.value.indexOf(globalId) + minZIndex;
   }
 
+  function clearWindowOutOfBounds() {
+    windowOutOfBounds.value = { side: '', windowId: '' };
+  }
+
   return {
     openWindowsReferences,
     zIndexesOrder,
     windowHeaderHeight,
     windowOutOfBounds,
+    clearWindowOutOfBounds,
     pushOpenWindowReference,
     removeOpenWindowReference,
     setWindowMinimized,
