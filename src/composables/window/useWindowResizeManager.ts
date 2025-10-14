@@ -1,5 +1,5 @@
 import { ref, type Ref } from 'vue';
-import type { WindowFlatReference, WindowStyleObject } from '@/types/WindowTypes.ts';
+import type { WindowStyleObject } from '@/types/WindowTypes.ts';
 import { useWindowStateManager } from '@/composables/window/useWindowStateManager.ts';
 import { useBrowserStore } from '@/stores/browser.ts';
 import { useWindowStore } from '@/stores/window.ts';
@@ -17,15 +17,14 @@ type WindowCornerPosition =
 
 export function useWindowResizeManager(
   styles: Ref<WindowStyleObject>,
-  windowId: string,
-  window: Ref,
+  windowRef: Ref,
   windowStateManager: ReturnType<typeof useWindowStateManager>,
 ) {
   const currentCorner = ref<WindowCornerPosition>('default');
   const isMouseDown = ref(false);
 
   function onMouseDownWindow() {
-    useWindowStore().setWindowZIndexToTop(windowId);
+    useWindowStore().setWindowZIndexToTop(windowStateManager.windowId);
     if (currentCorner.value !== 'default') {
       isMouseDown.value = true;
       document.body.style.cursor = styles.value.cursor;
@@ -60,7 +59,7 @@ export function useWindowResizeManager(
   }
 
   function resizeWindowOnCornerMouseDown(event: MouseEvent, side: WindowCornerPosition) {
-    const rect = window.value.getBoundingClientRect();
+    const rect = windowRef.value.getBoundingClientRect();
 
     const minHeight = Number(styles.value.minHeight.replace('px', ''));
     const minWidth = Number(styles.value.minWidth.replace('px', ''));
@@ -125,7 +124,7 @@ export function useWindowResizeManager(
     )
       return;
 
-    const rect = window.value.getBoundingClientRect();
+    const rect = windowRef.value.getBoundingClientRect();
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
 

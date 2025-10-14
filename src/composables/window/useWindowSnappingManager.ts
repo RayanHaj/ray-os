@@ -1,5 +1,7 @@
-import { type Ref, ref } from 'vue';
+import { type Ref, ref, watch } from 'vue';
 import { useBrowserStore } from '@/stores/browser.ts';
+import { useSnapLayoutStore } from '@/stores/snapLayout.ts';
+import type { useWindowStateManager } from '@/composables/window/useWindowStateManager.ts';
 
 type StyleProps = {
   left: string;
@@ -12,7 +14,7 @@ type StyleProps = {
   transition: string;
 };
 
-export function useWindowSnappingManager(styles: Ref<StyleProps>) {
+export function useWindowSnappingManager(styles: Ref<StyleProps>, windowId: string, windowStateManager: ReturnType<typeof useWindowStateManager>) {
   const showSnapLayout = ref<string>('');
   const browserStore = useBrowserStore();
 
@@ -67,5 +69,23 @@ export function useWindowSnappingManager(styles: Ref<StyleProps>) {
     }
   }
 
-  return { showSnapLayout, snapWindow };
+  const snapLayoutStore = useSnapLayoutStore();
+  watch(
+    () => snapLayoutStore.currentSnapLayoutSession,
+    async (newValue) => {
+      if (
+        newValue.selectedLayout === '' ||
+        newValue.windowId !== windowId ||
+        windowStateManager.isMaximized.value
+      )
+        return;
+
+      snapWindow(newValue.selectedLayout);
+      windowStateManager.isSnapped.value = true;
+    },
+    { deep: true },
+  );
+
+
+  return { showSnapLayout };
 }

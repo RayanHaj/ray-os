@@ -1,4 +1,4 @@
-import { nextTick, type Ref } from 'vue';
+import { ref, type Ref } from 'vue';
 import { useWindowStateManager } from '@/composables/window/useWindowStateManager.ts';
 import { useBrowserStore } from '@/stores/browser.ts';
 import { useSnapLayoutStore } from '@/stores/snapLayout.ts';
@@ -17,12 +17,12 @@ type StyleProps = {
 export function useWindowPositionManager(
   styles: Ref<StyleProps>,
   windowRef: Ref,
-  windowId: string,
-  currentCorner: Ref<string>,
   windowStateManager: ReturnType<typeof useWindowStateManager>,
-  oldPosition: Ref<{ clientX: number; clientY: number }>
+  currentCorner: Ref<string>
 ) {
   const browserStore = useBrowserStore();
+
+  const oldPosition = ref({ clientX: 0, clientY: 0 });
 
   function onMouseDownHeader(event: MouseEvent) {
     if (windowStateManager.isMaximized.value || currentCorner.value !== 'default') {
@@ -36,7 +36,7 @@ export function useWindowPositionManager(
     oldPosition.value.clientY = event.clientY;
 
     if (windowRef.value.getBoundingClientRect().top <= browserStore.heightExcTaskbar / 2) {
-      snapLayoutStore.openSnapLayout(windowId, 'beam');
+      snapLayoutStore.openSnapLayout(windowStateManager.windowId, 'beam');
     }
 
     addEventListener('mousemove', onMouseMove);

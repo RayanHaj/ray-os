@@ -1,6 +1,6 @@
-import { type Ref, watch } from 'vue';
-import type { WindowFlatReference } from '@/types/WindowTypes.ts';
-import type { useWindowStateManager } from '@/composables/window/useWindowStateManager.ts';
+import { ref, type Ref, watch } from 'vue';
+import type { WindowFlatReference, WindowStyleObject } from '@/types/WindowTypes.ts';
+import { useWindowStore } from '@/stores/window.ts';
 
 type StyleProps = {
   left: string;
@@ -13,30 +13,19 @@ type StyleProps = {
   transition: string;
 };
 
-export function useWindowStylesManager(
-  styles: Ref<StyleProps>,
-  reference: WindowFlatReference,
-  windowStateManager: ReturnType<typeof useWindowStateManager>,
-) {
-  watch(
-    () => windowStateManager.isDraggingWindow.value,
-    (newValue) => {
-      if (newValue) {
-        styles.value.transition = 'none';
-      } else {
-        styles.value.transition = 'width 0.5s, height 0.5s, left 0.5s, top 0.5s';
-      }
-    },
-  );
+export function useWindowStylesManager(reference: WindowFlatReference) {
+  const styles: Ref<WindowStyleObject> = ref({
+    left: '25%',
+    top: '25%',
+    width: '50%',
+    height: '50%',
+    minWidth: '250px',
+    minHeight: '50px',
+    zIndex: 10,
+    display: 'block',
+    cursor: 'auto',
+    transition: 'width 0.5s, height 0.5s, left 0.5s, top 0.5s',
+  });
 
-  watch(
-    () => windowStateManager.windowReference.value?.minimized,
-    (minimized) => {
-      if (minimized) {
-        styles.value.display = 'none';
-      } else {
-        styles.value.display = 'block';
-      }
-    }, { deep: true }
-  );
+  return { styles };
 }

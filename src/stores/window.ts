@@ -20,7 +20,7 @@ export const useWindowStore = defineStore('window', () => {
     }
 
     openWindowsReferences.value[windowName].push({ id: idNumber, minimized: false });
-    pushWindowToFront(windowName, idNumber);
+    pushWindowToFront(getWindowId(windowName, idNumber));
     return id;
   }
 
@@ -47,8 +47,8 @@ export const useWindowStore = defineStore('window', () => {
     return `${windowName}-${id}`;
   }
 
-  function pushWindowToFront(windowName: string, id: number) {
-    zIndexesOrder.value.push(getWindowId(windowName, id));
+  function pushWindowToFront(windowId: string) {
+    zIndexesOrder.value.push(windowId);
   }
 
   function getWindowCountByName(windowName: string) {
@@ -61,10 +61,7 @@ export const useWindowStore = defineStore('window', () => {
   }
 
   function setWindowMinimized(windowId: string) {
-    const windowIdSplit = windowId.split('-');
-    const windowName = windowIdSplit[0];
-    const id = Number(windowIdSplit[1]);
-
+    const { windowName, id } = splitWindowId(windowId);
     const index = openWindowsReferences.value[windowName].findIndex(
       (reference) => reference.id === id,
     );
@@ -80,10 +77,7 @@ export const useWindowStore = defineStore('window', () => {
   }
 
   function removeOpenWindowReference(windowId: string) {
-    const windowIdSplit = windowId.split('-');
-    const windowName = windowIdSplit[0];
-    const id = Number(windowIdSplit[1]);
-
+    const { windowName, id } = splitWindowId(windowId);
     if (typeof openWindowsReferences.value[windowName] === 'undefined') {
       return;
     }
@@ -106,14 +100,21 @@ export const useWindowStore = defineStore('window', () => {
     zIndexesOrder.value.push(windowId);
   }
 
-  function getZIndex(windowName: string, id: number) {
-    const globalId = getWindowId(windowName, id);
-    if (!zIndexesOrder.value.includes(globalId)) {
-      pushWindowToFront(windowName, id);
+  function getZIndex(windowId: string) {
+    if (!zIndexesOrder.value.includes(windowId)) {
+      pushWindowToFront(windowId);
     }
 
     const minZIndex = 10;
-    return zIndexesOrder.value.indexOf(globalId) + minZIndex;
+    return zIndexesOrder.value.indexOf(windowId) + minZIndex;
+  }
+
+  function splitWindowId(windowId: string) {
+    const windowIdSplit = windowId.split('-');
+    const windowName = windowIdSplit[0];
+    const id = Number(windowIdSplit[1]);
+
+    return { windowName, id };
   }
 
   return {
