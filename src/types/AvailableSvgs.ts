@@ -20,6 +20,8 @@ export const availableSvgs = [
   'Settings',
   'Upload',
   'Notepad',
-  'Todo'
+  'Todo',
+  'Github',
+  'LinkedIn'
 ] as const;
 export type AvailableSvgs = (typeof availableSvgs)[number];
