@@ -1,85 +1,18 @@
 import './assets/main.css';
-import themes from '@/json/themes.json';
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
-import { useThemeSwitcher } from '@/composables/helpers/useThemeSwitcher.ts';
-import { useFileSystemStore } from '@/stores/fileSystem.ts';
-import { RayDb } from 'ray-db-wrapper';
 
 import App from './App.vue';
-import { insertItemIntoFileSystem } from '@/composables/fileSystem/useIndexedDbHelper.ts';
-import { useFileStore } from '@/stores/file.ts';
+import { useRayDbInit } from '@/composables/initialization/useRayDbInit.ts';
+import { useFileSystemInit } from '@/composables/initialization/useFileSystemInit.ts';
+import { useThemeInit } from '@/composables/initialization/useThemeInit.ts';
 
 const app = createApp(App);
-
 app.use(createPinia());
 
-const rayDb = await RayDb.create('desktop', 1, [
-  {
-    name: 'files',
-    keyPath: 'id',
-    indexes: [
-      { indexName: 'id', keyPath: 'id', unique: true },
-      { indexName: 'label', keyPath: 'label', unique: true },
-      { indexName: 'content', keyPath: 'content', unique: false },
-    ],
-    autoIncrement: true,
-  },
-  {
-    name: 'fileSystem',
-    keyPath: 'id',
-    indexes: [
-      { indexName: 'id', keyPath: 'id', unique: true },
-      { indexName: 'parents', keyPath: 'parents', unique: false },
-      { indexName: 'file', keyPath: 'file', unique: false },
-      { indexName: 'directory', keyPath: 'directory', unique: true },
-      { indexName: 'isSystemFile', keyPath: 'isSystemFile', unique: false },
-    ],
-    autoIncrement: true,
-  },
-  {
-    name: 'desktopFiles',
-    keyPath: 'id',
-    indexes: [
-      { indexName: 'id', keyPath: 'id', unique: true },
-      { indexName: 'type', keyPath: 'type', unique: false },
-      { indexName: 'tileId', keyPath: 'tileId', unique: true },
-    ],
-    autoIncrement: false,
-  },
-  {
-    name: 'taskbarFiles',
-    keyPath: ['id'],
-    indexes: [{ indexName: 'id', keyPath: 'id', unique: false }],
-    autoIncrement: false,
-  },
-]);
-
-const fileSystemStore = useFileSystemStore();
-
-const rootDirectory = fileSystemStore.rootDirectory;
-const parentId = await insertItemIntoFileSystem(rayDb, [], {
-  directory: { name: rootDirectory, children: [] },
-  isSystemFile: true,
-});
-
-if (!(parentId instanceof Error)) {
-  if (parentId) {
-    await insertItemIntoFileSystem(rayDb, [parentId], {
-      directory: { name: 'Applications', children: [] },
-      isSystemFile: true,
-    });
-  }
-}
-
-await useFileStore().initializeFiles(rayDb);
-
+const rayDb = await useRayDbInit();
+await useFileSystemInit(rayDb);
 app.provide('rayDb', rayDb);
-const theme = useThemeSwitcher().getTheme();
-if (theme === '') {
-  useThemeSwitcher().setTheme(Object.keys(themes)[0]);
-} else {
-  document.documentElement.setAttribute('data-theme', theme);
-}
 
+useThemeInit();
 app.mount('#app');
