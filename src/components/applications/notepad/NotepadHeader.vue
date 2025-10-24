@@ -13,7 +13,7 @@ onBeforeMount(() => {
   fileNameRef.value = fileName;
 });
 
-defineExpose({'fileName': fileNameRef});
+defineExpose({ fileName: fileNameRef });
 
 const windowId = useInjectOrThrow<string>('windowId');
 function onInput(event: InputEvent) {
@@ -31,8 +31,20 @@ function onBlur(event: FocusEvent) {
 </script>
 
 <template>
-  <div class="notepad-header">
-    <input class="file-name" contenteditable="true" @input="onInput($event as InputEvent)" @blur="onBlur($event as FocusEvent)" :value="fileName"/>
+  <div
+    class="notepad-header"
+    :style="{
+      pointerEvents: fileName === '' ? 'none' : 'auto',
+      opacity: fileName === '' ? '0.5' : '1',
+    }"
+  >
+    <input
+      class="file-name"
+      contenteditable="true"
+      @input="onInput($event as InputEvent)"
+      @blur="onBlur($event as FocusEvent)"
+      :value="fileName"
+    />
     <div class="buttons">
       <button class="save-edits-button button" @click="emit('onSaveChanges')">save changes</button>
     </div>
@@ -101,7 +113,8 @@ function onBlur(event: FocusEvent) {
     height: fit-content;
   }
 
-  .button, .buttons {
+  .button,
+  .buttons {
     width: 100%;
   }
 
