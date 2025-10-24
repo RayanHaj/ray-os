@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import DesktopMain from '@/components/desktop/DesktopMain.vue';
 import TaskbarMain from '@/components/taskbar/TaskbarMain.vue';
-import { type Component, type ComputedRef } from 'vue';
+import { type ComputedRef } from 'vue';
 import WindowMain from '@/components/WindowMain.vue';
-import { type WindowFlatReference, type WindowName, windowNames } from '@/types/WindowTypes.ts';
+import { type WindowFlatReference } from '@/types/WindowTypes.ts';
 import { useFlatOpenWindowsReferencesFull } from '@/composables/window/useFlatOpenWindowsReferencesFull.ts';
 
-import FallbackMain from '@/components/applications/FallbackMain.vue';
 import DesktopSnapLayout from '@/components/DesktopSnapLayout.vue';
 import ContextMenu from '@/components/ContextMenu.vue';
 import { useContextMenuStore } from '@/stores/contextMenu.ts';
@@ -16,17 +15,6 @@ import { useGetWindowContentComponent } from '@/composables/window/useGetWindowC
 import { useWindowStore } from '@/stores/window.ts';
 
 const references: ComputedRef<WindowFlatReference[]> = useFlatOpenWindowsReferencesFull();
-
-function getWindowContentComponent(reference: WindowFlatReference): Component {
-  const formattedComponentName =
-    reference.label[0].toLowerCase() + reference.label.replace(' ', '').substring(1);
-  if (!windowNames.includes(formattedComponentName as WindowName)) {
-    return FallbackMain;
-  }
-
-  return useGetWindowContentComponent(formattedComponentName as WindowName);
-}
-
 const contextMenuStore = useContextMenuStore();
 </script>
 
@@ -39,7 +27,7 @@ const contextMenuStore = useContextMenuStore();
       v-for="reference of references"
       :key="useWindowStore().getGlobalId(reference.label, reference.id)"
       :reference="reference"
-      :window-content-component="getWindowContentComponent(reference)"
+      :window-content-component="useGetWindowContentComponent(reference.label)"
     >
       <UiToast
         toast-location="window"
