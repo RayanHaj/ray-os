@@ -7,11 +7,13 @@ import { useSvgsStore } from '@/stores/svgs.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import { RayDb } from 'ray-db-wrapper';
 import DesktopView from '@/views/DesktopView.vue';
+import { useSnapLayoutStore } from '@/stores/snapLayout.ts';
 
 const sereneSoundsStore = useSereneSoundsStore();
 const browserStore = useBrowserStore();
 const gridStore = useDesktopStore();
 const svgsStore = useSvgsStore();
+const snapLayoutStore = useSnapLayoutStore();
 
 const initialised = ref(false);
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
@@ -25,10 +27,16 @@ onBeforeMount(async () => {
 onUnmounted(() => {
   browserStore.stopListening();
 });
+
+document.addEventListener('mouseout', function (event) {
+  if (!event.relatedTarget) {
+    snapLayoutStore.closeSnapLayout();
+  }
+});
 </script>
 
 <template>
-  <DesktopView v-if="initialised"/>
+  <DesktopView v-if="initialised" />
 </template>
 
 <style scoped></style>

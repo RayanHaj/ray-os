@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useToastStore } from '@/stores/toast.ts';
 import { useTaskbarStore } from '@/stores/taskbar.ts';
-import { nextTick, onBeforeMount, ref, watch } from 'vue';
+import { nextTick, ref, watch } from 'vue';
 import { useSvgsStore } from '@/stores/svgs.ts';
 import type { Toast } from '@/types/ToastTypes.ts';
 
@@ -51,7 +51,7 @@ function updateStyles(toasts: Toast[]) {
       height += taskbarStore.taskbarHeight;
     }
 
-    return { top: `calc((100% - ${height + topValueToast}px) - 1%)`, right: '1%' };
+    return { top: `calc((100% - ${height + topValueToast}px) - 2%)`, right: '1%' };
   });
 }
 

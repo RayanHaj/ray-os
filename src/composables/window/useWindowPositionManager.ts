@@ -18,7 +18,7 @@ export function useWindowPositionManager(
   styles: Ref<StyleProps>,
   windowRef: Ref,
   windowStateManager: ReturnType<typeof useWindowStateManager>,
-  currentCorner: Ref<string>
+  currentCorner: Ref<string>,
 ) {
   const browserStore = useBrowserStore();
 
@@ -46,7 +46,32 @@ export function useWindowPositionManager(
   const snapLayoutStore = useSnapLayoutStore();
   function onMouseUp(event: MouseEvent) {
     event.preventDefault();
+
     windowStateManager.isDraggingWindow.value = false;
+
+    const windowWidth = windowRef.value.getBoundingClientRect().width;
+    const windowHeight = windowRef.value.getBoundingClientRect().height;
+
+    const windowLeft = parseInt(styles.value.left, 10);
+    const windowRight = windowLeft + windowWidth;
+    const windowTop = parseInt(styles.value.top, 10);
+    const windowBottom = windowTop + windowHeight;
+
+    if (windowTop < 0) {
+      styles.value.top = '0px';
+    }
+
+    if (windowLeft < 0) {
+      styles.value.left = '0px';
+    }
+
+    if (windowRight > browserStore.width) {
+      styles.value.left = `${browserStore.width - windowWidth}px`;
+    }
+
+    if (windowBottom > browserStore.heightExcTaskbar) {
+      styles.value.top = `${browserStore.heightExcTaskbar - windowHeight}px`;
+    }
 
     if (snapLayoutStore.currentSnapLayoutSession.showSnapLayout === 'beam') {
       snapLayoutStore.currentSnapLayoutSession.showSnapLayout = '';

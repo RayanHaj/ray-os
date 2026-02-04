@@ -14,7 +14,11 @@ type StyleProps = {
   transition: string;
 };
 
-export function useWindowSnappingManager(styles: Ref<StyleProps>, windowId: string, windowStateManager: ReturnType<typeof useWindowStateManager>) {
+export function useWindowSnappingManager(
+  styles: Ref<StyleProps>,
+  windowId: string,
+  windowStateManager: ReturnType<typeof useWindowStateManager>,
+) {
   const showSnapLayout = ref<string>('');
   const browserStore = useBrowserStore();
 
@@ -80,12 +84,13 @@ export function useWindowSnappingManager(styles: Ref<StyleProps>, windowId: stri
       )
         return;
 
-      snapWindow(newValue.selectedLayout);
+      // Wait for other callbacks so the window transitions are restored before snapping
+      setTimeout(() => snapWindow(newValue.selectedLayout), 0);
+
       windowStateManager.isSnapped.value = true;
     },
     { deep: true },
   );
-
 
   return { showSnapLayout };
 }

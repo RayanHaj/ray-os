@@ -107,6 +107,7 @@ const modalOpened = ref(false);
 const modalContentType = ref<'directory' | 'text file'>('directory');
 
 function toggleAddNewItemModal(contentType: 'directory' | 'text file') {
+  console.log(modalContentType);
   useContextMenuStore().hide();
   modalContentType.value = contentType;
   modalOpened.value = true;
@@ -144,8 +145,8 @@ async function handleModalInput(contentType: 'directory' | 'text file', input: s
         break;
       case 'text file': {
         const fileName = useSanitizeFileName(input);
-        if (!useValidateFileName(fileName)) {
-          useToastStore().createToast('file name to long', 'error', 5000, 'window', windowId);
+
+        if (!useValidateFileName(fileName, windowId)) {
           return;
         }
 

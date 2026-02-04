@@ -69,6 +69,7 @@ async function onRightClick(
         {},
         {
           newDirectory: () => {
+            console.log('hello')
             emits('newDirectory', { contentType: 'directory' });
           },
           newTextFile: () => {
@@ -119,7 +120,16 @@ function getSvg(fileSystemItem: FileSystemItem & { type: string }) {
 }
 
 async function onFileDrop(event: DragEvent) {
+  const jsonString = event.dataTransfer?.getData('text/plain');
+
+  if (!jsonString) {
+    return;
+  }
+
+  const fileSystemItem: FileSystemItem = JSON.parse(jsonString);
+
   const file = event.dataTransfer?.files[0];
+
   if (!file) {
     return;
   }
@@ -154,11 +164,7 @@ async function onFileDrop(event: DragEvent) {
 }
 
 function onDragStart(event: DragEvent, fileSystemItem: FileSystemItem) {
-  if (fileSystemItem.file) {
-    event.dataTransfer?.setData('text/plain', `file-${fileSystemItem.file.id.toString()}`);
-  } else if (fileSystemItem.directory && fileSystemItem.id) {
-    event.dataTransfer?.setData('text/plain', `directory-${fileSystemItem.id}`);
-  }
+  event.dataTransfer?.setData('text/plain', JSON.stringify(fileSystemItem));
 }
 
 function handleDisabledItem(item: FileSystemItem) {

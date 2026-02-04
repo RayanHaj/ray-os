@@ -22,8 +22,9 @@ function onInput(event: InputEvent) {
 
 function onBlur(event: FocusEvent) {
   const fileName = useSanitizeFileName((event.target as HTMLParagraphElement).innerText);
-  if (!useValidateFileName(fileName)) {
-    useToastStore().createToast('file name to long', 'error', 5000, 'window', windowId);
+
+  if (useValidateFileName(fileName, windowId)) {
+    return;
   }
 
   (event.target as HTMLParagraphElement).scrollLeft = 0;
