@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeMount, ref, watch, watchEffect } from 'vue';
+import { computed, onBeforeUnmount, ref, watch, watchEffect } from 'vue';
 import { useNotepadStore } from '@/stores/notepad.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import NotepadHeader from '@/components/applications/notepad/NotepadHeader.vue';
@@ -11,13 +11,14 @@ import type { RayDb } from 'ray-db-wrapper';
 import type { FileSystemItem, Item, ItemInsert } from '@/types/ItemTypes.ts';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
 
+const toastStore = useToastStore();
 const windowId = useInjectOrThrow<string>('windowId');
+
+onBeforeUnmount(() => toastStore.closeToastsByWindowId(windowId));
+
 const notepadStore = useNotepadStore();
-
-const rayDb = useInjectOrThrow<RayDb>('rayDb');
-
 const loadedFile = ref<{ windowId: string; fileId: number; fileName: string; text: string }>();
-onBeforeMount(async () => await nextTick());
+
 watchEffect(() => {
   if (notepadStore.loadedFile?.windowId !== windowId) {
     return;
@@ -27,10 +28,7 @@ watchEffect(() => {
   notepadStore.loadedFile = undefined;
 });
 
-function formatFileName(fileName: string) {
-  return `${fileName.split('.')[0]}.txt`;
-}
-
+const rayDb = useInjectOrThrow<RayDb>('rayDb');
 const notepadHeaderRef = ref();
 
 async function saveChanges() {
@@ -50,7 +48,7 @@ async function saveChanges() {
       updatedText === originalFileText &&
       notepadHeaderRef.value.fileName === fileItem.content.name
     ) {
-      useToastStore().createToast('no changes made', 'warning', 3000, 'window', windowId);
+      toastStore.createToast('no changes made', 'warning', 3000, 'window', windowId);
     } else {
       let fileName = fileItem.content.name;
       if (notepadHeaderRef.value.fileName !== fileItem.content.name) {
@@ -69,11 +67,11 @@ async function saveChanges() {
       );
       useFileSystemStore().updateFileSystem();
 
-      useToastStore().createToast('saved changes', 'success', 2000, 'window', windowId);
+      toastStore.createToast('saved changes', 'success', 2000, 'window', windowId);
     }
   } catch (e) {
     console.error(e);
-    useToastStore().createToast('could not save changes', 'error', 5000, 'window', windowId);
+    toastStore.createToast('could not save changes', 'error', 5000, 'window', windowId);
   }
 }
 
@@ -112,6 +110,10 @@ watch(
     }
   },
 );
+
+function formatFileName(fileName: string) {
+  return `${fileName.split('.')[0]}.txt`;
+}
 </script>
 
 <template>
@@ -131,7 +133,11 @@ watch(
     </div>
     <div class="open-text-file-section" v-else>
       <div class="open-text-file-block">
-        <button class="select-text-file-button" @click="handleUploadClick" :disabled="fileExplorerWindowIsOpen">
+        <button
+          class="select-text-file-button"
+          @click="handleUploadClick"
+          :disabled="fileExplorerWindowIsOpen"
+        >
           <span class="select-text-file-button-content">
             <component
               :is="useSvgOrFallback('Upload').svg"

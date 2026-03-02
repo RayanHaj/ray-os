@@ -22,6 +22,9 @@ export const availableSvgs = [
   'Notepad',
   'Todo',
   'Github',
-  'LinkedIn'
+  'LinkedIn',
+  'LargeSize',
+  'MediumSize',
+  'SmallSize'
 ] as const;
 export type AvailableSvgs = (typeof availableSvgs)[number];

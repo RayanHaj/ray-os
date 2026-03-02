@@ -105,17 +105,25 @@ async function onDblClickItem(item: FileSystemItem & { type: string }) {
 
 const modalOpened = ref(false);
 const modalContentType = ref<'directory' | 'text file'>('directory');
+const modalAction = ref<'add' | 'rename'>('add');
 
-function toggleAddNewItemModal(contentType: 'directory' | 'text file') {
-  console.log(modalContentType);
+function toggleAddNewItemModal(contentType: 'directory' | 'text file', item?: FileSystemItem) {
   useContextMenuStore().hide();
   modalContentType.value = contentType;
   modalOpened.value = true;
 }
 
-async function handleModalInput(contentType: 'directory' | 'text file', input: string) {
+async function handleModalInput(
+  contentType: 'directory' | 'text file',
+  action: 'add' | 'rename',
+  input: string,
+) {
   const currentPathItemName = currentPath.value[currentPath.value.length - 1];
   const previousItem = previousItems.value[previousItems.value.length - 1];
+
+  if (action === 'rename') {
+
+  }
 
   try {
     let parentId;
@@ -192,7 +200,8 @@ async function handleModalInput(contentType: 'directory' | 'text file', input: s
     <FileExplorerModal
       v-show="modalOpened"
       :title="modalContentType"
-      @modal-event:submit-click="handleModalInput($event.contentType, $event.input)"
+      :action="modalAction"
+      @modal-event:submit-click="handleModalInput($event.contentType, $event.action, $event.input)"
       @modal-event:cancel-click="modalOpened = false"
     />
     <FileExplorerHeader :current-path="currentPath" @header-event:back="handleBackClick" />
@@ -203,6 +212,7 @@ async function handleModalInput(contentType: 'directory' | 'text file', input: s
       @item-event:dbl-click="onDblClickItem"
       @new-directory="toggleAddNewItemModal($event.contentType)"
       @new-text-file="toggleAddNewItemModal($event.contentType)"
+      @rename-file="toggleAddNewItemModal($event.contentType, $event.item)"
     />
   </div>
 </template>

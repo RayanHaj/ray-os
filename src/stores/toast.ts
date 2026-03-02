@@ -34,6 +34,10 @@ export const useToastStore = defineStore('toast', () => {
     toasts.value = toasts.value.filter((_, index) => index !== position);
   }
 
+  function closeToastsByWindowId(windowId: string) {
+    toasts.value = toasts.value.filter((toast, _) => toast.windowId != windowId);
+  }
+
   //TODO: MAKE THIS FUNCTION SO IT CAN TARGET A SPECIFIC TOAST LOCATION
   function clearToasts() {
     for (const timeoutId of timeoutIds.value) {
@@ -43,5 +47,5 @@ export const useToastStore = defineStore('toast', () => {
     timeoutIds.value = [];
   }
 
-  return { toasts, createToast, closeToast };
+  return { toasts, createToast, closeToast, closeToastsByWindowId };
 });

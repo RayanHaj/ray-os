@@ -55,7 +55,7 @@ async function updateFilesList() {
   }
 }
 
-const emits = defineEmits(['itemEvent:dblClick', 'newDirectory', 'newTextFile']);
+const emits = defineEmits(['itemEvent:dblClick', 'newDirectory', 'newTextFile', 'renameFile']);
 
 async function onRightClick(
   event: MouseEvent,
@@ -69,7 +69,6 @@ async function onRightClick(
         {},
         {
           newDirectory: () => {
-            console.log('hello')
             emits('newDirectory', { contentType: 'directory' });
           },
           newTextFile: () => {
@@ -90,7 +89,13 @@ async function onRightClick(
             }
           },
         },
-        {},
+        {
+          renameFile: () => {
+            if (item) {
+              emits('renameFile', { contentType: 'text file', item: item })
+            }
+          }
+        },
       );
   }
 }
@@ -202,7 +207,7 @@ const itemSize = computed<ItemSize>(() => itemSizes[fileExplorerStore.currentFil
         draggable="true"
         @dragstart="onDragStart($event, fileSystemItem)"
         @click="useDblClick(() => $emit('itemEvent:dblClick', fileSystemItem))"
-        @contextmenu.prevent="onRightClick($event, fileSystemItem, 'gridItem')"
+        @contextmenu.prevent.stop="onRightClick($event, fileSystemItem, 'gridItem')"
       >
         <component
           class="file-svg"

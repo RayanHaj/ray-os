@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 
-const { title } = defineProps<{ title: 'directory' | 'text file' }>();
+const { title, action } = defineProps<{
+  title: 'directory' | 'text file';
+  action: 'add' | 'rename';
+}>();
 
 const input = ref('');
 const emits = defineEmits(['modalEvent:submitClick', 'modalEvent:cancelClick']);
 
 function onClickSubmit() {
-  emits('modalEvent:submitClick', { contentType: title, input: input.value });
+  emits('modalEvent:submitClick', { contentType: title, action: action, input: input.value });
   input.value = '';
 }
 
@@ -23,7 +26,7 @@ function onClickCancel() {
       <h2>{{ title }}</h2>
       <div class="input-wrapper">
         <label for="inputField">{{ `enter ${title} name` }}</label>
-        <input id="inputField" type="text" v-model="input"/>
+        <input id="inputField" type="text" v-model="input" />
       </div>
       <div class="buttons">
         <button class="submit-button" @click="onClickSubmit">submit</button>

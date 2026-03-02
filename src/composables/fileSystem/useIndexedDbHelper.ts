@@ -189,6 +189,16 @@ export async function getFileSystemItem(
   }
 }
 
+export async function updateFileSystemItem(rayDb: RayDb, id: number, updatedItem: FileSystemItem) {
+  try {
+    const id = await rayDb.updateOne<FileSystemItem>('fileSystem', updatedItem);
+    return id !== null;
+  } catch (e) {
+    console.error(e);
+    return false;
+  }
+}
+
 export async function deleteFileSystemItem(rayDb: RayDb, id: number) {
   const parent: FileSystemItem = await rayDb.findOne<FileSystemItem>('fileSystem', 'id', id);
   if (!parent || !parent.id) {

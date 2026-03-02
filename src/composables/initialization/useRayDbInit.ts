@@ -41,5 +41,4 @@ export async function useRayDbInit() {
       autoIncrement: false,
     },
   ]);
-
 }

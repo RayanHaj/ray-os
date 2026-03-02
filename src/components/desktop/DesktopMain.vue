@@ -109,4 +109,21 @@ function onDesktopRightClick(event: MouseEvent) {
   font-size: 20px;
   width: max-content;
 }
+
+@media (max-height: 575px) {
+  .socials-name {
+    font-size: 13px;
+  }
+
+  .social-svg {
+    width: 25px;
+    height: 25px;
+  }
+}
+
+@media (max-height: 410px) {
+  .socials-name {
+    display: none;
+  }
+}
 </style>
