@@ -2,7 +2,6 @@
 import { onBeforeMount, ref } from 'vue';
 import { useSanitizeFileName } from '@/composables/fileSystem/useSanitizeFileName.ts';
 import { useValidateFileName } from '@/composables/fileSystem/useValidateFileName.ts';
-import { useToastStore } from '@/stores/toast.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 
 const { fileName } = defineProps<{ fileName: string }>();
@@ -21,13 +20,16 @@ function onInput(event: InputEvent) {
 }
 
 function onBlur(event: FocusEvent) {
-  const fileName = useSanitizeFileName((event.target as HTMLParagraphElement).innerText);
-
-  if (useValidateFileName(fileName, windowId)) {
-    return;
-  }
-
   (event.target as HTMLParagraphElement).scrollLeft = 0;
+}
+
+function onSaveClick() {
+  const sanitizedFileName = useSanitizeFileName(fileNameRef.value);
+  console.log(sanitizedFileName)
+
+  if (useValidateFileName(sanitizedFileName, windowId)) {
+    emit('onSaveChanges');
+  }
 }
 </script>
 
@@ -47,7 +49,7 @@ function onBlur(event: FocusEvent) {
       :value="fileName"
     />
     <div class="buttons">
-      <button class="save-edits-button button" @click="emit('onSaveChanges')">save changes</button>
+      <button class="save-edits-button button" @click="onSaveClick">save changes</button>
     </div>
   </div>
 </template>
