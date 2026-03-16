@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import SettingsSidebar from '@/components/applications/settings/SettingsSidebar.vue';
-import SettingsThemes from '@/components/applications/settings/SettingsThemes.vue';
 import { onMounted, ref } from 'vue';
-import type { AllowedSettingsOptions } from '@/types/SettingsTypes.ts';
-import SettingsSystem from '@/components/applications/settings/SettingsSystem.vue';
+import {
+  type AllowedSettingsOptions,
+  settingsOptionsComponents,
+} from '@/types/SettingsTypes.ts';
 
 const selectedOption = ref<AllowedSettingsOptions>('Themes');
 
@@ -32,8 +33,9 @@ onMounted(() => {
         <hr />
       </div>
       <div class="current-option-settings">
-        <SettingsThemes v-show="selectedOption === 'Themes'" />
-        <SettingsSystem v-show="selectedOption === 'System'" />
+        <component
+          :is="settingsOptionsComponents[selectedOption]"
+        />
       </div>
     </div>
   </div>

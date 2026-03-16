@@ -29,16 +29,23 @@ const mousePosition = computed<{ left: number; top: number }>(
 );
 
 watchEffect(() => {
-  const withinBorders = useBrowserStore().height - mousePosition.value.top - contextMenuHeight.value - useTaskbarStore().taskbarHeight > 0;
-  const maximumContextMenuTop = (useBrowserStore().height - useTaskbarStore().taskbarHeight - contextMenuHeight.value) - 10;
+  const withinBorders =
+    useBrowserStore().height -
+      mousePosition.value.top -
+      contextMenuHeight.value -
+      useTaskbarStore().taskbarHeight >
+    0;
+  const maximumContextMenuTop =
+    useBrowserStore().height - useTaskbarStore().taskbarHeight - contextMenuHeight.value - 10;
   if (!withinBorders) {
     mousePosition.value.top = maximumContextMenuTop;
   }
 });
 
 watchEffect(() => {
-  const withinBorders = useBrowserStore().width - mousePosition.value.left - contextMenuWidth.value > 0;
-  const maximumContextMenuLeft = (useBrowserStore().width - contextMenuWidth.value) - 10;
+  const withinBorders =
+    useBrowserStore().width - mousePosition.value.left - contextMenuWidth.value > 0;
+  const maximumContextMenuLeft = useBrowserStore().width - contextMenuWidth.value - 10;
   if (!withinBorders) {
     mousePosition.value.left = maximumContextMenuLeft;
   }
@@ -64,7 +71,12 @@ const secondaryActions = computed<SecondaryActionsContextMenu[]>(
 <template>
   <div
     class="context-menu"
-    :style="{ left: `${mousePosition.left}px`, top: `${mousePosition.top}px`, height: `${contextMenuHeight}px`, width: `${contextMenuWidth}px` }"
+    :style="{
+      left: `${mousePosition.left}px`,
+      top: `${mousePosition.top}px`,
+      height: `${contextMenuHeight}px`,
+      width: `${contextMenuWidth}px`,
+    }"
   >
     <div class="primary-actions">
       <button
@@ -73,7 +85,7 @@ const secondaryActions = computed<SecondaryActionsContextMenu[]>(
         :key="action"
         @click="contextMenuStore.setClickedButton(action)"
       >
-        <component :is="primaryActionsSvgs[action]" :custom-height="20" :custom-width="20" />
+        <component :is="primaryActionsSvgs[action]" :custom-height="18" :custom-width="18" />
       </button>
     </div>
     <hr />
@@ -96,7 +108,7 @@ const secondaryActions = computed<SecondaryActionsContextMenu[]>(
   display: flex;
   flex-direction: column;
   background: var(--tabs-background);
-  border: var(--window-border-color) solid 2px;
+  border: var(--button-primary-color) solid 2px;
   border-radius: 10px;
   z-index: 9999;
 }
@@ -110,10 +122,10 @@ const secondaryActions = computed<SecondaryActionsContextMenu[]>(
 }
 
 .primary-action {
-  background: var(--button-primary-color);
+  border: var(--button-primary-color) solid 2px;
   text-align: center;
-  padding: 5px 5px 1px 5px;
-  border-radius: 5px;
+  padding: 2px 2px 0 2px;
+  border-radius: 2px;
 }
 
 .primary-action:hover {
@@ -126,10 +138,11 @@ const secondaryActions = computed<SecondaryActionsContextMenu[]>(
 }
 
 .secondary-action {
-  text-align: center;
+  text-align: start;
+  padding-inline: 10px;
   width: 100%;
   height: 25px;
-  border-bottom: 1px var(--input-border-color) solid;
+  border-bottom: 1px var(--button-primary-color) solid;
 }
 
 .secondary-action:hover {
@@ -140,7 +153,7 @@ hr {
   width: 100%;
   border: none;
   height: 2px;
-  background: var(--window-border-color);
+  background: var(--button-primary-color);
 }
 
 button {

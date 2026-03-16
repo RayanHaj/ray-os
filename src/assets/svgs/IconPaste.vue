@@ -3,12 +3,36 @@
     :width="customWidth"
     :height="customHeight"
     xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 20 20"
+    viewBox="0 0 36 36"
   >
     <path
       :fill="customColor"
-      d="M10.5 20H2a2 2 0 0 1-2-2V6c0-1.1.9-2 2-2h1V3l2.03-.4a3 3 0 0 1 5.94 0L13 3v1h1a2 2 0 0 1 2 2v1h-2V6h-1v1H3V6H2v12h5v2h3.5zM8 4a1 1 0 1 0 0-2a1 1 0 0 0 0 2zm2 4h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-8a2 2 0 0 1-2-2v-8c0-1.1.9-2 2-2zm0 2v8h8v-8h-8z"
+      d="M30 12h-4v2h4v2h2v-2a2 2 0 0 0-2-2Z"
+      class="clr-i-solid clr-i-solid-path-1"
     />
+    <path :fill="customColor" d="M30 18h2v6h-2z" class="clr-i-solid clr-i-solid-path-2" />
+    <path
+      :fill="customColor"
+      d="M30 30h-2v2h2a2 2 0 0 0 2-2v-4h-2Z"
+      class="clr-i-solid clr-i-solid-path-3"
+    />
+    <rect
+      width="20"
+      height="20"
+      x="4"
+      y="4"
+      :fill="customColor"
+      class="clr-i-solid clr-i-solid-path-4"
+      rx="2"
+      ry="2"
+    />
+    <path :fill="customColor" d="M20 30h6v2h-6z" class="clr-i-solid clr-i-solid-path-5" />
+    <path
+      :fill="customColor"
+      d="M14 26h-2v4a2 2 0 0 0 2 2h4v-2h-4Z"
+      class="clr-i-solid clr-i-solid-path-6"
+    />
+    <path fill="none" d="M0 0h36v36H0z" />
   </svg>
 </template>
 <script setup lang="ts">

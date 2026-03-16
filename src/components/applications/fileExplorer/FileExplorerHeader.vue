@@ -43,7 +43,7 @@ function updateSelectedItemSizeButton(itemSizeKey: ItemSizeKeys) {
         :key="size"
         @click="updateSelectedItemSizeButton(size)"
       >
-        <Component
+        <component
           :is="directorySvg"
           :style="{ width: `${10 * (index + 1)}px`, height: `${10 * (index + 1)}px` }"
         />

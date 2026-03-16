@@ -53,7 +53,7 @@ function onDesktopRightClick(event: MouseEvent) {
     </div>
     <div class="socials">
       <div class="socials-icons">
-        <Component
+        <component
           v-for="icon in ['Github', 'LinkedIn']"
           :key="icon"
           class="social-svg"

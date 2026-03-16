@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import type { AllowedSettingsOptions } from '@/types/SettingsTypes.ts';
+import { allowedSettingsOptions, type AllowedSettingsOptions } from '@/types/SettingsTypes.ts';
 
 const emits = defineEmits(['optionSelected']);
 
-const options = ref<AllowedSettingsOptions[]>(['Themes', 'System']);
 const selectedOption = ref<AllowedSettingsOptions>('Themes');
 
 function onClickOption(option: AllowedSettingsOptions) {
@@ -18,7 +17,7 @@ function onClickOption(option: AllowedSettingsOptions) {
     <button
       class="option"
       :class="{ selected: selectedOption === option }"
-      v-for="option of options"
+      v-for="option of allowedSettingsOptions"
       :key="option"
       @click="onClickOption(option)"
     >
