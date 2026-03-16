@@ -8,16 +8,19 @@ import { useWindowPositionManager } from '@/composables/window/useWindowPosition
 import { useWindowResizeManager } from '@/composables/window/useWindowResizeManager.ts';
 import { useWindowSnappingManager } from '@/composables/window/useWindowSnappingManager.ts';
 
-const { reference, windowContentComponent } = defineProps<{
+const { reference, windowContentComponent, isFixed, width, height } = defineProps<{
   reference: WindowFlatReference;
   windowContentComponent: Component;
+  isFixed?: boolean;
+  width?: string;
+  height?: string;
 }>();
 
 const styles: Ref<WindowStyleObject> = ref({
   left: '25%',
   top: '25%',
-  width: '50%',
-  height: '50%',
+  width: width ? width : '50%',
+  height: height ? height : '50%',
   minWidth: '250px',
   minHeight: '50px',
   zIndex: 10,
@@ -32,10 +35,10 @@ onBeforeMount(() => {
   provide('windowId', windowStateManager.windowId);
 });
 
-useWindowSnappingManager(styles, windowStateManager.windowId, windowStateManager);
+useWindowSnappingManager(styles, windowStateManager.windowId, windowStateManager, isFixed);
 
 const windowRef = ref();
-const windowResizeManager = useWindowResizeManager(styles, windowRef, windowStateManager);
+const windowResizeManager = useWindowResizeManager(styles, windowRef, windowStateManager, isFixed);
 const windowPositionManager = useWindowPositionManager(
   styles,
   windowRef,
@@ -57,6 +60,7 @@ function minimizeWindow() {
 }
 
 function maximizeWindow() {
+  if (isFixed) return;
   windowResizeManager.setWindowMaximized(cachedStyles);
 }
 

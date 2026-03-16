@@ -18,11 +18,13 @@ export function useWindowSnappingManager(
   styles: Ref<StyleProps>,
   windowId: string,
   windowStateManager: ReturnType<typeof useWindowStateManager>,
+  isFixed: boolean
 ) {
   const showSnapLayout = ref<string>('');
   const browserStore = useBrowserStore();
 
   function snapWindow(position: string) {
+    if (isFixed) return;
     switch (position) {
       case 'left':
         {
@@ -74,23 +76,25 @@ export function useWindowSnappingManager(
   }
 
   const snapLayoutStore = useSnapLayoutStore();
-  watch(
-    () => snapLayoutStore.currentSnapLayoutSession,
-    async (newValue) => {
-      if (
-        newValue.selectedLayout === '' ||
-        newValue.windowId !== windowId ||
-        windowStateManager.isMaximized.value
-      )
-        return;
+  if (!isFixed) {
+    watch(
+      () => snapLayoutStore.currentSnapLayoutSession,
+      async (newValue) => {
+        if (
+          newValue.selectedLayout === '' ||
+          newValue.windowId !== windowId ||
+          windowStateManager.isMaximized.value
+        )
+          return;
 
-      // Wait for other callbacks so the window transitions are restored before snapping
-      setTimeout(() => snapWindow(newValue.selectedLayout), 0);
+        // Wait for other callbacks so the window transitions are restored before snapping
+        setTimeout(() => snapWindow(newValue.selectedLayout), 0);
 
-      windowStateManager.isSnapped.value = true;
-    },
-    { deep: true },
-  );
+        windowStateManager.isSnapped.value = true;
+      },
+      { deep: true },
+    );
+  }
 
   return { showSnapLayout };
 }

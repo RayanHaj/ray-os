@@ -49,7 +49,8 @@ export const Applications = [
   'Paint',
   'Portfolio',
   'Todo',
-  'Notepad'
+  'Notepad',
+  'Doom'
 ] as const;
 export type Application = (typeof Applications)[number];
 

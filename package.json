@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "dompurify": "^3.2.6",
+    "js-dos": "^8.3.20",
     "pinia": "^3.0.1",
     "ray-db-wrapper": "^0.0.903",
     "vue": "^3.5.13",

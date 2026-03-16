@@ -19,12 +19,14 @@ export function useWindowResizeManager(
   styles: Ref<WindowStyleObject>,
   windowRef: Ref,
   windowStateManager: ReturnType<typeof useWindowStateManager>,
+  isFixed: boolean
 ) {
   const currentCorner = ref<WindowCornerPosition>('default');
   const isMouseDown = ref(false);
 
   function onMouseDownWindow() {
     useWindowStore().setWindowZIndexToTop(windowStateManager.windowId);
+    if (isFixed) return;
     if (currentCorner.value !== 'default') {
       isMouseDown.value = true;
       document.body.style.cursor = styles.value.cursor;
@@ -35,6 +37,7 @@ export function useWindowResizeManager(
   }
 
   function onMouseUpWindow() {
+    if (isFixed) return;
     isMouseDown.value = false;
     styles.value.transition = 'width 0.5s, height 0.5s, left 0.5s, top 0.5s';
     document.body.style.cursor = '';
@@ -44,6 +47,7 @@ export function useWindowResizeManager(
   }
 
   function resizeWindow(event: MouseEvent) {
+    if (isFixed) return;
     if (windowStateManager.isSnapped.value === true) {
       windowStateManager.isSnapped.value = false;
     }
@@ -59,6 +63,7 @@ export function useWindowResizeManager(
   }
 
   function resizeWindowOnCornerMouseDown(event: MouseEvent, side: WindowCornerPosition) {
+    if (isFixed) return;
     const rect = windowRef.value.getBoundingClientRect();
 
     const minHeight = Number(styles.value.minHeight.replace('px', ''));
@@ -118,6 +123,7 @@ export function useWindowResizeManager(
 
   function onMouseMoveWindow(event: MouseEvent) {
     if (
+      isFixed ||
       (isMouseDown.value && currentCorner.value !== 'default') ||
       windowStateManager.isDraggingWindow.value ||
       windowStateManager.isMaximized.value
@@ -176,6 +182,7 @@ export function useWindowResizeManager(
   function setWindowMaximized(
     cachedStyles: Ref<{ left: string; top: string; width: string; height: string }>,
   ) {
+    if (isFixed) return;
     // if already maximized, put window back into its position before it was maximized
     if (windowStateManager.isMaximized.value) {
       styles.value.height = cachedStyles.value.height;
@@ -194,6 +201,7 @@ export function useWindowResizeManager(
   }
 
   function maximize() {
+    if (isFixed) return;
     const { heightExcTaskbar } = useBrowserStore();
 
     styles.value.width = '100%';

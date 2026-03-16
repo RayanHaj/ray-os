@@ -3,7 +3,8 @@ import { useToastStore } from '@/stores/toast.ts';
 import { useTaskbarStore } from '@/stores/taskbar.ts';
 import { nextTick, ref, watch } from 'vue';
 import { useSvgsStore } from '@/stores/svgs.ts';
-import type { Toast } from '@/types/ToastTypes.ts';
+import type { Toast, ToastTypes } from '@/types/ToastTypes.ts';
+import type { AvailableSvgs } from '@/types/AvailableSvgs.ts';
 
 const taskbarStore = useTaskbarStore();
 const toastStore = useToastStore();
@@ -80,6 +81,34 @@ watch(
 function handleCloseToast(index: number) {
   toastStore.closeToast(index);
 }
+
+function returnSvgNameByToastType(toastType: ToastTypes): AvailableSvgs {
+  switch (toastType) {
+    case 'success': {
+      return 'Success';
+    }
+    case 'warning': {
+      return 'Warning';
+    }
+    case 'error': {
+      return 'Error';
+    }
+  }
+}
+
+function returnSvgColorByToastType(toastType: ToastTypes, onlyBlackWhite?: boolean): 'green' | 'black' | 'white' {
+  switch (toastType) {
+    case 'success': {
+      return onlyBlackWhite ? 'black' : 'green'
+    }
+    case 'warning': {
+      return 'black';
+    }
+    case 'error': {
+      return 'white';
+    }
+  }
+}
 </script>
 
 <template>
@@ -96,22 +125,34 @@ function handleCloseToast(index: number) {
     :class="toast.type"
     :style="styles[index]"
   >
-    <div class="close-toast">
-      <button class="close-toast-button" @click="handleCloseToast(index)">
-        <component
-          class="close-svg"
-          :is="useSvgsStore().svgs['Close']"
-          :custom-height="15"
-          :custom-width="15"
-        ></component>
-      </button>
+    <div class="message-wrapper">
+      <component
+        class="toast-info-icon"
+        :is="useSvgsStore().svgs[returnSvgNameByToastType(toast.type)]"
+        :custom-height="25"
+        :custom-width="25"
+        :custom-color="returnSvgColorByToastType(toast.type)"
+      />
+      <p class="message">{{ toast.message }}</p>
     </div>
-    <p class="message">{{ toast.message }}</p>
+    <button class="close-toast-button" @click="handleCloseToast(index)">
+      <component
+        class="close-svg"
+        :is="useSvgsStore().svgs['Close']"
+        :custom-height="15"
+        :custom-width="15"
+        :custom-color="returnSvgColorByToastType(toast.type, true)"
+      ></component>
+    </button>
   </div>
 </template>
 
 <style scoped>
 .toast {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
   position: absolute;
   padding: 10px;
   border-radius: 5px;
@@ -119,30 +160,46 @@ function handleCloseToast(index: number) {
   border: 2px solid;
   background: var(--button-primary-color);
   max-width: 400px;
+  min-width: 250px;
+  min-height: 70px;
   overflow-wrap: anywhere;
 }
 
 .toast.success {
-  border-color: green;
+  background-color: white;
+
+  .message {
+    color: black;
+  }
 }
 
 .toast.warning {
-  border-color: yellow;
+  background-color: yellow;
+
+  .message {
+    color: black;
+  }
 }
 
 .toast.error {
-  border-color: red;
+  background-color: red;
+
+  .message {
+    color: white;
+  }
+}
+
+.message-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  gap: 10px;
 }
 
 .message {
   color: var(--text-color);
   font-size: var(--font-size-lg);
-}
-
-.close-toast {
-  display: flex;
-  width: 100%;
-  justify-content: end;
 }
 
 .close-toast-button {
@@ -151,13 +208,9 @@ function handleCloseToast(index: number) {
   align-items: center;
   height: 25px;
   width: 25px;
-  padding: 5px;
   background: none;
   border-radius: 50%;
   border: none;
-}
-
-.close-toast-button:hover {
-  background-color: var(--button-secondary-color);
+  align-self: flex-start;
 }
 </style>

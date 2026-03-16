@@ -9,6 +9,7 @@ import TerminalMain from '@/components/applications/terminal/TerminalMain.vue';
 import NotepadMain from '@/components/applications/notepad/NotepadMain.vue';
 import { useWindowNameFormatter } from '@/composables/window/useWindowNameFormatter.ts';
 import FallbackMain from '@/components/applications/FallbackMain.vue';
+import DoomMain from '@/components/applications/doom/DoomMain.vue';
 
 const windowContentComponents: { [windowName in WindowName]: Component } = {
   settings: SettingsMain,
@@ -18,6 +19,7 @@ const windowContentComponents: { [windowName in WindowName]: Component } = {
   sereneSounds: SereneSoundsMain,
   terminal: TerminalMain,
   notepad: NotepadMain,
+  doom: DoomMain
 } as const;
 
 export function useGetWindowContentComponent(windowName: string) {

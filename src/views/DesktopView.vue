@@ -16,6 +16,13 @@ import { useWindowStore } from '@/stores/window.ts';
 
 const references: ComputedRef<WindowFlatReference[]> = useFlatOpenWindowsReferencesFull();
 const contextMenuStore = useContextMenuStore();
+
+interface WindowSize {
+  width: number;
+  height: number;
+}
+
+const fixedWindows: Record<string, WindowSize> = { Doom: { width: 766, height: 507 } };
 </script>
 
 <template>
@@ -28,6 +35,13 @@ const contextMenuStore = useContextMenuStore();
       :key="useWindowStore().getGlobalId(reference.label, reference.id)"
       :reference="reference"
       :window-content-component="useGetWindowContentComponent(reference.label)"
+      :is-fixed="fixedWindows[reference.label] !== undefined"
+      :width="
+        fixedWindows[reference.label] ? `${fixedWindows[reference.label].width}px` : undefined
+      "
+      :height="
+        fixedWindows[reference.label] ? `${fixedWindows[reference.label].height}px` : undefined
+      "
     >
       <UiToast
         toast-location="window"

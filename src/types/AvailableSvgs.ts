@@ -25,6 +25,10 @@ export const availableSvgs = [
   'LinkedIn',
   'LargeSize',
   'MediumSize',
-  'SmallSize'
+  'SmallSize',
+  'Success',
+  'Warning',
+  'Error',
+  'Doom'
 ] as const;
 export type AvailableSvgs = (typeof availableSvgs)[number];
