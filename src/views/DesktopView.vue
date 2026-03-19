@@ -17,12 +17,12 @@ import { useWindowStore } from '@/stores/window.ts';
 const references: ComputedRef<WindowFlatReference[]> = useFlatOpenWindowsReferencesFull();
 const contextMenuStore = useContextMenuStore();
 
-interface WindowSize {
-  width: number;
-  height: number;
-}
+const fixedSizeWindows: Record<string, { width: number; height: number }> = {
+  Doom: { width: 766, height: 507 },
+};
 
-const fixedWindows: Record<string, WindowSize> = { Doom: { width: 766, height: 507 } };
+const minWidthWindows: Record<string, { width: number }> = { Notepad: { width: 445 } };
+const minHeightWindows: Record<string, { height: number }> = { Notepad: { height: 208 } };
 </script>
 
 <template>
@@ -35,12 +35,24 @@ const fixedWindows: Record<string, WindowSize> = { Doom: { width: 766, height: 5
       :key="useWindowStore().getGlobalId(reference.label, reference.id)"
       :reference="reference"
       :window-content-component="useGetWindowContentComponent(reference.label)"
-      :is-fixed="fixedWindows[reference.label] !== undefined"
+      :is-fixed="fixedSizeWindows[reference.label] !== undefined"
       :width="
-        fixedWindows[reference.label] ? `${fixedWindows[reference.label].width}px` : undefined
+        fixedSizeWindows[reference.label]
+          ? `${fixedSizeWindows[reference.label].width}px`
+          : undefined
       "
       :height="
-        fixedWindows[reference.label] ? `${fixedWindows[reference.label].height}px` : undefined
+        fixedSizeWindows[reference.label]
+          ? `${fixedSizeWindows[reference.label].height}px`
+          : undefined
+      "
+      :min-width="
+        minWidthWindows[reference.label] ? `${minWidthWindows[reference.label].width}px` : undefined
+      "
+      :min-height="
+        minHeightWindows[reference.label]
+          ? `${minHeightWindows[reference.label].height}px`
+          : undefined
       "
     >
       <UiToast

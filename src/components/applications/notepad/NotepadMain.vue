@@ -142,8 +142,6 @@ watch(
   flex-direction: column;
   height: 100%;
   width: 100%;
-  min-width: fit-content;
-  min-height: fit-content;
   background-color: var(--accent-color);
   padding: 10px;
   border-radius: 10px;
@@ -163,7 +161,6 @@ watch(
   width: 100%;
   height: 100%;
   border-radius: 10px;
-  min-height: fit-content;
   background: rgb(0, 0, 0, 0.5);
   color: var(--text-color);
   font-size: var(--font-size-elg);
@@ -178,7 +175,6 @@ watch(
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: max-content;
   padding: 10px;
   border-radius: 10px;
 }

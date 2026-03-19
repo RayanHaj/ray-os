@@ -8,12 +8,14 @@ import { useWindowPositionManager } from '@/composables/window/useWindowPosition
 import { useWindowResizeManager } from '@/composables/window/useWindowResizeManager.ts';
 import { useWindowSnappingManager } from '@/composables/window/useWindowSnappingManager.ts';
 
-const { reference, windowContentComponent, isFixed, width, height } = defineProps<{
+const { reference, windowContentComponent, isFixed, width, height, minWidth, minHeight } = defineProps<{
   reference: WindowFlatReference;
   windowContentComponent: Component;
   isFixed?: boolean;
   width?: string;
   height?: string;
+  minWidth?: string;
+  minHeight?: string;
 }>();
 
 const styles: Ref<WindowStyleObject> = ref({
@@ -21,8 +23,8 @@ const styles: Ref<WindowStyleObject> = ref({
   top: '25%',
   width: width ? width : '50%',
   height: height ? height : '50%',
-  minWidth: '250px',
-  minHeight: '50px',
+  minWidth: minWidth ? minWidth : '250px',
+  minHeight: minHeight ? minHeight: '50px',
   zIndex: 10,
   display: 'block',
   cursor: 'auto',
