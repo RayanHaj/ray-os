@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { readonly, ref, type Ref } from 'vue';
+import { ref, type Ref } from 'vue';
 
 export const useWallpaperStore = defineStore('wallpaper', () => {
   const selectedWallpaper: Ref<number | null> = ref(null);
@@ -21,5 +21,10 @@ export const useWallpaperStore = defineStore('wallpaper', () => {
     selectedWallpaper.value = wallpaperId;
   }
 
-  return { initSelectedWallpaper, selectedWallpaper, setSelectedWallpaper, getWallpaperUrl };
+  function deselectWallpaper() {
+    localStorage.setItem(SELECTED_WALLPAPER_LS_KEY, '');
+    selectedWallpaper.value = null;
+  }
+
+  return { initSelectedWallpaper, selectedWallpaper, setSelectedWallpaper, deselectWallpaper, getWallpaperUrl };
 });
