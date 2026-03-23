@@ -1,19 +1,25 @@
 <script setup lang="ts">
 import wallpapersJSON from '@/json/wallpapers.json';
 import { useWallpaperStore } from '@/stores/settings/wallpaper.ts';
+import type { CustomWallpaperId, PredefinedWallpaperId } from '@/types/WallpaperTypes.ts';
 const wallpapers: Record<string, string> = wallpapersJSON;
 
-const { wallpaperId, selected } = defineProps<{ wallpaperId: number; selected: boolean }>();
+const { wallpaperId, selected, file } = defineProps<{
+  wallpaperId: PredefinedWallpaperId | CustomWallpaperId;
+  selected: boolean;
+  file?: File;
+}>();
 
 const wallpaperImageName = wallpapers[`wallpaper-${wallpaperId}`];
 
-const imageUrl = new URL(useWallpaperStore().getWallpaperUrl(wallpaperImageName), import.meta.url)
-  .href;
+const imageUrl = file
+  ? useWallpaperStore().getWallpaperUrlByFile(file)
+  : new URL(useWallpaperStore().getWallpaperUrl(wallpaperImageName), import.meta.url).href;
 </script>
 
 <template>
   <div :class="{ selected }" class="wallpaper-tile">
-    <img :src="imageUrl" :alt="wallpaperImageName" loading="lazy" />
+    <img :src="imageUrl" :alt="file ? file.name : wallpaperImageName" loading="lazy" />
   </div>
 </template>
 <style scoped>

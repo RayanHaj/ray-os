@@ -1,12 +1,17 @@
 import { defineStore } from 'pinia';
 import { ref, type Ref } from 'vue';
+import type { CustomWallpaperId, PredefinedWallpaperId } from '@/types/WallpaperTypes.ts';
 
 export const useWallpaperStore = defineStore('wallpaper', () => {
-  const selectedWallpaper: Ref<number | null> = ref(null);
+  const selectedWallpaper: Ref<PredefinedWallpaperId | CustomWallpaperId | null> = ref(null);
   const SELECTED_WALLPAPER_LS_KEY = 'selectedWallpaper';
 
   function getWallpaperUrl(wallpaperName: string) {
     return `../../../../assets/wallpaperThumbnails/${wallpaperName}`;
+  }
+
+  function getWallpaperUrlByFile(imageFile: File) {
+    return URL.createObjectURL(imageFile);
   }
 
   function initSelectedWallpaper() {
@@ -16,7 +21,7 @@ export const useWallpaperStore = defineStore('wallpaper', () => {
     }
   }
 
-  function setSelectedWallpaper(wallpaperId: number) {
+  function setSelectedWallpaper(wallpaperId: number | string) {
     localStorage.setItem(SELECTED_WALLPAPER_LS_KEY, wallpaperId.toString());
     selectedWallpaper.value = wallpaperId;
   }
@@ -26,5 +31,12 @@ export const useWallpaperStore = defineStore('wallpaper', () => {
     selectedWallpaper.value = null;
   }
 
-  return { initSelectedWallpaper, selectedWallpaper, setSelectedWallpaper, deselectWallpaper, getWallpaperUrl };
+  return {
+    initSelectedWallpaper,
+    selectedWallpaper,
+    setSelectedWallpaper,
+    deselectWallpaper,
+    getWallpaperUrl,
+    getWallpaperUrlByFile
+  };
 });
