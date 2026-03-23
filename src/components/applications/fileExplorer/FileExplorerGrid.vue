@@ -6,6 +6,8 @@ import {
   type ItemInsert,
   type FileType,
   type Item,
+  imageTypes,
+  isImageType,
 } from '@/types/ItemTypes.ts';
 import { computed, ref, watch } from 'vue';
 import type { RayDb } from 'ray-db-wrapper';
@@ -92,14 +94,15 @@ async function onRightClick(
         {
           renameFile: () => {
             if (item) {
-              emits('renameFile', { contentType: 'text file', item: item })
+              emits('renameFile', { contentType: 'text file', item: item });
             }
-          }
+          },
         },
       );
   }
 }
 
+const imageSvg = useSvgOrFallback('ImageViewer');
 const fileSvg = useSvgOrFallback('TextFile');
 const directorySvg = useSvgOrFallback('Directory');
 
@@ -113,6 +116,9 @@ function getSvg(fileSystemItem: FileSystemItem & { type: string }) {
       }
     }
     case 'file': {
+      if (isImageType(fileSystemItem.file?.type)) {
+        return imageSvg.svg;
+      }
       return fileSvg.svg;
     }
     case 'directory': {
@@ -125,14 +131,7 @@ function getSvg(fileSystemItem: FileSystemItem & { type: string }) {
 }
 
 async function onFileDrop(event: DragEvent) {
-  const jsonString = event.dataTransfer?.getData('text/plain');
-
-  if (!jsonString) {
-    return;
-  }
-
-  const fileSystemItem: FileSystemItem = JSON.parse(jsonString);
-
+  // const jsonString = event.dataTransfer?.getData('text/plain');
   const file = event.dataTransfer?.files[0];
 
   if (!file) {
@@ -161,7 +160,9 @@ async function onFileDrop(event: DragEvent) {
       content: fileObject as FileItem,
     });
     if (fileId && typeof fileId === 'number') {
-      await insertItemIntoFileSystem(rayDb, [parentId], { file: { name: file.name, id: fileId } });
+      await insertItemIntoFileSystem(rayDb, [parentId], {
+        file: { name: file.name, id: fileId, type: file.type },
+      });
     }
   } catch (e) {
     useToastStore().createToast((e as Error).message, 'error', 5000, 'desktop');

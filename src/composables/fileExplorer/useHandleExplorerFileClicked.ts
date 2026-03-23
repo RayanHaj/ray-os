@@ -1,9 +1,10 @@
-import type { FileSystemItem, FileType, Item } from '@/types/ItemTypes.ts';
+import { type FileSystemItem, type FileType, isImageType, type Item } from '@/types/ItemTypes.ts';
 import { useWindowStore } from '@/stores/window.ts';
 import { useSetFileSelectedValue } from '@/composables/fileExplorer/useSetFileSelectedValue.ts';
 import { useNotepadStore } from '@/stores/notepad.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import type { Ref } from 'vue';
+import { useImageViewerStore } from '@/stores/imageViewer.ts';
 
 export async function useHandleExplorerFileClicked(
   item: FileSystemItem & { type: string },
@@ -13,7 +14,7 @@ export async function useHandleExplorerFileClicked(
     windowId: string;
     allowedFileTypes: FileType[];
   } | null>,
-  rayDb: RayDb
+  rayDb: RayDb,
 ) {
   if (!item.file) return;
 
@@ -26,11 +27,20 @@ export async function useHandleExplorerFileClicked(
       if (!file) {
         return;
       }
+
       if (file.content.type === 'file') {
         if (isInFileSelectState.value?.state) {
           useSetFileSelectedValue(isInFileSelectState.value.windowId, item.file.id, file.content);
           return;
         } else if (file.content.rawFile) {
+          if (isImageType(item.file.type)) {
+            useImageViewerStore().initImageFileAndUrl(
+              useWindowStore().getNextWindowId('Image Viewer'),
+              file.content.rawFile,
+            );
+            useWindowStore().pushOpenWindowReference('Image Viewer');
+            return;
+          }
           // switch (file.content.rawFile.type) {
           //   case 'text/plain':
           //     {

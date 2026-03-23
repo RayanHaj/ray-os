@@ -60,7 +60,7 @@ function insertionCheck(
 export async function insertItemIntoFileSystem(
   rayDb: RayDb,
   parents: number[],
-  item: { file?: { name: string; id: number }; directory?: { name: string; children: number[] }, isSystemFile?: boolean },
+  item: { file?: { name: string; id: number; type: string }; directory?: { name: string; children: number[] }, isSystemFile?: boolean },
 ): Promise<Error | number | undefined> {
   try {
     const foundItems = await rayDb.findAll<FileSystemItem>('fileSystem');

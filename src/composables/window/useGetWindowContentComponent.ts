@@ -10,6 +10,7 @@ import NotepadMain from '@/components/applications/notepad/NotepadMain.vue';
 import { useWindowNameFormatter } from '@/composables/window/useWindowNameFormatter.ts';
 import FallbackMain from '@/components/applications/FallbackMain.vue';
 import DoomMain from '@/components/applications/doom/DoomMain.vue';
+import ImageViewerMain from '@/components/applications/imageViewer/ImageViewerMain.vue';
 
 const windowContentComponents: { [windowName in WindowName]: Component } = {
   settings: SettingsMain,
@@ -19,7 +20,8 @@ const windowContentComponents: { [windowName in WindowName]: Component } = {
   sereneSounds: SereneSoundsMain,
   terminal: TerminalMain,
   notepad: NotepadMain,
-  doom: DoomMain
+  doom: DoomMain,
+  imageViewer: ImageViewerMain
 } as const;
 
 export function useGetWindowContentComponent(windowName: string) {

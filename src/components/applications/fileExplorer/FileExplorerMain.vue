@@ -179,7 +179,7 @@ async function handleModalInput(
         }
 
         hasInserted = await insertItemIntoFileSystem(rayDb, [parentId], {
-          file: { name: fileName, id: Number(fileId) },
+          file: { name: fileName, id: Number(fileId), type: file.type },
         });
       }
     }

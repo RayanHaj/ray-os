@@ -27,7 +27,7 @@ export interface ItemInsert {
 
 export type FileSystemItem = {
   parents: number[];
-  file?: { name: string; id: number };
+  file?: { name: string; id: number, type: string };
   directory?: { name: string; children: number[] };
   id?: number;
   isSystemFile?: boolean
@@ -50,9 +50,19 @@ export const Applications = [
   'Portfolio',
   'Todo',
   'Notepad',
-  'Doom'
+  'Doom',
 ] as const;
 export type Application = (typeof Applications)[number];
 
 export type FileType = keyof typeof fileExtensions;
+
+export const imageTypes = ['image/jpeg', 'image/png'] as const satisfies readonly FileType[];
+export function isImageType(type: string | undefined): type is (typeof imageTypes)[number] {
+  if (!type) return false;
+  return imageTypes.includes(type as (typeof imageTypes)[number]);
+}
+
+export const videoTypes = ['video/mp4'] as const satisfies readonly FileType[];
+export const textTypes = ['text/plain'] as const satisfies readonly FileType[];
+
 export type FileExtension = (typeof fileExtensions)[FileType];

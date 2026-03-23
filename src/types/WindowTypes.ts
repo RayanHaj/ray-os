@@ -28,6 +28,7 @@ export const windowNames = [
   'sereneSounds',
   'terminal',
   'notepad',
-  'doom'
+  'doom',
+  'imageViewer'
 ] as const;
 export type WindowName = (typeof windowNames)[number];

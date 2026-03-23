@@ -29,9 +29,7 @@ export const useFileStore = defineStore('file', () => {
     if (!directory || !directory.children || !directory.id) return;
 
     for (const applicationItem of applicationItems) {
-      const containsApplicationItem = fileItems.some(
-        (item) => applicationItem.id === item.id,
-      );
+      const containsApplicationItem = fileItems.some((item) => applicationItem.id === item.id);
       if (containsApplicationItem) break;
 
       const directoryContainsApplication = directory.children.some(
@@ -41,8 +39,12 @@ export const useFileStore = defineStore('file', () => {
 
       await rayDb.insertOne<Item>('files', applicationItem);
       await insertItemIntoFileSystem(rayDb, [directory.id], {
-        file: { name: applicationItem.label, id: applicationItem.id },
-        isSystemFile: true
+        file: {
+          name: applicationItem.label,
+          id: applicationItem.id,
+          type: applicationItem.content.type,
+        },
+        isSystemFile: true,
       });
     }
   }
@@ -54,7 +56,7 @@ export const useFileStore = defineStore('file', () => {
 
   function mapApplicationsToItems(): Item[] {
     return Applications.map((application, index) => {
-      const item: Item = { label: application, content: { type: 'application' }, id: index + 1};
+      const item: Item = { label: application, content: { type: 'application' }, id: index + 1 };
       return item;
     });
   }
