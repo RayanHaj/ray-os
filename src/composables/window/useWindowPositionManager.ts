@@ -19,6 +19,7 @@ export function useWindowPositionManager(
   windowRef: Ref,
   windowStateManager: ReturnType<typeof useWindowStateManager>,
   currentCorner: Ref<string>,
+  isFixed: boolean
 ) {
   const browserStore = useBrowserStore();
 
@@ -35,7 +36,10 @@ export function useWindowPositionManager(
     oldPosition.value.clientX = event.clientX;
     oldPosition.value.clientY = event.clientY;
 
-    if (windowRef.value.getBoundingClientRect().top <= browserStore.heightExcTaskbar / 2) {
+    if (
+      windowRef.value.getBoundingClientRect().top <= browserStore.heightExcTaskbar / 2 &&
+      !isFixed
+    ) {
       snapLayoutStore.openSnapLayout(windowStateManager.windowId, 'beam');
     }
 
@@ -73,7 +77,7 @@ export function useWindowPositionManager(
       styles.value.top = `${browserStore.heightExcTaskbar - windowHeight}px`;
     }
 
-    if (snapLayoutStore.currentSnapLayoutSession.showSnapLayout === 'beam') {
+    if (snapLayoutStore.currentSnapLayoutSession.showSnapLayout === 'beam' && !isFixed) {
       snapLayoutStore.currentSnapLayoutSession.showSnapLayout = '';
     }
 

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import DesktopMain from '@/components/desktop/DesktopMain.vue';
 import TaskbarMain from '@/components/taskbar/TaskbarMain.vue';
-import { type ComputedRef } from 'vue';
+import { computed, type ComputedRef, onBeforeMount, watch } from 'vue';
 import WindowMain from '@/components/WindowMain.vue';
 import { type WindowFlatReference } from '@/types/WindowTypes.ts';
 import { useFlatOpenWindowsReferencesFull } from '@/composables/window/useFlatOpenWindowsReferencesFull.ts';
@@ -13,12 +13,34 @@ import { useOnOuterClickClose } from '@/composables/helpers/useOnOuterClickClose
 import UiToast from '@/ui/UiToast.vue';
 import { useGetWindowContentComponent } from '@/composables/window/useGetWindowContentComponent.ts';
 import { useWindowStore } from '@/stores/window.ts';
+import { useWallpaperStore } from '@/stores/settings/wallpaper.ts';
+import wallpapersJSON from '@/json/wallpapers.json';
+const wallpapers: Record<string, string> = wallpapersJSON;
 
 const references: ComputedRef<WindowFlatReference[]> = useFlatOpenWindowsReferencesFull();
 const contextMenuStore = useContextMenuStore();
 
+const wallpaperStore = useWallpaperStore();
+const wallpaperUrl = computed(() => {
+  const fileName = wallpapers[`wallpaper-${wallpaperStore.selectedWallpaper}`];
+  const url = new URL(`../assets/wallpapers/${fileName}`, import.meta.url).href;
+  return `url('${url}')`;
+});
+
+// watch(
+//   () => wallpaperStore.selectedWallpaper,
+//   (newValue, oldValue) => {
+//     if (newValue === oldValue) {
+//       return;
+//     }
+//
+//     const wallpaperImageName = wallpapers[`wallpaper-${newValue}`];
+//   },
+// );
+
 const fixedSizeWindows: Record<string, { width: number; height: number }> = {
   Doom: { width: 766, height: 507 },
+  Calculator: { width: 300, height: 375 },
 };
 
 const minWidthWindows: Record<string, { width: number }> = { Notepad: { width: 445 } };
@@ -26,7 +48,10 @@ const minHeightWindows: Record<string, { height: number }> = { Notepad: { height
 </script>
 
 <template>
-  <main @click="useOnOuterClickClose($event.target as HTMLElement)">
+  <main
+    @click="useOnOuterClickClose($event.target as HTMLElement)"
+    :style="{ backgroundImage: wallpaperUrl }"
+  >
     <UiToast toast-location="desktop" />
     <ContextMenu v-show="contextMenuStore.isShown()" />
     <DesktopSnapLayout />
@@ -71,8 +96,8 @@ main {
   width: 100vw;
   background-color: var(--background-color);
   //background-image: url('../assets/wallpaper.jpeg');
-  //background-position: center;
-  //background-repeat: no-repeat;
-  //background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 </style>

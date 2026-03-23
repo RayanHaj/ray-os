@@ -1,10 +1,7 @@
 <script setup lang="ts">
 import SettingsSidebar from '@/components/applications/settings/SettingsSidebar.vue';
 import { onMounted, ref } from 'vue';
-import {
-  type AllowedSettingsOptions,
-  settingsOptionsComponents,
-} from '@/types/SettingsTypes.ts';
+import { type AllowedSettingsOptions, settingsOptionsComponents } from '@/types/SettingsTypes.ts';
 
 const selectedOption = ref<AllowedSettingsOptions>('Themes');
 
@@ -33,9 +30,9 @@ onMounted(() => {
         <hr />
       </div>
       <div class="current-option-settings">
-        <component
-          :is="settingsOptionsComponents[selectedOption]"
-        />
+        <div class="inner">
+          <component :is="settingsOptionsComponents[selectedOption]" />
+        </div>
       </div>
     </div>
   </div>
@@ -75,13 +72,19 @@ hr {
 .current-option-settings {
   align-self: center;
   width: 98%;
-  padding: 10px;
   height: 100%;
   background-color: var(--window-secondary-color);
   border: var(--input-border-color) 1px solid;
   border-bottom: none;
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
+  overflow: hidden;
+}
+
+.inner {
+  height: 100%;
+  overflow: auto;
+  padding: 10px;
 }
 
 .settings.small {

@@ -1,28 +1,27 @@
 <script setup lang="ts">
-import {
-  type Component,
-  markRaw,
-  onBeforeMount,
-  type Raw,
-  ref,
-  shallowRef,
-} from 'vue';
+import { type Component, markRaw, onBeforeMount, type Raw, ref, shallowRef } from 'vue';
 import type { WindowFlatReference } from '@/types/WindowTypes.ts';
 import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
 import { useWindowStore } from '@/stores/window';
 
-const { reference } = defineProps<{ reference: WindowFlatReference }>();
+const { reference, isFixed } = defineProps<{ reference: WindowFlatReference; isFixed: boolean }>();
 
 const windowControlButtons = ref<{ name: string; svg: Raw<Component> | null }[]>([]);
 const svg = shallowRef<Component | null>(null);
 onBeforeMount(async () => {
   svg.value = useSvgOrFallback(reference.label).svg;
 
-  const buttons = [
-    { name: 'Minimize', svg: null },
-    { name: 'Maximize', svg: null },
-    { name: 'Close', svg: null },
-  ];
+  const buttons = isFixed
+    ? [
+        { name: 'Minimize', svg: null },
+        { name: 'Close', svg: null },
+      ]
+    : [
+        { name: 'Minimize', svg: null },
+        { name: 'Maximize', svg: null },
+        { name: 'Close', svg: null },
+      ];
+  
   windowControlButtons.value = await Promise.all(
     buttons.map(async (button) => {
       const svg = useSvgOrFallback(button.name).svg;

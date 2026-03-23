@@ -12,14 +12,21 @@ const lines = ref<Array<{ line: string; isPlain: boolean }>>([
   emptyLine,
 ]);
 
+const fontSize = ref(20);
+
 const terminal = ref();
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 const windowId = useInjectOrThrow<string>('windowId');
 const currentPath = ref<string[]>([]);
 
+const FONT_SIZE_LS_KEY = 'terminalFontSize';
 onBeforeMount(() => {
   currentPath.value = [useFileSystemStore().rootDirectory];
+  const fontSizeLS = localStorage.getItem(FONT_SIZE_LS_KEY);
+  if (fontSizeLS !== null) {
+    fontSize.value = Number(fontSizeLS);
+  }
 });
 
 const lineIndexesOfErrorLines = ref<number[]>([]);
@@ -53,32 +60,40 @@ function isReadonly(lineNumber: number) {
   return lineNumber < lines.value.length - 1;
 }
 
-const fontSize = ref(20);
 function onKeyDown(event: KeyboardEvent) {
-  if (event.key === 'Control')
-  document.addEventListener('wheel', onResizing, {passive: false});
+  if (event.key === 'Control') document.addEventListener('wheel', onResizing, { passive: false });
 }
 
 function onKeyUp(event: KeyboardEvent) {
-  if (event.key === 'Control')
-  document.removeEventListener('wheel', onResizing);
+  if (event.key === 'Control') document.removeEventListener('wheel', onResizing);
 }
 
 const onResizing = (event: WheelEvent) => {
   event.preventDefault();
+
+  const FONT_SIZE_STEP = 1;
   if (event.deltaY < 0) {
-    if (fontSize.value < 100)
-      fontSize.value += 2;
+    if (fontSize.value < 100) {
+      fontSize.value += FONT_SIZE_STEP;
+      localStorage.setItem(FONT_SIZE_LS_KEY, fontSize.value.toString());
+    }
   } else {
     if (fontSize.value > 2) {
-      fontSize.value -= 2;
+      fontSize.value -= FONT_SIZE_STEP;
+      localStorage.setItem(FONT_SIZE_LS_KEY, fontSize.value.toString());
     }
   }
-}
+};
 </script>
 
 <template>
-  <div ref="terminal" class="terminal" @keydown="onKeyDown" @keyup="onKeyUp" :style="{ fontSize: `${fontSize}px` }">
+  <div
+    ref="terminal"
+    class="terminal"
+    @keydown="onKeyDown"
+    @keyup="onKeyUp"
+    :style="{ fontSize: `${fontSize}px` }"
+  >
     <TerminalLine
       v-for="(_, index) of lines"
       :key="index"

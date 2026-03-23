@@ -7,6 +7,8 @@ import { useRayDbInit } from '@/composables/initialization/useRayDbInit.ts';
 import { useFileSystemInit } from '@/composables/initialization/useFileSystemInit.ts';
 import { useThemeInit } from '@/composables/initialization/useThemeInit.ts';
 
+await navigator.storage.persist();
+
 const app = createApp(App);
 app.use(createPinia());
 

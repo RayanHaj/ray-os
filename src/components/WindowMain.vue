@@ -46,6 +46,7 @@ const windowPositionManager = useWindowPositionManager(
   windowRef,
   windowStateManager,
   windowResizeManager.currentCorner,
+  isFixed
 );
 
 function onMousedownHeader(event: MouseEvent) {
@@ -86,6 +87,7 @@ const windowContentStyles = { height: windowContentHeight.value, width: '100%', 
     <slot />
     <WindowHeader
       :reference="reference"
+      :is-fixed="isFixed"
       @on-mousedown-header="onMousedownHeader"
       @window-control-close="closeWindow"
       @window-control-maximize="maximizeWindow"

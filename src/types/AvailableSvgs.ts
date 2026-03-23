@@ -1,4 +1,5 @@
 export const availableSvgs = [
+  'Audio',
   'Close',
   'Copy',
   'Delete',
