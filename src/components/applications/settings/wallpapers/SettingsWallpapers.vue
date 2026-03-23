@@ -2,7 +2,7 @@
 import WallpaperTile from '@/components/applications/settings/wallpapers/WallpaperTile.vue';
 import wallpapers from '@/json/wallpapers.json';
 import { onBeforeMount, type Ref, ref } from 'vue';
-import { useWallpaperStore } from '@/stores/settings/wallpaper.ts';
+import { useWallpaperStore, type WallpaperType } from '@/stores/settings/wallpaper.ts';
 import { fileSystemLookup } from '@/composables/fileSystem/useIndexedDbHelper.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import type { RayDb } from 'ray-db-wrapper';
@@ -36,8 +36,8 @@ onBeforeMount(async () => {
   ).filter((item): item is { id: number; file: File } => item !== null);
 });
 
-function onClick(index: number) {
-  wallpaperStore.setSelectedWallpaper(index);
+function onClick(id: number, type: WallpaperType, file?: File) {
+  wallpaperStore.setSelectedWallpaper(id, type, file);
 }
 
 function onClickDeselectWallpaper() {
@@ -58,10 +58,15 @@ function onClickDeselectWallpaper() {
         <WallpaperTile
           v-for="wallpaper in customWallpapers"
           :key="wallpaper.id"
-          :wallpaper-id="wallpaper.id"
+          :wallpaper-id="wallpaper.file.name"
           :file="wallpaper.file"
-          :selected="wallpaper.id === wallpaperStore.selectedWallpaper"
-          @click="onClick(wallpaper.id)"
+          :selected="
+            wallpaper.id === wallpaperStore.selectedWallpaper?.id &&
+            wallpaperStore.selectedWallpaper.type === 'custom'
+          "
+          @click="
+            onClick(wallpaper.id, 'custom', wallpaper.file)
+          "
         />
       </div>
       <span v-if="customWallpapers.length === 0">No uploaded wallpapers found</span>
@@ -74,8 +79,11 @@ function onClickDeselectWallpaper() {
           v-for="index in WALLPAPER_COUNT"
           :key="index"
           :wallpaper-id="index"
-          :selected="index === wallpaperStore.selectedWallpaper"
-          @click="onClick(index)"
+          :selected="
+            index === wallpaperStore.selectedWallpaper?.id &&
+            wallpaperStore.selectedWallpaper.type === 'default'
+          "
+          @click="onClick(index, 'default')"
         />
       </div>
     </div>

@@ -14,7 +14,8 @@ const wallpaperImageName = wallpapers[`wallpaper-${wallpaperId}`];
 
 const imageUrl = file
   ? useWallpaperStore().getWallpaperUrlByFile(file)
-  : new URL(useWallpaperStore().getWallpaperUrl(wallpaperImageName), import.meta.url).href;
+  : useWallpaperStore().getWallpaperUrl(wallpaperImageName);
+
 </script>
 
 <template>

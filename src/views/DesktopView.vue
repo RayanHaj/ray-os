@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import DesktopMain from '@/components/desktop/DesktopMain.vue';
 import TaskbarMain from '@/components/taskbar/TaskbarMain.vue';
-import { computed, type ComputedRef, onBeforeMount, watch } from 'vue';
+import { computed, type ComputedRef } from 'vue';
 import WindowMain from '@/components/WindowMain.vue';
 import { type WindowFlatReference } from '@/types/WindowTypes.ts';
 import { useFlatOpenWindowsReferencesFull } from '@/composables/window/useFlatOpenWindowsReferencesFull.ts';
@@ -22,9 +22,16 @@ const contextMenuStore = useContextMenuStore();
 
 const wallpaperStore = useWallpaperStore();
 const wallpaperUrl = computed(() => {
-  const fileName = wallpapers[`wallpaper-${wallpaperStore.selectedWallpaper}`];
-  const url = new URL(`../assets/wallpapers/${fileName}`, import.meta.url).href;
-  return `url('${url}')`;
+  let returnUrl = '';
+  if (wallpaperStore.selectedWallpaper?.type === 'custom') {
+    returnUrl = `url('${wallpaperStore.getWallpaperByLSFileUrl()}')`;
+  } else {
+    const fileName = wallpapers[`wallpaper-${wallpaperStore.selectedWallpaper?.id}`];
+    const url = new URL(`../assets/wallpapers/${fileName}`, import.meta.url).href;
+    returnUrl = `url('${url}')`;
+  }
+
+  return returnUrl;
 });
 
 // watch(
