@@ -6,7 +6,6 @@ import {
   type ItemInsert,
   type FileType,
   type Item,
-  imageTypes,
   isImageType,
 } from '@/types/ItemTypes.ts';
 import { computed, ref, watch } from 'vue';
@@ -131,7 +130,39 @@ function getSvg(fileSystemItem: FileSystemItem & { type: string }) {
 }
 
 async function onFileDrop(event: DragEvent) {
-  // const jsonString = event.dataTransfer?.getData('text/plain');
+  const targetElement = (event.target as Element).closest('div');
+  if (targetElement?.className === 'item') {
+    try {
+      const plainItem = event.dataTransfer?.getData('text/plain');
+      if (plainItem === undefined) {
+        return;
+      }
+
+      const dropItem = JSON.parse(plainItem);
+      const targetElementName = targetElement.innerText;
+      const targetElementId = currentDirectories.find(
+        (dirEl) => dirEl.directory?.name == targetElementName,
+      )?.id;
+
+      console.log(dropItem);
+
+      if (targetElementId === undefined) {
+        return;
+      }
+
+      const insertedId = await insertItemIntoFileSystem(rayDb, [targetElementId], dropItem);
+      if (insertedId instanceof Error || insertedId === undefined) {
+        return;
+      }
+
+      await useDeleteFileSystemItem(rayDb, dropItem, undefined, true);
+    } catch (e) {
+      console.error(e);
+    }
+
+    return;
+  }
+
   const file = event.dataTransfer?.files[0];
 
   if (!file) {
@@ -205,7 +236,7 @@ const itemSize = computed<ItemSize>(() => itemSizes[fileExplorerStore.currentFil
         :style="{ pointerEvents: handleDisabledItem(fileSystemItem) ? 'none' : 'auto' }"
         v-for="fileSystemItem of currentDirectories"
         :key="fileSystemItem.id"
-        draggable="true"
+        :draggable="!fileSystemItem.isSystemFile"
         @dragstart="onDragStart($event, fileSystemItem)"
         @click="useDblClick(() => $emit('itemEvent:dblClick', fileSystemItem))"
         @contextmenu.prevent.stop="onRightClick($event, fileSystemItem, 'gridItem')"
@@ -225,6 +256,10 @@ const itemSize = computed<ItemSize>(() => itemSizes[fileExplorerStore.currentFil
 </template>
 
 <style scoped>
+.item * {
+  pointer-events: none;
+}
+
 .file-explorer-grid {
   position: relative;
   height: calc(100% - 50px);
@@ -242,6 +277,7 @@ const itemSize = computed<ItemSize>(() => itemSizes[fileExplorerStore.currentFil
   width: 100%;
   user-select: none;
   padding: 10px;
+  height: 100%;
 }
 
 button {

@@ -122,7 +122,6 @@ async function handleModalInput(
   const previousItem = previousItems.value[previousItems.value.length - 1];
 
   if (action === 'rename') {
-
   }
 
   try {
@@ -193,6 +192,17 @@ async function handleModalInput(
     useToastStore().createToast((e as Error).message, 'error', 5000, 'desktop');
   }
 }
+
+function pushItemToPreviousDirectory(item: {
+  parents: number[];
+  file?: { name: string; id: number; type: string } | undefined;
+  directory?: { name: string; children: number[] } | undefined;
+  id?: number | undefined;
+  isSystemFile?: boolean | undefined;
+  type: string;
+}) {
+  previousItems.value[previousItems.value.length - 1].push(item);
+}
 </script>
 
 <template>
@@ -204,7 +214,12 @@ async function handleModalInput(
       @modal-event:submit-click="handleModalInput($event.contentType, $event.action, $event.input)"
       @modal-event:cancel-click="modalOpened = false"
     />
-    <FileExplorerHeader :current-path="currentPath" @header-event:back="handleBackClick" />
+    <FileExplorerHeader
+      :current-path="currentPath"
+      :previous-items="previousItems"
+      @header-event:back="handleBackClick"
+      @push-item-to-previous-directory="pushItemToPreviousDirectory"
+    />
     <FileExplorerGrid
       :parent-id="currentParentItemId ?? -1"
       :current-directories="currentItems"

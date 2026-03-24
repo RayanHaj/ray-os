@@ -1,18 +1,27 @@
 <script setup lang="ts">
-import { onBeforeMount, type PropType, ref } from 'vue';
+import { onBeforeMount, ref } from 'vue';
 import { type ItemSizeKeys, ItemSizeKeysArray } from '@/types/FileExplorerTypes.ts';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
 import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
+import type { FileSystemItem } from '@/types/ItemTypes.ts';
+import { insertItemIntoFileSystem } from '@/composables/fileSystem/useIndexedDbHelper.ts';
+import { useDeleteFileSystemItem } from '@/composables/fileSystem/useDeleteFileSystemItem.ts';
+import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
+import { RayDb } from 'ray-db-wrapper';
 
-defineProps({
-  currentPath: { required: false, type: Array as PropType<string[]>, default: () => ['C:/'] },
-});
-const emits = defineEmits(['header-event:back']);
+const { currentPath = ['C:/'], previousItems } = defineProps<{
+  currentPath?: string[];
+  previousItems: Array<Array<FileSystemItem & { type: string }>>;
+}>();
+
+const emits = defineEmits(['header-event:back', 'pushItemToPreviousDirectory']);
 
 const directorySvg = useSvgOrFallback('Directory').svg;
 
 const itemSizeKeys = ItemSizeKeysArray;
 const selectedItemSizeButton = ref<ItemSizeKeys>('medium');
+
+const rayDb = useInjectOrThrow<RayDb>('rayDb');
 
 onBeforeMount(() => {
   const fileItemSize = localStorage.getItem('fileItemSize');
@@ -25,12 +34,45 @@ function updateSelectedItemSizeButton(itemSizeKey: ItemSizeKeys) {
   selectedItemSizeButton.value = itemSizeKey as ItemSizeKeys;
   useFileExplorerStore().updateItemSize(itemSizeKey);
 }
+
+async function onDrop(event: DragEvent) {
+  if (previousItems.length === 0) {
+    return;
+  }
+
+  try {
+    const previousDirId = previousItems[previousItems.length - 1][0].parents[0];
+    const plainItem = event.dataTransfer?.getData('text/plain');
+    if (plainItem === undefined) {
+      return;
+    }
+
+    const dropItem = JSON.parse(plainItem);
+    const insertedId = await insertItemIntoFileSystem(rayDb, [previousDirId], dropItem);
+    if (insertedId instanceof Error || insertedId === undefined) {
+      return;
+    }
+
+    await useDeleteFileSystemItem(rayDb, dropItem, undefined, true);
+
+    emits('pushItemToPreviousDirectory', dropItem);
+  } catch (e) {
+    console.error(e);
+  }
+}
 </script>
 
 <template>
   <header class="file-explorer-header">
     <div class="left-section">
-      <button class="back-button" @click="emits('header-event:back')">^</button>
+      <button
+        class="back-button"
+        @click="emits('header-event:back')"
+        @drop.prevent="onDrop"
+        @dragover.prevent
+      >
+        ^
+      </button>
     </div>
     <div class="middle-section">
       <input type="text" :value="currentPath.join('/')" disabled />

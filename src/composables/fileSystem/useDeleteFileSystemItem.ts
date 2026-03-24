@@ -3,13 +3,13 @@ import { deleteFileSystemItem } from '@/composables/fileSystem/useIndexedDbHelpe
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
 import type { RayDb } from 'ray-db-wrapper';
 
-export async function useDeleteFileSystemItem(rayDb: RayDb, item?: FileSystemItem, id?: number) {
+export async function useDeleteFileSystemItem(rayDb: RayDb, item?: FileSystemItem, id?: number, onlyFileSystemReference?: boolean) {
   try {
     if (id) {
-      await deleteFileSystemItem(rayDb, id);
+      await deleteFileSystemItem(rayDb, id, onlyFileSystemReference);
     } else {
       if (item && item.id) {
-        await deleteFileSystemItem(rayDb, item.id);
+        await deleteFileSystemItem(rayDb, item.id, onlyFileSystemReference);
       }
     }
 

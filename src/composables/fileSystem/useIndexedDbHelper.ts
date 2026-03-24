@@ -199,7 +199,7 @@ export async function updateFileSystemItem(rayDb: RayDb, id: number, updatedItem
   }
 }
 
-export async function deleteFileSystemItem(rayDb: RayDb, id: number) {
+export async function deleteFileSystemItem(rayDb: RayDb, id: number, onlyFileSystemReference?: boolean) {
   const parent: FileSystemItem = await rayDb.findOne<FileSystemItem>('fileSystem', 'id', id);
   if (!parent || !parent.id) {
     return;
@@ -211,7 +211,11 @@ export async function deleteFileSystemItem(rayDb: RayDb, id: number) {
   }
 
   if (parent.file) {
-    await useHandleIDBFileOperations(rayDb).remove(parent.file.id, parent.id, 'file');
+    if (onlyFileSystemReference) {
+      await rayDb.deleteOne('fileSystem', parent.id);
+    } else {
+      await useHandleIDBFileOperations(rayDb).remove(parent.file.id, parent.id, 'file');
+    }
   } else if (parent.directory) {
     await rayDb.deleteOne('fileSystem', parent.id);
 

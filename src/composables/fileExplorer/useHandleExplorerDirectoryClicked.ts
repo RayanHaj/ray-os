@@ -14,7 +14,7 @@ export async function useHandleExplorerDirectoryClicked(
   currentPath: Ref<string[]>,
   rayDb: RayDb
 ) {
-  previousItems.value.push(currentItems.value);
+  previousItems.value = [...previousItems.value, currentItems.value];
 
   const newPath = `${currentPath.value.join('/')}/${directory.name}`;
   await useUpdateItemsByCurrentPath(rayDb, newPath, currentItems);

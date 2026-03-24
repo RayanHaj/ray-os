@@ -7,7 +7,7 @@ export async function useRayDbInit() {
       keyPath: 'id',
       indexes: [
         { indexName: 'id', keyPath: 'id', unique: true },
-        { indexName: 'label', keyPath: 'label', unique: true },
+        { indexName: 'label', keyPath: 'label', unique: false },
         { indexName: 'content', keyPath: 'content', unique: false },
       ],
       autoIncrement: true,
