@@ -36,8 +36,8 @@ onBeforeMount(async () => {
   ).filter((item): item is { id: number; file: File } => item !== null);
 });
 
-function onClick(id: number, type: WallpaperType, file?: File) {
-  wallpaperStore.setSelectedWallpaper(id, type, file);
+function onClick(id: number, type: WallpaperType) {
+  wallpaperStore.setSelectedWallpaper(id, type);
 }
 
 function onClickDeselectWallpaper() {

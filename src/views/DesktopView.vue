@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import DesktopMain from '@/components/desktop/DesktopMain.vue';
 import TaskbarMain from '@/components/taskbar/TaskbarMain.vue';
-import { computed, type ComputedRef } from 'vue';
+import { type ComputedRef, type Ref, ref, watch } from 'vue';
 import WindowMain from '@/components/WindowMain.vue';
 import { type WindowFlatReference } from '@/types/WindowTypes.ts';
 import { useFlatOpenWindowsReferencesFull } from '@/composables/window/useFlatOpenWindowsReferencesFull.ts';
@@ -15,35 +15,59 @@ import { useGetWindowContentComponent } from '@/composables/window/useGetWindowC
 import { useWindowStore } from '@/stores/window.ts';
 import { useWallpaperStore } from '@/stores/settings/wallpaper.ts';
 import wallpapersJSON from '@/json/wallpapers.json';
+import { fileSystemLookup } from '@/composables/fileSystem/useIndexedDbHelper.ts';
+import type { Item } from '@/types/ItemTypes.ts';
+import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
+import type { RayDb } from 'ray-db-wrapper';
 const wallpapers: Record<string, string> = wallpapersJSON;
 
 const references: ComputedRef<WindowFlatReference[]> = useFlatOpenWindowsReferencesFull();
 const contextMenuStore = useContextMenuStore();
 
 const wallpaperStore = useWallpaperStore();
-const wallpaperUrl = computed(() => {
-  let returnUrl = '';
-  if (wallpaperStore.selectedWallpaper?.type === 'custom') {
-    returnUrl = `url('${wallpaperStore.getWallpaperByLSFileUrl()}')`;
-  } else {
-    const fileName = wallpapers[`wallpaper-${wallpaperStore.selectedWallpaper?.id}`];
-    const url = new URL(`../assets/wallpapers/${fileName}`, import.meta.url).href;
-    returnUrl = `url('${url}')`;
-  }
 
-  return returnUrl;
-});
+const wallpaperUrl: Ref<string> = ref('');
 
-// watch(
-//   () => wallpaperStore.selectedWallpaper,
-//   (newValue, oldValue) => {
-//     if (newValue === oldValue) {
-//       return;
-//     }
-//
-//     const wallpaperImageName = wallpapers[`wallpaper-${newValue}`];
-//   },
-// );
+const rayDb = useInjectOrThrow<RayDb>('rayDb');
+
+watch(
+  () => wallpaperStore.selectedWallpaper,
+  async (newValue, oldValue) => {
+    if (newValue === oldValue) {
+      return;
+    }
+
+    if (wallpaperStore.selectedWallpaper?.type === 'custom') {
+      const wallpaperDirectory = await fileSystemLookup(rayDb, 'Wallpapers');
+      if (wallpaperDirectory instanceof Error || wallpaperDirectory === undefined) {
+        return;
+      }
+
+      const wallpaper = wallpaperDirectory.children.find(
+        (wallpaper) => wallpaper.id === wallpaperStore.selectedWallpaper?.id,
+      );
+
+      if (wallpaper === null || wallpaper?.file === null) {
+        return;
+      }
+
+      const wallpaperFile = await rayDb.findOne<Item>('files', 'id', wallpaper!.file!.id);
+      if (wallpaperFile.content.type !== 'file') {
+        return;
+      }
+      if (!wallpaperFile.content.rawFile) {
+        return;
+      }
+
+      wallpaperUrl.value = `url('${wallpaperStore.getWallpaperUrlByFile(wallpaperFile.content.rawFile)}')`;
+    } else {
+      const fileName = wallpapers[`wallpaper-${wallpaperStore.selectedWallpaper?.id}`];
+      const url = new URL(`../assets/wallpapers/${fileName}`, import.meta.url).href;
+      wallpaperUrl.value = `url('${url}')`;
+    }
+  },
+  { immediate: true },
+);
 
 const fixedSizeWindows: Record<string, { width: number; height: number }> = {
   Doom: { width: 766, height: 507 },

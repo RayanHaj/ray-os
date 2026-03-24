@@ -27,21 +27,7 @@ export const useWallpaperStore = defineStore('wallpaper', () => {
     }
   }
 
-  function saveFileToLS(file: File) {
-    const reader = new FileReader();
-    reader.onload = () => {
-      localStorage.setItem(FILE_URL_LS_KEY, reader.result as string);
-    };
-    reader.readAsDataURL(file);
-  }
-
-  function setSelectedWallpaper(wallpaperId: number, type: WallpaperType, file?: File) {
-    if (file) {
-      saveFileToLS(file);
-    } else if (localStorage.getItem(FILE_URL_LS_KEY) !== null) {
-      localStorage.removeItem(FILE_URL_LS_KEY);
-    }
-
+  function setSelectedWallpaper(wallpaperId: number, type: WallpaperType) {
     localStorage.setItem(SELECTED_WALLPAPER_LS_KEY, addIdPrefix(wallpaperId.toString(), type));
     selectedWallpaper.value = { id: wallpaperId, type: type };
   }
@@ -63,7 +49,6 @@ export const useWallpaperStore = defineStore('wallpaper', () => {
   function removeIdPrefix(wallpaperId: string): { id: number; type: WallpaperType } | null {
     const [prefix, id] = wallpaperId.split('-');
 
-    console.log(wallpaperId)
     switch (prefix) {
       case 'custom':
         return { id: Number(id), type: 'custom' };
