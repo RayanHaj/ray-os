@@ -16,7 +16,6 @@ import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
 import type { ItemSizeKeys } from '@/types/FileExplorerTypes.ts';
 import { useToastStore } from '@/stores/toast.ts';
 import { useUpdateItemsByCurrentPath } from '@/composables/fileExplorer/useUpdateItemsByCurrentPath.ts';
-import { useHandleExplorerDirectoryClicked } from '@/composables/fileExplorer/useHandleExplorerDirectoryClicked.ts';
 import { useHandleExplorerFileClicked } from '@/composables/fileExplorer/useHandleExplorerFileClicked.ts';
 import { useSanitizeFileName } from '@/composables/fileSystem/useSanitizeFileName.ts';
 import { useValidateFileName } from '@/composables/fileSystem/useValidateFileName.ts';
@@ -26,7 +25,7 @@ const fileSystemStore = useFileSystemStore();
 
 const currentPath = ref<string[]>([fileSystemStore.rootDirectory]);
 const currentItems = ref<Array<FileSystemItem & { type: string }>>([]);
-const previousItems = ref<Array<Array<FileSystemItem & { type: string }>>>([]);
+const previousPaths = ref<string[][]>([]);
 const currentParentItemId = ref<number>();
 const isInFileSelectState = ref<{
   state: boolean;
@@ -76,12 +75,12 @@ watch(
 );
 
 function handleBackClick() {
-  const poppedItems = previousItems.value.pop();
+  const previousPath = previousPaths.value.pop();
 
-  if (poppedItems && poppedItems.length > 0) {
-    currentItems.value = poppedItems;
+  if (previousPath) {
+    currentPath.value = previousPath;
+    fileSystemStore.updateFileSystem();
     currentParentItemId.value = currentItems.value[0].parents[0];
-    currentPath.value.pop();
   }
 }
 
@@ -89,15 +88,10 @@ async function onDblClickItem(item: FileSystemItem & { type: string }) {
   if (!item.id) return;
 
   if (item.directory) {
-    await useHandleExplorerDirectoryClicked(
-      item.id,
-      item.directory,
-      previousItems,
-      currentItems,
-      currentParentItemId,
-      currentPath,
-      rayDb,
-    );
+    previousPaths.value.push([...currentPath.value]);
+    currentPath.value = [...currentPath.value, item.directory.name];
+    currentParentItemId.value = item.id;
+    fileSystemStore.updateFileSystem();
   } else if (item.file) {
     await useHandleExplorerFileClicked(item, currentParentItemId, isInFileSelectState, rayDb);
   }
@@ -118,28 +112,17 @@ async function handleModalInput(
   action: 'add' | 'rename',
   input: string,
 ) {
-  const currentPathItemName = currentPath.value[currentPath.value.length - 1];
-  const previousItem = previousItems.value[previousItems.value.length - 1];
-
   if (action === 'rename') {
   }
 
   try {
-    let parentId;
-    if (previousItem) {
-      parentId = previousItem.find((el) => el.directory?.name === currentPathItemName)?.id ?? null;
-    } else {
-      const value = await fileSystemLookup(rayDb, fileSystemStore.rootDirectory);
-      if (value instanceof Error) {
-        throw value;
-      }
-
-      parentId = value ? value.parent.id : null;
+    const currentDir = await fileSystemLookup(rayDb, currentPath.value.join('/'));
+    if (!currentDir || currentDir instanceof Error) {
+      throw new Error('Could not find current directory');
     }
 
-    if (!parentId) {
-      return;
-    }
+    const parentId = currentDir.parent.id;
+    if (!parentId) return;
 
     let hasInserted;
     switch (contentType) {
@@ -192,17 +175,6 @@ async function handleModalInput(
     useToastStore().createToast((e as Error).message, 'error', 5000, 'desktop');
   }
 }
-
-function pushItemToPreviousDirectory(item: {
-  parents: number[];
-  file?: { name: string; id: number; type: string } | undefined;
-  directory?: { name: string; children: number[] } | undefined;
-  id?: number | undefined;
-  isSystemFile?: boolean | undefined;
-  type: string;
-}) {
-  previousItems.value[previousItems.value.length - 1].push(item);
-}
 </script>
 
 <template>
@@ -216,9 +188,7 @@ function pushItemToPreviousDirectory(item: {
     />
     <FileExplorerHeader
       :current-path="currentPath"
-      :previous-items="previousItems"
       @header-event:back="handleBackClick"
-      @push-item-to-previous-directory="pushItemToPreviousDirectory"
     />
     <FileExplorerGrid
       :parent-id="currentParentItemId ?? -1"

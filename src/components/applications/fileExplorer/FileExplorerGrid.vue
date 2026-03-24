@@ -144,8 +144,6 @@ async function onFileDrop(event: DragEvent) {
         (dirEl) => dirEl.directory?.name == targetElementName,
       )?.id;
 
-      console.log(dropItem);
-
       if (targetElementId === undefined) {
         return;
       }

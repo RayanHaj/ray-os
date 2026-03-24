@@ -3,18 +3,21 @@ import { onBeforeMount, ref } from 'vue';
 import { type ItemSizeKeys, ItemSizeKeysArray } from '@/types/FileExplorerTypes.ts';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
 import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
-import type { FileSystemItem } from '@/types/ItemTypes.ts';
-import { insertItemIntoFileSystem } from '@/composables/fileSystem/useIndexedDbHelper.ts';
+import {
+  fileSystemLookup,
+  insertItemIntoFileSystem,
+} from '@/composables/fileSystem/useIndexedDbHelper.ts';
 import { useDeleteFileSystemItem } from '@/composables/fileSystem/useDeleteFileSystemItem.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import { RayDb } from 'ray-db-wrapper';
 
-const { currentPath = ['C:/'], previousItems } = defineProps<{
+const { currentPath = ['C:/'] } = defineProps<{
   currentPath?: string[];
-  previousItems: Array<Array<FileSystemItem & { type: string }>>;
 }>();
 
-const emits = defineEmits(['header-event:back', 'pushItemToPreviousDirectory']);
+const emits = defineEmits([
+  'header-event:back',
+]);
 
 const directorySvg = useSvgOrFallback('Directory').svg;
 
@@ -36,26 +39,21 @@ function updateSelectedItemSizeButton(itemSizeKey: ItemSizeKeys) {
 }
 
 async function onDrop(event: DragEvent) {
-  if (previousItems.length === 0) {
-    return;
-  }
-
   try {
-    const previousDirId = previousItems[previousItems.length - 1][0].parents[0];
     const plainItem = event.dataTransfer?.getData('text/plain');
-    if (plainItem === undefined) {
-      return;
-    }
+    if (!plainItem) return;
 
     const dropItem = JSON.parse(plainItem);
-    const insertedId = await insertItemIntoFileSystem(rayDb, [previousDirId], dropItem);
-    if (insertedId instanceof Error || insertedId === undefined) {
-      return;
-    }
 
     await useDeleteFileSystemItem(rayDb, dropItem, undefined, true);
 
-    emits('pushItemToPreviousDirectory', dropItem);
+    const parentPath = currentPath.slice(0, -1).join('/') || 'C:/';
+    const parentDir = await fileSystemLookup(rayDb, parentPath);
+    if (!parentDir || parentDir instanceof Error) return;
+
+    await insertItemIntoFileSystem(rayDb, [parentDir.parent.id!], dropItem);
+
+    emits('header-event:back');
   } catch (e) {
     console.error(e);
   }

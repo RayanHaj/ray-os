@@ -210,6 +210,14 @@ export async function deleteFileSystemItem(rayDb: RayDb, id: number, onlyFileSys
     throw new Error('cannot delete system files');
   }
 
+  for (const parentId of parent.parents) {
+    const parent = await rayDb.findOne<FileSystemItem>('fileSystem', 'id', parentId);
+    if (parent?.directory) {
+      parent.directory.children = parent.directory.children.filter((childId) => childId !== id);
+      await rayDb.updateOne<FileSystemItem>('fileSystem', parent);
+    }
+  }
+
   if (parent.file) {
     if (onlyFileSystemReference) {
       await rayDb.deleteOne('fileSystem', parent.id);
