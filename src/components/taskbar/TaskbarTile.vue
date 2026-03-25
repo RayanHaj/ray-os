@@ -248,15 +248,8 @@ hr {
 }
 
 .app-svg {
-  width: 40px;
-  height: 40px;
-}
-
-@media (max-width: 850px) {
-  .app-svg {
-    width: 30px;
-    height: 30px;
-  }
+  width: 30px;
+  height: 30px;
 }
 
 @media (max-width: 475px) {

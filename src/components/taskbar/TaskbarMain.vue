@@ -86,8 +86,8 @@ const startMenuStore = useStartMenuStore();
 }
 
 .search-svg {
-  width: 55px;
-  height: 55px;
+  width: 45px;
+  height: 45px;
 }
 
 @media (max-width: 1120px) {

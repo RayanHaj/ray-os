@@ -39,7 +39,7 @@ onBeforeUnmount(() => emits('tabsUnmounted'));
   border: var(--window-border-color) solid 2px;
   color: var(--tabs-text);
   border-radius: 5px;
-  bottom: 90px;
+  bottom: 70px;
   padding: 20px;
   width: 200px;
   min-height: 200px;
