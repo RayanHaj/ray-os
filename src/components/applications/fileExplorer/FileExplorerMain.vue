@@ -7,7 +7,7 @@ import {
 import type { RayDb } from 'ray-db-wrapper';
 import FileExplorerHeader from '@/components/applications/fileExplorer/FileExplorerHeader.vue';
 import FileExplorerGrid from '@/components/applications/fileExplorer/FileExplorerGrid.vue';
-import type { FileItem, FileSystemItem, FileType, ItemInsert } from '@/types/ItemTypes.ts';
+import type { FileItem, FileSystemItem, ItemInsert } from '@/types/ItemTypes.ts';
 import FileExplorerModal from '@/components/applications/fileExplorer/FileExplorerModal.vue';
 import { useContextMenuStore } from '@/stores/contextMenu.ts';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
@@ -23,15 +23,10 @@ import { useValidateFileName } from '@/composables/fileSystem/useValidateFileNam
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 const fileSystemStore = useFileSystemStore();
 
-const currentPath = ref<string[]>([fileSystemStore.rootDirectory]);
 const currentItems = ref<Array<FileSystemItem & { type: string }>>([]);
+const currentPath = ref<string[]>([fileSystemStore.rootDirectory]);
 const previousPaths = ref<string[][]>([]);
 const currentParentItemId = ref<number>();
-const isInFileSelectState = ref<{
-  state: boolean;
-  windowId: string;
-  allowedFileTypes: FileType[];
-} | null>(null);
 
 const fileExplorerStore = useFileExplorerStore();
 onBeforeMount(async () => {
@@ -43,12 +38,6 @@ onBeforeMount(async () => {
     if (fileExplorerStore.currentFileItemSizeKey !== (fileItemSize as ItemSizeKeys)) {
       fileExplorerStore.updateItemSize(fileItemSize as ItemSizeKeys);
     }
-  }
-
-  if (fileExplorerStore.isInFileSelectState?.state) {
-    isInFileSelectState.value = fileExplorerStore.isInFileSelectState;
-  } else {
-    isInFileSelectState.value = null;
   }
 
   if (fileExplorerStore.filePathAtWindow?.windowId === windowId) {
@@ -93,7 +82,7 @@ async function onDblClickItem(item: FileSystemItem & { type: string }) {
     currentParentItemId.value = item.id;
     fileSystemStore.updateFileSystem();
   } else if (item.file) {
-    await useHandleExplorerFileClicked(item, currentParentItemId, isInFileSelectState, rayDb);
+    await useHandleExplorerFileClicked(item, currentParentItemId, rayDb);
   }
 }
 
@@ -186,14 +175,11 @@ async function handleModalInput(
       @modal-event:submit-click="handleModalInput($event.contentType, $event.action, $event.input)"
       @modal-event:cancel-click="modalOpened = false"
     />
-    <FileExplorerHeader
-      :current-path="currentPath"
-      @header-event:back="handleBackClick"
-    />
+    <FileExplorerHeader :current-path="currentPath" @header-event:back="handleBackClick" />
     <FileExplorerGrid
       :parent-id="currentParentItemId ?? -1"
       :current-directories="currentItems"
-      :filter-by-file-type="isInFileSelectState?.allowedFileTypes ?? []"
+      :filter-by-file-type="fileExplorerStore.fileSelectState?.allowedFileTypes ?? []"
       @item-event:dbl-click="onDblClickItem"
       @new-directory="toggleAddNewItemModal($event.contentType)"
       @new-text-file="toggleAddNewItemModal($event.contentType)"

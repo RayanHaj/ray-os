@@ -61,7 +61,7 @@ watch(
 
       useNotepadStore().initializeNotepadFile(windowId, newValue.fileId, newValue.value.name, text);
       useWindowStore().removeOpenWindowReference(fileExplorerWindowId.value);
-      useFileExplorerStore().isInFileSelectState = null;
+      useFileExplorerStore().fileSelectState = null;
     }
   },
 );
