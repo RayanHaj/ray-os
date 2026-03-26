@@ -6,7 +6,7 @@ import {
   type ItemInsert,
   type FileType,
   type Item,
-  isImageType,
+  isImageType, isVideoType,
 } from '@/types/ItemTypes.ts';
 import { computed, ref, watch } from 'vue';
 import type { RayDb } from 'ray-db-wrapper';
@@ -102,6 +102,7 @@ async function onRightClick(
 }
 
 const imageSvg = useSvgOrFallback('ImageViewer');
+const videoSvg = useSvgOrFallback('Video');
 const fileSvg = useSvgOrFallback('TextFile');
 const directorySvg = useSvgOrFallback('Directory');
 
@@ -117,6 +118,9 @@ function getSvg(fileSystemItem: FileSystemItem & { type: string }) {
     case 'file': {
       if (isImageType(fileSystemItem.file?.type)) {
         return imageSvg.svg;
+      }
+      if (isVideoType(fileSystemItem.file?.type)) {
+        return videoSvg.svg;
       }
       return fileSvg.svg;
     }

@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { ref, type Ref, watchEffect } from 'vue';
+import { onUnmounted, ref, type Ref, watchEffect } from 'vue';
 import { useImageViewerStore } from '@/stores/imageViewer.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import type { LoadedImage } from '@/types/imageViewerTypes.ts';
-import { useImageUrlFromFile } from '@/composables/imageViewer/useImageUrlFromFile.ts';
 
 const imageViewerStore = useImageViewerStore();
 const windowId = useInjectOrThrow<string>('windowId');
@@ -11,13 +10,21 @@ const windowId = useInjectOrThrow<string>('windowId');
 const loadedImage: Ref<LoadedImage> = ref({ windowId: null, file: null });
 const imageUrl: Ref<string | null> = ref(null);
 
-watchEffect( () => {
+watchEffect(() => {
   if (imageViewerStore.loadedImage.windowId !== windowId) {
     return;
   }
 
   loadedImage.value = imageViewerStore.loadedImage;
-  imageUrl.value = useImageUrlFromFile(imageViewerStore.loadedImage.file);
+  if (imageViewerStore.loadedImage.file) {
+    imageUrl.value = URL.createObjectURL(imageViewerStore.loadedImage.file);
+  }
+});
+
+onUnmounted(() => {
+  if (imageUrl.value) {
+    URL.revokeObjectURL(imageUrl.value);
+  }
 });
 </script>
 

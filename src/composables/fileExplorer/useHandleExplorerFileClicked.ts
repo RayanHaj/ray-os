@@ -1,10 +1,11 @@
-import { type FileSystemItem, isImageType, type Item } from '@/types/ItemTypes.ts';
+import { type FileSystemItem, isImageType, isVideoType, type Item } from '@/types/ItemTypes.ts';
 import { useWindowStore } from '@/stores/window.ts';
 import { useNotepadStore } from '@/stores/notepad.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import type { Ref } from 'vue';
 import { useImageViewerStore } from '@/stores/imageViewer.ts';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
+import { useVideoPlayerStore } from '@/stores/videoPlayer.ts';
 
 export async function useHandleExplorerFileClicked(
   item: FileSystemItem & { type: string },
@@ -39,6 +40,13 @@ export async function useHandleExplorerFileClicked(
               file.content.rawFile,
             );
             useWindowStore().pushOpenWindowReference('Image Viewer');
+            return;
+          } else if (isVideoType(item.file.type)) {
+            useVideoPlayerStore().initVideoFileAndUrl(
+              useWindowStore().getNextWindowId('Video Player'),
+              file.content.rawFile
+            );
+            useWindowStore().pushOpenWindowReference('Video Player');
             return;
           }
           useNotepadStore().initializeNotepadFile(

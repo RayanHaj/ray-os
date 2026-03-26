@@ -29,6 +29,7 @@ export const windowNames = [
   'terminal',
   'notepad',
   'doom',
-  'imageViewer'
+  'imageViewer',
+  'videoPlayer'
 ] as const;
 export type WindowName = (typeof windowNames)[number];

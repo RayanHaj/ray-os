@@ -11,6 +11,7 @@ import { useWindowNameFormatter } from '@/composables/window/useWindowNameFormat
 import FallbackMain from '@/components/applications/FallbackMain.vue';
 import DoomMain from '@/components/applications/doom/DoomMain.vue';
 import ImageViewerMain from '@/components/applications/imageViewer/ImageViewerMain.vue';
+import VideoPlayerMain from '@/components/applications/videoPlayer/VideoPlayerMain.vue';
 
 const windowContentComponents: { [windowName in WindowName]: Component } = {
   settings: SettingsMain,
@@ -21,7 +22,8 @@ const windowContentComponents: { [windowName in WindowName]: Component } = {
   terminal: TerminalMain,
   notepad: NotepadMain,
   doom: DoomMain,
-  imageViewer: ImageViewerMain
+  imageViewer: ImageViewerMain,
+  videoPlayer: VideoPlayerMain
 } as const;
 
 export function useGetWindowContentComponent(windowName: string) {

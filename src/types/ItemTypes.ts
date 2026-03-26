@@ -64,6 +64,11 @@ export function isImageType(type: string | undefined): type is (typeof imageType
 }
 
 export const videoTypes = ['video/mp4'] as const satisfies readonly FileType[];
+export function isVideoType(type: string | undefined): type is (typeof videoTypes)[number] {
+  if (!type) return false;
+  return videoTypes.includes(type as (typeof videoTypes)[number]);
+}
+
 export const textTypes = ['text/plain'] as const satisfies readonly FileType[];
 
 export type FileExtension = (typeof fileExtensions)[FileType];
