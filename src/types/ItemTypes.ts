@@ -38,6 +38,7 @@ export const fileExtensions = {
   'video/mp4': 'mp4',
   'image/jpeg': 'jpeg',
   'image/png': 'png',
+  'image/webp': 'webp'
 } as const;
 
 export const Applications = [
@@ -56,7 +57,7 @@ export type Application = (typeof Applications)[number];
 
 export type FileType = keyof typeof fileExtensions;
 
-export const imageTypes = ['image/jpeg', 'image/png'] as const satisfies readonly FileType[];
+export const imageTypes = ['image/jpeg', 'image/png', 'image/webp'] as const satisfies readonly FileType[];
 export function isImageType(type: string | undefined): type is (typeof imageTypes)[number] {
   if (!type) return false;
   return imageTypes.includes(type as (typeof imageTypes)[number]);
