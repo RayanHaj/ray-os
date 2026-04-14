@@ -72,7 +72,7 @@ watch(
     <NotepadHeader
       ref="notepadHeader"
       :file-name="loadedFile?.fileName ?? ''"
-      @on-save-changes="useSaveChanges(rayDb, notepadHeader.fileName, windowId, loadedFile)"
+      @on-save-changes="useSaveChanges(rayDb, $event, windowId, loadedFile)"
     />
     <div class="notepad-reader" v-if="loadedFile">
       <textarea class="reader" v-model="loadedFile.text" contenteditable="true" />

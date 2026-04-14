@@ -1,8 +1,5 @@
 <script setup lang="ts">
-import { onBeforeMount, ref } from 'vue';
-import { useSanitizeFileName } from '@/composables/fileSystem/useSanitizeFileName.ts';
-import { useValidateFileName } from '@/composables/fileSystem/useValidateFileName.ts';
-import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
+import { onBeforeMount, ref, watch } from 'vue';
 
 const { fileName } = defineProps<{ fileName: string }>();
 const emit = defineEmits(['onSaveChanges']);
@@ -12,9 +9,15 @@ onBeforeMount(() => {
   fileNameRef.value = fileName;
 });
 
+watch(
+  () => fileName,
+  (newValue) => {
+    fileNameRef.value = newValue;
+  },
+);
+
 defineExpose({ fileName: fileNameRef });
 
-const windowId = useInjectOrThrow<string>('windowId');
 function onInput(event: InputEvent) {
   fileNameRef.value = (event.target as HTMLInputElement).value;
 }
@@ -24,12 +27,7 @@ function onBlur(event: FocusEvent) {
 }
 
 function onSaveClick() {
-  const sanitizedFileName = useSanitizeFileName(fileNameRef.value);
-  console.log(sanitizedFileName)
-
-  if (useValidateFileName(sanitizedFileName, windowId)) {
-    emit('onSaveChanges');
-  }
+  emit('onSaveChanges', fileNameRef.value);
 }
 </script>
 

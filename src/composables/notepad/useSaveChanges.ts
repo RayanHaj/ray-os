@@ -3,6 +3,7 @@ import { useFileSystemStore } from '@/stores/fileSystem.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import { useToastStore } from '@/stores/toast.ts';
 import { useSanitizeFileName } from '@/composables/fileSystem/useSanitizeFileName.ts';
+import { useValidateFileName } from '@/composables/fileSystem/useValidateFileName.ts';
 
 export async function useSaveChanges(
   rayDb: RayDb,
@@ -21,8 +22,6 @@ export async function useSaveChanges(
     return;
   }
 
-  console.log(headerFileName);
-
   try {
     const updatedText = loadedFile.text;
     const originalFileText = await fileItem.content.rawFile?.text();
@@ -32,7 +31,12 @@ export async function useSaveChanges(
       let fileName = fileItem.content.name;
 
       if (headerFileName !== fileName) {
-        fileName = useSanitizeFileName(headerFileName);
+        const sanitizedFileName = useSanitizeFileName(headerFileName);
+        if (useValidateFileName(sanitizedFileName, windowId)) {
+          fileName = useSanitizeFileName(headerFileName);
+        } else {
+          return;
+        }
       }
 
       fileItem.label = fileName;

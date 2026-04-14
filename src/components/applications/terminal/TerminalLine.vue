@@ -29,7 +29,6 @@ watch(
     }
 
     if (newValue[newValue.length - 1] === windowId) {
-      console.log('aa')
       terminalLineRef.value?.focus();
     }
   },
