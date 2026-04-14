@@ -123,10 +123,10 @@ const minHeightWindows: Record<string, { height: number }> = { Notepad: { height
 
 <style scoped>
 main {
-  height: 100vh;
-  width: 100vw;
+  height: 100dvh;
+  width: 100dvw;
+  overflow: hidden;
   background-color: var(--background-color);
-  //background-image: url('../assets/wallpaper.jpeg');
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;

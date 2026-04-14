@@ -8,7 +8,7 @@ export function useTileCountGrid() {
   const gridStore = useDesktopStore();
   const taskbarStore = useTaskbarStore();
 
-  const x = computed(() => Math.max(0, Math.floor(browserStore.width / gridStore.tileWidth - 0.5)));
+  const x = computed(() => Math.max(0, Math.floor(browserStore.width / gridStore.tileWidth - 1)));
   const y = computed(() =>
     Math.max(
       0,

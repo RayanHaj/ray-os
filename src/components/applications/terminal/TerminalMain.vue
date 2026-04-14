@@ -6,6 +6,9 @@ import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
 
+const rayDb = useInjectOrThrow<RayDb>('rayDb');
+const windowId = useInjectOrThrow<string>('windowId');
+
 const emptyLine = { line: '', isPlain: false };
 const lines = ref<Array<{ line: string; isPlain: boolean }>>([
   { line: 'RayOS Terminal', isPlain: true },
@@ -13,11 +16,6 @@ const lines = ref<Array<{ line: string; isPlain: boolean }>>([
 ]);
 
 const fontSize = ref(20);
-
-const terminal = ref();
-
-const rayDb = useInjectOrThrow<RayDb>('rayDb');
-const windowId = useInjectOrThrow<string>('windowId');
 const currentPath = ref<string[]>([]);
 
 const FONT_SIZE_LS_KEY = 'terminalFontSize';
@@ -31,7 +29,10 @@ onBeforeMount(() => {
 
 const lineIndexesOfErrorLines = ref<number[]>([]);
 async function onEnter(command: string) {
-  lines.value[lines.value.length - 1] = { line: command, isPlain: false };
+  if (lines.value.length > 0) {
+    lines.value[lines.value.length - 1] = { line: command, isPlain: false };
+  }
+
   const commandObject = await useHandleTerminalCommand(
     rayDb,
     command,
@@ -41,8 +42,8 @@ async function onEnter(command: string) {
   );
 
   if (commandObject instanceof Error) {
-    lineIndexesOfErrorLines.value.push(lines.value.length);
     lines.value.push({ line: commandObject.message, isPlain: true });
+    lineIndexesOfErrorLines.value.push(lines.value.length - 1);
   } else if (commandObject.command === 'cls') {
     lineIndexesOfErrorLines.value = [];
     await nextTick();
@@ -61,11 +62,15 @@ function isReadonly(lineNumber: number) {
 }
 
 function onKeyDown(event: KeyboardEvent) {
-  if (event.key === 'Control') document.addEventListener('wheel', onResizing, { passive: false });
+  if (event.key === 'Control') {
+    document.addEventListener('wheel', onResizing, { passive: false });
+  }
 }
 
 function onKeyUp(event: KeyboardEvent) {
-  if (event.key === 'Control') document.removeEventListener('wheel', onResizing);
+  if (event.key === 'Control') {
+    document.removeEventListener('wheel', onResizing);
+  }
 }
 
 const onResizing = (event: WheelEvent) => {
@@ -88,7 +93,6 @@ const onResizing = (event: WheelEvent) => {
 
 <template>
   <div
-    ref="terminal"
     class="terminal"
     @keydown="onKeyDown"
     @keyup="onKeyUp"
@@ -101,6 +105,7 @@ const onResizing = (event: WheelEvent) => {
       :is-readonly="isReadonly(index)"
       :current-path="currentPath.join('/')"
       :is-error="lineIndexesOfErrorLines.includes(index)"
+      :window-id="windowId"
       @enter-pressed="onEnter"
     />
   </div>

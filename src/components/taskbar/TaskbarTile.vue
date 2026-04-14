@@ -175,7 +175,7 @@ const getTitleOverflowStyle = computed(() => {
 <template>
   <div
     v-if="application"
-    class="application-name"
+    class="tile"
     :class="setClassOnHover"
     @mouseenter.prevent="onMouseEnter(true)"
     @mouseleave.prevent="onMouseLeave(true)"
@@ -201,7 +201,7 @@ const getTitleOverflowStyle = computed(() => {
 </template>
 
 <style scoped>
-.application-name {
+.tile {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -210,7 +210,7 @@ const getTitleOverflowStyle = computed(() => {
   position: relative;
 }
 
-.application-name.active {
+.tile.active {
   background-color: var(--button-hover-color);
   border-radius: 5px;
 }

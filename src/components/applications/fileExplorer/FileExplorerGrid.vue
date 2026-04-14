@@ -6,7 +6,8 @@ import {
   type ItemInsert,
   type FileType,
   type Item,
-  isImageType, isVideoType,
+  isImageType,
+  isVideoType,
 } from '@/types/ItemTypes.ts';
 import { computed, ref, watch } from 'vue';
 import type { RayDb } from 'ray-db-wrapper';
@@ -19,8 +20,11 @@ import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import { useToastStore } from '@/stores/toast.ts';
 import { useInitializeContextMenu } from '@/composables/contextMenu/useInitializeContextMenu.ts';
 import { useDblClick } from '@/composables/helpers/UseDblClick.ts';
+import { SystemFileDeleteError } from '@/exceptions/SystemFileDeleteError.ts';
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
+const windowId = useInjectOrThrow<string>('windowId');
+
 const { currentDirectories, parentId, filterByFileType } = defineProps<{
   currentDirectories: Array<FileSystemItem & { type: string }>;
   parentId: number;
@@ -86,7 +90,19 @@ async function onRightClick(
           Paste: () => {},
           Delete: async () => {
             if (item) {
-              await useDeleteFileSystemItem(rayDb, item);
+              try {
+                await useDeleteFileSystemItem(rayDb, item);
+              } catch (e) {
+                if (e instanceof SystemFileDeleteError) {
+                  useToastStore().createToast(
+                    'cannot delete system files',
+                    'error',
+                    5000,
+                    'window',
+                    windowId,
+                  );
+                }
+              }
             }
           },
         },

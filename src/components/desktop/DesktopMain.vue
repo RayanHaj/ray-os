@@ -67,6 +67,8 @@ function onDesktopRightClick(event: MouseEvent) {
 
 <style scoped>
 .desktop {
+  --socials-width: 70px;
+
   display: flex;
   justify-content: space-between;
   flex-direction: row;
@@ -76,7 +78,7 @@ function onDesktopRightClick(event: MouseEvent) {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: calc(100% - 60px);
+  width: calc(100% - var(--socials-width));
 }
 
 .socials {
@@ -84,7 +86,7 @@ function onDesktopRightClick(event: MouseEvent) {
   flex-direction: column;
   justify-content: space-evenly;
   align-items: center;
-  width: 70px;
+  width: var(--socials-width);
   height: 100%;
   background: rgba(0, 0, 0, 0.5);
   border-left: var(--window-border-color) 1px solid;

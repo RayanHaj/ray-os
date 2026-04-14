@@ -117,6 +117,10 @@ export const useWindowStore = defineStore('window', () => {
     return { windowName, id };
   }
 
+  function getFocusedWindowId(): string {
+    return zIndexesOrder.value[zIndexesOrder.value.length - 1];
+  }
+
   return {
     openWindowsReferences,
     zIndexesOrder,
@@ -129,5 +133,6 @@ export const useWindowStore = defineStore('window', () => {
     getNextWindowId,
     getGlobalId: getWindowId,
     getZIndex,
+    getFocusedWindowId,
   };
 });

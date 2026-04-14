@@ -4,6 +4,7 @@ import { useFileSystemStore } from '@/stores/fileSystem.ts';
 import { useGetRootDirectory } from '@/composables/fileSystem/useGetRootDirectory.ts';
 import { useHandleIDBFileOperations } from '@/composables/fileSystem/useHandleIDBFileOperations.ts';
 import { useToastStore } from '@/stores/toast.ts';
+import { SystemFileDeleteError } from '@/exceptions/SystemFileDeleteError.ts';
 
 function insertionCheck(
   foundItems: FileSystemItem[],
@@ -206,8 +207,7 @@ export async function deleteFileSystemItem(rayDb: RayDb, id: number, onlyFileSys
   }
 
   if (parent.isSystemFile) {
-    useToastStore().createToast('cannot delete system files', 'error', 5000, 'desktop');
-    throw new Error('cannot delete system files');
+    throw new SystemFileDeleteError('cannot delete system files');
   }
 
   for (const parentId of parent.parents) {

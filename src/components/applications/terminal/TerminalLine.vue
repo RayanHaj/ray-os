@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { computed, onBeforeMount, onMounted, ref } from 'vue';
+import { computed, onBeforeMount, onMounted, ref, watch } from 'vue';
+import { useWindowStore } from '@/stores/window.ts';
 
-const { currentPath, inputValue, isReadonly, isError } = defineProps<{
+const { currentPath, inputValue, isReadonly, isError, windowId } = defineProps<{
   currentPath: string;
   inputValue: { line: string | Error; isPlain: boolean };
   isReadonly: boolean;
   isError: boolean;
+  windowId: string;
 }>();
 
 const path = ref<string>('');
@@ -18,6 +20,20 @@ onBeforeMount(() => {
 onMounted(() => {
   terminalLineRef.value?.focus();
 });
+
+watch(
+  () => useWindowStore().zIndexesOrder,
+  (newValue, oldValue) => {
+    if (newValue === oldValue) {
+      return;
+    }
+
+    if (newValue[newValue.length - 1] === windowId) {
+      console.log('aa')
+      terminalLineRef.value?.focus();
+    }
+  },
+);
 
 const emit = defineEmits(['enter-pressed']);
 
@@ -40,7 +56,13 @@ const displayPath = computed(() => `PS ${path.value}>`);
       class="terminal-line"
       contenteditable="true"
       @keydown.enter.prevent="onEnter($event)"
-      @blur="() => terminalLineRef?.focus()"
+      @blur="
+        () => {
+          if (useWindowStore().getFocusedWindowId() === windowId) {
+            return terminalLineRef?.focus();
+          }
+        }
+      "
     >
       <p v-if="inputValue.line">{{ inputValue.line }}</p>
     </div>
