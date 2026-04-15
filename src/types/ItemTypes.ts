@@ -31,6 +31,7 @@ export type FileSystemItem = {
   directory?: { name: string; children: number[] };
   id?: number;
   isSystemFile?: boolean
+  type?: string
 };
 
 export const fileExtensions = {

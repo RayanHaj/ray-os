@@ -7,7 +7,8 @@ export async function useDeleteFileSystemItem(
   rayDb: RayDb,
   item?: FileSystemItem,
   id?: number,
-  onlyFileSystemReference?: boolean
+  onlyFileSystemReference?: boolean,
+  updateFileSystem = true
 ) {
   if (id) {
     await deleteFileSystemItem(rayDb, id, onlyFileSystemReference);
@@ -17,5 +18,7 @@ export async function useDeleteFileSystemItem(
     }
   }
 
-  useFileSystemStore().updateFileSystem();
+  if (updateFileSystem) {
+    useFileSystemStore().updateFileSystem();
+  }
 }

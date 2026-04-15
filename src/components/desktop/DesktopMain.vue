@@ -2,15 +2,19 @@
 import DesktopTile from '@/components/desktop/DesktopTile.vue';
 import { useTileCountGrid } from '@/composables/desktop/useTileCountGrid.ts';
 import { useBrowserStore } from '@/stores/browser.ts';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useInitializeContextMenu } from '@/composables/contextMenu/useInitializeContextMenu.ts';
 import { useTaskbarStore } from '@/stores/taskbar.ts';
 import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
 import MultiSelectionBox from '@/components/MultiSelectionBox.vue';
 import { useMultiSelectionBoxStore } from '@/stores/multiSelectionBox.ts';
 
+const socials = ['Github'] as const;
+type Socials = (typeof socials)[number];
+
 const rowCount = computed(() => useTileCountGrid().x.value);
 const columnCount = computed(() => useTileCountGrid().y.value);
+const tileIsBeingDragged = ref<boolean>(false);
 
 function onDesktopRightClick(event: MouseEvent) {
   useInitializeContextMenu(event)
@@ -38,6 +42,10 @@ function onDesktopRightClick(event: MouseEvent) {
 const multiSelectionBoxStore = useMultiSelectionBoxStore();
 
 function onMouseDown(e: MouseEvent) {
+  if (tileIsBeingDragged.value) {
+    return;
+  }
+
   multiSelectionBoxStore.multiSelectionVariables.startX = e.clientX;
   multiSelectionBoxStore.multiSelectionVariables.startY = e.clientY;
 
@@ -56,6 +64,10 @@ function onMouseMove(e: MouseEvent) {
 }
 
 function onMouseUp(e: MouseEvent) {
+  if (tileIsBeingDragged.value) {
+    return;
+  }
+
   removeEventListener('mousemove', onMouseMove);
   Object.assign(multiSelectionBoxStore.multiSelectionVariables, {
     isSelecting: false,
@@ -68,8 +80,20 @@ function onMouseUp(e: MouseEvent) {
   });
 }
 function onMouseLeave(e: MouseEvent) {
+  if (tileIsBeingDragged.value) {
+    return;
+  }
+
   removeEventListener('mousemove', onMouseMove);
-  multiSelectionBoxStore.multiSelectionVariables.isSelecting = false
+  multiSelectionBoxStore.multiSelectionVariables.isSelecting = false;
+}
+
+function navigateToSocialPage(social: Socials) {
+  switch (social) {
+    case 'Github': {
+      window.open('https://github.com/RayanHaj', '_blank');
+    }
+  }
 }
 </script>
 
@@ -90,6 +114,8 @@ function onMouseLeave(e: MouseEvent) {
           v-for="columnPosition in columnCount"
           :key="columnPosition"
           :tile-position="{ x: rowPosition, y: columnPosition }"
+          @drag-started="tileIsBeingDragged = true"
+          @drag-ended="tileIsBeingDragged = false"
         />
       </div>
       <MultiSelectionBox
@@ -101,14 +127,14 @@ function onMouseLeave(e: MouseEvent) {
       />
     </div>
     <div class="socials">
-      <div class="socials-icons">
-        <component
-          v-for="icon in ['Github', 'LinkedIn']"
-          :key="icon"
-          class="social-svg"
-          :is="useSvgOrFallback(icon).svg"
-        />
-      </div>
+      <button
+        v-for="social in socials"
+        :key="social"
+        class="socials-icons"
+        @click="navigateToSocialPage(social)"
+      >
+        <component class="social-svg" :is="useSvgOrFallback(social).svg" />
+      </button>
       <p class="socials-name">Made by Rayan el Hajaoui</p>
     </div>
   </div>
@@ -151,6 +177,12 @@ function onMouseLeave(e: MouseEvent) {
   gap: 15px;
   flex-direction: column;
   justify-content: center;
+  cursor: pointer;
+}
+
+button.socials-icons {
+  background: none;
+  border: none;
 }
 
 .socials-name {

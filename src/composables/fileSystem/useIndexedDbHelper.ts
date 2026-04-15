@@ -62,6 +62,7 @@ export async function insertItemIntoFileSystem(
   rayDb: RayDb,
   parents: number[],
   item: { file?: { name: string; id: number; type: string }; directory?: { name: string; children: number[] }, isSystemFile?: boolean },
+  updateFileSystem = true
 ): Promise<Error | number | undefined> {
   try {
     const foundItems = await rayDb.findAll<FileSystemItem>('fileSystem');
@@ -95,7 +96,9 @@ export async function insertItemIntoFileSystem(
       }
     }
 
-    useFileSystemStore().updateFileSystem();
+    if (updateFileSystem) {
+      useFileSystemStore().updateFileSystem();
+    }
     return id;
   } catch (e) {
     return e as Error;

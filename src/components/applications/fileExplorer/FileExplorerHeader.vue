@@ -45,13 +45,14 @@ async function onDrop(event: DragEvent) {
 
     const dropItem = JSON.parse(plainItem);
 
-    await useDeleteFileSystemItem(rayDb, dropItem, undefined, true);
+    await useDeleteFileSystemItem(rayDb, dropItem, undefined, true, false);
 
-    const parentPath = currentPath.slice(0, -1).join('/') || 'C:/';
+    const parentPath = currentPath.slice(0, -1).join('/') || 'C:';
     const parentDir = await fileSystemLookup(rayDb, parentPath);
+
     if (!parentDir || parentDir instanceof Error) return;
 
-    await insertItemIntoFileSystem(rayDb, [parentDir.parent.id!], dropItem);
+    await insertItemIntoFileSystem(rayDb, [parentDir.parent.id!], dropItem, false);
 
     emits('header-event:back');
   } catch (e) {

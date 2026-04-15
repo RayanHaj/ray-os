@@ -30,7 +30,7 @@ const currentParentItemId = ref<number>();
 
 const fileExplorerStore = useFileExplorerStore();
 onBeforeMount(async () => {
-  await useUpdateItemsByCurrentPath(rayDb, fileSystemStore.rootDirectory, currentItems);
+  currentItems.value = await useUpdateItemsByCurrentPath(rayDb, fileSystemStore.rootDirectory);
   currentParentItemId.value = fileSystemStore.rootId;
 
   const fileItemSize = localStorage.getItem('fileItemSize');
@@ -48,7 +48,10 @@ onBeforeMount(async () => {
 
 watch(
   () => fileSystemStore.updateFileSystemVal,
-  async () => await useUpdateItemsByCurrentPath(rayDb, currentPath.value.join('/'), currentItems),
+  async () => {
+    console.log('aa');
+    currentItems.value = await useUpdateItemsByCurrentPath(rayDb, currentPath.value.join('/'));
+  },
 );
 const fileExplorerDiv = ref();
 
@@ -63,12 +66,12 @@ watch(
   },
 );
 
-function handleBackClick() {
+async function handleBackClick() {
   const previousPath = previousPaths.value.pop();
-
   if (previousPath) {
     currentPath.value = previousPath;
-    fileSystemStore.updateFileSystem();
+    currentItems.value = await useUpdateItemsByCurrentPath(rayDb, currentPath.value.join('/'));
+
     currentParentItemId.value = currentItems.value[0].parents[0];
   }
 }

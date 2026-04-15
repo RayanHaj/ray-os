@@ -2,52 +2,55 @@
 import { useDesktopStore } from '@/stores/desktop.ts';
 import { useTileCountGrid } from '@/composables/desktop/useTileCountGrid.ts';
 import { computed, onMounted, ref, watch } from 'vue';
-import type { Item } from '@/types/ItemTypes.ts';
+import type { FileSystemItem, Item } from '@/types/ItemTypes.ts';
 import { useWindowStore } from '@/stores/window.ts';
 import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import { useBrowserStore } from '@/stores/browser.ts';
-import {
-  useInitializeContextMenu
-} from '@/composables/contextMenu/useInitializeContextMenu.ts';
+import { useInitializeContextMenu } from '@/composables/contextMenu/useInitializeContextMenu.ts';
 import { useDblClick } from '@/composables/helpers/UseDblClick.ts';
+import { useMultiSelectionBoxStore } from '@/stores/multiSelectionBox.ts';
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 
+const emits = defineEmits(['dragStarted', 'dragEnded']);
+
 const { tilePosition } = defineProps<{ tilePosition: { x: number; y: number } }>();
-const verticalTileCount = useTileCountGrid().y
+const verticalTileCount = useTileCountGrid().y;
 const tileId = computed(() => (tilePosition.x - 1) * verticalTileCount.value + tilePosition.y);
 
 const tileItem = ref<(Item & { tileId: number }) | null>();
 const desktopStore = useDesktopStore();
 function onTileRightClick(event: MouseEvent) {
-  useInitializeContextMenu(event).tile().initialize(
-    {
-      Copy: () => {
-        console.log('copy');
-      },
-      Paste: () => {
-        console.log('paste');
-      },
-      Delete: async () => {
-        if (!tileItem.value) {
-          return;
-        }
+  useInitializeContextMenu(event)
+    .tile()
+    .initialize(
+      {
+        Copy: () => {
+          console.log('copy');
+        },
+        Paste: () => {
+          console.log('paste');
+        },
+        Delete: async () => {
+          if (!tileItem.value) {
+            return;
+          }
 
-        await desktopStore.deleteDesktopItem(rayDb, tileItem.value.id)
-      }
-    },
-    {
-      test: () => {
-        console.log('test');
+          await desktopStore.deleteDesktopItem(rayDb, tileItem.value.id);
+        },
       },
-      properties: () => {
-        console.log('properties');
-      }
-    }
-  );
+      {
+        test: () => {
+          console.log('test');
+        },
+        properties: () => {
+          console.log('properties');
+        },
+      },
+    );
 }
 
 onMounted(async () => await updateTile());
@@ -65,7 +68,8 @@ watch(
 );
 
 watch(
-  () => useBrowserStore().height, () => {
+  () => useBrowserStore().height,
+  () => {
     const item = desktopStore.items.find((item) => item.tileId === tileId.value);
     if (!item) {
       tileItem.value = null;
@@ -73,9 +77,8 @@ watch(
     }
 
     tileItem.value = item;
-  }
-)
-
+  },
+);
 
 async function updateTile() {
   const desktopItem = await desktopStore.getDesktopItemByTileId(rayDb, tileId.value);
@@ -98,6 +101,8 @@ const tileContainsContent = computed(() => {
   return true;
 });
 
+const multiSelectionBoxStore = useMultiSelectionBoxStore();
+
 function onDragStart(event: DragEvent) {
   const id = tileItem.value?.id;
   if (!id) {
@@ -108,6 +113,7 @@ function onDragStart(event: DragEvent) {
 }
 
 async function onDrop(event: DragEvent) {
+  emits('dragEnded');
   const targetId = Number((event.currentTarget as HTMLElement).id);
 
   const data = event.dataTransfer?.getData('text/plain');
@@ -115,10 +121,20 @@ async function onDrop(event: DragEvent) {
     return;
   }
 
-  const fileExplorerData = data.split('-');
-  if (fileExplorerData.length === 2) {
-    const type = fileExplorerData[0];
-    const id = fileExplorerData[1];
+  const parsedData = JSON.parse(data);
+  if (parsedData instanceof Object) {
+    const fileSystemItem = parsedData as FileSystemItem;
+    const type = fileSystemItem.type;
+    const id =
+      type === 'application' || type === 'file'
+        ? fileSystemItem.file?.id
+        : type === 'directory'
+          ? fileSystemItem.id
+          : null;
+
+    if (id === null) {
+      return;
+    }
 
     await desktopStore.addDesktopItem(rayDb, {
       id: Number(id),
@@ -166,18 +182,42 @@ function openWindow() {
     }
   }
 }
+
+const tile = ref();
+
+const isSelected = computed(() => {
+  const box = multiSelectionBoxStore.multiSelectionVariables;
+
+  if (!tile.value || !box.isSelecting || !tileContainsContent.value) return false;
+
+  const rect = tile.value.getBoundingClientRect();
+
+  return !(
+    box.left + box.width < rect.left ||
+    box.left > rect.right ||
+    box.top + box.height < rect.top ||
+    box.top > rect.bottom
+  );
+});
 </script>
 
 <template>
   <div
     :id="tileId.toString()"
     class="tile"
-    :class="{ filled: tileContainsContent }"
+    ref="tile"
+    :class="{
+      filled: tileContainsContent,
+      'no-hover': multiSelectionBoxStore.multiSelectionVariables.isSelecting,
+      selected: isSelected,
+    }"
     :style="{ width: `${desktopStore.tileWidth}px`, height: `${desktopStore.tileHeight}px` }"
     :draggable="tileContainsContent"
     @dragstart="onDragStart"
     @dragover.prevent
     @dragenter.prevent
+    @mousedown="tileContainsContent ? emits('dragStarted') : undefined"
+    @mouseup="tileContainsContent ? emits('dragEnded') : undefined"
     @drop.prevent="onDrop"
     @click="useDblClick(() => openWindow())"
     @contextmenu.prevent="onTileRightClick"
@@ -203,8 +243,14 @@ function openWindow() {
   padding: 5px;
 }
 
-.tile.filled:hover {
+.tile.filled:not(.no-hover):hover {
   background-color: var(--button-hover-color);
+}
+
+.tile.selected {
+  background-color: rgba(68, 170, 255, 0.15);
+  border: 1px solid #4af;
+  border-radius: 0;
 }
 
 .content {
