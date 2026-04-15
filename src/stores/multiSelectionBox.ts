@@ -1,7 +1,17 @@
 import { defineStore } from 'pinia';
-import { type Ref, ref } from 'vue';
+import { reactive, type Ref, ref } from 'vue';
 
 export const useMultiSelectionBoxStore = defineStore('multiSelectionBox', <T>() => {
+  const multiSelectionVariables = reactive({
+    isSelecting: false,
+    width: 0,
+    height: 0,
+    startX: 0,
+    startY: 0,
+    left: 0,
+    top: 0,
+  });
+
   const selectedItems: Ref<T[]> = ref([]);
 
   function selectItem(item: T): void {
@@ -28,5 +38,5 @@ export const useMultiSelectionBoxStore = defineStore('multiSelectionBox', <T>() 
     return selectedItems.value;
   }
 
-  return { selectItem, selectItems, unSelectItem, unSelectAllItems, getItem, getAllItems }
+  return { multiSelectionVariables, selectItem, selectItems, unSelectItem, unSelectAllItems, getItem, getAllItems }
 });
