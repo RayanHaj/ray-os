@@ -32,6 +32,7 @@ export const availableSvgs = [
   'Warning',
   'Error',
   'Doom',
-  'ImageViewer'
+  'ImageViewer',
+  'Snake'
 ] as const;
 export type AvailableSvgs = (typeof availableSvgs)[number];

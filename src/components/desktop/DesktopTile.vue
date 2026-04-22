@@ -2,10 +2,8 @@
 import { useDesktopStore } from '@/stores/desktop.ts';
 import { useTileCountGrid } from '@/composables/desktop/useTileCountGrid.ts';
 import { computed, onMounted, ref, watch } from 'vue';
-import type { FileSystemItem, Item } from '@/types/ItemTypes.ts';
-import { useWindowStore } from '@/stores/window.ts';
+import { type FileSystemItem, isImageType, isVideoType, type Item } from '@/types/ItemTypes.ts';
 import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
-import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import { useBrowserStore } from '@/stores/browser.ts';
@@ -25,6 +23,10 @@ const tileId = computed(() => (tilePosition.x - 1) * verticalTileCount.value + t
 const tileItem = ref<(Item & { tileId: number }) | null>();
 const desktopStore = useDesktopStore();
 function onTileRightClick(event: MouseEvent) {
+  if (tileContainsContent.value) {
+    event.stopPropagation();
+  }
+
   useInitializeContextMenu(event)
     .tile()
     .initialize(
@@ -184,6 +186,43 @@ const isSelected = computed(() => {
     box.top > rect.bottom
   );
 });
+
+const imageSvg = useSvgOrFallback('ImageViewer');
+const videoSvg = useSvgOrFallback('VideoPlayer');
+const fileSvg = useSvgOrFallback('TextFile');
+const directorySvg = useSvgOrFallback('Directory');
+
+function getSvg() {
+  if (!tileItem.value) {
+    return;
+  }
+
+  switch (tileItem.value.content.type) {
+    case 'application': {
+      if (tileItem.value.label) {
+        return useSvgOrFallback(tileItem.value.label).svg;
+      } else {
+        return fileSvg.svg;
+      }
+    }
+    case 'file': {
+      if (isImageType(tileItem.value.content.rawFile?.type)) {
+        return imageSvg.svg;
+      }
+      if (isVideoType(tileItem.value.content.rawFile?.type)) {
+        return videoSvg.svg;
+      }
+
+      return fileSvg.svg;
+    }
+    case 'directory': {
+      return directorySvg.svg;
+    }
+    default: {
+      return fileSvg.svg;
+    }
+  }
+}
 </script>
 
 <template>
@@ -208,11 +247,7 @@ const isSelected = computed(() => {
     @contextmenu.prevent="onTileRightClick"
   >
     <div class="content" v-if="tileItem && tileItem.id">
-      <component
-        :is="useSvgOrFallback(tileItem.label).svg"
-        :custom-width="35"
-        :custom-height="35"
-      />
+      <component :is="getSvg()" :custom-width="35" :custom-height="35" />
       <div>{{ tileItem.label }}</div>
     </div>
   </div>

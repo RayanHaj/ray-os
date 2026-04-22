@@ -26,7 +26,7 @@ function onDesktopRightClick(event: MouseEvent) {
         },
         Paste: () => {
           console.log('paste');
-        },
+        }
       },
       {
         test: () => {
