@@ -1,9 +1,9 @@
 export const itemSizes = {
-  small: { font: 10, size: 30 },
-  medium: { font: 12, size: 50 },
-  large: { font: 14, size: 60 },
+  small: { font: 9, size: 30 },
+  medium: { font: 10, size: 40 },
+  large: { font: 10, size: 50 },
 } as const;
 
-export type ItemSize = (typeof itemSizes)[keyof typeof itemSizes];
-export type ItemSizeKeys = keyof typeof itemSizes;
-export const ItemSizeKeysArray = Object.keys(itemSizes) as ItemSizeKeys[];
+export type FileItemSizeValue = (typeof itemSizes)[keyof typeof itemSizes];
+export type FileItemSizeKey = keyof typeof itemSizes;
+export const fileItemSizes = Object.keys(itemSizes) as FileItemSizeKey[];

@@ -13,35 +13,36 @@ import { useContextMenuStore } from '@/stores/contextMenu.ts';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
-import type { ItemSizeKeys } from '@/types/FileExplorerTypes.ts';
+import type { FileItemSizeKey } from '@/types/FileExplorerTypes.ts';
 import { useToastStore } from '@/stores/toast.ts';
 import { useUpdateItemsByCurrentPath } from '@/composables/fileExplorer/useUpdateItemsByCurrentPath.ts';
 import { useHandleExplorerFileClicked } from '@/composables/fileExplorer/useHandleExplorerFileClicked.ts';
 import { useSanitizeFileName } from '@/composables/fileSystem/useSanitizeFileName.ts';
 import { useValidateFileName } from '@/composables/fileSystem/useValidateFileName.ts';
 
-const rayDb = useInjectOrThrow<RayDb>('rayDb');
+const fileExplorerStore = useFileExplorerStore();
 const fileSystemStore = useFileSystemStore();
 
-const currentItems = ref<Array<FileSystemItem & { type: string }>>([]);
-const currentPath = ref<string[]>([fileSystemStore.rootDirectory]);
-const previousPaths = ref<string[][]>([]);
-const currentParentItemId = ref<number>();
+const rayDb = useInjectOrThrow<RayDb>('rayDb');
+const windowId = useInjectOrThrow<string>('windowId');
 
-const fileExplorerStore = useFileExplorerStore();
+const items = ref<Array<FileSystemItem & { type: string }>>([]);
+const path = ref<string[]>([fileSystemStore.rootDirectory]);
+const parentId = ref<number>();
+
 onBeforeMount(async () => {
-  currentItems.value = await useUpdateItemsByCurrentPath(rayDb, fileSystemStore.rootDirectory);
-  currentParentItemId.value = fileSystemStore.rootId;
+  items.value = await useUpdateItemsByCurrentPath(rayDb, fileSystemStore.rootDirectory);
+  parentId.value = fileSystemStore.rootId;
 
   const fileItemSize = localStorage.getItem('fileItemSize');
   if (fileItemSize) {
-    if (fileExplorerStore.currentFileItemSizeKey !== (fileItemSize as ItemSizeKeys)) {
-      fileExplorerStore.updateItemSize(fileItemSize as ItemSizeKeys);
+    if (fileExplorerStore.currentFileItemSize !== (fileItemSize as FileItemSizeKey)) {
+      fileExplorerStore.updateItemSize(fileItemSize as FileItemSizeKey);
     }
   }
 
   if (fileExplorerStore.filePathAtWindow?.windowId === windowId) {
-    currentPath.value = fileExplorerStore.filePathAtWindow.path;
+    path.value = fileExplorerStore.filePathAtWindow.path;
     fileExplorerStore.filePathAtWindow = { windowId: '', path: [] };
   }
 });
@@ -49,30 +50,29 @@ onBeforeMount(async () => {
 watch(
   () => fileSystemStore.updateFileSystemVal,
   async () => {
-    console.log('aa');
-    currentItems.value = await useUpdateItemsByCurrentPath(rayDb, currentPath.value.join('/'));
+    items.value = await useUpdateItemsByCurrentPath(rayDb, path.value.join('/'));
   },
 );
-const fileExplorerDiv = ref();
 
-const windowId = useInjectOrThrow<string>('windowId');
 watch(
   () => fileExplorerStore.filePathAtWindow,
   (newVal) => {
     if (newVal && newVal.windowId === windowId) {
-      currentPath.value = newVal.path;
+      path.value = newVal.path;
       fileSystemStore.updateFileSystem();
     }
   },
 );
 
 async function handleBackClick() {
-  const previousPath = previousPaths.value.pop();
-  if (previousPath) {
-    currentPath.value = previousPath;
-    currentItems.value = await useUpdateItemsByCurrentPath(rayDb, currentPath.value.join('/'));
+  const cachedPath = [...path.value];
+  const previousPath = path.value.pop();
 
-    currentParentItemId.value = currentItems.value[0].parents[0];
+  if (previousPath && previousPath !== fileSystemStore.rootDirectory) {
+    items.value = await useUpdateItemsByCurrentPath(rayDb, path.value.join('/'));
+    parentId.value = items.value[0].parents[0];
+  } else {
+    path.value = cachedPath;
   }
 }
 
@@ -80,12 +80,11 @@ async function onDblClickItem(item: FileSystemItem & { type: string }) {
   if (!item.id) return;
 
   if (item.directory) {
-    previousPaths.value.push([...currentPath.value]);
-    currentPath.value = [...currentPath.value, item.directory.name];
-    currentParentItemId.value = item.id;
+    path.value = [...path.value, item.directory.name];
+    parentId.value = item.id;
     fileSystemStore.updateFileSystem();
   } else if (item.file) {
-    await useHandleExplorerFileClicked(item, currentParentItemId, rayDb);
+    await useHandleExplorerFileClicked(item, parentId, rayDb);
   }
 }
 
@@ -108,7 +107,7 @@ async function handleModalInput(
   }
 
   try {
-    const currentDir = await fileSystemLookup(rayDb, currentPath.value.join('/'));
+    const currentDir = await fileSystemLookup(rayDb, path.value.join('/'));
     if (!currentDir || currentDir instanceof Error) {
       throw new Error('Could not find current directory');
     }
@@ -170,7 +169,7 @@ async function handleModalInput(
 </script>
 
 <template>
-  <div class="file-explorer" ref="fileExplorerDiv">
+  <div class="file-explorer">
     <FileExplorerModal
       v-show="modalOpened"
       :title="modalContentType"
@@ -178,10 +177,10 @@ async function handleModalInput(
       @modal-event:submit-click="handleModalInput($event.contentType, $event.action, $event.input)"
       @modal-event:cancel-click="modalOpened = false"
     />
-    <FileExplorerHeader :current-path="currentPath" @header-event:back="handleBackClick" />
+    <FileExplorerHeader :current-path="path" @header-event:back="handleBackClick" />
     <FileExplorerGrid
-      :parent-id="currentParentItemId ?? -1"
-      :current-directories="currentItems"
+      :parent-id="parentId ?? -1"
+      :current-directories="items"
       :filter-by-file-type="fileExplorerStore.fileSelectState?.allowedFileTypes ?? []"
       @item-event:dbl-click="onDblClickItem"
       @new-directory="toggleAddNewItemModal($event.contentType)"

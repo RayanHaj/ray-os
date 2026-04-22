@@ -53,9 +53,10 @@ export const Applications = [
   'Todo',
   'Notepad',
   'Doom',
+  'Snake'
 ] as const;
-export type Application = (typeof Applications)[number];
 
+export type Application = (typeof Applications)[number];
 export type FileType = keyof typeof fileExtensions;
 
 export const imageTypes = ['image/jpeg', 'image/png', 'image/webp'] as const satisfies readonly FileType[];
@@ -70,6 +71,8 @@ export function isVideoType(type: string | undefined): type is (typeof videoType
   return videoTypes.includes(type as (typeof videoTypes)[number]);
 }
 
-export const textTypes = ['text/plain'] as const satisfies readonly FileType[];
-
-export type FileExtension = (typeof fileExtensions)[FileType];
+export const textTypes = ['text/plain'];
+export function isTextType(type: string | undefined): type is (typeof textTypes)[number] {
+  if (!type) return false;
+  return textTypes.includes(type as (typeof textTypes)[number]);
+}

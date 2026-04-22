@@ -1,6 +1,6 @@
 export const availableSvgs = [
   'Audio',
-  'Video',
+  'VideoPlayer',
   'Close',
   'Copy',
   'Delete',

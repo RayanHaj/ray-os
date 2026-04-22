@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onBeforeMount, ref } from 'vue';
-import { type ItemSizeKeys, ItemSizeKeysArray } from '@/types/FileExplorerTypes.ts';
+import { type FileItemSizeKey, fileItemSizes } from '@/types/FileExplorerTypes.ts';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
 import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
 import {
@@ -11,30 +11,26 @@ import { useDeleteFileSystemItem } from '@/composables/fileSystem/useDeleteFileS
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import { RayDb } from 'ray-db-wrapper';
 
-const { currentPath = ['C:/'] } = defineProps<{
-  currentPath?: string[];
-}>();
+const { currentPath = ['C:/'] } = defineProps<{ currentPath?: string[] }>();
 
-const emits = defineEmits([
-  'header-event:back',
-]);
+const emits = defineEmits(['header-event:back']);
 
 const directorySvg = useSvgOrFallback('Directory').svg;
 
-const itemSizeKeys = ItemSizeKeysArray;
-const selectedItemSizeButton = ref<ItemSizeKeys>('medium');
+const itemSizeKeys = fileItemSizes;
+const selectedItemSizeButton = ref<FileItemSizeKey>('medium');
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 
 onBeforeMount(() => {
   const fileItemSize = localStorage.getItem('fileItemSize');
   if (fileItemSize) {
-    updateSelectedItemSizeButton(fileItemSize as ItemSizeKeys);
+    updateSelectedItemSizeButton(fileItemSize as FileItemSizeKey);
   }
 });
 
-function updateSelectedItemSizeButton(itemSizeKey: ItemSizeKeys) {
-  selectedItemSizeButton.value = itemSizeKey as ItemSizeKeys;
+function updateSelectedItemSizeButton(itemSizeKey: FileItemSizeKey) {
+  selectedItemSizeButton.value = itemSizeKey as FileItemSizeKey;
   useFileExplorerStore().updateItemSize(itemSizeKey);
 }
 

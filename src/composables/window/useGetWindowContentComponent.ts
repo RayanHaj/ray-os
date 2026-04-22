@@ -12,6 +12,7 @@ import FallbackMain from '@/components/applications/FallbackMain.vue';
 import DoomMain from '@/components/applications/doom/DoomMain.vue';
 import ImageViewerMain from '@/components/applications/imageViewer/ImageViewerMain.vue';
 import VideoPlayerMain from '@/components/applications/videoPlayer/VideoPlayerMain.vue';
+import SnakeMain from '@/components/applications/snake/SnakeMain.vue';
 
 const windowContentComponents: { [windowName in WindowName]: Component } = {
   settings: SettingsMain,
@@ -23,7 +24,8 @@ const windowContentComponents: { [windowName in WindowName]: Component } = {
   notepad: NotepadMain,
   doom: DoomMain,
   imageViewer: ImageViewerMain,
-  videoPlayer: VideoPlayerMain
+  videoPlayer: VideoPlayerMain,
+  snake: SnakeMain
 } as const;
 
 export function useGetWindowContentComponent(windowName: string) {

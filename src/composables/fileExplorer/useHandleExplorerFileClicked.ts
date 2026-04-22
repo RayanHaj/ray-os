@@ -49,7 +49,6 @@ export async function useHandleExplorerFileClicked(
             useWindowStore().pushOpenWindowReference('Video Player');
             return;
           }
-          console.log(file);
           useNotepadStore().initializeNotepadFile(
             useWindowStore().getNextWindowId('Notepad'),
             item.file.id,

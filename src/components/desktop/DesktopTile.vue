@@ -12,6 +12,7 @@ import { useBrowserStore } from '@/stores/browser.ts';
 import { useInitializeContextMenu } from '@/composables/contextMenu/useInitializeContextMenu.ts';
 import { useDblClick } from '@/composables/helpers/UseDblClick.ts';
 import { useMultiSelectionBoxStore } from '@/stores/multiSelectionBox.ts';
+import { useHandleDesktopFileClicked } from '@/composables/desktop/useHandleDesktopFileClicked.ts';
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 
@@ -162,25 +163,9 @@ async function onDrop(event: DragEvent) {
   await desktopStore.updateDesktopItem(rayDb, sourceItem.id, targetId);
 }
 
-function openWindow() {
+async function openWindow() {
   if (!tileItem.value) return;
-  switch (tileItem.value.content.type) {
-    case 'application':
-      {
-        useWindowStore().pushOpenWindowReference(tileItem.value.label);
-      }
-      break;
-    case 'file':
-      {
-        //IMPLEMENT
-        console.log('clicked file');
-      }
-      break;
-    case 'directory': {
-      const windowId = useWindowStore().pushOpenWindowReference('File Explorer');
-      useFileExplorerStore().setFilePathAtWindow(windowId, tileItem.value.content.path);
-    }
-  }
+  await useHandleDesktopFileClicked(tileItem.value, rayDb);
 }
 
 const tile = ref();

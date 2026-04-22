@@ -15,7 +15,7 @@ import { useDeleteFileSystemItem } from '@/composables/fileSystem/useDeleteFileS
 import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
 import { insertItemIntoFileSystem } from '@/composables/fileSystem/useIndexedDbHelper.ts';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
-import { type ItemSize, itemSizes } from '@/types/FileExplorerTypes.ts';
+import { type FileItemSizeValue, itemSizes } from '@/types/FileExplorerTypes.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import { useToastStore } from '@/stores/toast.ts';
 import { useInitializeContextMenu } from '@/composables/contextMenu/useInitializeContextMenu.ts';
@@ -118,7 +118,7 @@ async function onRightClick(
 }
 
 const imageSvg = useSvgOrFallback('ImageViewer');
-const videoSvg = useSvgOrFallback('Video');
+const videoSvg = useSvgOrFallback('VideoPlayer');
 const fileSvg = useSvgOrFallback('TextFile');
 const directorySvg = useSvgOrFallback('Directory');
 
@@ -236,7 +236,7 @@ function handleDisabledItem(item: FileSystemItem) {
 }
 
 const fileExplorerStore = useFileExplorerStore();
-const itemSize = computed<ItemSize>(() => itemSizes[fileExplorerStore.currentFileItemSizeKey]);
+const itemSize = computed<FileItemSizeValue>(() => itemSizes[fileExplorerStore.currentFileItemSize]);
 </script>
 
 <template>

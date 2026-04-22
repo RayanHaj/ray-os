@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import type { Item, ItemType } from '@/types/ItemTypes.ts';
 import type { RayDb } from 'ray-db-wrapper';
+import { useToastStore } from '@/stores/toast.ts';
 
 type DesktopItem = { id: number; type: ItemType; path?: string[]; tileId: number };
 
@@ -83,6 +84,10 @@ export const useDesktopStore = defineStore('desktop', () => {
       item.tileId = desktopItem.tileId;
       items.value = [...items.value, item];
     } catch (e) {
+      if ((e as Error).name === 'ConstraintError') {
+        useToastStore().createToast('file already added to the desktop', 'error', 3000, 'desktop');
+        return;
+      }
       throw (e as Error).message;
     }
   }
