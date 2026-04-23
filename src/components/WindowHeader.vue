@@ -4,24 +4,33 @@ import type { WindowFlatReference } from '@/types/WindowTypes.ts';
 import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
 import { useWindowStore } from '@/stores/window';
 
-const { reference, isFixed } = defineProps<{ reference: WindowFlatReference; isFixed: boolean }>();
+const { reference, windowType } = defineProps<{
+  reference: WindowFlatReference;
+  windowType?: 'fixed' | 'inline';
+}>();
 
 const windowControlButtons = ref<{ name: string; svg: Raw<Component> | null }[]>([]);
 const svg = shallowRef<Component | null>(null);
 onBeforeMount(async () => {
   svg.value = useSvgOrFallback(reference.label).svg;
 
-  const buttons = isFixed
-    ? [
-        { name: 'Minimize', svg: null },
-        { name: 'Close', svg: null },
-      ]
-    : [
-        { name: 'Minimize', svg: null },
-        { name: 'Maximize', svg: null },
-        { name: 'Close', svg: null },
-      ];
-  
+  const buttons =
+    windowType === 'fixed'
+      ? [
+          { name: 'Minimize', svg: null },
+          { name: 'Close', svg: null },
+        ]
+      : windowType === 'inline'
+        ? [
+            { name: 'Maximize', svg: null },
+            { name: 'Close', svg: null },
+          ]
+        : [
+            { name: 'Minimize', svg: null },
+            { name: 'Maximize', svg: null },
+            { name: 'Close', svg: null },
+          ];
+
   windowControlButtons.value = await Promise.all(
     buttons.map(async (button) => {
       const svg = useSvgOrFallback(button.name).svg;

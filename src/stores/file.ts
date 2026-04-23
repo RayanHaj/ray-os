@@ -26,6 +26,7 @@ export const useFileStore = defineStore('file', () => {
         return { children: directory.children, id: directory.parent.id };
       }
     });
+
     if (!directory || !directory.children || !directory.id) return;
 
     for (const applicationItem of applicationItems) {

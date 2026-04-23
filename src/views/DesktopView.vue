@@ -74,6 +74,8 @@ const fixedSizeWindows: Record<string, { width: number; height: number }> = {
   Calculator: { width: 300, height: 375 },
 };
 
+const inlineWindows: Record<string, boolean> = { 'Video Player': true, 'Image Viewer': true };
+
 const minWidthWindows: Record<string, { width: number }> = { Notepad: { width: 445 } };
 const minHeightWindows: Record<string, { height: number }> = { Notepad: { height: 208 } };
 </script>
@@ -91,7 +93,13 @@ const minHeightWindows: Record<string, { height: number }> = { Notepad: { height
       :key="useWindowStore().getGlobalId(reference.label, reference.id)"
       :reference="reference"
       :window-content-component="useGetWindowContentComponent(reference.label)"
-      :is-fixed="fixedSizeWindows[reference.label] !== undefined"
+      :window-type="
+        fixedSizeWindows[reference.label] !== undefined
+          ? 'fixed'
+          : inlineWindows[reference.label] !== undefined
+            ? 'inline'
+            : undefined
+      "
       :width="
         fixedSizeWindows[reference.label]
           ? `${fixedSizeWindows[reference.label].width}px`

@@ -5,6 +5,7 @@ import { isVideoType } from '@/types/ItemTypes.ts';
 
 export const useVideoPlayerStore = defineStore('videoPlayer', () => {
   const loadedVideo: Ref<LoadedImage> = ref({ windowId: null, file: null });
+  const hasOpenInstance: Ref<boolean> = ref(false);
 
   function initVideoFileAndUrl(windowId: string, videoFile: File): boolean {
     if (!isVideoType(videoFile.type)) {
@@ -15,5 +16,5 @@ export const useVideoPlayerStore = defineStore('videoPlayer', () => {
     return true;
   }
 
-  return { loadedVideo, initVideoFileAndUrl };
+  return { loadedVideo, initVideoFileAndUrl, hasOpenInstance };
 });

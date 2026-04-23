@@ -12,6 +12,7 @@ import { useWallpaperStore } from '@/stores/settings/wallpaper.ts';
 
 const sereneSoundsStore = useSereneSoundsStore();
 const browserStore = useBrowserStore();
+const desktopStore = useDesktopStore();
 const wallpaperStore = useWallpaperStore();
 const gridStore = useDesktopStore();
 const svgsStore = useSvgsStore();
@@ -24,6 +25,7 @@ onBeforeMount(async () => {
   wallpaperStore.initSelectedWallpaper();
   await svgsStore.initializeSvgs();
   await sereneSoundsStore.initializeSounds();
+  await desktopStore.updateDesktopDirectory(rayDb);
   await gridStore.initializeTileContent(rayDb);
   initialised.value = true;
 });

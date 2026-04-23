@@ -8,15 +8,16 @@ import { useWindowPositionManager } from '@/composables/window/useWindowPosition
 import { useWindowResizeManager } from '@/composables/window/useWindowResizeManager.ts';
 import { useWindowSnappingManager } from '@/composables/window/useWindowSnappingManager.ts';
 
-const { reference, windowContentComponent, isFixed, width, height, minWidth, minHeight } = defineProps<{
-  reference: WindowFlatReference;
-  windowContentComponent: Component;
-  isFixed?: boolean;
-  width?: string;
-  height?: string;
-  minWidth?: string;
-  minHeight?: string;
-}>();
+const { reference, windowContentComponent, width, height, minWidth, minHeight, windowType } =
+  defineProps<{
+    reference: WindowFlatReference;
+    windowContentComponent: Component;
+    width?: string;
+    height?: string;
+    minWidth?: string;
+    minHeight?: string;
+    windowType?: 'fixed' | 'inline';
+  }>();
 
 const styles: Ref<WindowStyleObject> = ref({
   left: '25%',
@@ -24,7 +25,7 @@ const styles: Ref<WindowStyleObject> = ref({
   width: width ? width : '50%',
   height: height ? height : '50%',
   minWidth: minWidth ? minWidth : '250px',
-  minHeight: minHeight ? minHeight: '50px',
+  minHeight: minHeight ? minHeight : '50px',
   zIndex: 10,
   display: 'block',
   cursor: 'auto',
@@ -37,16 +38,26 @@ onBeforeMount(() => {
   provide('windowId', windowStateManager.windowId);
 });
 
-useWindowSnappingManager(styles, windowStateManager.windowId, windowStateManager, isFixed);
+useWindowSnappingManager(
+  styles,
+  windowStateManager.windowId,
+  windowStateManager,
+  windowType === 'fixed',
+);
 
 const windowRef = ref();
-const windowResizeManager = useWindowResizeManager(styles, windowRef, windowStateManager, isFixed);
+const windowResizeManager = useWindowResizeManager(
+  styles,
+  windowRef,
+  windowStateManager,
+  windowType === 'fixed',
+);
 const windowPositionManager = useWindowPositionManager(
   styles,
   windowRef,
   windowStateManager,
   windowResizeManager.currentCorner,
-  isFixed
+  windowType === 'fixed',
 );
 
 function onMousedownHeader(event: MouseEvent) {
@@ -63,7 +74,7 @@ function minimizeWindow() {
 }
 
 function maximizeWindow() {
-  if (isFixed) return;
+  if (windowType === 'fixed') return;
   windowResizeManager.setWindowMaximized(cachedStyles);
 }
 
@@ -87,7 +98,7 @@ const windowContentStyles = { height: windowContentHeight.value, width: '100%', 
     <slot />
     <WindowHeader
       :reference="reference"
-      :is-fixed="isFixed"
+      :windowType="windowType"
       @on-mousedown-header="onMousedownHeader"
       @window-control-close="closeWindow"
       @window-control-maximize="maximizeWindow"

@@ -3,6 +3,8 @@ import { readonly, ref } from 'vue';
 
 import type { WindowReference } from '@/types/WindowTypes.ts';
 import type { Application } from '@/types/ItemTypes.ts';
+import { useVideoPlayerStore } from '@/stores/videoPlayer.ts';
+import { useImageViewerStore } from '@/stores/imageViewer.ts';
 
 type WindowReferences = { [applicationName: string]: WindowReference[] };
 export const useWindowStore = defineStore('window', () => {
@@ -14,6 +16,14 @@ export const useWindowStore = defineStore('window', () => {
     const id = getNextWindowId(windowName);
     const idNumber = Number(id.split('-')[1]);
 
+    if (windowName === 'Video Player') {
+      useVideoPlayerStore().hasOpenInstance = true;
+    }
+
+    if (windowName === 'Image Viewer') {
+      useImageViewerStore().hasOpenInstance = false;
+    }
+
     if (typeof openWindowsReferences.value[windowName] === 'undefined') {
       openWindowsReferences.value[windowName] = [{ id: idNumber, minimized: false }];
       return id;
@@ -21,6 +31,7 @@ export const useWindowStore = defineStore('window', () => {
 
     openWindowsReferences.value[windowName].push({ id: idNumber, minimized: false });
     pushWindowToFront(getWindowId(windowName, idNumber));
+
     return id;
   }
 
@@ -51,7 +62,7 @@ export const useWindowStore = defineStore('window', () => {
     zIndexesOrder.value.push(windowId);
   }
 
-  function getWindowCountByName(windowName: string) {
+  function getWindowCountByName(windowName: string | Application) {
     const reference = openWindowsReferences.value[windowName];
     if (!reference) {
       return 0;
@@ -80,6 +91,24 @@ export const useWindowStore = defineStore('window', () => {
     const { windowName, id } = splitWindowId(windowId);
     if (typeof openWindowsReferences.value[windowName] === 'undefined') {
       return;
+    }
+
+    if (windowId === useVideoPlayerStore().loadedVideo.windowId) {
+      const windowCount = getWindowCountByName('Video Player');
+      if (windowCount > 1) {
+        return;
+      }
+
+      useVideoPlayerStore().hasOpenInstance = false;
+    }
+
+    if (windowId === useImageViewerStore().loadedImage.windowId) {
+      const windowCount = getWindowCountByName('Image Viewer');
+      if (windowCount > 1) {
+        return;
+      }
+
+      useImageViewerStore().hasOpenInstance = false;
     }
 
     openWindowsReferences.value[windowName] = openWindowsReferences.value[windowName].filter(

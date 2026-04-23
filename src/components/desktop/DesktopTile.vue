@@ -11,6 +11,7 @@ import { useInitializeContextMenu } from '@/composables/contextMenu/useInitializ
 import { useDblClick } from '@/composables/helpers/UseDblClick.ts';
 import { useMultiSelectionBoxStore } from '@/stores/multiSelectionBox.ts';
 import { useHandleDesktopFileClicked } from '@/composables/desktop/useHandleDesktopFileClicked.ts';
+import { useVideoPlayerStore } from '@/stores/videoPlayer.ts';
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 

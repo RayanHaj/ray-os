@@ -8,6 +8,7 @@ export const useImageViewerStore = defineStore('imageViewer', () => {
     windowId: null,
     file: null,
   });
+  const hasOpenInstance: Ref<boolean> = ref(false);
 
   function initImageFileAndUrl(windowId: string, imageFile: File): boolean {
     if (!isImageType(imageFile.type)) {
@@ -18,5 +19,5 @@ export const useImageViewerStore = defineStore('imageViewer', () => {
     return true;
   }
 
-  return { loadedImage, initImageFileAndUrl };
+  return { loadedImage, initImageFileAndUrl, hasOpenInstance };
 });
