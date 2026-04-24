@@ -135,7 +135,6 @@ watch(
 
 <style scoped>
 main {
-  //(dvh): Dynamic Viewport Height
   height: 100dvh;
   width: 100dvw;
   background-color: var(--background-color);
