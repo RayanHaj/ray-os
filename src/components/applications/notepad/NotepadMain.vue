@@ -40,7 +40,7 @@ function handleUploadClick() {
 const fileExplorerWindowIsOpen = computed(() =>
   useWindowStore().openWindowsReferences['File Explorer']?.some(
     (reference) =>
-      useWindowStore().getGlobalId('File Explorer', reference.id) === fileExplorerWindowId.value,
+      useWindowStore().getWindowId('File Explorer', reference.id) === fileExplorerWindowId.value,
   ),
 );
 

@@ -54,6 +54,11 @@ export const useWindowStore = defineStore('window', () => {
     return getWindowId(windowName, id + 1);
   }
 
+  /**
+   * Builds a windowId string from a windowName and id
+   * @param windowName
+   * @param id
+   */
   function getWindowId(windowName: string, id: number) {
     return `${windowName}-${id}`;
   }
@@ -160,7 +165,7 @@ export const useWindowStore = defineStore('window', () => {
     setWindowZIndexToTop,
     getWindowCountByName,
     getNextWindowId,
-    getGlobalId: getWindowId,
+    getWindowId,
     getZIndex,
     getFocusedWindowId,
   };

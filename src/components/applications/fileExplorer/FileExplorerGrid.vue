@@ -90,6 +90,18 @@ async function onRightClick(
           Paste: () => {},
           Delete: async () => {
             if (item) {
+              if (item.isSystemFile) {
+                useToastStore().createToast(
+                  'cannot delete system files',
+                  'error',
+                  5000,
+                  'window',
+                  windowId,
+                );
+
+                return;
+              }
+
               try {
                 await useDeleteFileSystemItem(rayDb, item);
               } catch (e) {
@@ -236,7 +248,9 @@ function handleDisabledItem(item: FileSystemItem) {
 }
 
 const fileExplorerStore = useFileExplorerStore();
-const itemSize = computed<FileItemSizeValue>(() => itemSizes[fileExplorerStore.currentFileItemSize]);
+const itemSize = computed<FileItemSizeValue>(
+  () => itemSizes[fileExplorerStore.currentFileItemSize],
+);
 </script>
 
 <template>

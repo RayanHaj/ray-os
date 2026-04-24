@@ -128,7 +128,7 @@ function onClickTile() {
 
   if (reference.length === 1) {
     windowStore.setWindowMinimized(
-      windowStore.getGlobalId(application.value.label, reference[0].id),
+      windowStore.getWindowId(application.value.label, reference[0].id),
     );
   }
 }

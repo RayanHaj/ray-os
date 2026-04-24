@@ -38,7 +38,7 @@ export function useWindowStateManager(styles: Ref<StyleProps>, reference: Window
   const isDraggingWindow = ref(false);
 
   const windowStore = useWindowStore();
-  const windowId = windowStore.getGlobalId(reference.label, reference.id);
+  const windowId = windowStore.getWindowId(reference.label, reference.id);
 
   watch(
     () => isDraggingWindow.value,
@@ -65,7 +65,7 @@ export function useWindowStateManager(styles: Ref<StyleProps>, reference: Window
   watch(
     () => windowStore.zIndexesOrder,
     (newValue, oldValue) => {
-      const globalId = windowStore.getGlobalId(reference.label, reference.id);
+      const globalId = windowStore.getWindowId(reference.label, reference.id);
       const newIndex = newValue.indexOf(globalId);
       const oldIndex = oldValue.indexOf(globalId);
       if (newIndex === oldIndex) {

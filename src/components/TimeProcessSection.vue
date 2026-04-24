@@ -36,7 +36,8 @@ watch(
   font-size: var(--font-size-elg);
   font-family: 'Courier New', sans-serif;
   align-items: end;
-  padding: 10px;
+  padding: 6px;
+  padding-inline: 10px;
   width: fit-content;
   border-radius: 5px;
 }

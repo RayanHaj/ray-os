@@ -15,15 +15,11 @@ onBeforeUnmount(() => emits('tabsUnmounted'));
 </script>
 
 <template>
-  <ol
-    class="tabs"
-    @mouseenter="$emit('mouseEntered')"
-    @mouseleave="$emit('mouseLeft')"
-  >
+  <ol class="tabs" @mouseenter="$emit('mouseEntered')" @mouseleave="$emit('mouseLeft')">
     <TaskbarTab
       v-for="reference of references"
-      :key="useWindowStore().getGlobalId(applicationName, reference.id)"
-      :window-id="useWindowStore().getGlobalId(applicationName, reference.id)"
+      :key="useWindowStore().getWindowId(applicationName, reference.id)"
+      :window-id="useWindowStore().getWindowId(applicationName, reference.id)"
       :application-name="applicationName"
     />
   </ol>
