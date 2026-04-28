@@ -1,17 +1,26 @@
 import { defineStore } from 'pinia';
-import { ref, watch } from 'vue';
+import { computed, ref, watch, watchEffect } from 'vue';
 import type {
+  PrimaryActionsContextMenu,
   primaryActionsContextMenu,
   SecondaryActionsContextMenu,
 } from '@/types/ContextMenuTypes.ts';
+import { useBrowserStore } from '@/stores/browser.ts';
+import { useTaskbarStore } from '@/stores/taskbar.ts';
 
 export const useContextMenuStore = defineStore('contextMenu', () => {
-  const contextMenusProperties = ref<{
-    show: boolean;
-    primaryActions?: readonly typeof primaryActionsContextMenu[number][];
-    secondaryActions?: readonly SecondaryActionsContextMenu[];
-    mousePosition?: { left: number; top: number };
-  }>({ show: false });
+  const fallbackPrimaryActions: PrimaryActionsContextMenu[] = ['Copy', 'Paste', 'Delete', 'Rename'];
+  const fallbackSecondaryActions: SecondaryActionsContextMenu[] = [];
+  const fallbackPosition: { left: number; top: number } = { left: 100, top: 100 };
+
+  const cmIsShown = ref<boolean>(false);
+  const cmPrimaryActions =
+    ref<readonly (typeof primaryActionsContextMenu)[number][]>(fallbackPrimaryActions);
+  const cmSecondaryActions = ref<readonly SecondaryActionsContextMenu[]>(fallbackSecondaryActions);
+  const cmPosition = ref<{ left: number; top: number }>(fallbackPosition);
+
+  const contextMenuHeight = ref(300);
+  const contextMenuWidth = ref(200);
 
   const watcher = ref<() => void>();
   const buttonClicked = ref<{ [button: string]: boolean }>({});
@@ -19,12 +28,12 @@ export const useContextMenuStore = defineStore('contextMenu', () => {
   function initializeContextMenu(
     primaryActions?: readonly typeof primaryActionsContextMenu[number][],
     secondaryActions?: readonly SecondaryActionsContextMenu[],
-    mousePosition?: { left: number; top: number },
+    position?: { left: number; top: number },
     actions?: { [buttonName: string]: () => unknown | Promise<unknown> },
   ) {
-    contextMenusProperties.value.primaryActions = primaryActions;
-    contextMenusProperties.value.secondaryActions = secondaryActions;
-    contextMenusProperties.value.mousePosition = mousePosition;
+    cmPrimaryActions.value = primaryActions ?? fallbackPrimaryActions;
+    cmSecondaryActions.value = secondaryActions ?? fallbackSecondaryActions;
+    cmPosition.value = position ?? fallbackPosition;
 
     watcher.value = watch(
       () => buttonClicked.value,
@@ -40,37 +49,64 @@ export const useContextMenuStore = defineStore('contextMenu', () => {
     );
   }
 
+  const maximumContextMenuTop = computed(
+    () => useBrowserStore().height - useTaskbarStore().taskbarHeight - contextMenuHeight.value - 10,
+  );
+
+  const maximumContextMenuLeft = computed(
+    () => useBrowserStore().width - contextMenuWidth.value - 10,
+  );
+
+  const contextMenuWithinBordersTop = computed(
+    () =>
+      useBrowserStore().height -
+        cmPosition.value.top -
+        contextMenuHeight.value -
+        useTaskbarStore().taskbarHeight >
+      0,
+  );
+
+  const contextMenuWithinBordersLeft = computed(
+    () => useBrowserStore().width - cmPosition.value.left - contextMenuWidth.value > 0,
+  );
+
+  watchEffect(() => {
+    if (!contextMenuWithinBordersTop.value) {
+      cmPosition.value.top = maximumContextMenuTop.value;
+    }
+
+    if (!contextMenuWithinBordersLeft.value) {
+      cmPosition.value.left = maximumContextMenuLeft.value;
+    }
+  });
+
   function setClickedButton(button: string) {
     const currentValue = buttonClicked.value[button] ?? false;
+    console.log(currentValue);
     buttonClicked.value = { [button]: !currentValue };
   }
 
-  function updateContextMenuPosition(mousePosition?: { left: number; top: number }) {
-    contextMenusProperties.value.mousePosition = mousePosition;
-  }
-
   function show() {
-    contextMenusProperties.value.show = true;
-  }
-
-  function isShown() {
-    return contextMenusProperties.value.show;
+    cmIsShown.value = true;
   }
 
   function hide() {
-    contextMenusProperties.value.show = false;
+    cmIsShown.value = false;
     if (typeof watcher.value === 'function') {
       watcher.value();
     }
   }
 
   return {
-    show,
-    isShown,
-    hide,
-    updateContextMenuPosition,
+    primaryActions: computed(() => cmPrimaryActions.value),
+    secondaryActions: computed(() => cmSecondaryActions.value),
+    position: computed(() => cmPosition.value),
+    isShown: computed(() => cmIsShown.value),
+    contextMenuHeight,
+    contextMenuWidth,
     initializeContextMenu,
-    contextMenusProperties,
     setClickedButton,
+    show,
+    hide,
   };
 });

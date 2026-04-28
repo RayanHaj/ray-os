@@ -8,7 +8,7 @@ import { useStartMenuStore } from '@/stores/startMenu.ts';
  */
 export function useOnOuterClickClose(target: HTMLElement) {
   if (!target.closest('.context-menu')) {
-    if (useContextMenuStore().isShown()) {
+    if (useContextMenuStore().isShown) {
       useContextMenuStore().hide();
     }
   }

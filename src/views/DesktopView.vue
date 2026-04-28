@@ -90,7 +90,7 @@ watch(
     :style="{ backgroundImage: wallpaperUrl }"
   >
     <UiToast toast-location="desktop" />
-    <ContextMenu v-show="contextMenuStore.isShown()" />
+    <ContextMenu v-show="contextMenuStore.isShown" />
     <DesktopSnapLayout />
     <WindowMain
       v-for="reference of windowFlatReferences"

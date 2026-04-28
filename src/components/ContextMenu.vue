@@ -1,39 +1,10 @@
 <script setup lang="ts">
-import { type Component, computed, onBeforeMount, ref, shallowRef, watchEffect } from 'vue';
+import { type Component, onBeforeMount, shallowRef } from 'vue';
 import { useSvgByFileNameAndDirectory } from '@/composables/svg/useSvgByFileNameAndDirectory.ts';
-import {
-  type SecondaryActionsContextMenu,
-  type AllPrimaryActionsContextMenu,
-  type PrimaryActionsContextMenu,
-} from '@/types/ContextMenuTypes.ts';
+import { type AllPrimaryActionsContextMenu } from '@/types/ContextMenuTypes.ts';
 import { useContextMenuStore } from '@/stores/contextMenu.ts';
-import { useTaskbarStore } from '@/stores/taskbar.ts';
-import { useBrowserStore } from '@/stores/browser.ts';
 
 const contextMenuStore = useContextMenuStore();
-
-const fallbackPrimaryActions: PrimaryActionsContextMenu[] = ['Copy', 'Paste', 'Delete', 'Rename'];
-
-const primaryActions = computed<PrimaryActionsContextMenu[]>(
-  () =>
-    (contextMenuStore.contextMenusProperties.primaryActions as
-      | PrimaryActionsContextMenu[]
-      | undefined) ?? fallbackPrimaryActions,
-);
-
-const secondaryActions = computed<SecondaryActionsContextMenu[]>(
-  () =>
-    (contextMenuStore.contextMenusProperties.secondaryActions as
-      | SecondaryActionsContextMenu[]
-      | undefined) ?? [],
-);
-
-const contextMenuHeight = ref(300);
-const contextMenuWidth = ref(200);
-
-const mousePosition = computed<{ left: number; top: number }>(
-  () => contextMenuStore.contextMenusProperties.mousePosition ?? { left: 100, top: 100 },
-);
 
 const primaryActionsSvgs = shallowRef<Record<string, Component>>({});
 onBeforeMount(async () => {
@@ -44,53 +15,22 @@ onBeforeMount(async () => {
     }
   }
 });
-
-const maximumContextMenuTop = computed(
-  () => useBrowserStore().height - useTaskbarStore().taskbarHeight - contextMenuHeight.value - 10,
-);
-
-const maximumContextMenuLeft = computed(
-  () => useBrowserStore().width - contextMenuWidth.value - 10,
-);
-
-const contextMenuWithinBordersTop = computed(
-  () =>
-    useBrowserStore().height -
-      mousePosition.value.top -
-      contextMenuHeight.value -
-      useTaskbarStore().taskbarHeight >
-    0,
-);
-
-const contextMenuWithinBordersLeft = computed(
-  () => useBrowserStore().width - mousePosition.value.left - contextMenuWidth.value > 0,
-);
-
-watchEffect(() => {
-  if (!contextMenuWithinBordersTop.value) {
-    mousePosition.value.top = maximumContextMenuTop.value;
-  }
-
-  if (!contextMenuWithinBordersLeft.value) {
-    mousePosition.value.left = maximumContextMenuLeft.value;
-  }
-});
 </script>
 
 <template>
   <div
     class="context-menu"
     :style="{
-      left: `${mousePosition.left}px`,
-      top: `${mousePosition.top}px`,
-      height: `${contextMenuHeight}px`,
-      width: `${contextMenuWidth}px`,
+      left: `${contextMenuStore.position.left}px`,
+      top: `${contextMenuStore.position.top}px`,
+      height: `${contextMenuStore.contextMenuHeight}px`,
+      width: `${contextMenuStore.contextMenuWidth}px`,
     }"
   >
     <div class="primary-actions">
       <button
         class="primary-action"
-        v-for="action of primaryActions"
+        v-for="action of contextMenuStore.primaryActions"
         :key="action"
         @click="contextMenuStore.setClickedButton(action)"
       >
@@ -101,7 +41,7 @@ watchEffect(() => {
     <div class="secondary-actions">
       <button
         class="secondary-action"
-        v-for="action of secondaryActions"
+        v-for="action of contextMenuStore.secondaryActions"
         :key="action.id"
         @click="contextMenuStore.setClickedButton(action.id)"
       >
