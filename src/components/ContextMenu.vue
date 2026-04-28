@@ -10,46 +10,7 @@ import { useContextMenuStore } from '@/stores/contextMenu.ts';
 import { useTaskbarStore } from '@/stores/taskbar.ts';
 import { useBrowserStore } from '@/stores/browser.ts';
 
-const primaryActionsSvgs = shallowRef<Record<string, Component>>({});
-onBeforeMount(async () => {
-  for (const action of ['Copy', 'Paste', 'Delete', 'Rename'] as AllPrimaryActionsContextMenu) {
-    const svg = await useSvgByFileNameAndDirectory(action);
-    if (svg) {
-      primaryActionsSvgs.value[action] = svg;
-    }
-  }
-});
-
 const contextMenuStore = useContextMenuStore();
-const contextMenuHeight = ref(300);
-const contextMenuWidth = ref(200);
-
-const mousePosition = computed<{ left: number; top: number }>(
-  () => contextMenuStore.contextMenusProperties.mousePosition ?? { left: 100, top: 100 },
-);
-
-watchEffect(() => {
-  const withinBorders =
-    useBrowserStore().height -
-      mousePosition.value.top -
-      contextMenuHeight.value -
-      useTaskbarStore().taskbarHeight >
-    0;
-  const maximumContextMenuTop =
-    useBrowserStore().height - useTaskbarStore().taskbarHeight - contextMenuHeight.value - 10;
-  if (!withinBorders) {
-    mousePosition.value.top = maximumContextMenuTop;
-  }
-});
-
-watchEffect(() => {
-  const withinBorders =
-    useBrowserStore().width - mousePosition.value.left - contextMenuWidth.value > 0;
-  const maximumContextMenuLeft = useBrowserStore().width - contextMenuWidth.value - 10;
-  if (!withinBorders) {
-    mousePosition.value.left = maximumContextMenuLeft;
-  }
-});
 
 const fallbackPrimaryActions: PrimaryActionsContextMenu[] = ['Copy', 'Paste', 'Delete', 'Rename'];
 
@@ -66,6 +27,54 @@ const secondaryActions = computed<SecondaryActionsContextMenu[]>(
       | SecondaryActionsContextMenu[]
       | undefined) ?? [],
 );
+
+const contextMenuHeight = ref(300);
+const contextMenuWidth = ref(200);
+
+const mousePosition = computed<{ left: number; top: number }>(
+  () => contextMenuStore.contextMenusProperties.mousePosition ?? { left: 100, top: 100 },
+);
+
+const primaryActionsSvgs = shallowRef<Record<string, Component>>({});
+onBeforeMount(async () => {
+  for (const action of ['Copy', 'Paste', 'Delete', 'Rename'] as AllPrimaryActionsContextMenu) {
+    const svg = await useSvgByFileNameAndDirectory(action);
+    if (svg) {
+      primaryActionsSvgs.value[action] = svg;
+    }
+  }
+});
+
+const maximumContextMenuTop = computed(
+  () => useBrowserStore().height - useTaskbarStore().taskbarHeight - contextMenuHeight.value - 10,
+);
+
+const maximumContextMenuLeft = computed(
+  () => useBrowserStore().width - contextMenuWidth.value - 10,
+);
+
+const contextMenuWithinBordersTop = computed(
+  () =>
+    useBrowserStore().height -
+      mousePosition.value.top -
+      contextMenuHeight.value -
+      useTaskbarStore().taskbarHeight >
+    0,
+);
+
+const contextMenuWithinBordersLeft = computed(
+  () => useBrowserStore().width - mousePosition.value.left - contextMenuWidth.value > 0,
+);
+
+watchEffect(() => {
+  if (!contextMenuWithinBordersTop.value) {
+    mousePosition.value.top = maximumContextMenuTop.value;
+  }
+
+  if (!contextMenuWithinBordersLeft.value) {
+    mousePosition.value.left = maximumContextMenuLeft.value;
+  }
+});
 </script>
 
 <template>
