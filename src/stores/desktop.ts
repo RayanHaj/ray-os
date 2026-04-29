@@ -85,12 +85,14 @@ export const useDesktopStore = defineStore('desktop', () => {
       return;
     }
 
+    items.value = [];
+
     for (const item of desktopItems) {
       if (item.type === 'directory') {
       } else {
         const fileItem = await rayDb.findOne<Item>('files', 'id', item.id);
         if (fileItem) {
-          items.value.push({ ...fileItem, tileId: item.tileId });
+          items.value = [...items.value, { ...fileItem, tileId: item.tileId }];
         }
       }
     }

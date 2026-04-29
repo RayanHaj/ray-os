@@ -11,7 +11,6 @@ import { useInitializeContextMenu } from '@/composables/contextMenu/useInitializ
 import { useDblClick } from '@/composables/helpers/UseDblClick.ts';
 import { useMultiSelectionBoxStore } from '@/stores/multiSelectionBox.ts';
 import { useHandleDesktopFileClicked } from '@/composables/desktop/useHandleDesktopFileClicked.ts';
-import { useVideoPlayerStore } from '@/stores/videoPlayer.ts';
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 
@@ -61,10 +60,12 @@ function onTileRightClick(event: MouseEvent) {
 }
 
 onMounted(async () => await updateTile());
+
 watch(
   () => desktopStore.items,
   (newValue) => {
     const item = newValue.find((item) => item.tileId === tileId.value);
+
     if (!item) {
       tileItem.value = null;
       return;

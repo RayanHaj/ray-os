@@ -6,7 +6,7 @@ export function useHandleIDBFileOperations(rayDb: RayDb) {
   async function remove(fileId: number, fileSystemId: number, type: ItemType) {
     await rayDb.deleteOne('fileSystem', fileSystemId);
     await rayDb.deleteOne('files', fileId);
-    await rayDb.deleteOne('desktopFiles', [fileId, type]);
+    await rayDb.deleteOne('desktopFiles', fileId);
     await useDesktopStore().updateTiles(rayDb);
   }
 

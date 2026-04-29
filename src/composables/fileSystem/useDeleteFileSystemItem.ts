@@ -3,6 +3,7 @@ import { deleteFileSystemItem } from '@/composables/fileSystem/useIndexedDbHelpe
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import { useDesktopStore } from '@/stores/desktop.ts';
+// import { useDesktopStore } from '@/stores/desktop.ts';
 
 export async function useDeleteFileSystemItem(
   rayDb: RayDb,
@@ -19,11 +20,5 @@ export async function useDeleteFileSystemItem(
 
   if (updateFileSystem) {
     useFileSystemStore().updateFileSystem();
-  }
-
-  if (id) {
-    await useDesktopStore().deleteDesktopItem(rayDb, id);
-  } else if (item && item.file?.id) {
-    await useDesktopStore().deleteDesktopItem(rayDb, item.file.id);
   }
 }
