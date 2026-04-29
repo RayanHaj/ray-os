@@ -187,4 +187,34 @@ watch(
 .slide-leave-active {
   transition: transform 0.3s ease;
 }
+
+@media screen and (max-width: 550px) {
+  .snap-layout {
+    width: 300px;
+  }
+
+  .preview-beam {
+    width: 300px;
+  }
+
+  .half-layout {
+    width: 100px;
+  }
+
+  #topLeft,
+  #topRight,
+  #bottomLeft,
+  #bottomRight {
+    width: 60px;
+  }
+}
+
+@media screen and (max-width: 500px){
+  .snap-layout {
+    display: none;
+  }
+  .preview-beam {
+    display: none;
+  }
+}
 </style>

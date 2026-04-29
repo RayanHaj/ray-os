@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useWindowStore } from '@/stores/window.ts';
 import TaskbarTab from '@/components/taskbar/TaskbarTab.vue';
+import { useBrowserStore } from '@/stores/browser.ts';
 
 const { applicationName } = defineProps<{ applicationName: string }>();
 const emits = defineEmits(['mouseLeft', 'mouseEntered', 'tabsUnmounted']);
@@ -12,10 +13,42 @@ const references = computed(() => {
 });
 
 onBeforeUnmount(() => emits('tabsUnmounted'));
+
+const tabsRef = ref<HTMLOListElement>();
+const tabIsOverflowing = ref<'positive' | 'negative' | ''>('');
+onMounted(() => {
+  if (tabsRef.value) {
+    const rect = tabsRef.value.getBoundingClientRect();
+
+    if (rect.x + rect.width >= useBrowserStore().width) {
+      tabIsOverflowing.value = 'positive';
+    } else if (rect.x < 0) {
+      tabIsOverflowing.value = 'negative';
+    } else {
+      tabIsOverflowing.value = '';
+    }
+  }
+});
+
+const getTabIsOverflowingStyle = computed(() => {
+  if (tabIsOverflowing.value === 'positive') {
+    return { right: 0 };
+  } else if (tabIsOverflowing.value === 'negative') {
+    return { left: 0 };
+  }
+
+  return '';
+});
 </script>
 
 <template>
-  <ol class="tabs" @mouseenter="$emit('mouseEntered')" @mouseleave="$emit('mouseLeft')">
+  <ol
+    ref="tabsRef"
+    class="tabs"
+    :style="getTabIsOverflowingStyle"
+    @mouseenter="$emit('mouseEntered')"
+    @mouseleave="$emit('mouseLeft')"
+  >
     <TaskbarTab
       v-for="reference of references"
       :key="useWindowStore().getWindowId(applicationName, reference.id)"
