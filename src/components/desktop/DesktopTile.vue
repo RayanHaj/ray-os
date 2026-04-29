@@ -43,6 +43,9 @@ function onTileRightClick(event: MouseEvent) {
             return;
           }
 
+          console.log('deleting: ');
+          console.log(tileItem.value);
+
           await desktopStore.deleteDesktopItem(rayDb, tileItem.value.id);
         },
       },
