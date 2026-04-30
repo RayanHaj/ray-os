@@ -40,7 +40,6 @@ export const useDesktopStore = defineStore('desktop', () => {
     for (const fileItem of fileItems) {
       const item = await rayDb.findOne<Item>('files', 'id', fileItem.id);
 
-      console.log(item);
       if (!item) {
         return;
       }

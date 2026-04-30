@@ -185,7 +185,7 @@ async function onFileDrop(event: DragEvent) {
         return;
       }
 
-      await useDeleteFileSystemItem(rayDb, dropItem, false, true);
+      await useDeleteFileSystemItem(rayDb, dropItem, true, true);
     } catch (e) {
       console.error(e);
     }
