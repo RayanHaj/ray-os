@@ -11,7 +11,7 @@ const windowId = useInjectOrThrow<string>('windowId');
 
 const emptyLine = { line: '', isPlain: false };
 const lines = ref<Array<{ line: string; isPlain: boolean }>>([
-  { line: 'RayOS Terminal', isPlain: true },
+  { line: 'RayOS Terminal — type "help" for commands', isPlain: true },
   emptyLine,
 ]);
 
