@@ -100,20 +100,16 @@ export const useWindowStore = defineStore('window', () => {
 
     if (windowId === useVideoPlayerStore().loadedVideo.windowId) {
       const windowCount = getWindowCountByName('Video Player');
-      if (windowCount > 1) {
-        return;
+      if (windowCount <= 1) {
+        useVideoPlayerStore().hasOpenInstance = false;
       }
-
-      useVideoPlayerStore().hasOpenInstance = false;
     }
 
     if (windowId === useImageViewerStore().loadedImage.windowId) {
       const windowCount = getWindowCountByName('Image Viewer');
-      if (windowCount > 1) {
-        return;
+      if (windowCount <= 1) {
+        useImageViewerStore().hasOpenInstance = false;
       }
-
-      useImageViewerStore().hasOpenInstance = false;
     }
 
     openWindowsReferences.value[windowName] = openWindowsReferences.value[windowName].filter(

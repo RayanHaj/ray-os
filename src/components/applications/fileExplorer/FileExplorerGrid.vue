@@ -21,6 +21,7 @@ import { useToastStore } from '@/stores/toast.ts';
 import { useInitializeContextMenu } from '@/composables/contextMenu/useInitializeContextMenu.ts';
 import { useDblClick } from '@/composables/helpers/UseDblClick.ts';
 import { SystemFileDeleteError } from '@/exceptions/SystemFileDeleteError.ts';
+import { useFileSystemStore } from '@/stores/fileSystem.ts';
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 const windowId = useInjectOrThrow<string>('windowId');
