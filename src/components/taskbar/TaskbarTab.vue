@@ -34,12 +34,11 @@ function onClickTab() {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  width: 100%;
+  width: calc(100% - 5px);
   background-color: var(--tabs-secondary-background);
-  padding: 10px;
+  padding: 5px;
   border-radius: 5px;
   cursor: auto;
-  user-select: none;
 }
 
 .tab:hover {

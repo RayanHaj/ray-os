@@ -42,37 +42,56 @@ const getTabIsOverflowingStyle = computed(() => {
 </script>
 
 <template>
-  <ol
-    ref="tabsRef"
-    class="tabs"
-    :style="getTabIsOverflowingStyle"
+  <div
+    class="tabs-wrapper"
     @mouseenter="$emit('mouseEntered')"
     @mouseleave="$emit('mouseLeft')"
+    :style="getTabIsOverflowingStyle"
   >
-    <TaskbarTab
-      v-for="reference of references"
-      :key="useWindowStore().getWindowId(applicationName, reference.id)"
-      :window-id="useWindowStore().getWindowId(applicationName, reference.id)"
-      :application-name="applicationName"
-    />
-  </ol>
+    <ol ref="tabsRef" class="tabs">
+      <TaskbarTab
+        v-for="reference of references"
+        :key="useWindowStore().getWindowId(applicationName, reference.id)"
+        :window-id="useWindowStore().getWindowId(applicationName, reference.id)"
+        :application-name="applicationName"
+      />
+    </ol>
+    <button
+      class="add-new-instance-button"
+      @click="useWindowStore().pushOpenWindowReference(applicationName)"
+    >
+      New window
+    </button>
+  </div>
 </template>
 
 <style scoped>
-.tabs {
+.tabs-wrapper {
   position: absolute;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   gap: 5px;
   background-color: var(--tabs-background);
   border: var(--window-border-color) solid 2px;
   color: var(--tabs-text);
   border-radius: 5px;
   bottom: 70px;
-  padding: 20px;
+  padding: 10px;
   width: 200px;
   min-height: 200px;
   max-height: 300px;
+  overflow: hidden;
+  user-select: none;
+}
+.tabs {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
   overflow: auto;
+}
+.add-new-instance-button {
+  width: 100%;
 }
 </style>
