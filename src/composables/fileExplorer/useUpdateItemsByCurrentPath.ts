@@ -6,7 +6,7 @@ import { useDeleteFileSystemItem } from '@/composables/fileSystem/useDeleteFileS
 export async function useUpdateItemsByCurrentPath(
   rayDb: RayDb,
   path: string
-) {
+): Promise<FileSystemItem[]> {
   const fileSystemItems = await fileSystemLookup(rayDb, path);
   if (fileSystemItems instanceof Error || !fileSystemItems) {
     throw new Error(`No fileSystemItems (children) found with specified path: ${path}`);
@@ -15,7 +15,7 @@ export async function useUpdateItemsByCurrentPath(
   return await mapItemsWithType(rayDb, fileSystemItems.children);
 }
 
-async function mapItemsWithType(rayDb: RayDb, items: FileSystemItem[]) {
+async function mapItemsWithType(rayDb: RayDb, items: FileSystemItem[]): Promise<FileSystemItem[]> {
   return await Promise.all(
     items.map(async (item) => {
       const updatedItems = { ...item, type: 'directory' };
@@ -34,5 +34,5 @@ async function mapItemsWithType(rayDb: RayDb, items: FileSystemItem[]) {
 
       return updatedItems;
     }).filter((item) => item !== undefined),
-  );
+  ) as FileSystemItem[];
 }

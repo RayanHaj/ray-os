@@ -26,7 +26,7 @@ const rayDb = useInjectOrThrow<RayDb>('rayDb');
 const windowId = useInjectOrThrow<string>('windowId');
 
 const { currentDirectories, parentId, filterByFileType } = defineProps<{
-  currentDirectories: Array<FileSystemItem & { type: string }>;
+  currentDirectories: FileSystemItem[];
   parentId: number;
   filterByFileType: FileType[];
 }>();
@@ -134,7 +134,7 @@ const videoSvg = useSvgOrFallback('VideoPlayer');
 const fileSvg = useSvgOrFallback('TextFile');
 const directorySvg = useSvgOrFallback('Directory');
 
-function getSvg(fileSystemItem: FileSystemItem & { type: string }) {
+function getSvg(fileSystemItem: FileSystemItem) {
   switch (fileSystemItem.type) {
     case 'application': {
       if (fileSystemItem.file?.name) {

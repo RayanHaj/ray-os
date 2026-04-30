@@ -26,7 +26,7 @@ const fileSystemStore = useFileSystemStore();
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 const windowId = useInjectOrThrow<string>('windowId');
 
-const items = ref<Array<FileSystemItem & { type: string }>>([]);
+const items = ref<FileSystemItem[]>([]);
 const path = ref<string[]>([fileSystemStore.rootDirectory]);
 const parentId = ref<number>();
 
