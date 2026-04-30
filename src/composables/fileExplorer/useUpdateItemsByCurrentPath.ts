@@ -1,6 +1,7 @@
 import { fileSystemLookup } from '@/composables/fileSystem/useIndexedDbHelper.ts';
 import type { FileSystemItem, Item } from '@/types/ItemTypes.ts';
 import type { RayDb } from 'ray-db-wrapper';
+import { useDeleteFileSystemItem } from '@/composables/fileSystem/useDeleteFileSystemItem.ts';
 
 export async function useUpdateItemsByCurrentPath(
   rayDb: RayDb,
@@ -21,10 +22,17 @@ async function mapItemsWithType(rayDb: RayDb, items: FileSystemItem[]) {
 
       if (item.file) {
         const file = await rayDb.findOne<Item>('files', 'id', item.file.id);
+
+        // if file does not exist in the files store but somehow a reference is still in the fileSystem store, it will be deleted
+        if (!file) {
+          await useDeleteFileSystemItem(rayDb, item, false, true);
+          return;
+        }
+
         updatedItems.type = file.content.type;
       }
 
       return updatedItems;
-    }),
+    }).filter((item) => item !== undefined),
   );
 }

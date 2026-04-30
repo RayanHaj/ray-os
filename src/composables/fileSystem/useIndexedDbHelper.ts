@@ -1,9 +1,8 @@
 import type { RayDb } from 'ray-db-wrapper';
-import type { FileSystemItem } from '@/types/ItemTypes.ts';
+import type { FileSystemItem, InsertFileSystemItem } from '@/types/ItemTypes.ts';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
 import { useGetRootDirectory } from '@/composables/fileSystem/useGetRootDirectory.ts';
 import { useHandleIDBFileOperations } from '@/composables/fileSystem/useHandleIDBFileOperations.ts';
-import { useToastStore } from '@/stores/toast.ts';
 import { SystemFileDeleteError } from '@/exceptions/SystemFileDeleteError.ts';
 
 function insertionCheck(
@@ -77,7 +76,7 @@ export async function insertItemIntoFileSystem(
     }
 
 
-    let id = await rayDb.insertOne<FileSystemItem>('fileSystem', {
+    let id = await rayDb.insertOne<InsertFileSystemItem>('fileSystem', {
       parents: parents,
       [item.directory ? 'directory' : 'file']: item.directory || item.file,
       isSystemFile: item.isSystemFile
@@ -91,7 +90,7 @@ export async function insertItemIntoFileSystem(
       if (parent.directory !== undefined) {
         if (!parent.directory.children.includes(id)) {
           parent.directory.children.push(id);
-          await rayDb.updateOne<FileSystemItem>('fileSystem', parent);
+          await rayDb.updateOne<InsertFileSystemItem>('fileSystem', parent);
         }
       }
     }
@@ -193,9 +192,9 @@ export async function getFileSystemItem(
   }
 }
 
-export async function updateFileSystemItem(rayDb: RayDb, id: number, updatedItem: FileSystemItem) {
+export async function updateFileSystemItem(rayDb: RayDb, id: number, updatedItem: InsertFileSystemItem) {
   try {
-    const id = await rayDb.updateOne<FileSystemItem>('fileSystem', updatedItem);
+    const id = await rayDb.updateOne<InsertFileSystemItem>('fileSystem', updatedItem);
     return id !== null;
   } catch (e) {
     console.error(e);
@@ -217,7 +216,7 @@ export async function deleteFileSystemItem(rayDb: RayDb, id: number, onlyFileSys
     const parent = await rayDb.findOne<FileSystemItem>('fileSystem', 'id', parentId);
     if (parent?.directory) {
       parent.directory.children = parent.directory.children.filter((childId) => childId !== id);
-      await rayDb.updateOne<FileSystemItem>('fileSystem', parent);
+      await rayDb.updateOne<InsertFileSystemItem>('fileSystem', parent);
     }
   }
 

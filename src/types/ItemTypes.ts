@@ -26,12 +26,21 @@ export interface ItemInsert {
 }
 
 export type FileSystemItem = {
+  id: number;
   parents: number[];
-  file?: { name: string; id: number, type: string };
+  file?: { name: string; id: number; type: string };
   directory?: { name: string; children: number[] };
+  isSystemFile?: boolean;
+  type?: string;
+};
+
+export type InsertFileSystemItem = {
   id?: number;
-  isSystemFile?: boolean
-  type?: string
+  parents: number[];
+  file?: { name: string; id: number; type: string };
+  directory?: { name: string; children: number[] };
+  isSystemFile?: boolean;
+  type?: string;
 };
 
 export const fileExtensions = {

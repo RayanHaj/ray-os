@@ -41,7 +41,7 @@ async function onDrop(event: DragEvent) {
 
     const dropItem = JSON.parse(plainItem);
 
-    await useDeleteFileSystemItem(rayDb, dropItem, undefined, true, false);
+    await useDeleteFileSystemItem(rayDb, dropItem, true, false);
 
     const parentPath = currentPath.slice(0, -1).join('/') || 'C:';
     const parentDir = await fileSystemLookup(rayDb, parentPath);

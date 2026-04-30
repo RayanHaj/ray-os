@@ -21,7 +21,7 @@ export async function useHandleDel(
     }
 
     try {
-      await useDeleteFileSystemItem(rayDb, undefined, targetValue.id);
+      await useDeleteFileSystemItem(rayDb, targetValue.id);
     } catch (e) {
       return new Error((e as Error).message);
     }

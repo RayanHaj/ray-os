@@ -1,4 +1,4 @@
-import type { FileSystemItem, Item, ItemInsert } from '@/types/ItemTypes.ts';
+import type { FileSystemItem, InsertFileSystemItem, Item, ItemInsert } from '@/types/ItemTypes.ts';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import { useToastStore } from '@/stores/toast.ts';
@@ -44,7 +44,7 @@ export async function useSaveChanges(
       fileItem.content.rawFile = new File([updatedText], fileName, { type: 'text/plain' });
 
       await rayDb.updateOne<ItemInsert>('files', fileItem);
-      await rayDb.updateManyByQuery<FileSystemItem>(
+      await rayDb.updateManyByQuery<InsertFileSystemItem>(
         'fileSystem',
         () => ({ file: { name: fileName } }),
         (item) => item.file?.id === fileItem.id,
