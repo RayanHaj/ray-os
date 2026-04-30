@@ -136,9 +136,7 @@ async function onDrop(event: DragEvent) {
     const id =
       type === 'application' || type === 'file'
         ? fileSystemItem.file?.id
-        : type === 'directory'
-          ? fileSystemItem.id
-          : null;
+        : null;
 
     if (id === null) {
       return;

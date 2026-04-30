@@ -194,5 +194,6 @@ async function handleModalInput(
 .file-explorer {
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 </style>

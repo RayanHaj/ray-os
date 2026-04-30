@@ -166,11 +166,14 @@ async function onFileDrop(event: DragEvent) {
   if (targetElement?.className === 'item') {
     try {
       const plainItem = event.dataTransfer?.getData('text/plain');
-      if (plainItem === undefined) {
-        return;
-      }
+      if (!plainItem) return;
 
-      const dropItem = JSON.parse(plainItem);
+      const parsedItem = JSON.parse(plainItem);
+      if (typeof parsedItem !== 'object') return;
+
+      const dropItem = parsedItem as FileSystemItem;
+      if (dropItem.isSystemFile) return;
+
       const targetElementName = targetElement.innerText;
       const targetElementId = currentDirectories.find(
         (dirEl) => dirEl.directory?.name == targetElementName,
@@ -268,7 +271,7 @@ const itemSize = computed<FileItemSizeValue>(
         :style="{ pointerEvents: handleDisabledItem(fileSystemItem) ? 'none' : 'auto' }"
         v-for="fileSystemItem of currentDirectories"
         :key="fileSystemItem.id"
-        :draggable="!fileSystemItem.isSystemFile"
+        draggable="true"
         @dragstart="onDragStart($event, fileSystemItem)"
         @click="useDblClick(() => $emit('itemEvent:dblClick', fileSystemItem))"
         @contextmenu.prevent.stop="onRightClick($event, fileSystemItem, 'gridItem')"

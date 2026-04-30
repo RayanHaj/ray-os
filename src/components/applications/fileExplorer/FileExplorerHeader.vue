@@ -10,6 +10,7 @@ import {
 import { useDeleteFileSystemItem } from '@/composables/fileSystem/useDeleteFileSystemItem.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import { RayDb } from 'ray-db-wrapper';
+import type { FileSystemItem } from '@/types/ItemTypes.ts';
 
 const { currentPath = ['C:/'] } = defineProps<{ currentPath?: string[] }>();
 
@@ -39,7 +40,11 @@ async function onDrop(event: DragEvent) {
     const plainItem = event.dataTransfer?.getData('text/plain');
     if (!plainItem) return;
 
-    const dropItem = JSON.parse(plainItem);
+    const parsedItem = JSON.parse(plainItem);
+    if (typeof parsedItem !== 'object') return;
+
+    const dropItem = parsedItem as FileSystemItem;
+    if (dropItem.isSystemFile) return;
 
     await useDeleteFileSystemItem(rayDb, dropItem, true, false);
 
