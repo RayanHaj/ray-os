@@ -47,7 +47,7 @@ export function useInitializeContextMenu(event: MouseEvent) {
     return { initialize };
   };
   const fileExplorerGrid = () => {
-    const primaryActions = ['Delete'] as const;
+    const primaryActions = [] as const;
     const secondaryActions = [
       { id: 'newDirectory', label: 'new directory', disabled: false },
       { id: 'newTextFile', label: 'new text file', disabled: false }

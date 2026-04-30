@@ -297,15 +297,16 @@ const itemSize = computed<FileItemSizeValue>(
   height: calc(100% - 50px);
   display: flex;
   flex-direction: column;
-  align-items: center;
   width: 100%;
   margin-left: 0;
   padding-left: 0;
+  overflow: auto;
 }
 
 .desktop-grid {
   display: flex;
   flex-wrap: wrap;
+  flex: 0;
   width: 100%;
   user-select: none;
   padding: 10px;
