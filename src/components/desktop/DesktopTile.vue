@@ -39,6 +39,7 @@ function onTileRightClick(event: MouseEvent) {
         },
         Delete: async () => {
           if (!tileItem.value) {
+            console.log('did not delete')
             return;
           }
 

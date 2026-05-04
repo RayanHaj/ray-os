@@ -35,8 +35,12 @@ export const useContextMenuStore = defineStore('contextMenu', () => {
     cmSecondaryActions.value = secondaryActions ?? fallbackSecondaryActions;
     cmPosition.value = position ?? fallbackPosition;
 
+    if (typeof watcher.value === 'function') {
+      watcher.value();
+    }
+
     watcher.value = watch(
-      () => buttonClicked.value,
+      buttonClicked,
       async (value) => {
         const buttonName = Object.keys(value)[0];
 
@@ -82,7 +86,6 @@ export const useContextMenuStore = defineStore('contextMenu', () => {
 
   function setClickedButton(button: string) {
     const currentValue = buttonClicked.value[button] ?? false;
-    console.log(currentValue);
     buttonClicked.value = { [button]: !currentValue };
   }
 
@@ -94,6 +97,7 @@ export const useContextMenuStore = defineStore('contextMenu', () => {
     cmIsShown.value = false;
     if (typeof watcher.value === 'function') {
       watcher.value();
+      watcher.value = undefined;
     }
   }
 

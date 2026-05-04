@@ -12,7 +12,7 @@ onMounted(() => {
 });
 
 watch(
-  () => calculatorManager.calculationArray.value,
+  calculatorManager.calculationArray,
   () => {
     calculationString.value = calculatorManager.returnCalculationString();
   },
