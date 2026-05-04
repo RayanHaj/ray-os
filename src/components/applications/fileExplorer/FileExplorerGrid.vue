@@ -121,7 +121,10 @@ async function onRightClick(
         {
           renameFile: () => {
             if (item) {
-              emits('renameFile', { contentType: 'text file', item: item });
+              emits('renameFile', {
+                contentType: item.directory ? 'directory' : 'file',
+                item: item,
+              });
             }
           },
         },

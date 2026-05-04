@@ -7,13 +7,19 @@ import {
 import type { RayDb } from 'ray-db-wrapper';
 import FileExplorerHeader from '@/components/applications/fileExplorer/FileExplorerHeader.vue';
 import FileExplorerGrid from '@/components/applications/fileExplorer/FileExplorerGrid.vue';
-import type { FileItem, FileSystemItem, ItemInsert } from '@/types/ItemTypes.ts';
+import type {
+  FileItem,
+  FileSystemItem,
+  InsertFileSystemItem,
+  Item,
+  ItemInsert,
+} from '@/types/ItemTypes.ts';
 import FileExplorerModal from '@/components/applications/fileExplorer/FileExplorerModal.vue';
 import { useContextMenuStore } from '@/stores/contextMenu.ts';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
-import type { FileItemSizeKey } from '@/types/FileExplorerTypes.ts';
+import type { FileItemSizeKey, ModalAction, ModalContentType } from '@/types/FileExplorerTypes.ts';
 import { useToastStore } from '@/stores/toast.ts';
 import { useUpdateItemsByCurrentPath } from '@/composables/fileExplorer/useUpdateItemsByCurrentPath.ts';
 import { useHandleExplorerFileClicked } from '@/composables/fileExplorer/useHandleExplorerFileClicked.ts';
@@ -89,82 +95,125 @@ async function onDblClickItem(item: FileSystemItem & { type: string }) {
 }
 
 const modalOpened = ref(false);
-const modalContentType = ref<'directory' | 'text file'>('directory');
-const modalAction = ref<'add' | 'rename'>('add');
+const modalContentType = ref<ModalContentType>('directory');
+const modalAction = ref<ModalAction>('add');
+const modalItem = ref<FileSystemItem>();
 
-function toggleAddNewItemModal(contentType: 'directory' | 'text file', item?: FileSystemItem) {
+function toggleAddNewItemModal(
+  contentType: ModalContentType,
+  action: ModalAction,
+  item?: FileSystemItem,
+) {
   useContextMenuStore().hide();
   modalContentType.value = contentType;
+  modalAction.value = action;
+  modalItem.value = item;
   modalOpened.value = true;
 }
 
-async function handleModalInput(
-  contentType: 'directory' | 'text file',
-  action: 'add' | 'rename',
-  input: string,
-) {
-  if (action === 'rename') {
-  }
-
-  try {
-    const currentDir = await fileSystemLookup(rayDb, path.value.join('/'));
-    if (!currentDir || currentDir instanceof Error) {
-      throw new Error('Could not find current directory');
-    }
-
-    const parentId = currentDir.parent.id;
-    if (!parentId) return;
-
-    let hasInserted;
-    switch (contentType) {
-      case 'directory':
-        {
-          hasInserted = await insertItemIntoFileSystem(rayDb, [parentId], {
-            directory: { name: input, children: [] },
-          });
-        }
-        break;
-      case 'text file': {
-        const fileName = useSanitizeFileName(input);
-
-        if (!useValidateFileName(fileName, windowId)) {
-          return;
+async function handleModalInput(contentType: ModalContentType, action: ModalAction, input: string) {
+  switch (action) {
+    case 'rename':
+      {
+        if (!modalItem.value) {
+          break;
         }
 
-        const createdAt = Date.now();
-        const file = new File([''], fileName, { type: 'text/plain', lastModified: createdAt });
+        if (contentType === 'directory') {
 
-        const item: FileItem = {
-          type: 'file',
-          name: fileName,
-          size: file.size,
-          createdAt: file.lastModified.toString(),
-          rawFile: file,
-        };
+        } else {
+          const fileId = modalItem.value.file!.id;
 
-        const fileId = await rayDb.insertOne<ItemInsert>('files', {
-          label: fileName,
-          content: item,
-        });
+          const sanitizedFileName = useSanitizeFileName(input);
 
-        if (!fileId) {
-          return;
+          if (!useValidateFileName(sanitizedFileName, windowId)) {
+            return;
+          }
+
+          const fileItem = await rayDb.findOne<Item>('files', 'id', fileId);
+
+          if (!fileItem || fileItem.content.type !== 'file') {
+            return;
+          }
+
+          fileItem.label = sanitizedFileName;
+          fileItem.content.name = sanitizedFileName;
+
+          console.log(fileItem);
+
+          await rayDb.updateOne<ItemInsert>('files', fileItem);
+          await rayDb.updateManyByQuery<InsertFileSystemItem>(
+            'fileSystem',
+            () => ({ file: { name: sanitizedFileName } }),
+            (item) => item.file?.id === fileItem.id,
+          );
+
+          useFileSystemStore().updateFileSystem();
+        }
+      }
+      break;
+    case 'add': {
+      try {
+        const currentDir = await fileSystemLookup(rayDb, path.value.join('/'));
+        if (!currentDir || currentDir instanceof Error) {
+          throw new Error('Could not find current directory');
         }
 
-        hasInserted = await insertItemIntoFileSystem(rayDb, [parentId], {
-          file: { name: fileName, id: Number(fileId), type: file.type },
-        });
+        const parentId = currentDir.parent.id;
+        if (!parentId) return;
+
+        let hasInserted;
+        switch (contentType) {
+          case 'directory':
+            {
+              hasInserted = await insertItemIntoFileSystem(rayDb, [parentId], {
+                directory: { name: input, children: [] },
+              });
+            }
+            break;
+          case 'file': {
+            const fileName = useSanitizeFileName(input);
+
+            if (!useValidateFileName(fileName, windowId)) {
+              return;
+            }
+
+            const createdAt = Date.now();
+            const file = new File([''], fileName, { type: 'text/plain', lastModified: createdAt });
+
+            const item: FileItem = {
+              type: 'file',
+              name: fileName,
+              size: file.size,
+              createdAt: file.lastModified.toString(),
+              rawFile: file,
+            };
+
+            const fileId = await rayDb.insertOne<ItemInsert>('files', {
+              label: fileName,
+              content: item,
+            });
+
+            if (!fileId) {
+              return;
+            }
+
+            hasInserted = await insertItemIntoFileSystem(rayDb, [parentId], {
+              file: { name: fileName, id: Number(fileId), type: file.type },
+            });
+          }
+        }
+
+        if (hasInserted instanceof Error) {
+          throw hasInserted;
+        }
+      } catch (e) {
+        useToastStore().createToast((e as Error).message, 'error', 5000, 'window', windowId);
       }
     }
-
-    if (hasInserted instanceof Error) {
-      throw hasInserted;
-    }
-
-    modalOpened.value = false;
-  } catch (e) {
-    useToastStore().createToast((e as Error).message, 'error', 5000, 'window', windowId);
   }
+
+  modalOpened.value = false;
 }
 </script>
 
@@ -181,11 +230,15 @@ async function handleModalInput(
     <FileExplorerGrid
       :parent-id="parentId ?? -1"
       :current-directories="items"
-      :filter-by-file-type="windowId === fileExplorerStore.fileSelectState?.fileExplorerWindowId ? fileExplorerStore.fileSelectState?.allowedFileTypes : []"
+      :filter-by-file-type="
+        windowId === fileExplorerStore.fileSelectState?.fileExplorerWindowId
+          ? fileExplorerStore.fileSelectState?.allowedFileTypes
+          : []
+      "
       @item-event:dbl-click="onDblClickItem"
-      @new-directory="toggleAddNewItemModal($event.contentType)"
-      @new-text-file="toggleAddNewItemModal($event.contentType)"
-      @rename-file="toggleAddNewItemModal($event.contentType, $event.item)"
+      @new-directory="toggleAddNewItemModal($event.contentType, 'add')"
+      @new-text-file="toggleAddNewItemModal($event.contentType, 'add')"
+      @rename-file="toggleAddNewItemModal($event.contentType, 'rename', $event.item)"
     />
   </div>
 </template>

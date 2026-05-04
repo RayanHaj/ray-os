@@ -7,3 +7,6 @@ export const itemSizes = {
 export type FileItemSizeValue = (typeof itemSizes)[keyof typeof itemSizes];
 export type FileItemSizeKey = keyof typeof itemSizes;
 export const fileItemSizes = Object.keys(itemSizes) as FileItemSizeKey[];
+
+export type ModalContentType = 'directory' | 'file';
+export type ModalAction = 'add' | 'rename';

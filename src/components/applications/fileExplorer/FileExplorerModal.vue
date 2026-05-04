@@ -1,10 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import type { ModalAction, ModalContentType } from '@/types/FileExplorerTypes.ts';
 
-const { title, action } = defineProps<{
-  title: 'directory' | 'text file';
-  action: 'add' | 'rename';
-}>();
+const { title, action } = defineProps<{ title: ModalContentType; action: ModalAction }>();
 
 const input = ref('');
 const emits = defineEmits(['modalEvent:submitClick', 'modalEvent:cancelClick']);
@@ -23,7 +21,7 @@ function onClickCancel() {
 <template>
   <div class="modal-container">
     <div class="modal">
-      <h2>{{ title }}</h2>
+      <h2>{{ `${action[0].toUpperCase()}${action.slice(1)}` }} {{ title }}</h2>
       <div class="input-wrapper">
         <label for="inputField">{{ `enter ${title} name` }}</label>
         <input id="inputField" type="text" v-model="input" />
