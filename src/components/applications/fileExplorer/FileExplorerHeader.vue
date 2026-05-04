@@ -46,14 +46,29 @@ async function onDrop(event: DragEvent) {
     const dropItem = parsedItem as FileSystemItem;
     if (dropItem.isSystemFile) return;
 
-    await useDeleteFileSystemItem(rayDb, dropItem, true, false);
+    await useDeleteFileSystemItem(rayDb, dropItem, true, true, false);
 
     const parentPath = currentPath.slice(0, -1).join('/') || 'C:';
     const parentDir = await fileSystemLookup(rayDb, parentPath);
 
     if (!parentDir || parentDir instanceof Error) return;
 
-    await insertItemIntoFileSystem(rayDb, [parentDir.parent.id!], dropItem, false);
+    const newDirectoryId = await insertItemIntoFileSystem(rayDb, [parentDir.parent.id!], dropItem, false);
+
+    if (!newDirectoryId || (newDirectoryId instanceof Error)) return;
+
+    if (dropItem.directory) {
+      for (const childId of dropItem.directory.children) {
+        const childItem = await rayDb.findOne<FileSystemItem>('fileSystem', 'id', childId);
+        if (!childItem) continue;
+
+        const oldDirectoryIdIndex = childItem.parents.findIndex((parentId) => parentId === dropItem.id);
+        if (oldDirectoryIdIndex === -1) continue;
+
+        childItem.parents[oldDirectoryIdIndex] = newDirectoryId;
+        await rayDb.updateOne('fileSystem', childItem);
+      }
+    }
 
     emits('header-event:back');
   } catch (e) {

@@ -211,7 +211,7 @@ export async function updateFileSystemItem(
   }
 }
 
-export async function deleteFileSystemItem(rayDb: RayDb, id: number, onlyFileSystemReference?: boolean) {
+export async function deleteFileSystemItem(rayDb: RayDb, id: number, onlyFileSystemReference?: boolean, onlyTopLevel?: boolean) {
   const parent: FileSystemItem = await rayDb.findOne<FileSystemItem>('fileSystem', 'id', id);
   if (!parent || !parent.id) {
     return;
@@ -237,6 +237,8 @@ export async function deleteFileSystemItem(rayDb: RayDb, id: number, onlyFileSys
     }
   } else if (parent.directory) {
     await rayDb.deleteOne('fileSystem', parent.id);
+
+    if (onlyTopLevel) return;
 
     for (const child of parent.directory.children) {
       const fileSystemItem = await rayDb.findOne<FileSystemItem>('fileSystem', 'id', child);

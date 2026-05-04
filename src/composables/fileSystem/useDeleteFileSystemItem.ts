@@ -7,12 +7,13 @@ export async function useDeleteFileSystemItem(
   rayDb: RayDb,
   itemIdentifier: FileSystemItem | number,
   onlyFileSystemReference?: boolean,
+  onlyTopLevel?: boolean,
   updateFileSystem = true,
 ) {
   if (typeof itemIdentifier === 'number') {
-    await deleteFileSystemItem(rayDb, itemIdentifier, onlyFileSystemReference);
+    await deleteFileSystemItem(rayDb, itemIdentifier, onlyFileSystemReference, onlyTopLevel);
   } else {
-    await deleteFileSystemItem(rayDb, itemIdentifier.id, onlyFileSystemReference);
+    await deleteFileSystemItem(rayDb, itemIdentifier.id, onlyFileSystemReference, onlyTopLevel);
   }
 
   if (updateFileSystem) {
