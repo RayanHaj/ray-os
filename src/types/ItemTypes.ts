@@ -48,7 +48,8 @@ export const fileExtensions = {
   'video/mp4': 'mp4',
   'image/jpeg': 'jpeg',
   'image/png': 'png',
-  'image/webp': 'webp'
+  'image/webp': 'webp',
+  'audio/mpeg': 'mp3'
 } as const;
 
 export const Applications = [
@@ -62,7 +63,8 @@ export const Applications = [
   'Todo',
   'Notepad',
   'Doom',
-  'Snake'
+  'Snake',
+  'Audio Player'
 ] as const;
 
 export type Application = (typeof Applications)[number];
@@ -78,6 +80,12 @@ export const videoTypes = ['video/mp4'] as const satisfies readonly FileType[];
 export function isVideoType(type: string | undefined): type is (typeof videoTypes)[number] {
   if (!type) return false;
   return videoTypes.includes(type as (typeof videoTypes)[number]);
+}
+
+export const audioTypes = ['audio/mpeg'] as const satisfies readonly FileType[];
+export function isAudioType(type: string | undefined): type is (typeof audioTypes)[number] {
+  if (!type) return false;
+  return audioTypes.includes(type as (typeof audioTypes)[number]);
 }
 
 export const textTypes = ['text/plain'];

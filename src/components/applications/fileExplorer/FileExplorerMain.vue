@@ -163,7 +163,7 @@ async function handleModalInput(
 
     modalOpened.value = false;
   } catch (e) {
-    useToastStore().createToast((e as Error).message, 'error', 5000, 'desktop');
+    useToastStore().createToast((e as Error).message, 'error', 5000, 'window', windowId);
   }
 }
 </script>
