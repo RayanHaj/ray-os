@@ -1,4 +1,10 @@
-import type { FileSystemItem, InsertFileSystemItem, Item, ItemInsert } from '@/types/ItemTypes.ts';
+import type {
+  FileSystemItem,
+  FileType,
+  InsertFileSystemItem,
+  Item,
+  ItemInsert,
+} from '@/types/ItemTypes.ts';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import { useToastStore } from '@/stores/toast.ts';
@@ -31,12 +37,15 @@ export async function useSaveChanges(
       let fileName = fileItem.content.name;
 
       if (headerFileName !== fileName) {
-        const sanitizedFileName = useSanitizeFileName(headerFileName);
-        if (useValidateFileName(sanitizedFileName, windowId)) {
-          fileName = useSanitizeFileName(headerFileName);
-        } else {
+        const sanitizedFileName = useSanitizeFileName(
+          headerFileName,
+          fileItem.content.rawFile?.type as FileType,
+        );
+        if (!useValidateFileName(sanitizedFileName, windowId)) {
           return;
         }
+
+        fileName = sanitizedFileName;
       }
 
       fileItem.label = fileName;

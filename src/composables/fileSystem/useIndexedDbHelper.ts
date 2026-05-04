@@ -192,9 +192,18 @@ export async function getFileSystemItem(
   }
 }
 
-export async function updateFileSystemItem(rayDb: RayDb, id: number, updatedItem: InsertFileSystemItem) {
+export async function updateFileSystemItem(
+  rayDb: RayDb,
+  updatedItem: InsertFileSystemItem,
+  updateFileSystem = true,
+) {
   try {
     const id = await rayDb.updateOne<InsertFileSystemItem>('fileSystem', updatedItem);
+
+    if (updateFileSystem) {
+      useFileSystemStore().updateFileSystem();
+    }
+
     return id !== null;
   } catch (e) {
     console.error(e);

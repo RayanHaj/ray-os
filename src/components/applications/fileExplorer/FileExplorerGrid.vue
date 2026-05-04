@@ -77,7 +77,7 @@ async function onRightClick(
             emits('newDirectory', { contentType: 'directory' });
           },
           newTextFile: () => {
-            emits('newTextFile', { contentType: 'text file' });
+            emits('newTextFile', { contentType: 'file' });
           },
         },
       );

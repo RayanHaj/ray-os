@@ -8,6 +8,7 @@ const input = ref('');
 const emits = defineEmits(['modalEvent:submitClick', 'modalEvent:cancelClick']);
 
 function onClickSubmit() {
+  console.log(title, action, input.value);
   emits('modalEvent:submitClick', { contentType: title, action: action, input: input.value });
   input.value = '';
 }

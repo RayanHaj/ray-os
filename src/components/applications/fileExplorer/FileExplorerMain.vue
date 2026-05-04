@@ -10,6 +10,7 @@ import FileExplorerGrid from '@/components/applications/fileExplorer/FileExplore
 import type {
   FileItem,
   FileSystemItem,
+  FileType,
   InsertFileSystemItem,
   Item,
   ItemInsert,
@@ -25,6 +26,8 @@ import { useUpdateItemsByCurrentPath } from '@/composables/fileExplorer/useUpdat
 import { useHandleExplorerFileClicked } from '@/composables/fileExplorer/useHandleExplorerFileClicked.ts';
 import { useSanitizeFileName } from '@/composables/fileSystem/useSanitizeFileName.ts';
 import { useValidateFileName } from '@/composables/fileSystem/useValidateFileName.ts';
+import { useRenameFile } from '@/composables/fileSystem/useRenameFile.ts';
+import { useRenameDirectory } from '@/composables/fileSystem/useRenameDirectory.ts';
 
 const fileExplorerStore = useFileExplorerStore();
 const fileSystemStore = useFileSystemStore();
@@ -119,36 +122,26 @@ async function handleModalInput(contentType: ModalContentType, action: ModalActi
           break;
         }
 
-        if (contentType === 'directory') {
+        switch (contentType) {
+          case 'directory':
+            {
+              const directoryId = modalItem.value.id;
+              const directoryItem = await rayDb.findOne<FileSystemItem>('fileSystem', 'id', directoryId);
+              await useRenameDirectory(rayDb, directoryItem, input, windowId);
+            }
+            break;
+          case 'file':
+            {
+              const fileId = modalItem.value.file!.id;
+              const fileItem = await rayDb.findOne<Item>('files', 'id', fileId);
 
-        } else {
-          const fileId = modalItem.value.file!.id;
+              if (!fileItem || fileItem.content.type !== 'file') {
+                return;
+              }
 
-          const sanitizedFileName = useSanitizeFileName(input);
-
-          if (!useValidateFileName(sanitizedFileName, windowId)) {
-            return;
-          }
-
-          const fileItem = await rayDb.findOne<Item>('files', 'id', fileId);
-
-          if (!fileItem || fileItem.content.type !== 'file') {
-            return;
-          }
-
-          fileItem.label = sanitizedFileName;
-          fileItem.content.name = sanitizedFileName;
-
-          console.log(fileItem);
-
-          await rayDb.updateOne<ItemInsert>('files', fileItem);
-          await rayDb.updateManyByQuery<InsertFileSystemItem>(
-            'fileSystem',
-            () => ({ file: { name: sanitizedFileName } }),
-            (item) => item.file?.id === fileItem.id,
-          );
-
-          useFileSystemStore().updateFileSystem();
+              await useRenameFile(rayDb, fileItem, input, windowId);
+            }
+            break;
         }
       }
       break;
@@ -172,7 +165,7 @@ async function handleModalInput(contentType: ModalContentType, action: ModalActi
             }
             break;
           case 'file': {
-            const fileName = useSanitizeFileName(input);
+            const fileName = useSanitizeFileName(input, 'text/plain');
 
             if (!useValidateFileName(fileName, windowId)) {
               return;
