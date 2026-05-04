@@ -181,7 +181,7 @@ async function handleModalInput(
     <FileExplorerGrid
       :parent-id="parentId ?? -1"
       :current-directories="items"
-      :filter-by-file-type="fileExplorerStore.fileSelectState?.allowedFileTypes ?? []"
+      :filter-by-file-type="windowId === fileExplorerStore.fileSelectState?.fileExplorerWindowId ? fileExplorerStore.fileSelectState?.allowedFileTypes : []"
       @item-event:dbl-click="onDblClickItem"
       @new-directory="toggleAddNewItemModal($event.contentType)"
       @new-text-file="toggleAddNewItemModal($event.contentType)"

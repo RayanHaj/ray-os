@@ -33,7 +33,8 @@ const notepadHeader = ref();
 const fileExplorerWindowId = ref<string>();
 
 function handleUploadClick() {
-  useFileExplorerStore().setFileExplorerWindowAsFileSelect(windowId, ['text/plain']);
+  const fileExplorerId = useWindowStore().getNextWindowId('File Explorer');
+  useFileExplorerStore().setFileExplorerWindowAsFileSelect(windowId, fileExplorerId, ['text/plain']);
   fileExplorerWindowId.value = useWindowStore().pushOpenWindowReference('File Explorer');
 }
 
