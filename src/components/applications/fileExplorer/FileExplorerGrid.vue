@@ -186,6 +186,10 @@ async function onFileDrop(event: DragEvent) {
         return;
       }
 
+      if (targetElementId === dropItem.id) {
+        return;
+      }
+
       const insertedId = await insertItemIntoFileSystem(rayDb, [targetElementId], dropItem);
       if (insertedId instanceof Error || insertedId === undefined) {
         return;
