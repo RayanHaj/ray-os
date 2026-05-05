@@ -5,15 +5,19 @@ import { useHandleTerminalCommand } from '@/composables/terminal/useHandleTermin
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
+import type { LineTerminal } from '@/types/TerminalTypes.ts';
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 const windowId = useInjectOrThrow<string>('windowId');
 
 const emptyLine = { line: '', isPlain: false };
-const lines = ref<Array<{ line: string; isPlain: boolean }>>([
+const lines = ref<LineTerminal[]>([
   { line: 'RayOS Terminal — type "help" for commands', isPlain: true },
   emptyLine,
 ]);
+
+const cachedLines = ref<LineTerminal[]>([]);
+const currentCacheIndex = ref<number>(-1);
 
 const fontSize = ref(20);
 const currentPath = ref<string[]>([]);
@@ -49,8 +53,15 @@ async function onEnter(command: string) {
     await nextTick();
   }
 
+  cachedLines.value.push({ line: command, isPlain: false });
+
   pushNewEmptyLine();
   return commandObject;
+}
+
+function onLineInput() {
+  if (currentCacheIndex.value === -1) return;
+  currentCacheIndex.value = -1;
 }
 
 function pushNewEmptyLine() {
@@ -67,9 +78,40 @@ function onKeyDown(event: KeyboardEvent) {
   }
 }
 
+const terminalLineRef = ref();
 function onKeyUp(event: KeyboardEvent) {
-  if (event.key === 'Control') {
-    document.removeEventListener('wheel', onResizing);
+  switch (event.key) {
+    case 'Control':
+      {
+        document.removeEventListener('wheel', onResizing);
+      }
+      break;
+    case 'ArrowUp':
+      {
+        if (cachedLines.value.length === 0) return;
+
+        if (currentCacheIndex.value === -1) {
+          currentCacheIndex.value = cachedLines.value.length - 1;
+        } else if (currentCacheIndex.value > 0) {
+          currentCacheIndex.value--;
+        }
+
+        lines.value[lines.value.length - 1] = cachedLines.value[currentCacheIndex.value];
+
+        terminalLineRef.value.focusAtEnd();
+      }
+      break;
+    case 'ArrowDown': {
+      if (cachedLines.value.length === 0 || currentCacheIndex.value === -1) return;
+
+      if (currentCacheIndex.value < cachedLines.value.length - 1) {
+        currentCacheIndex.value++;
+      }
+
+      lines.value[lines.value.length - 1] = cachedLines.value[currentCacheIndex.value];
+
+      terminalLineRef.value.focusAtEnd();
+    }
   }
 }
 
@@ -100,6 +142,7 @@ const onResizing = (event: WheelEvent) => {
   >
     <TerminalLine
       v-for="(_, index) of lines"
+      :ref="(el) => index === lines.length - 1 && el && (terminalLineRef = el)"
       :key="index"
       :input-value="lines[index]"
       :is-readonly="isReadonly(index)"
@@ -107,6 +150,7 @@ const onResizing = (event: WheelEvent) => {
       :is-error="lineIndexesOfErrorLines.includes(index)"
       :window-id="windowId"
       @enter-pressed="onEnter"
+      @on-input="onLineInput"
     />
   </div>
 </template>

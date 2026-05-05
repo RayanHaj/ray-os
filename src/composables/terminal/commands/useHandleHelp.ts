@@ -1,4 +1,5 @@
 import type { Ref } from 'vue';
+import type { LineTerminal } from '@/types/TerminalTypes.ts';
 
 const helpArray = [
   'cd   : change directory',
@@ -12,6 +13,6 @@ const helpArray = [
   'start: open a file or application',
 ];
 
-export function useHandleHelp(lines: Ref<Array<{ line: string; isPlain: boolean }>>) {
+export function useHandleHelp(lines: Ref<LineTerminal[]>) {
   lines.value.push({ line: helpArray.join('\n'), isPlain: true });
 }

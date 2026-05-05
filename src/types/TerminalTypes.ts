@@ -12,3 +12,4 @@ export const commands = [
   'start'
 ] as const;
 export type CommandKeyword = (typeof commands)[number];
+export type LineTerminal = { line: string; isPlain: boolean };

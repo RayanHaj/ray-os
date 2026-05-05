@@ -1,4 +1,4 @@
-import { type CommandKeyword, commands } from '@/types/TerminalTypes.ts';
+import { type CommandKeyword, commands, type LineTerminal } from '@/types/TerminalTypes.ts';
 import type { Ref } from 'vue';
 import type { RayDb } from 'ray-db-wrapper';
 import { useHandleCdDots } from '@/composables/terminal/commands/useHandleCdDots.ts';
@@ -16,7 +16,7 @@ type CommandObject = { command: CommandKeyword; value: string };
 export async function useHandleTerminalCommand(
   rayDb: RayDb,
   command: string,
-  lines: Ref<Array<{ line: string; isPlain: boolean }>>,
+  lines: Ref<LineTerminal[]>,
   currentPath: Ref<string[]>,
   windowId: string,
 ) {
@@ -49,7 +49,7 @@ export function parseCommandStringToArray(command: string): CommandObject | Erro
 async function handleCommand(
   rayDb: RayDb,
   commandObject: CommandObject,
-  lines: Ref<Array<{ line: string; isPlain: boolean }>>,
+  lines: Ref<LineTerminal[]>,
   currentPath: Ref<string[]>,
   windowId: string,
 ) {

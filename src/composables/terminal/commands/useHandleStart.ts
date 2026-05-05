@@ -4,10 +4,11 @@ import { fileSystemLookup } from '@/composables/fileSystem/useIndexedDbHelper.ts
 import type { Application, FileItem, FileSystemItem, Item } from '@/types/ItemTypes.ts';
 import { useWindowStore } from '@/stores/window.ts';
 import { useNotepadStore } from '@/stores/notepad.ts';
+import type { LineTerminal } from '@/types/TerminalTypes.ts';
 
 export async function useHandleStart(
   rayDb: RayDb,
-  lines: Ref<Array<{ line: string; isPlain: boolean }>>,
+  lines: Ref<LineTerminal[]>,
   currentPath: Ref<string[]>,
   name: string,
 ) {

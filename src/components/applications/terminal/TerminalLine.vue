@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed, onBeforeMount, onMounted, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeMount, onMounted, ref, watch } from 'vue';
 import { useWindowStore } from '@/stores/window.ts';
+import type { LineTerminal } from '@/types/TerminalTypes.ts';
 
 const { currentPath, inputValue, isReadonly, isError, windowId } = defineProps<{
   currentPath: string;
-  inputValue: { line: string | Error; isPlain: boolean };
+  inputValue: LineTerminal;
   isReadonly: boolean;
   isError: boolean;
   windowId: string;
@@ -34,7 +35,7 @@ watch(
   },
 );
 
-const emit = defineEmits(['enter-pressed']);
+const emit = defineEmits(['enter-pressed', 'on-input']);
 
 function onEnter(event: KeyboardEvent) {
   const target = event.target as HTMLElement;
@@ -45,6 +46,22 @@ function onEnter(event: KeyboardEvent) {
 }
 
 const displayPath = computed(() => `PS ${path.value}>`);
+
+defineExpose({
+  focusAtEnd() {
+    nextTick(() => {
+      if (!terminalLineRef.value) return;
+
+      terminalLineRef.value.focus();
+      const range = document.createRange();
+      const selection = window.getSelection();
+      range.selectNodeContents(terminalLineRef.value);
+      range.collapse(false);
+      selection?.removeAllRanges();
+      selection?.addRange(range);
+    });
+  },
+});
 </script>
 
 <template>
@@ -54,6 +71,7 @@ const displayPath = computed(() => `PS ${path.value}>`);
       ref="terminalLineRef"
       class="terminal-line"
       contenteditable="true"
+      @input="emit('on-input')"
       @keydown.enter.prevent="onEnter($event)"
       @blur="
         () => {

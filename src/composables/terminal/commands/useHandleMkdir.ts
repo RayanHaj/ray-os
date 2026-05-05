@@ -4,10 +4,11 @@ import {
   fileSystemLookup,
   insertItemIntoFileSystem,
 } from '@/composables/fileSystem/useIndexedDbHelper.ts';
+import type { LineTerminal } from '@/types/TerminalTypes.ts';
 
 export async function useHandleMkdir(
   rayDb: RayDb,
-  lines: Ref<Array<{ line: string; isPlain: boolean }>>,
+  lines: Ref<LineTerminal[]>,
   currentPath: Ref<string[]>,
   name: string,
 ): Promise<Error | undefined> {
