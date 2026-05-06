@@ -42,6 +42,20 @@ document.addEventListener('mouseout', function (event) {
 
 <template>
   <DesktopView v-if="initialised" />
+  <div
+    v-else
+    style="
+      display: flex;
+      height: 100vh;
+      align-items: center;
+      justify-content: center;
+      background: #000;
+      color: #fff;
+      font-family: monospace;
+    "
+  >
+    Loading RayOS...
+  </div>
 </template>
 
 <style scoped></style>
