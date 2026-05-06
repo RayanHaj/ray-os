@@ -6,8 +6,7 @@ import { computed, ref } from 'vue';
 import { useInitializeContextMenu } from '@/composables/contextMenu/useInitializeContextMenu.ts';
 import { useTaskbarStore } from '@/stores/taskbar.ts';
 import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
-import MultiSelectionBox from '@/components/MultiSelectionBox.vue';
-import { useMultiSelectionBoxStore } from '@/stores/multiSelectionBox.ts';
+import { useToastFeatureNotImplemented } from '@/composables/helpers/useToastFeatureNotImplemented.ts';
 
 const socials = ['Github'] as const;
 type Socials = (typeof socials)[number];
@@ -23,69 +22,26 @@ function onDesktopRightClick(event: MouseEvent) {
       {
         Copy: () => {
           console.log('copy');
+          useToastFeatureNotImplemented();
         },
         Paste: () => {
           console.log('paste');
-        }
+          useToastFeatureNotImplemented();
+        },
       },
       {
-        test: () => {
-          console.log('test');
-        },
         properties: () => {
           console.log('properties');
+          useToastFeatureNotImplemented();
         },
       },
     );
 }
 
-const multiSelectionBoxStore = useMultiSelectionBoxStore();
-
-function onMouseDown(e: MouseEvent) {
+function onMouseLeave(_: MouseEvent) {
   if (tileIsBeingDragged.value) {
     return;
   }
-
-  multiSelectionBoxStore.multiSelectionVariables.startX = e.clientX;
-  multiSelectionBoxStore.multiSelectionVariables.startY = e.clientY;
-
-  multiSelectionBoxStore.multiSelectionVariables.left = e.clientX;
-  multiSelectionBoxStore.multiSelectionVariables.top = e.clientY;
-
-  addEventListener('mousemove', onMouseMove);
-}
-
-function onMouseMove(e: MouseEvent) {
-  multiSelectionBoxStore.multiSelectionVariables.isSelecting = true;
-  multiSelectionBoxStore.multiSelectionVariables.width =
-    e.clientX - multiSelectionBoxStore.multiSelectionVariables.startX;
-  multiSelectionBoxStore.multiSelectionVariables.height =
-    e.clientY - multiSelectionBoxStore.multiSelectionVariables.startY;
-}
-
-function onMouseUp(e: MouseEvent) {
-  if (tileIsBeingDragged.value) {
-    return;
-  }
-
-  removeEventListener('mousemove', onMouseMove);
-  Object.assign(multiSelectionBoxStore.multiSelectionVariables, {
-    isSelecting: false,
-    width: 0,
-    height: 0,
-    startX: 0,
-    startY: 0,
-    left: 0,
-    top: 0,
-  });
-}
-function onMouseLeave(e: MouseEvent) {
-  if (tileIsBeingDragged.value) {
-    return;
-  }
-
-  removeEventListener('mousemove', onMouseMove);
-  multiSelectionBoxStore.multiSelectionVariables.isSelecting = false;
 }
 
 function navigateToSocialPage(social: Socials) {
@@ -101,8 +57,6 @@ function navigateToSocialPage(social: Socials) {
   <div class="desktop" :style="{ height: `calc(100% - ${useTaskbarStore().taskbarHeight}px)` }">
     <div
       class="desktop-grid"
-      @mousedown="onMouseDown"
-      @mouseup="onMouseUp"
       @mouseleave="onMouseLeave"
       @dragover.prevent
       @dragenter.prevent
@@ -118,13 +72,6 @@ function navigateToSocialPage(social: Socials) {
           @drag-ended="tileIsBeingDragged = false"
         />
       </div>
-      <MultiSelectionBox
-        :is-selecting="multiSelectionBoxStore.multiSelectionVariables.isSelecting"
-        :width="multiSelectionBoxStore.multiSelectionVariables.width"
-        :height="multiSelectionBoxStore.multiSelectionVariables.height"
-        :left="multiSelectionBoxStore.multiSelectionVariables.left"
-        :top="multiSelectionBoxStore.multiSelectionVariables.top"
-      />
     </div>
     <div class="socials">
       <button

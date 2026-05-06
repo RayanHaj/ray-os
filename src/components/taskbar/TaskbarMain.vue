@@ -4,7 +4,6 @@ import TaskbarTile from '@/components/taskbar/TaskbarTile.vue';
 import StartMenuMain from '@/components/startMenu/StartMenuMain.vue';
 import { useStartMenuStore } from '@/stores/startMenu.ts';
 import TimeProcessSection from '@/components/TimeProcessSection.vue';
-import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
 import { useFileStore } from '@/stores/file.ts';
 
 const taskbarStore = useTaskbarStore();
@@ -19,13 +18,13 @@ const startMenuStore = useStartMenuStore();
   <StartMenuMain v-if="startMenuStore.isShown()" />
   <div class="taskbar" :style="{ height: `${taskbarHeight}px` }">
     <div class="left-section">
-      <button
-        class="taskbar-search-button"
-        @click="startMenuStore.isShown() ? startMenuStore.hide() : startMenuStore.show()"
-        :style="{ backgroundColor: startMenuStore.isShown() ? 'var(--button-hover-color)' : '' }"
-      >
-        <component class="search-svg" :is="useSvgOrFallback('Search').svg" />
-      </button>
+<!--      <button-->
+<!--        class="taskbar-search-button"-->
+<!--        @click="startMenuStore.isShown() ? startMenuStore.hide() : startMenuStore.show()"-->
+<!--        :style="{ backgroundColor: startMenuStore.isShown() ? 'var(&#45;&#45;button-hover-color)' : '' }"-->
+<!--      >-->
+<!--        <component class="search-svg" :is="useSvgOrFallback('Search').svg" />-->
+<!--      </button>-->
     </div>
     <div class="middle-section">
       <div class="taskbar-tiles">

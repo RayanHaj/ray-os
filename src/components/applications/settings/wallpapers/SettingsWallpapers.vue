@@ -39,18 +39,10 @@ onBeforeMount(async () => {
 function onClick(id: number, type: WallpaperType) {
   wallpaperStore.setSelectedWallpaper(id, type);
 }
-
-function onClickDeselectWallpaper() {
-  wallpaperStore.deselectWallpaper();
-}
 </script>
 
 <template>
   <div class="settings-wallpapers">
-    <div class="top-bar">
-      <button @click="onClickDeselectWallpaper()">deselect wallpaper</button>
-      <button>upload wallpaper</button>
-    </div>
     <hr />
     <div class="custom-wallpapers">
       <h2>Custom wallpapers</h2>

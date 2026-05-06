@@ -7,14 +7,7 @@ import {
 import type { RayDb } from 'ray-db-wrapper';
 import FileExplorerHeader from '@/components/applications/fileExplorer/FileExplorerHeader.vue';
 import FileExplorerGrid from '@/components/applications/fileExplorer/FileExplorerGrid.vue';
-import type {
-  FileItem,
-  FileSystemItem,
-  FileType,
-  InsertFileSystemItem,
-  Item,
-  ItemInsert,
-} from '@/types/ItemTypes.ts';
+import type { FileItem, FileSystemItem, Item, ItemInsert } from '@/types/ItemTypes.ts';
 import FileExplorerModal from '@/components/applications/fileExplorer/FileExplorerModal.vue';
 import { useContextMenuStore } from '@/stores/contextMenu.ts';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
@@ -93,7 +86,7 @@ async function onDblClickItem(item: FileSystemItem & { type: string }) {
     parentId.value = item.id;
     fileSystemStore.updateFileSystem();
   } else if (item.file) {
-    await useHandleExplorerFileClicked(item, parentId, rayDb);
+    await useHandleExplorerFileClicked(item, parentId, rayDb, windowId);
   }
 }
 
@@ -126,7 +119,11 @@ async function handleModalInput(contentType: ModalContentType, action: ModalActi
           case 'directory':
             {
               const directoryId = modalItem.value.id;
-              const directoryItem = await rayDb.findOne<FileSystemItem>('fileSystem', 'id', directoryId);
+              const directoryItem = await rayDb.findOne<FileSystemItem>(
+                'fileSystem',
+                'id',
+                directoryId,
+              );
               await useRenameDirectory(rayDb, directoryItem, input, windowId);
             }
             break;
@@ -208,6 +205,18 @@ async function handleModalInput(contentType: ModalContentType, action: ModalActi
 
   modalOpened.value = false;
 }
+
+function filterByFileType() {
+  const foundSelectState = fileExplorerStore.fileSelectState.find(
+    (element) => element.fileExplorerWindowId === windowId,
+  );
+
+  if (!foundSelectState) {
+    return [];
+  }
+
+  return foundSelectState.allowedFileTypes;
+}
 </script>
 
 <template>
@@ -223,11 +232,7 @@ async function handleModalInput(contentType: ModalContentType, action: ModalActi
     <FileExplorerGrid
       :parent-id="parentId ?? -1"
       :current-directories="items"
-      :filter-by-file-type="
-        windowId === fileExplorerStore.fileSelectState?.fileExplorerWindowId
-          ? fileExplorerStore.fileSelectState?.allowedFileTypes
-          : []
-      "
+      :filter-by-file-type="filterByFileType()"
       @item-event:dbl-click="onDblClickItem"
       @new-directory="toggleAddNewItemModal($event.contentType, 'add')"
       @new-text-file="toggleAddNewItemModal($event.contentType, 'add')"

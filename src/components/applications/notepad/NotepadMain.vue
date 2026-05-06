@@ -34,7 +34,10 @@ const fileExplorerWindowId = ref<string>();
 
 function handleUploadClick() {
   const fileExplorerId = useWindowStore().getNextWindowId('File Explorer');
-  useFileExplorerStore().setFileExplorerWindowAsFileSelect(windowId, fileExplorerId, ['text/plain']);
+  console.log(windowId)
+  useFileExplorerStore().setFileExplorerWindowAsFileSelect(windowId, fileExplorerId, [
+    'text/plain',
+  ]);
   fileExplorerWindowId.value = useWindowStore().pushOpenWindowReference('File Explorer');
 }
 
@@ -50,19 +53,23 @@ watch(
   async (newValue) => {
     if (!newValue) return;
 
-    if (newValue.windowId !== windowId) {
+    const found = newValue.find((fileSelectState) => fileSelectState.windowId === windowId);
+    if (!found) {
       return;
     }
 
-    if (typeof newValue.value !== 'string') {
-      const text = await newValue.value.rawFile?.text();
+    useFileExplorerStore().fileSelectState = useFileExplorerStore().fileSelectState.filter(
+      (element) => element.fileExplorerWindowId !== fileExplorerWindowId.value,
+    );
+
+    if (typeof found.value !== 'string') {
+      const text = await found.value.rawFile?.text();
       if (text === undefined || !fileExplorerWindowId.value) {
         return;
       }
 
-      useNotepadStore().initializeNotepadFile(windowId, newValue.fileId, newValue.value.name, text);
+      useNotepadStore().initializeNotepadFile(windowId, found.fileId, found.value.name, text);
       useWindowStore().removeOpenWindowReference(fileExplorerWindowId.value);
-      useFileExplorerStore().fileSelectState = null;
     }
   },
 );

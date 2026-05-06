@@ -11,6 +11,7 @@ import { useInitializeContextMenu } from '@/composables/contextMenu/useInitializ
 import { useDblClick } from '@/composables/helpers/UseDblClick.ts';
 import { useMultiSelectionBoxStore } from '@/stores/multiSelectionBox.ts';
 import { useHandleDesktopFileClicked } from '@/composables/desktop/useHandleDesktopFileClicked.ts';
+import { useToastFeatureNotImplemented } from '@/composables/helpers/useToastFeatureNotImplemented.ts';
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 
@@ -33,13 +34,15 @@ function onTileRightClick(event: MouseEvent) {
       {
         Copy: () => {
           console.log('copy');
+          useToastFeatureNotImplemented();
         },
         Paste: () => {
           console.log('paste');
+          useToastFeatureNotImplemented();
         },
         Delete: async () => {
           if (!tileItem.value) {
-            console.log('did not delete')
+            console.log('did not delete');
             return;
           }
 
@@ -50,11 +53,9 @@ function onTileRightClick(event: MouseEvent) {
         },
       },
       {
-        test: () => {
-          console.log('test');
-        },
         properties: () => {
           console.log('properties');
+          useToastFeatureNotImplemented();
         },
       },
     );
@@ -134,10 +135,7 @@ async function onDrop(event: DragEvent) {
   if (parsedData instanceof Object) {
     const fileSystemItem = parsedData as FileSystemItem;
     const type = fileSystemItem.type;
-    const id =
-      type === 'application' || type === 'file'
-        ? fileSystemItem.file?.id
-        : null;
+    const id = type === 'application' || type === 'file' ? fileSystemItem.file?.id : null;
 
     if (id === null) {
       return;

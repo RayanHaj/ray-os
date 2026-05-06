@@ -5,6 +5,8 @@ import type { WindowReference } from '@/types/WindowTypes.ts';
 import type { Application } from '@/types/ItemTypes.ts';
 import { useVideoPlayerStore } from '@/stores/videoPlayer.ts';
 import { useImageViewerStore } from '@/stores/imageViewer.ts';
+import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
+import { useAudioPlayerStore } from '@/stores/audioPlayer.ts';
 
 type WindowReferences = { [applicationName: string]: WindowReference[] };
 export const useWindowStore = defineStore('window', () => {
@@ -111,6 +113,29 @@ export const useWindowStore = defineStore('window', () => {
         useImageViewerStore().hasOpenInstance = false;
       }
     }
+
+    if (
+      useFileExplorerStore().fileSelectState.find(
+        (element) => element.fileExplorerWindowId === windowId,
+      )
+    ) {
+      useFileExplorerStore().fileSelectState = useFileExplorerStore().fileSelectState.filter(
+        (element) => element.fileExplorerWindowId !== windowId,
+      );
+    }
+
+    if (
+      useFileExplorerStore().isInFileSelectStateReturnValue.find(
+        (element) => element.windowId === windowId,
+      )
+    ) {
+      useFileExplorerStore().isInFileSelectStateReturnValue =
+        useFileExplorerStore().isInFileSelectStateReturnValue.filter(
+          (element) => element.windowId !== windowId,
+        );
+    }
+
+    useAudioPlayerStore().setAudioElement(windowId, null);
 
     openWindowsReferences.value[windowName] = openWindowsReferences.value[windowName].filter(
       (windowReference) => windowReference.id !== id,

@@ -4,7 +4,7 @@ import { type FileItemSizeKey } from '@/types/FileExplorerTypes.ts';
 import type { FileItem, FileType } from '@/types/ItemTypes.ts';
 
 export const useFileExplorerStore = defineStore('fileExplorer', () => {
-  const currentFileItemSize = ref<FileItemSizeKey>('medium');
+  const currentFileItemSize = ref<FileItemSizeKey>('small');
 
   const filePathAtWindow = ref<{ windowId: string; path: string[] }>();
   const fileSelectState = ref<{
@@ -12,9 +12,10 @@ export const useFileExplorerStore = defineStore('fileExplorer', () => {
     windowId: string;
     fileExplorerWindowId: string;
     allowedFileTypes: FileType[];
-  } | null>(null);
+  }[]>([]);
 
-  const isInFileSelectStateReturnValue = ref<{ windowId: string; fileId: number; value: string | FileItem; }>();
+  const isInFileSelectStateReturnValue =
+    ref<{ windowId: string; fileId: number; value: string | FileItem }[]>([]);
 
   function updateItemSize(itemSizeKey: FileItemSizeKey) {
     currentFileItemSize.value = itemSizeKey;
@@ -22,12 +23,12 @@ export const useFileExplorerStore = defineStore('fileExplorer', () => {
   }
 
   function setFileExplorerWindowAsFileSelect(windowId: string, fileExplorerWindowId: string, allowedFileTypes: FileType[]) {
-    fileSelectState.value = {
+    fileSelectState.value.push({
       active: true,
       windowId: windowId,
       fileExplorerWindowId: fileExplorerWindowId,
       allowedFileTypes: allowedFileTypes,
-    };
+    });
   }
 
   function setFilePathAtWindow(windowId: string, path: string[]) {

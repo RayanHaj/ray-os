@@ -17,7 +17,6 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
-    "dompurify": "^3.2.6",
     "pinia": "^3.0.1",
     "ray-db-wrapper": "^0.0.903",
     "vue": "^3.5.13",

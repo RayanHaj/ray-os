@@ -8,6 +8,7 @@ import {
   type Item,
   isImageType,
   isVideoType,
+  isAudioType,
 } from '@/types/ItemTypes.ts';
 import { computed, ref, watch } from 'vue';
 import type { RayDb } from 'ray-db-wrapper';
@@ -21,6 +22,7 @@ import { useToastStore } from '@/stores/toast.ts';
 import { useInitializeContextMenu } from '@/composables/contextMenu/useInitializeContextMenu.ts';
 import { useDblClick } from '@/composables/helpers/UseDblClick.ts';
 import { SystemFileDeleteError } from '@/exceptions/SystemFileDeleteError.ts';
+import { useToastFeatureNotImplemented } from '@/composables/helpers/useToastFeatureNotImplemented.ts';
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 const windowId = useInjectOrThrow<string>('windowId');
@@ -71,7 +73,11 @@ async function onRightClick(
     useInitializeContextMenu(event)
       .fileExplorerGrid()
       .initialize(
-        {},
+        {
+          Paste: () => {
+            useToastFeatureNotImplemented();
+          },
+        },
         {
           newDirectory: () => {
             emits('newDirectory', { contentType: 'directory' });
@@ -86,8 +92,12 @@ async function onRightClick(
       .fileExplorerGridItem()
       .initialize(
         {
-          Copy: () => {},
-          Paste: () => {},
+          Copy: () => {
+            useToastFeatureNotImplemented();
+          },
+          Paste: () => {
+            useToastFeatureNotImplemented();
+          },
           Delete: async () => {
             if (item) {
               if (item.isSystemFile) {
@@ -134,6 +144,7 @@ async function onRightClick(
 
 const imageSvg = useSvgOrFallback('ImageViewer');
 const videoSvg = useSvgOrFallback('VideoPlayer');
+const audioSvg = useSvgOrFallback('Audio');
 const fileSvg = useSvgOrFallback('TextFile');
 const directorySvg = useSvgOrFallback('Directory');
 
@@ -152,6 +163,9 @@ function getSvg(fileSystemItem: FileSystemItem) {
       }
       if (isVideoType(fileSystemItem.file?.type)) {
         return videoSvg.svg;
+      }
+      if (isAudioType(fileSystemItem.file?.type)) {
+        return audioSvg.svg;
       }
       return fileSvg.svg;
     }

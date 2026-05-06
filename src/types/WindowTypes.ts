@@ -23,15 +23,12 @@ export type WindowStyleObject = {
 export const windowNames = [
   'settings',
   'calculator',
-  'paint',
   'fileExplorer',
   'sereneSounds',
   'terminal',
   'notepad',
-  'doom',
   'imageViewer',
   'videoPlayer',
-  'snake',
   'audioPlayer'
 ] as const;
 export type WindowName = (typeof windowNames)[number];

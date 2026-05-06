@@ -58,12 +58,7 @@ export const Applications = [
   'Serene Sounds',
   'Settings',
   'Terminal',
-  'Paint',
-  'Portfolio',
-  'Todo',
   'Notepad',
-  'Doom',
-  'Snake',
   'Audio Player'
 ] as const;
 

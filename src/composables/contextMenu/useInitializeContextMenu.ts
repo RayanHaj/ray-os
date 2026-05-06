@@ -29,7 +29,6 @@ export function useInitializeContextMenu(event: MouseEvent) {
   const desktop = () => {
     const primaryActions = ['Copy', 'Paste'] as const;
     const secondaryActions = [
-      { id: 'test', label: 'this is a test', disabled: false },
       { id: 'properties', label: 'open properties', disabled: false },
     ] as const;
 
@@ -39,7 +38,6 @@ export function useInitializeContextMenu(event: MouseEvent) {
   const tile = () => {
     const primaryActions = ['Copy', 'Paste', 'Delete'] as const;
     const secondaryActions = [
-      { id: 'test', label: 'this is a test', disabled: false },
       { id: 'properties', label: 'open properties', disabled: false },
     ] as const;
 
@@ -47,7 +45,7 @@ export function useInitializeContextMenu(event: MouseEvent) {
     return { initialize };
   };
   const fileExplorerGrid = () => {
-    const primaryActions = [] as const;
+    const primaryActions = ['Paste'] as const;
     const secondaryActions = [
       { id: 'newDirectory', label: 'new directory', disabled: false },
       { id: 'newTextFile', label: 'new text file', disabled: false }

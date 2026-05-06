@@ -75,6 +75,8 @@ function minimizeWindow() {
 
 function maximizeWindow() {
   if (windowType === 'fixed') return;
+
+  styles.value.cursor = 'default';
   windowResizeManager.setWindowMaximized(cachedStyles);
 }
 
