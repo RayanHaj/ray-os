@@ -10,6 +10,7 @@ import { useHandleDir } from '@/composables/terminal/commands/useHandleDir.ts';
 import { useHandleMkdir } from '@/composables/terminal/commands/useHandleMkdir.ts';
 import { useHandleDel } from '@/composables/terminal/commands/useHandleDel.ts';
 import { useHandleStart } from '@/composables/terminal/commands/useHandleStart.ts';
+import { useHandleClsHistory } from '@/composables/terminal/commands/useHandleClsHistory.ts';
 
 type CommandObject = { command: CommandKeyword; value: string };
 
@@ -17,15 +18,25 @@ export async function useHandleTerminalCommand(
   rayDb: RayDb,
   command: string,
   lines: Ref<LineTerminal[]>,
+  cachedLines: Ref<LineTerminal[]>,
   currentPath: Ref<string[]>,
   windowId: string,
+  lsCommandCacheKey: string
 ) {
   const commandObject = parseCommandStringToArray(command);
   if (commandObject instanceof Error) {
     return commandObject;
   }
 
-  const error = await handleCommand(rayDb, commandObject, lines, currentPath, windowId);
+  const error = await handleCommand(
+    rayDb,
+    commandObject,
+    lines,
+    cachedLines,
+    currentPath,
+    windowId,
+    lsCommandCacheKey,
+  );
   if (error) {
     return error;
   }
@@ -50,8 +61,10 @@ async function handleCommand(
   rayDb: RayDb,
   commandObject: CommandObject,
   lines: Ref<LineTerminal[]>,
+  cachedLines: Ref<LineTerminal[]>,
   currentPath: Ref<string[]>,
   windowId: string,
+  lsCommandCacheKey: string
 ) {
   let commandError: Error | null = null;
   switch (commandObject.command) {
@@ -81,6 +94,10 @@ async function handleCommand(
       break;
     case 'start':
       await useHandleStart(rayDb, lines, currentPath, commandObject.value);
+      break;
+    case 'cls-history':
+      useHandleClsHistory(lsCommandCacheKey, cachedLines);
+      break;
   }
 
   return commandError;

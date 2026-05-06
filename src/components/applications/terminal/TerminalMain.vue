@@ -10,6 +10,9 @@ import type { LineTerminal } from '@/types/TerminalTypes.ts';
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 const windowId = useInjectOrThrow<string>('windowId');
 
+const FONT_SIZE_LS_KEY = 'terminalFontSize';
+const LS_COMMAND_CACHE_KEY = 'commandCache';
+
 const emptyLine = { line: '', isPlain: false };
 const lines = ref<LineTerminal[]>([
   { line: 'RayOS Terminal — type "help" for commands', isPlain: true },
@@ -21,13 +24,27 @@ const currentCacheIndex = ref<number>(-1);
 
 const fontSize = ref(20);
 const currentPath = ref<string[]>([]);
-
-const FONT_SIZE_LS_KEY = 'terminalFontSize';
-onBeforeMount(() => {
+onBeforeMount(async () => {
   currentPath.value = [useFileSystemStore().rootDirectory];
   const fontSizeLS = localStorage.getItem(FONT_SIZE_LS_KEY);
   if (fontSizeLS !== null) {
     fontSize.value = Number(fontSizeLS);
+  }
+
+  const commandCacheLs = localStorage.getItem(LS_COMMAND_CACHE_KEY);
+  if (commandCacheLs !== null) {
+    try {
+      const parsedCommandCache = (await JSON.parse(commandCacheLs)) as LineTerminal[];
+
+      if (parsedCommandCache.length > 0) {
+        cachedLines.value = parsedCommandCache;
+      }
+    } catch (e) {
+      console.error(e);
+      localStorage.setItem(LS_COMMAND_CACHE_KEY, JSON.stringify([]));
+    }
+  } else {
+    localStorage.setItem(LS_COMMAND_CACHE_KEY, JSON.stringify([]));
   }
 });
 
@@ -41,8 +58,10 @@ async function onEnter(command: string) {
     rayDb,
     command,
     lines,
+    cachedLines,
     currentPath,
     windowId,
+    LS_COMMAND_CACHE_KEY,
   );
 
   if (commandObject instanceof Error) {
@@ -53,7 +72,32 @@ async function onEnter(command: string) {
     await nextTick();
   }
 
-  cachedLines.value.push({ line: command, isPlain: false });
+  if (commandObject instanceof Error || commandObject.command !== 'cls-history') {
+    const previousCachedLine = cachedLines.value[cachedLines.value.length - 1];
+
+    if (previousCachedLine === undefined || previousCachedLine.line !== command) {
+      cachedLines.value.push({ line: command, isPlain: false });
+
+      const commandCacheLs = localStorage.getItem(LS_COMMAND_CACHE_KEY);
+      if (commandCacheLs !== null) {
+        try {
+          const parsedCommandCache = JSON.parse(commandCacheLs) as LineTerminal[];
+          localStorage.setItem(
+            LS_COMMAND_CACHE_KEY,
+            JSON.stringify([...parsedCommandCache, { line: command, isPlain: false }]),
+          );
+        } catch (e) {
+          console.error(e);
+          localStorage.setItem(LS_COMMAND_CACHE_KEY, JSON.stringify([]));
+        }
+      } else {
+        localStorage.setItem(
+          LS_COMMAND_CACHE_KEY,
+          JSON.stringify([{ line: command, isPlain: false }]),
+        );
+      }
+    }
+  }
 
   pushNewEmptyLine();
   return commandObject;
