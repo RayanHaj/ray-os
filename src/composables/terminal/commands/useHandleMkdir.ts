@@ -1,16 +1,16 @@
 import type { RayDb } from 'ray-db-wrapper';
-import type { Ref } from 'vue';
 import {
   fileSystemLookup,
   insertItemIntoFileSystem,
 } from '@/composables/fileSystem/useIndexedDbHelper.ts';
+import type { Ref } from 'vue';
 import type { LineTerminal } from '@/types/TerminalTypes.ts';
 
 export async function useHandleMkdir(
   rayDb: RayDb,
-  lines: Ref<LineTerminal[]>,
-  currentPath: Ref<string[]>,
   name: string,
+  currentPath: Ref<string[]>,
+  lines: Ref<LineTerminal[]>,
 ): Promise<Error | undefined> {
   try {
     const value = await fileSystemLookup(rayDb, currentPath.value.join('/'));

@@ -11,6 +11,8 @@ const { currentPath, inputValue, isReadonly, isError, windowId } = defineProps<{
   windowId: string;
 }>();
 
+const emit = defineEmits(['enter-pressed', 'on-input']);
+
 const path = ref<string>('');
 const terminalLineRef = ref();
 
@@ -22,6 +24,9 @@ onMounted(() => {
   terminalLineRef.value?.focus();
 });
 
+/**
+ * Focuses the terminal input when this window is brought to the front.
+ */
 watch(
   () => useWindowStore().zIndexesOrder,
   (newValue, oldValue) => {
@@ -35,7 +40,14 @@ watch(
   },
 );
 
-const emit = defineEmits(['enter-pressed', 'on-input']);
+watch(
+  () => inputValue.line,
+  (newValue) => {
+    if (!terminalLineRef.value) return;
+    if (terminalLineRef.value.textContent === newValue) return;
+    terminalLineRef.value.textContent = newValue;
+  },
+);
 
 function onEnter(event: KeyboardEvent) {
   const target = event.target as HTMLElement;
@@ -65,13 +77,21 @@ defineExpose({
 </script>
 
 <template>
-  <div v-if="!isReadonly" class="wrapper">
+  <div v-if="isReadonly" class="wrapper" :style="{ color: isError ? 'red' : 'var(--text-color)' }">
+    <p v-if="!inputValue.isPlain" class="current-location">{{ displayPath }}</p>
+    <div class="terminal-line">
+      <p v-if="inputValue.line">
+        <span class="input-value">{{ inputValue.line }}</span>
+      </p>
+    </div>
+  </div>
+  <div v-else class="wrapper">
     <p v-if="!inputValue.isPlain" class="current-location">{{ displayPath }}</p>
     <div
       ref="terminalLineRef"
       class="terminal-line"
       contenteditable="true"
-      @input="emit('on-input')"
+      @input="emit('on-input', ($event.target as HTMLElement).textContent ?? '')"
       @keydown.enter.prevent="onEnter($event)"
       @blur="
         () => {
@@ -80,25 +100,8 @@ defineExpose({
           }
         }
       "
-    >
-      <p v-if="inputValue.line">{{ inputValue.line }}</p>
-    </div>
+    />
   </div>
-
-  <div
-    v-else-if="isReadonly"
-    class="wrapper"
-    :style="{ color: isError ? 'red' : 'var(--text-color)' }"
-  >
-    <p v-if="!inputValue.isPlain" class="current-location">{{ displayPath }}</p>
-    <div class="terminal-line">
-      <p v-if="inputValue.line">
-        <span class="input-value">{{ inputValue.line }}</span>
-      </p>
-    </div>
-  </div>
-
-  <p v-else>{{ inputValue.line }}</p>
 </template>
 
 <style scoped>

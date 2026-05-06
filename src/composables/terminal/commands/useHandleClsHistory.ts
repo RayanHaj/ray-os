@@ -1,7 +1,7 @@
-import type { Ref } from 'vue';
-import type { LineTerminal } from '@/types/TerminalTypes.ts';
+import { useTerminalStore } from '@/stores/terminal.ts';
 
-export function useHandleClsHistory(lsClsCommandKey: string, cachedLines: Ref<LineTerminal[]>) {
-  localStorage.setItem(lsClsCommandKey, JSON.stringify([]));
-  cachedLines.value = [];
+export function useHandleClsHistory() {
+  const terminalStore = useTerminalStore();
+  localStorage.setItem(terminalStore.LS_COMMAND_CACHE_KEY, JSON.stringify([]));
+  terminalStore.cachedLines = [];
 }

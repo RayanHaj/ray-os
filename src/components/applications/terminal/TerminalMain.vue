@@ -6,62 +6,60 @@ import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
 import type { LineTerminal } from '@/types/TerminalTypes.ts';
+import { useTerminalStore } from '@/stores/terminal.ts';
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 const windowId = useInjectOrThrow<string>('windowId');
 
-const FONT_SIZE_LS_KEY = 'terminalFontSize';
-const LS_COMMAND_CACHE_KEY = 'commandCache';
+const terminalStore = useTerminalStore();
 
-const emptyLine = { line: '', isPlain: false };
 const lines = ref<LineTerminal[]>([
   { line: 'RayOS Terminal — type "help" for commands', isPlain: true },
-  emptyLine,
+  terminalStore.emptyLine,
 ]);
 
-const cachedLines = ref<LineTerminal[]>([]);
+const currentPath = ref<string[]>([]);
 const currentCacheIndex = ref<number>(-1);
 
 const fontSize = ref(20);
-const currentPath = ref<string[]>([]);
 onBeforeMount(async () => {
   currentPath.value = [useFileSystemStore().rootDirectory];
-  const fontSizeLS = localStorage.getItem(FONT_SIZE_LS_KEY);
+  const fontSizeLS = localStorage.getItem(terminalStore.FONT_SIZE_LS_KEY);
   if (fontSizeLS !== null) {
     fontSize.value = Number(fontSizeLS);
   }
 
-  const commandCacheLs = localStorage.getItem(LS_COMMAND_CACHE_KEY);
+  const commandCacheLs = localStorage.getItem(terminalStore.LS_COMMAND_CACHE_KEY);
   if (commandCacheLs !== null) {
     try {
       const parsedCommandCache = (await JSON.parse(commandCacheLs)) as LineTerminal[];
 
       if (parsedCommandCache.length > 0) {
-        cachedLines.value = parsedCommandCache;
+        terminalStore.cachedLines = parsedCommandCache;
       }
     } catch (e) {
       console.error(e);
-      localStorage.setItem(LS_COMMAND_CACHE_KEY, JSON.stringify([]));
+      localStorage.setItem(terminalStore.LS_COMMAND_CACHE_KEY, JSON.stringify([]));
     }
   } else {
-    localStorage.setItem(LS_COMMAND_CACHE_KEY, JSON.stringify([]));
+    localStorage.setItem(terminalStore.LS_COMMAND_CACHE_KEY, JSON.stringify([]));
   }
 });
 
 const lineIndexesOfErrorLines = ref<number[]>([]);
 async function onEnter(command: string) {
+  currentCacheIndex.value = -1;
+
   if (lines.value.length > 0) {
     lines.value[lines.value.length - 1] = { line: command, isPlain: false };
   }
 
   const commandObject = await useHandleTerminalCommand(
     rayDb,
-    command,
-    lines,
-    cachedLines,
-    currentPath,
     windowId,
-    LS_COMMAND_CACHE_KEY,
+    command,
+    currentPath,
+    lines,
   );
 
   if (commandObject instanceof Error) {
@@ -73,26 +71,26 @@ async function onEnter(command: string) {
   }
 
   if (commandObject instanceof Error || commandObject.command !== 'cls-history') {
-    const previousCachedLine = cachedLines.value[cachedLines.value.length - 1];
+    const previousCachedLine = terminalStore.cachedLines[terminalStore.cachedLines.length - 1];
 
     if (previousCachedLine === undefined || previousCachedLine.line !== command) {
-      cachedLines.value.push({ line: command, isPlain: false });
+      terminalStore.cachedLines.push({ line: command, isPlain: false });
 
-      const commandCacheLs = localStorage.getItem(LS_COMMAND_CACHE_KEY);
+      const commandCacheLs = localStorage.getItem(terminalStore.LS_COMMAND_CACHE_KEY);
       if (commandCacheLs !== null) {
         try {
           const parsedCommandCache = JSON.parse(commandCacheLs) as LineTerminal[];
           localStorage.setItem(
-            LS_COMMAND_CACHE_KEY,
+            terminalStore.LS_COMMAND_CACHE_KEY,
             JSON.stringify([...parsedCommandCache, { line: command, isPlain: false }]),
           );
         } catch (e) {
           console.error(e);
-          localStorage.setItem(LS_COMMAND_CACHE_KEY, JSON.stringify([]));
+          localStorage.setItem(terminalStore.LS_COMMAND_CACHE_KEY, JSON.stringify([]));
         }
       } else {
         localStorage.setItem(
-          LS_COMMAND_CACHE_KEY,
+          terminalStore.LS_COMMAND_CACHE_KEY,
           JSON.stringify([{ line: command, isPlain: false }]),
         );
       }
@@ -103,59 +101,66 @@ async function onEnter(command: string) {
   return commandObject;
 }
 
-function onLineInput() {
-  if (currentCacheIndex.value === -1) return;
+function onLineInput(value: string) {
+  lines.value[lines.value.length - 1] = { line: value, isPlain: false };
   currentCacheIndex.value = -1;
 }
 
 function pushNewEmptyLine() {
-  lines.value.push(emptyLine);
+  lines.value.push(terminalStore.emptyLine);
 }
 
 function isReadonly(lineNumber: number) {
   return lineNumber < lines.value.length - 1;
 }
 
+const terminalLineRef = ref();
 function onKeyDown(event: KeyboardEvent) {
   if (event.key === 'Control') {
     document.addEventListener('wheel', onResizing, { passive: false });
   }
-}
 
-const terminalLineRef = ref();
-function onKeyUp(event: KeyboardEvent) {
   switch (event.key) {
-    case 'Control':
-      {
-        document.removeEventListener('wheel', onResizing);
-      }
-      break;
     case 'ArrowUp':
       {
-        if (cachedLines.value.length === 0) return;
+        event.preventDefault();
+        if (terminalStore.cachedLines.length === 0) return;
 
         if (currentCacheIndex.value === -1) {
-          currentCacheIndex.value = cachedLines.value.length - 1;
+          currentCacheIndex.value = terminalStore.cachedLines.length - 1;
         } else if (currentCacheIndex.value > 0) {
           currentCacheIndex.value--;
         }
 
-        lines.value[lines.value.length - 1] = cachedLines.value[currentCacheIndex.value];
+        lines.value[lines.value.length - 1] = {
+          ...terminalStore.cachedLines[currentCacheIndex.value],
+        };
 
         terminalLineRef.value.focusAtEnd();
       }
       break;
-    case 'ArrowDown': {
-      if (cachedLines.value.length === 0 || currentCacheIndex.value === -1) return;
+    case 'ArrowDown':
+      {
+        event.preventDefault();
+        if (terminalStore.cachedLines.length === 0 || currentCacheIndex.value === -1) return;
 
-      if (currentCacheIndex.value < cachedLines.value.length - 1) {
-        currentCacheIndex.value++;
+        if (currentCacheIndex.value < terminalStore.cachedLines.length - 1) {
+          currentCacheIndex.value++;
+        }
+
+        lines.value[lines.value.length - 1] = {
+          ...terminalStore.cachedLines[currentCacheIndex.value],
+        };
+
+        terminalLineRef.value.focusAtEnd();
       }
+      break;
+  }
+}
 
-      lines.value[lines.value.length - 1] = cachedLines.value[currentCacheIndex.value];
-
-      terminalLineRef.value.focusAtEnd();
-    }
+async function onKeyUp(event: KeyboardEvent) {
+  if (event.key === 'Control') {
+    document.removeEventListener('wheel', onResizing);
   }
 }
 
@@ -166,12 +171,12 @@ const onResizing = (event: WheelEvent) => {
   if (event.deltaY < 0) {
     if (fontSize.value < 100) {
       fontSize.value += FONT_SIZE_STEP;
-      localStorage.setItem(FONT_SIZE_LS_KEY, fontSize.value.toString());
+      localStorage.setItem(terminalStore.FONT_SIZE_LS_KEY, fontSize.value.toString());
     }
   } else {
     if (fontSize.value > 2) {
       fontSize.value -= FONT_SIZE_STEP;
-      localStorage.setItem(FONT_SIZE_LS_KEY, fontSize.value.toString());
+      localStorage.setItem(terminalStore.FONT_SIZE_LS_KEY, fontSize.value.toString());
     }
   }
 };
@@ -188,11 +193,11 @@ const onResizing = (event: WheelEvent) => {
       v-for="(_, index) of lines"
       :ref="(el) => index === lines.length - 1 && el && (terminalLineRef = el)"
       :key="index"
+      :window-id="windowId"
+      :current-path="currentPath.join('/')"
       :input-value="lines[index]"
       :is-readonly="isReadonly(index)"
-      :current-path="currentPath.join('/')"
       :is-error="lineIndexesOfErrorLines.includes(index)"
-      :window-id="windowId"
       @enter-pressed="onEnter"
       @on-input="onLineInput"
     />

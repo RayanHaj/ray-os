@@ -1,7 +1,7 @@
 import type { RayDb } from 'ray-db-wrapper';
-import type { Ref } from 'vue';
 import { fileSystemLookup } from '@/composables/fileSystem/useIndexedDbHelper.ts';
 import type { Item } from '@/types/ItemTypes.ts';
+import type { Ref } from 'vue';
 import type { LineTerminal } from '@/types/TerminalTypes.ts';
 
 export async function useHandleDir(rayDb: RayDb, currentPath: Ref<string[]>, lines: Ref<LineTerminal[]>) {

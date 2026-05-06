@@ -1,5 +1,4 @@
 import { type CommandKeyword, commands, type LineTerminal } from '@/types/TerminalTypes.ts';
-import type { Ref } from 'vue';
 import type { RayDb } from 'ray-db-wrapper';
 import { useHandleCdDots } from '@/composables/terminal/commands/useHandleCdDots.ts';
 import { useHandleCd } from '@/composables/terminal/commands/useHandleCd.ts';
@@ -11,32 +10,23 @@ import { useHandleMkdir } from '@/composables/terminal/commands/useHandleMkdir.t
 import { useHandleDel } from '@/composables/terminal/commands/useHandleDel.ts';
 import { useHandleStart } from '@/composables/terminal/commands/useHandleStart.ts';
 import { useHandleClsHistory } from '@/composables/terminal/commands/useHandleClsHistory.ts';
+import { type Ref } from 'vue';
 
 type CommandObject = { command: CommandKeyword; value: string };
 
 export async function useHandleTerminalCommand(
   rayDb: RayDb,
-  command: string,
-  lines: Ref<LineTerminal[]>,
-  cachedLines: Ref<LineTerminal[]>,
-  currentPath: Ref<string[]>,
   windowId: string,
-  lsCommandCacheKey: string
+  command: string,
+  currentPath: Ref<string[]>,
+  lines: Ref<LineTerminal[]>,
 ) {
   const commandObject = parseCommandStringToArray(command);
   if (commandObject instanceof Error) {
     return commandObject;
   }
 
-  const error = await handleCommand(
-    rayDb,
-    commandObject,
-    lines,
-    cachedLines,
-    currentPath,
-    windowId,
-    lsCommandCacheKey,
-  );
+  const error = await handleCommand(rayDb, windowId, commandObject, currentPath, lines);
   if (error) {
     return error;
   }
@@ -59,17 +49,15 @@ export function parseCommandStringToArray(command: string): CommandObject | Erro
 
 async function handleCommand(
   rayDb: RayDb,
-  commandObject: CommandObject,
-  lines: Ref<LineTerminal[]>,
-  cachedLines: Ref<LineTerminal[]>,
-  currentPath: Ref<string[]>,
   windowId: string,
-  lsCommandCacheKey: string
+  commandObject: CommandObject,
+  currentPath: Ref<string[]>,
+  lines: Ref<LineTerminal[]>,
 ) {
   let commandError: Error | null = null;
   switch (commandObject.command) {
     case 'cd':
-      commandError = (await useHandleCd(rayDb, currentPath, commandObject.value)) ?? null;
+      commandError = (await useHandleCd(rayDb, commandObject.value, currentPath)) ?? null;
       break;
     case 'cd..':
       useHandleCdDots(currentPath);
@@ -87,16 +75,16 @@ async function handleCommand(
       await useHandleDir(rayDb, currentPath, lines);
       break;
     case 'mkdir':
-      commandError = (await useHandleMkdir(rayDb, lines, currentPath, commandObject.value)) ?? null;
+      commandError = (await useHandleMkdir(rayDb, commandObject.value, currentPath, lines)) ?? null;
       break;
     case 'del':
-      commandError = (await useHandleDel(rayDb, lines, currentPath, commandObject.value)) ?? null;
+      commandError = (await useHandleDel(rayDb, commandObject.value, currentPath, lines)) ?? null;
       break;
     case 'start':
-      await useHandleStart(rayDb, lines, currentPath, commandObject.value);
+      await useHandleStart(rayDb, commandObject.value, currentPath);
       break;
     case 'cls-history':
-      useHandleClsHistory(lsCommandCacheKey, cachedLines);
+      useHandleClsHistory();
       break;
   }
 

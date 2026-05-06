@@ -1,16 +1,14 @@
 import type { RayDb } from 'ray-db-wrapper';
-import type { Ref } from 'vue';
 import { fileSystemLookup } from '@/composables/fileSystem/useIndexedDbHelper.ts';
 import type { Application, FileItem, FileSystemItem, Item } from '@/types/ItemTypes.ts';
 import { useWindowStore } from '@/stores/window.ts';
 import { useNotepadStore } from '@/stores/notepad.ts';
-import type { LineTerminal } from '@/types/TerminalTypes.ts';
+import type { Ref } from 'vue';
 
 export async function useHandleStart(
   rayDb: RayDb,
-  lines: Ref<LineTerminal[]>,
-  currentPath: Ref<string[]>,
   name: string,
+  currentPath: Ref<string[]>,
 ) {
   if (!name) {
     return;
