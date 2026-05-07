@@ -23,6 +23,7 @@ import { useInitializeContextMenu } from '@/composables/contextMenu/useInitializ
 import { useDblClick } from '@/composables/helpers/UseDblClick.ts';
 import { SystemFileDeleteError } from '@/exceptions/SystemFileDeleteError.ts';
 import { useToastFeatureNotImplemented } from '@/composables/helpers/useToastFeatureNotImplemented.ts';
+import { useDesktopStore } from '@/stores/desktop.ts';
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 const windowId = useInjectOrThrow<string>('windowId');

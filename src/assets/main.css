@@ -102,32 +102,6 @@ body {
   --tabs-hover: #0a250a;
 }
 
-[data-theme='super-mario'] {
-  --background-color: #5c94fc;
-  --text-color: #ffffff;
-  --text-secondary-color: #ffd700;
-  --accent-color: #ff5555;
-  --svg-color: #ffffff;
-  --button-primary-color: #ff0000;
-  --button-secondary-color: #cc0000;
-  --button-hover-color: #e62e00;
-  --button-text-color: #ffffff;
-  --input-primary-color: #ffffff;
-  --input-secondary-color: #fffacd;
-  --input-border-color: #ff5555;
-  --input-focus-color: #ffe87c;
-  --taskbar-background-color: #228b22;
-  --taskbar-border-color: #ffffff;
-  --window-primary-color: #ffffff;
-  --window-secondary-color: #fffacd;
-  --window-border-color: #ff0000;
-  --highlight-color: #ffff0080;
-  --tabs-background: #b22222;
-  --tabs-secondary-background: #8b0000;
-  --tabs-text: #ffffff;
-  --tabs-hover: #cd5c5c;
-}
-
 [data-theme='cyberpunk-neon'] {
   --background-color: #0a0a1f;
   --text-color: #ff47ff;

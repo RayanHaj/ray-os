@@ -35,16 +35,27 @@ async function resetState() {
 
 <template>
   <div class="settings-system">
+    <p>Warning: close all other RayOS tabs before resetting</p>
     <button class="reset-state-button" @click="resetState">Reset everything</button>
   </div>
 </template>
 
 <style scoped>
+.settings-system {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
 .reset-state-button {
   width: 100%;
   background: red;
   color: white;
   padding: 10px;
   border: none;
+}
+
+p {
+  color: var(--text-color);
+  font-weight: bold;
 }
 </style>

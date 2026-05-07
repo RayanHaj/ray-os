@@ -21,10 +21,6 @@ export async function useFileSystemInit(rayDb: RayDb) {
         directory: { name: 'Wallpapers', children: [] },
         isSystemFile: true,
       });
-      await insertItemIntoFileSystem(rayDb, [parentId], {
-        directory: { name: 'Desktop', children: [] },
-        isSystemFile: true,
-      });
     }
   }
 

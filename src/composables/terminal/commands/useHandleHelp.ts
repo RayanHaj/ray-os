@@ -12,6 +12,8 @@ const helpArray = [
   'mkdir       : create a new directory',
   'del         : delete a file or folder',
   'start       : open a file or application',
+  '',
+  'Tip: ctrl + scroll or pinch to zoom to adjust font size',
 ];
 
 export function useHandleHelp(lines: Ref<LineTerminal[]>) {
