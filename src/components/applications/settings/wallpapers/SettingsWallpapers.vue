@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import WallpaperTile from '@/components/applications/settings/wallpapers/WallpaperTile.vue';
 import wallpapers from '@/json/wallpapers.json';
-import { onBeforeMount, type Ref, ref } from 'vue';
+import { onBeforeMount, type Ref, ref, watch } from 'vue';
 import { useWallpaperStore, type WallpaperType } from '@/stores/settings/wallpaper.ts';
 import { fileSystemLookup } from '@/composables/fileSystem/useIndexedDbHelper.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import type { Item } from '@/types/ItemTypes.ts';
+import { useFileSystemStore } from '@/stores/fileSystem.ts';
 
 const customWallpapers: Ref<{ id: number; file: File }[]> = ref([]);
 const WALLPAPER_COUNT = Object.keys(wallpapers).length;
@@ -15,7 +16,18 @@ const wallpaperStore = useWallpaperStore();
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 onBeforeMount(async () => {
   wallpaperStore.initSelectedWallpaper();
+  await updateCustomWallpapers();
+});
 
+watch(
+  () => useFileSystemStore().updateFileSystemVal,
+  async (value, oldValue) => {
+    if (value === oldValue) return;
+    await updateCustomWallpapers();
+  },
+);
+
+async function updateCustomWallpapers() {
   const wallpaperDirectory = await fileSystemLookup(rayDb, 'Wallpapers');
   if (wallpaperDirectory instanceof Error || wallpaperDirectory === undefined) {
     return;
@@ -34,7 +46,7 @@ onBeforeMount(async () => {
         }),
     )
   ).filter((item): item is { id: number; file: File } => item !== null);
-});
+}
 
 function onClick(id: number, type: WallpaperType) {
   wallpaperStore.setSelectedWallpaper(id, type);
@@ -56,12 +68,15 @@ function onClick(id: number, type: WallpaperType) {
             wallpaper.id === wallpaperStore.selectedWallpaper?.id &&
             wallpaperStore.selectedWallpaper.type === 'custom'
           "
-          @click="
-            onClick(wallpaper.id, 'custom', wallpaper.file)
-          "
+          @click="onClick(wallpaper.id, 'custom')"
         />
       </div>
-      <span v-if="customWallpapers.length === 0">No uploaded wallpapers found</span>
+      <div class="no-custom-wallpapers-found" v-if="customWallpapers.length === 0">
+        <span>No uploaded wallpapers found</span>
+        <span
+          >Go to File Explorer and drag and drop a file into the Wallpapers system directory</span
+        >
+      </div>
     </div>
     <hr />
     <div class="pre-defined-wallpapers">
@@ -133,13 +148,17 @@ function onClick(id: number, type: WallpaperType) {
   gap: 10px;
 }
 
-.custom-wallpapers span {
-  color: var(--text-secondary-color);
-  font-size: var(--font-size-sm);
+.no-custom-wallpapers-found {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  text-align: center;
+  color: var(--text-secondary-color);
+  font-size: var(--font-size-sm);
 }
 
 hr {
