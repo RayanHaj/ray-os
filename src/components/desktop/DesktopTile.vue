@@ -33,28 +33,21 @@ function onTileRightClick(event: MouseEvent) {
     .initialize(
       {
         Copy: () => {
-          console.log('copy');
           useToastFeatureNotImplemented();
         },
         Paste: () => {
-          console.log('paste');
           useToastFeatureNotImplemented();
         },
         Delete: async () => {
           if (!tileItem.value) {
-            console.log('did not delete');
             return;
           }
 
-          console.log('deleting: ');
-          console.log(tileItem.value);
-
-          await desktopStore.deleteDesktopItem(rayDb, tileItem.value.id);
+          await desktopStore.deleteDesktopItem(rayDb, tileItem.value.tileId);
         },
       },
       {
         properties: () => {
-          console.log('properties');
           useToastFeatureNotImplemented();
         },
       },
@@ -155,6 +148,9 @@ function onDragStart(event: DragEvent) {
 async function onDrop(event: DragEvent) {
   emits('dragEnded');
   const targetId = Number((event.currentTarget as HTMLElement).id);
+  if (tileItem.value?.content) {
+    return;
+  }
 
   const data = event.dataTransfer?.getData('text/plain');
   if (!data) {

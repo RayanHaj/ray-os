@@ -21,17 +21,14 @@ function onDesktopRightClick(event: MouseEvent) {
     .initialize(
       {
         Copy: () => {
-          console.log('copy');
           useToastFeatureNotImplemented();
         },
         Paste: () => {
-          console.log('paste');
           useToastFeatureNotImplemented();
         },
       },
       {
         properties: () => {
-          console.log('properties');
           useToastFeatureNotImplemented();
         },
       },

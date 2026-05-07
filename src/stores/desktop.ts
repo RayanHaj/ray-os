@@ -183,10 +183,10 @@ export const useDesktopStore = defineStore('desktop', () => {
     }
   }
 
-  async function deleteDesktopItem(rayDb: RayDb, desktopItemId: number) {
+  async function deleteDesktopItem(rayDb: RayDb, tileId: number) {
     try {
-      await rayDb.deleteOne('desktopFiles', desktopItemId);
-      items.value = items.value.filter((item) => item.id !== desktopItemId);
+      await rayDb.deleteOne('desktopFiles', tileId);
+      items.value = items.value.filter((item) => item.tileId !== tileId);
     } catch (e) {
       throw (e as Error).message;
     }

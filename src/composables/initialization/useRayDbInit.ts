@@ -26,9 +26,9 @@ export async function useRayDbInit() {
     },
     {
       name: 'desktopFiles',
-      keyPath: 'id',
+      keyPath: 'tileId',
       indexes: [
-        { indexName: 'id', keyPath: 'id', unique: true },
+        { indexName: 'id', keyPath: 'id', unique: false },
         { indexName: 'type', keyPath: 'type', unique: false },
         { indexName: 'tileId', keyPath: 'tileId', unique: true },
       ],
