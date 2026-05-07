@@ -113,22 +113,32 @@ export const useDesktopStore = defineStore('desktop', () => {
     }
   }
 
-  async function updateDesktopItem(rayDb: RayDb, desktopItemId: number, newTileId: number) {
+  async function updateDesktopItem(
+    rayDb: RayDb,
+    desktopItemId: number,
+    newTileId: number,
+    type: string,
+  ) {
     try {
-      const item = await rayDb.findOne<DesktopItem>('desktopFiles', 'id', desktopItemId);
-      if (!item) {
-        throw new Error('cannot find item');
-      }
+      const storeItem = items.value.find(
+        (item) => item.id === desktopItemId && item.content.type === type,
+      );
+      if (!storeItem) throw new Error('cannot find item');
 
+      const item = await rayDb.findOne<DesktopItem>('desktopFiles', 'tileId', storeItem.tileId);
+      if (!item) throw new Error('cannot find item in db');
+
+      const oldTileId = item.tileId;
       item.tileId = newTileId;
-      await rayDb.updateOne('desktopFiles', item);
+
+      await rayDb.deleteOne('desktopFiles', oldTileId);
+      await rayDb.insertOne<DesktopItem>('desktopFiles', item);
 
       items.value = items.value.map((item) => {
-        if (item.id === desktopItemId) {
+        if (item.id === desktopItemId && item.content.type === type) {
           item.tileId = newTileId;
           return item;
         }
-
         return item;
       });
     } catch (e) {

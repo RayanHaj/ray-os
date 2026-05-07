@@ -87,7 +87,7 @@ async function updateTile() {
   const desktopItem = await desktopStore.getDesktopItemByTileId(rayDb, tileId.value);
 
   if (desktopItem) {
-    let item: Item & { tileId: number } | null = null;
+    let item: (Item & { tileId: number }) | null = null;
 
     switch (desktopItem.type) {
       case 'application':
@@ -113,7 +113,7 @@ async function updateTile() {
           content: fetchedDirectory,
           id: fetchedDirectory.id,
           tileId: tileId.value,
-          path: desktopItem.path
+          path: desktopItem.path,
         } as Item & { tileId: number };
       }
     }
@@ -138,15 +138,19 @@ const multiSelectionBoxStore = useMultiSelectionBoxStore();
 
 function onDragStart(event: DragEvent) {
   const id = tileItem.value?.id;
-  if (!id) {
-    return;
-  }
+  const type = tileItem.value?.content.type;
 
-  event?.dataTransfer?.setData('text/plain', id.toString());
+  if (!id || !type) return;
+
+  event?.dataTransfer?.setData(
+    'text/plain',
+    JSON.stringify({ id, type }),
+  );
 }
 
 async function onDrop(event: DragEvent) {
   emits('dragEnded');
+
   const targetId = Number((event.currentTarget as HTMLElement).id);
   if (tileItem.value?.content) {
     return;
@@ -158,12 +162,12 @@ async function onDrop(event: DragEvent) {
   }
 
   const parsedData = JSON.parse(data);
-  if (parsedData instanceof Object) {
+
+  if ('directory' in parsedData || 'file' in parsedData) {
     const fileSystemItem = parsedData as FileSystemItem;
     const type = fileSystemItem.type;
 
     let id = null;
-
     switch (type) {
       case 'file':
       case 'application':
@@ -171,14 +175,14 @@ async function onDrop(event: DragEvent) {
           id = fileSystemItem.file?.id;
         }
         break;
-      case 'directory': {
-        id = fileSystemItem.id;
-      }
+      case 'directory':
+        {
+          id = fileSystemItem.id;
+        }
+        break;
     }
 
-    if (id === null) {
-      return;
-    }
+    if (id === null) return;
 
     await desktopStore.addDesktopItem(rayDb, {
       id: Number(id),
@@ -190,21 +194,16 @@ async function onDrop(event: DragEvent) {
     return;
   }
 
-  const sourceId = Number(data);
-  if (!sourceId) {
-    return;
-  }
+  const { id: sourceId, type } = parsedData as { id: number; type: string };
+  if (!sourceId || !type) return;
 
-  const sourceItem: Item | undefined = desktopStore.items.find((item) => item.id === sourceId);
-  if (!sourceItem) {
-    return;
-  }
+  const sourceItem = desktopStore.items.find(
+    (item) => item.id === sourceId && item.content.type === type,
+  );
 
-  if (sourceId === -1) {
-    return;
-  }
+  if (!sourceItem) return;
 
-  await desktopStore.updateDesktopItem(rayDb, sourceItem.id, targetId);
+  await desktopStore.updateDesktopItem(rayDb, sourceItem.id, targetId, type);
 }
 
 async function openWindow() {

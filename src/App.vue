@@ -41,9 +41,11 @@ document.addEventListener('mouseout', function (event) {
 </script>
 
 <template>
-  <DesktopView v-if="initialised" />
+  <Transition name="fade">
+    <DesktopView v-if="initialised" />
+  </Transition>
   <div
-    v-else
+    v-if="!initialised"
     style="
       display: flex;
       height: 100vh;
@@ -58,4 +60,12 @@ document.addEventListener('mouseout', function (event) {
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.fade-enter-active {
+  transition: opacity 0.8s ease;
+}
+
+.fade-enter-from {
+  opacity: 0;
+}
+</style>

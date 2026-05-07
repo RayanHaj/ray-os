@@ -1,0 +1,19 @@
+Welcome to RayOS v0.1 Beta
+RayOS started as a way for me to dive deeper into Vue 3 and kind of spiraled into a browser-based desktop environment. Built with Vue 3, native HTML drag and drop and my own IndexedDB wrapper — no UI libraries, no backend. Everything persists locally in your browser.
+
+Desktop:
+Drag tiles around or drag files from the File Explorer straight onto the desktop. Applications, directories and files are all supported. Right click a tile to open the context menu where you can delete it.
+
+File Explorer:
+Right click anywhere to open the context menu — from here you can create new directories and text files. Right click a file or directory to rename or delete it. Drag and drop files straight from your local machine — video, audio, image and text files are all supported and can be opened directly in the app. Directories and files can be dragged into other directories. To move something back up, drag it onto the back button in the top left corner.
+
+Terminal:
+Type "help" to see what's available.
+
+Settings:
+Switch themes, upload wallpapers or reset everything.
+
+To use a custom wallpaper, drag an image from your local machine into the Wallpapers system directory in the File Explorer. It will then show up in Settings under custom wallpapers.
+
+Note:
+Mobile version is not stable yet.
