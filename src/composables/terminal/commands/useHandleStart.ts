@@ -4,6 +4,7 @@ import type { Application, FileItem, FileSystemItem, Item } from '@/types/ItemTy
 import { useWindowStore } from '@/stores/window.ts';
 import { useNotepadStore } from '@/stores/notepad.ts';
 import type { Ref } from 'vue';
+import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
 
 export async function useHandleStart(
   rayDb: RayDb,
@@ -34,7 +35,9 @@ export async function useHandleStart(
   }
 
   if (fileSystemItem.directory) {
-    handleDirectory(await rayDb.findOne<FileSystemItem>('fileSystem', 'id', fileSystemItem?.id));
+    handleDirectory(await rayDb.findOne<FileSystemItem>('fileSystem', 'id', fileSystemItem?.id), [
+      ...currentPath.value,
+    ]);
     return;
   }
 
@@ -51,8 +54,17 @@ export async function useHandleStart(
   }
 }
 
-function handleDirectory(item: FileSystemItem) {
-  console.log(item);
+function handleDirectory(item: FileSystemItem, currentPath: string[]) {
+  const nextWindowId = useWindowStore().getNextWindowId('File Explorer');
+
+  if (!item.directory?.name) {
+    return
+  }
+
+  currentPath.push(item.directory?.name);
+
+  useFileExplorerStore().setFilePathAtWindow(nextWindowId, currentPath);
+  useWindowStore().pushOpenWindowReference('File Explorer');
 }
 
 async function handleFile(item: FileItem, fileId: number) {

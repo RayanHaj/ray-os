@@ -34,7 +34,6 @@ const fileExplorerWindowId = ref<string>();
 
 function handleUploadClick() {
   const fileExplorerId = useWindowStore().getNextWindowId('File Explorer');
-  console.log(windowId)
   useFileExplorerStore().setFileExplorerWindowAsFileSelect(windowId, fileExplorerId, [
     'text/plain',
   ]);
