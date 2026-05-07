@@ -16,13 +16,14 @@ export interface FileItem {
 
 export interface Item {
   label: string;
-  content: ApplicationItem | FileItem | FileSystemItem & { type: 'directory', path: string[], id: number };
+  content: ApplicationItem | FileItem | FileSystemItem & { type: 'directory' };
   id: number;
+  path?: string;
 }
 
 export interface ItemInsert {
   label: string;
-  content: ApplicationItem | FileItem | FileSystemItem & { type: 'directory', path: string[], id: number };
+  content: ApplicationItem | FileItem | FileSystemItem & { type: 'directory' };
 }
 
 export type FileSystemItem = {
@@ -32,6 +33,7 @@ export type FileSystemItem = {
   directory?: { name: string; children: number[] };
   isSystemFile?: boolean;
   type?: string;
+  path?: string;
 };
 
 export type InsertFileSystemItem = {

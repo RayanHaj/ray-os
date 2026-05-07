@@ -79,7 +79,8 @@ export async function insertItemIntoFileSystem(
     let id = await rayDb.insertOne<InsertFileSystemItem>('fileSystem', {
       parents: parents,
       [item.directory ? 'directory' : 'file']: item.directory || item.file,
-      isSystemFile: item.isSystemFile
+      isSystemFile: item.isSystemFile,
+      type: 'directory'
     });
 
     if (Number.isNaN(id)) return new Error('hello');
@@ -109,7 +110,7 @@ export async function fileSystemLookup(
   path: string,
 ): Promise<Error | { parent: FileSystemItem; children: FileSystemItem[] } | undefined> {
   try {
-    const pathArray: string[] = parseToPathArray(path);
+    const pathArray: string[] = parseToPathArray(path, true);
     const rootDirectoryId = await useGetRootDirectory(rayDb, true);
 
     if (!rootDirectoryId) {
@@ -255,6 +256,14 @@ export async function deleteFileSystemItem(rayDb: RayDb, id: number, onlyFileSys
   }
 }
 
-function parseToPathArray(value: string) {
-  return value.replace('C:/', '').split('/');
+export function parseToPathString(value: string[]) {
+  return value.join('/');
+}
+
+export function parseToPathArray(value: string, excludeRoot = false) {
+  if (excludeRoot) {
+    return value.replace('C:/', '').split('/');
+  }
+
+  return value.split('/');
 }

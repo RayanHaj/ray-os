@@ -3,6 +3,7 @@ import { onBeforeMount, ref, watch } from 'vue';
 import {
   fileSystemLookup,
   insertItemIntoFileSystem,
+  parseToPathString,
 } from '@/composables/fileSystem/useIndexedDbHelper.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import FileExplorerHeader from '@/components/applications/fileExplorer/FileExplorerHeader.vue';
@@ -33,7 +34,16 @@ const path = ref<string[]>([fileSystemStore.rootDirectory]);
 const parentId = ref<number>();
 
 onBeforeMount(async () => {
-  items.value = await useUpdateItemsByCurrentPath(rayDb, fileSystemStore.rootDirectory);
+  let initPath: string = fileSystemStore.rootDirectory;
+
+  if (fileExplorerStore.filePathAtWindow?.windowId === windowId) {
+    path.value = fileExplorerStore.filePathAtWindow.path;
+    initPath = parseToPathString(fileExplorerStore.filePathAtWindow.path);
+
+    fileExplorerStore.filePathAtWindow = { windowId: '', path: [] };
+  }
+
+  items.value = await useUpdateItemsByCurrentPath(rayDb, initPath);
   parentId.value = fileSystemStore.rootId;
 
   const fileItemSize = localStorage.getItem('fileItemSize');
@@ -41,11 +51,6 @@ onBeforeMount(async () => {
     if (fileExplorerStore.currentFileItemSize !== (fileItemSize as FileItemSizeKey)) {
       fileExplorerStore.updateItemSize(fileItemSize as FileItemSizeKey);
     }
-  }
-
-  if (fileExplorerStore.filePathAtWindow?.windowId === windowId) {
-    path.value = fileExplorerStore.filePathAtWindow.path;
-    fileExplorerStore.filePathAtWindow = { windowId: '', path: [] };
   }
 });
 
@@ -71,7 +76,7 @@ async function handleBackClick() {
   const previousPath = path.value.pop();
 
   if (previousPath && previousPath !== fileSystemStore.rootDirectory) {
-    items.value = await useUpdateItemsByCurrentPath(rayDb, path.value.join('/'));
+    items.value = await useUpdateItemsByCurrentPath(rayDb, parseToPathString(path.value));
     parentId.value = items.value[0].parents[0];
   } else {
     path.value = cachedPath;
@@ -232,6 +237,7 @@ function filterByFileType() {
     <FileExplorerGrid
       :parent-id="parentId ?? -1"
       :current-directories="items"
+      :path="parseToPathString(path)"
       :filter-by-file-type="filterByFileType()"
       @item-event:dbl-click="onDblClickItem"
       @new-directory="toggleAddNewItemModal($event.contentType, 'add')"

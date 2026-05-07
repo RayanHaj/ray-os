@@ -1,5 +1,4 @@
 import type {
-  FileSystemItem,
   FileType,
   InsertFileSystemItem,
   Item,

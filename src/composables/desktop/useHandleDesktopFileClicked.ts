@@ -5,6 +5,7 @@ import type { RayDb } from 'ray-db-wrapper';
 import { useImageViewerStore } from '@/stores/imageViewer.ts';
 import { useVideoPlayerStore } from '@/stores/videoPlayer.ts';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
+import { parseToPathArray } from '@/composables/fileSystem/useIndexedDbHelper.ts';
 
 export async function useHandleDesktopFileClicked(
   item: Item & { tileId: number },
@@ -47,8 +48,14 @@ export async function useHandleDesktopFileClicked(
       }
     } break;
     case 'directory': {
-      const windowId = useWindowStore().pushOpenWindowReference('File Explorer');
-      useFileExplorerStore().setFilePathAtWindow(windowId, item.content.path);
+      const nextWindowId = useWindowStore().getNextWindowId('File Explorer');
+
+      if (!item.path) {
+        return;
+      }
+
+      useFileExplorerStore().setFilePathAtWindow(nextWindowId, parseToPathArray(item.path));
+      useWindowStore().pushOpenWindowReference('File Explorer');
     }
   }
 }

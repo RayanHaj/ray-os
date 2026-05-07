@@ -2,6 +2,7 @@
 import SettingsSidebar from '@/components/applications/settings/SettingsSidebar.vue';
 import { onMounted, ref } from 'vue';
 import { type AllowedSettingsOptions, settingsOptionsComponents } from '@/types/SettingsTypes.ts';
+import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 
 const selectedOption = ref<AllowedSettingsOptions>('Themes');
 
@@ -12,6 +13,8 @@ const resizeObserver = new ResizeObserver((entries) => {
     isSmall.value = entry.contentRect.width < 500;
   }
 });
+
+const windowId = useInjectOrThrow<string>('windowId');
 
 onMounted(() => {
   resizeObserver.observe(settings.value);
@@ -31,7 +34,7 @@ onMounted(() => {
       </div>
       <div class="current-option-settings">
         <div class="inner">
-          <component :is="settingsOptionsComponents[selectedOption]" />
+          <component :is="settingsOptionsComponents[selectedOption]" :window-id="windowId" />
         </div>
       </div>
     </div>

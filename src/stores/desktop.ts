@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import type { Item, ItemType } from '@/types/ItemTypes.ts';
+import type { FileSystemItem, Item, ItemType } from '@/types/ItemTypes.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import { useToastStore } from '@/stores/toast.ts';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
@@ -9,7 +9,7 @@ import {
   insertItemIntoFileSystem,
 } from '@/composables/fileSystem/useIndexedDbHelper.ts';
 
-type DesktopItem = { id: number; type: ItemType; path?: string[]; tileId: number };
+type DesktopItem = { id: number; type: ItemType; tileId: number; path?: string; };
 
 export const useDesktopStore = defineStore('desktop', () => {
   const tileWidth = ref(85);
@@ -88,6 +88,22 @@ export const useDesktopStore = defineStore('desktop', () => {
 
     for (const item of desktopItems) {
       if (item.type === 'directory') {
+        const directoryItem = await rayDb.findOne<FileSystemItem>('fileSystem', 'id', item.id);
+        if (!directoryItem.directory) {
+          continue;
+        }
+
+        if (directoryItem) {
+          items.value = [
+            ...items.value,
+            {
+              label: directoryItem.directory.name,
+              content: directoryItem,
+              id: directoryItem.id,
+              tileId: item.tileId,
+            } as Item & { tileId: number },
+          ];
+        }
       } else {
         const fileItem = await rayDb.findOne<Item>('files', 'id', item.id);
         if (fileItem) {
@@ -122,7 +138,30 @@ export const useDesktopStore = defineStore('desktop', () => {
 
   async function addDesktopItem(rayDb: RayDb, desktopItem: DesktopItem) {
     try {
-      const item = await rayDb.findOne<Item & { tileId: number }>('files', 'id', desktopItem.id);
+      let item: Item & {tileId: number} | null = null;
+
+      switch (desktopItem.type) {
+        case 'file':
+        case 'application':
+          {
+            item = await rayDb.findOne<Item & { tileId: number }>('files', 'id', desktopItem.id);
+          }
+          break;
+        case 'directory': {
+          const fileSystemItem = await rayDb.findOne<FileSystemItem>('fileSystem', 'id', desktopItem.id);
+
+          if (!fileSystemItem.directory) {
+            throw new Error('Could not insert desktop item');
+          }
+
+          item = {
+            label: fileSystemItem.directory.name,
+            content: fileSystemItem,
+            id: fileSystemItem.id,
+          } as Item & { tileId: number };
+        }
+      }
+
       if (!item) {
         throw new Error('Could not insert desktop item');
       }
@@ -133,6 +172,7 @@ export const useDesktopStore = defineStore('desktop', () => {
       }
 
       item.tileId = desktopItem.tileId;
+      item.path = desktopItem.path;
       items.value = [...items.value, item];
     } catch (e) {
       if ((e as Error).name === 'ConstraintError') {

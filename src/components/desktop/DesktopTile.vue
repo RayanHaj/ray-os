@@ -94,12 +94,42 @@ async function updateTile() {
   const desktopItem = await desktopStore.getDesktopItemByTileId(rayDb, tileId.value);
 
   if (desktopItem) {
-    const file = await rayDb.findOne<Item>('files', 'id', desktopItem.id);
-    if (!file) {
+    let item: Item & { tileId: number } | null = null;
+
+    switch (desktopItem.type) {
+      case 'application':
+      case 'file':
+        {
+          const fetchedFile = await rayDb.findOne<Item>('files', 'id', desktopItem.id);
+          item = { ...fetchedFile, tileId: tileId.value };
+        }
+        break;
+      case 'directory': {
+        const fetchedDirectory = await rayDb.findOne<FileSystemItem>(
+          'fileSystem',
+          'id',
+          desktopItem.id,
+        );
+
+        if (!fetchedDirectory.directory) {
+          break;
+        }
+
+        item = {
+          label: fetchedDirectory.directory.name,
+          content: fetchedDirectory,
+          id: fetchedDirectory.id,
+          tileId: tileId.value,
+          path: desktopItem.path
+        } as Item & { tileId: number };
+      }
+    }
+
+    if (!item) {
       return;
     }
 
-    tileItem.value = { ...file, tileId: tileId.value } as Item & { tileId: number };
+    tileItem.value = item;
   }
 }
 
@@ -135,7 +165,20 @@ async function onDrop(event: DragEvent) {
   if (parsedData instanceof Object) {
     const fileSystemItem = parsedData as FileSystemItem;
     const type = fileSystemItem.type;
-    const id = type === 'application' || type === 'file' ? fileSystemItem.file?.id : null;
+
+    let id = null;
+
+    switch (type) {
+      case 'file':
+      case 'application':
+        {
+          id = fileSystemItem.file?.id;
+        }
+        break;
+      case 'directory': {
+        id = fileSystemItem.id;
+      }
+    }
 
     if (id === null) {
       return;
@@ -145,6 +188,7 @@ async function onDrop(event: DragEvent) {
       id: Number(id),
       tileId: targetId,
       type: type as 'application' | 'file' | 'directory',
+      path: fileSystemItem.path,
     });
 
     return;

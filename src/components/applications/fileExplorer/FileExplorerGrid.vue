@@ -27,8 +27,9 @@ import { useToastFeatureNotImplemented } from '@/composables/helpers/useToastFea
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 const windowId = useInjectOrThrow<string>('windowId');
 
-const { currentDirectories, parentId, filterByFileType } = defineProps<{
+const { currentDirectories, path, parentId, filterByFileType } = defineProps<{
   currentDirectories: FileSystemItem[];
+  path: string;
   parentId: number;
   filterByFileType: FileType[];
 }>();
@@ -254,6 +255,9 @@ async function onFileDrop(event: DragEvent) {
 }
 
 function onDragStart(event: DragEvent, fileSystemItem: FileSystemItem) {
+  if (fileSystemItem.directory) {
+    fileSystemItem.path = `${path}/${fileSystemItem.directory.name}`;
+  }
   event.dataTransfer?.setData('text/plain', JSON.stringify(fileSystemItem));
 }
 
