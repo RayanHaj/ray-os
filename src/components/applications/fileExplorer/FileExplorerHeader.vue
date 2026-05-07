@@ -19,7 +19,7 @@ const emits = defineEmits(['header-event:back']);
 const directorySvg = useSvgOrFallback('Directory').svg;
 
 const itemSizeKeys = fileItemSizes;
-const selectedItemSizeButton = ref<FileItemSizeKey>('medium');
+const selectedItemSizeButton = ref<FileItemSizeKey>('small');
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 
