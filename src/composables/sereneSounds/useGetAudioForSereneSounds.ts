@@ -5,8 +5,7 @@ export async function useGetAudioForSereneSounds(
 ): Promise<HTMLAudioElement | Error> {
   return new Promise((resolve, reject) => {
     const soundName = name.endsWith('.mp3') ? name : `${name}.mp3`;
-    const path = new URL(`../../assets/sounds/sereneSounds/${soundName}`, import.meta.url).href;
-    const audio = new Audio(path);
+    const audio = new Audio(`/sounds/sereneSounds/${soundName}`);
 
     audio.addEventListener('canplaythrough', () => resolve(audio), { once: true });
     audio.addEventListener(
