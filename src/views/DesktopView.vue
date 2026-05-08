@@ -76,7 +76,7 @@ watch(
       wallpaperUrl.value = `url('${wallpaperStore.getWallpaperUrlByFile(wallpaperFile.content.rawFile)}')`;
     } else {
       const fileName = wallpapers[`wallpaper-${newSelectedWallpaper.id}`];
-      const url = new URL(`../assets/wallpapers/${fileName}`, import.meta.url).href;
+      const url = `/wallpapers/${fileName}`;
       wallpaperUrl.value = `url('${url}')`;
     }
   },
