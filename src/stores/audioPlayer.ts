@@ -1,13 +1,12 @@
 import { defineStore } from 'pinia';
-import type { AudioPlayerPage } from '@/types/AudioPlayerTypes.ts';
+import type { AudioPlayerPage, LoadedAudio } from '@/types/AudioPlayerTypes.ts';
 import { computed, ref, type Ref } from 'vue';
 import { isAudioType } from '@/types/ItemTypes.ts';
-import type { LoadedImage } from '@/types/imageViewerTypes.ts';
 
 export const useAudioPlayerStore = defineStore('audioPlayer', () => {
   const selectedPage: Ref<AudioPlayerPage> = ref('Home');
 
-  const loadedAudio: Ref<LoadedImage> = ref({ windowId: null, file: null });
+  const loadedAudio: Ref<LoadedAudio> = ref({ windowId: null, file: null });
   const hasOpenInstance: Ref<boolean> = ref(false);
   const audioElements: Ref<Map<string, { el: HTMLAudioElement; file: File }>> = ref(new Map());
 
@@ -25,6 +24,16 @@ export const useAudioPlayerStore = defineStore('audioPlayer', () => {
       audioElements.value.delete(windowId);
     } else if (file) {
       audioElements.value.set(windowId, { el, file });
+    }
+  }
+
+  function removeAudioElement(windowId: string) {
+    audioElements.value.delete(windowId);
+    if (loadedAudio.value.windowId === windowId) {
+      loadedAudio.value = {
+        windowId: null,
+        file: null
+      }
     }
   }
 
@@ -75,6 +84,7 @@ export const useAudioPlayerStore = defineStore('audioPlayer', () => {
     initAudioFileAndUrl,
     hasOpenInstance,
     setAudioElement,
+    removeAudioElement,
     audioElementCount,
     getAudioFileName,
     play,

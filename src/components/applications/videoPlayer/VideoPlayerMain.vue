@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import { onUnmounted, ref, type Ref, watchEffect } from 'vue';
-import type { LoadedImage } from '@/types/imageViewerTypes.ts';
 import { useVideoPlayerStore } from '@/stores/videoPlayer.ts';
+import type { LoadedVideo } from '@/types/VideoPlayerTypes.ts';
 
 const videoPlayerStore = useVideoPlayerStore();
 const windowId = useInjectOrThrow<string>('windowId');
 
-const loadedVideo: Ref<LoadedImage> = ref({ windowId: null, file: null });
+const loadedVideo: Ref<LoadedVideo> = ref({ windowId: null, file: null });
 const videoUrl: Ref<string | null> = ref(null);
 
 watchEffect(() => {

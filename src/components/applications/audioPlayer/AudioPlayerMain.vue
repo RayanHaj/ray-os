@@ -1,17 +1,42 @@
 <script setup lang="ts">
-// import AudioPlayerPlaylists from '@/components/applications/audioPlayer/AudioPlayerPlaylists.vue';
-
-import { onUnmounted, type Ref, ref, watch, watchEffect } from 'vue';
+import { onMounted, onUnmounted, type Ref, ref, watch, watchEffect } from 'vue';
 import { useAudioPlayerStore } from '@/stores/audioPlayer.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
-import type { LoadedImage } from '@/types/imageViewerTypes.ts';
+import AudioPlayerFooter from '@/components/applications/audioPlayer/AudioPlayerFooter.vue';
+import type { LoadedAudio } from '@/types/AudioPlayerTypes.ts';
 
 const audioPlayerStore = useAudioPlayerStore();
 
 const windowId = useInjectOrThrow<string>('windowId');
 
-const loadedAudio: Ref<LoadedImage> = ref({ windowId: null, file: null });
+const loadedAudio: Ref<LoadedAudio> = ref({ windowId: null, file: null });
 const audioUrl: Ref<string | null> = ref(null);
+
+const audioObject = ref<HTMLAudioElement | null>(null);
+const audioDuration = ref(0);
+const audioCurrentTime = ref(0);
+const isPlaying = ref(false);
+
+onMounted(() => {
+  audioObject.value = new Audio();
+  audioObject.value.addEventListener('loadedmetadata', updateAudioDuration);
+  audioObject.value.addEventListener('timeupdate', onTimeUpdate);
+});
+
+onUnmounted(() => {
+  if (audioObject.value) {
+    audioObject.value.removeEventListener('loadedmetadata', updateAudioDuration);
+    audioObject.value.removeEventListener('timeupdate', onTimeUpdate);
+    audioObject.value.src = '';
+    audioObject.value = null;
+
+    audioPlayerStore.removeAudioElement(windowId);
+  }
+
+  if (audioUrl.value) {
+    URL.revokeObjectURL(audioUrl.value);
+  }
+});
 
 watchEffect(() => {
   if (audioPlayerStore.loadedAudio.windowId !== windowId) {
@@ -21,6 +46,10 @@ watchEffect(() => {
   loadedAudio.value = audioPlayerStore.loadedAudio;
   if (audioPlayerStore.loadedAudio.file) {
     audioUrl.value = URL.createObjectURL(audioPlayerStore.loadedAudio.file);
+
+    if (audioObject.value) {
+      audioObject.value.src = audioUrl.value;
+    }
   }
 });
 
@@ -35,18 +64,50 @@ watch(
   { immediate: true },
 );
 
-onUnmounted(() => {
-  if (audioUrl.value) {
-    URL.revokeObjectURL(audioUrl.value);
+function updateAudioDuration() {
+  audioDuration.value = audioObject.value?.duration ?? 0;
+}
+
+function onTimeUpdate() {
+  if (Math.floor(audioDuration.value) === Math.floor(audioCurrentTime.value) && audioObject.value) {
+    audioCurrentTime.value = 0;
+    audioObject.value.currentTime = 0;
+    return;
   }
-});
+  audioCurrentTime.value = audioObject.value?.currentTime ?? 0;
+}
+
+function playAudio() {
+  if (audioObject.value === null) return;
+
+  audioObject.value.play();
+  isPlaying.value = true;
+}
+
+function pauseAudio() {
+  if (audioObject.value === null) return;
+
+  audioObject.value.pause();
+  isPlaying.value = false;
+}
+
+function onSliderInput(time: number) {
+  if (audioObject.value) audioObject.value.currentTime = time;
+}
 </script>
 <template>
   <div class="audio-player">
     <div class="content">
       {{ loadedAudio.file?.name ?? 'load audio through File Explorer' }}
-      <audio ref="audioElementRef" :src="audioUrl ?? undefined" controls loop></audio>
     </div>
+    <AudioPlayerFooter
+      :loaded-audio="loadedAudio"
+      :audio-duration="audioDuration"
+      :audio-current-time="audioCurrentTime"
+      :is-playing="isPlaying"
+      @play-pause-audio="isPlaying ? pauseAudio() : playAudio()"
+      @slider-input="onSliderInput"
+    />
   </div>
 </template>
 <style scoped>
@@ -57,6 +118,7 @@ onUnmounted(() => {
   height: 100%;
 
   --audio-player-header-height: 50px;
+  --audio-player-footer-height: 80px;
   color: var(--text-color);
 }
 
