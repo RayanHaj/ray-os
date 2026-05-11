@@ -16,5 +16,11 @@ export const useVideoPlayerStore = defineStore('videoPlayer', () => {
     return true;
   }
 
-  return { loadedVideo, initVideoFileAndUrl, hasOpenInstance };
+  function removeLoadedVideo(windowId: string) {
+    if (loadedVideo.value.windowId === windowId) {
+      loadedVideo.value = {windowId: null, file: null};
+    }
+  }
+
+  return { loadedVideo, initVideoFileAndUrl, removeLoadedVideo, hasOpenInstance };
 });
