@@ -30,6 +30,9 @@ function onFileNameBlur(event: FocusEvent) {
 
 async function handleExportFile() {
   if (!fileId) return;
+
+  emit('onSaveChanges', fileNameRef.value);
+
   const file = await rayDb.findOne<Item & { content: FileItem }>('files', 'id', fileId);
 
   const rawFile = file.content.rawFile;
