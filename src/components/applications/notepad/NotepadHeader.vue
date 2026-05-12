@@ -1,53 +1,67 @@
 <script setup lang="ts">
-import { onBeforeMount, ref, watch } from 'vue';
+import { computed, ref, type StyleValue, watch } from 'vue';
+import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
+import type { RayDb } from 'ray-db-wrapper';
+import type { FileItem, Item } from '@/types/ItemTypes.ts';
 
-const { fileName } = defineProps<{ fileName: string }>();
+const rayDb = useInjectOrThrow<RayDb>('rayDb');
+
+const { _fileName, fileIsLoaded, fileId } = defineProps<{
+  _fileName?: string;
+  fileIsLoaded: boolean;
+  fileId: number | null;
+}>();
 const emit = defineEmits(['onSaveChanges']);
 
-const fileNameRef = ref('');
-onBeforeMount(() => {
-  fileNameRef.value = fileName;
-});
-
+const fileNameRef = ref<string>('');
 watch(
-  () => fileName,
-  (newValue) => {
-    fileNameRef.value = newValue;
-  },
+  () => _fileName,
+  (newFileName) => (fileNameRef.value = newFileName ?? ''),
+  { immediate: true },
 );
 
-defineExpose({ fileName: fileNameRef });
-
-function onInput(event: InputEvent) {
+function onFileNameInput(event: InputEvent) {
   fileNameRef.value = (event.target as HTMLInputElement).value;
 }
 
-function onBlur(event: FocusEvent) {
+function onFileNameBlur(event: FocusEvent) {
   (event.target as HTMLParagraphElement).scrollLeft = 0;
 }
 
-function onSaveClick() {
-  emit('onSaveChanges', fileNameRef.value);
+async function handleExportFile() {
+  if (!fileId) return;
+  const file = await rayDb.findOne<Item & { content: FileItem }>('files', 'id', fileId);
+
+  const rawFile = file.content.rawFile;
+  if (!rawFile) return;
+
+  const objectUrl = URL.createObjectURL(rawFile);
+
+  const a = document.createElement('a');
+  a.href = objectUrl;
+  a.download = fileNameRef.value;
+  a.click();
+
+  URL.revokeObjectURL(objectUrl);
 }
+
+const notepadHeaderStyles = computed<StyleValue>(() => {
+  return { pointerEvents: fileIsLoaded ? 'auto' : 'none', opacity: fileIsLoaded ? '1' : '0.5' };
+});
 </script>
 
 <template>
-  <div
-    class="notepad-header"
-    :style="{
-      pointerEvents: fileName === '' ? 'none' : 'auto',
-      opacity: fileName === '' ? '0.5' : '1',
-    }"
-  >
+  <div class="notepad-header" :style="notepadHeaderStyles">
     <input
       class="file-name"
       contenteditable="true"
-      @input="onInput($event as InputEvent)"
-      @blur="onBlur($event as FocusEvent)"
-      :value="fileName"
+      @input="onFileNameInput($event as InputEvent)"
+      @blur="onFileNameBlur($event as FocusEvent)"
+      :value="fileNameRef"
     />
     <div class="buttons">
-      <button class="save-edits-button button" @click="onSaveClick">save changes</button>
+      <button class="button" @click="handleExportFile()">Export file</button>
+      <button class="button" @click="emit('onSaveChanges', fileNameRef)">save changes</button>
     </div>
   </div>
 </template>
@@ -106,7 +120,7 @@ function onSaveClick() {
   background-color: var(--button-hover-color);
 }
 
-@container notepadHeader (max-width: 440px) {
+@container notepadMain (max-width: 550px) {
   .notepad-header {
     justify-content: center;
     flex-direction: column;

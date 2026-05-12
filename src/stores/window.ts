@@ -7,6 +7,7 @@ import { useVideoPlayerStore } from '@/stores/videoPlayer.ts';
 import { useImageViewerStore } from '@/stores/imageViewer.ts';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
 import { useAudioPlayerStore } from '@/stores/audioPlayer.ts';
+import { useToastStore } from '@/stores/toast.ts';
 
 type WindowReferences = { [applicationName: string]: WindowReference[] };
 export const useWindowStore = defineStore('window', () => {
@@ -125,12 +126,10 @@ export const useWindowStore = defineStore('window', () => {
     }
 
     if (
-      useFileExplorerStore().isInFileSelectStateReturnValue.find(
-        (element) => element.windowId === windowId,
-      )
+      useFileExplorerStore().fileSelectReturnValue.find((element) => element.windowId === windowId)
     ) {
-      useFileExplorerStore().isInFileSelectStateReturnValue =
-        useFileExplorerStore().isInFileSelectStateReturnValue.filter(
+      useFileExplorerStore().fileSelectReturnValue =
+        useFileExplorerStore().fileSelectReturnValue.filter(
           (element) => element.windowId !== windowId,
         );
     }
@@ -148,6 +147,8 @@ export const useWindowStore = defineStore('window', () => {
     if (zIndexesOrder.value.includes(windowId)) {
       zIndexesOrder.value = zIndexesOrder.value.filter((value) => value !== windowId);
     }
+
+    useToastStore().closeToastsByWindowId(windowId);
   }
 
   function setWindowZIndexToTop(windowId: string) {
