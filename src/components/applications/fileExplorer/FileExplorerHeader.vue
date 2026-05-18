@@ -10,11 +10,11 @@ import {
 import { useDeleteFileSystemItem } from '@/composables/fileSystem/useDeleteFileSystemItem.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import { RayDb } from 'ray-db-wrapper';
-import type { FileSystemItem } from '@/types/ItemTypes.ts';
+import { fileExtensions, type FileSystemItem } from '@/types/ItemTypes.ts';
 
 const { currentPath = ['C:/'] } = defineProps<{ currentPath?: string[] }>();
 
-const emits = defineEmits(['header-event:back']);
+const emit = defineEmits(['header-event:back', 'header-event:file-upload']);
 
 const directorySvg = useSvgOrFallback('Directory').svg;
 
@@ -53,16 +53,23 @@ async function onDrop(event: DragEvent) {
 
     if (!parentDir || parentDir instanceof Error) return;
 
-    const newDirectoryId = await insertItemIntoFileSystem(rayDb, [parentDir.parent.id!], dropItem, false);
+    const newDirectoryId = await insertItemIntoFileSystem(
+      rayDb,
+      [parentDir.parent.id!],
+      dropItem,
+      false,
+    );
 
-    if (!newDirectoryId || (newDirectoryId instanceof Error)) return;
+    if (!newDirectoryId || newDirectoryId instanceof Error) return;
 
     if (dropItem.directory) {
       for (const childId of dropItem.directory.children) {
         const childItem = await rayDb.findOne<FileSystemItem>('fileSystem', 'id', childId);
         if (!childItem) continue;
 
-        const oldDirectoryIdIndex = childItem.parents.findIndex((parentId) => parentId === dropItem.id);
+        const oldDirectoryIdIndex = childItem.parents.findIndex(
+          (parentId) => parentId === dropItem.id,
+        );
         if (oldDirectoryIdIndex === -1) continue;
 
         childItem.parents[oldDirectoryIdIndex] = newDirectoryId;
@@ -70,10 +77,19 @@ async function onDrop(event: DragEvent) {
       }
     }
 
-    emits('header-event:back');
+    emit('header-event:back');
   } catch (e) {
     console.error(e);
   }
+}
+
+function onFileUploadChange(event: Event) {
+  const input = event.target as HTMLInputElement;
+  const files = input.files ? [...input.files] : null;
+  if (!files || files.length === 0) return;
+
+  emit('header-event:file-upload', files);
+  input.value = '';
 }
 </script>
 
@@ -82,7 +98,7 @@ async function onDrop(event: DragEvent) {
     <div class="left-section">
       <button
         class="back-button"
-        @click="emits('header-event:back')"
+        @click="emit('header-event:back')"
         @drop.prevent="onDrop"
         @dragover.prevent
       >
@@ -93,6 +109,14 @@ async function onDrop(event: DragEvent) {
       <input type="text" :value="currentPath.join('/')" disabled />
     </div>
     <div class="right-section">
+      <label for="file-upload" class="custom-file-upload"> Upload file </label>
+      <input
+        id="file-upload"
+        type="file"
+        multiple
+        :accept="Object.keys(fileExtensions).join(',')"
+        @change="onFileUploadChange"
+      />
       <button
         class="item-size-button"
         :class="{ selected: size === selectedItemSizeButton }"
@@ -136,10 +160,24 @@ async function onDrop(event: DragEvent) {
   color: var(--text-color);
 }
 
+input[type='file'] {
+  display: none;
+}
+
 .right-section {
   display: flex;
   flex-direction: row;
-  width: 150px;
+  width: 350px;
+}
+
+.right-section label {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--button-primary-color);
+  border: var(--window-border-color) 1px solid;
+  padding: 10px;
+  width: 200px;
 }
 
 .item-size-button {

@@ -211,17 +211,44 @@ async function handleModalInput(contentType: ModalContentType, action: ModalActi
   modalOpened.value = false;
 }
 
-const fileSelectState = computed(() => fileExplorerStore.fileSelectState.find(
-  (element) => element.fileExplorerWindowId === windowId,
-));
+const fileSelectState = computed(() =>
+  fileExplorerStore.fileSelectState.find((element) => element.fileExplorerWindowId === windowId),
+);
 
 function filterByFileType() {
-
   if (!fileSelectState.value) {
     return [];
   }
 
   return fileSelectState.value.allowedFileTypes;
+}
+
+async function onFileUpload(files: FileList) {
+  for (const file of files) {
+    const fileObject: FileItem = {
+      type: 'file',
+      name: file.name,
+      size: file.size,
+      createdAt: file.lastModified.toString(),
+      rawFile: file,
+    };
+
+    if (!parentId.value) return;
+
+    try {
+      const fileId = await rayDb.insertOne<ItemInsert>('files', {
+        label: file.name,
+        content: fileObject as FileItem,
+      });
+      if (fileId && typeof fileId === 'number') {
+        await insertItemIntoFileSystem(rayDb, [parentId.value], {
+          file: { name: file.name, id: fileId, type: file.type },
+        });
+      }
+    } catch (e) {
+      useToastStore().createToast((e as Error).message, 'error', 5000, 'window', windowId);
+    }
+  }
 }
 </script>
 
@@ -234,7 +261,11 @@ function filterByFileType() {
       @modal-event:submit-click="handleModalInput($event.contentType, $event.action, $event.input)"
       @modal-event:cancel-click="modalOpened = false"
     />
-    <FileExplorerHeader :current-path="path" @header-event:back="handleBackClick" />
+    <FileExplorerHeader
+      :current-path="path"
+      @header-event:back="handleBackClick"
+      @header-event:file-upload="onFileUpload"
+    />
     <FileExplorerGrid
       :parent-id="parentId ?? -1"
       :current-directories="items"
