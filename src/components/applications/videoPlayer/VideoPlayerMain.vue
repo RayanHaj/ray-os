@@ -86,7 +86,7 @@ function onSliderInput(time: number) {
   <div class="video-player">
     <video ref="videoRef" :src="videoUrl ?? undefined" />
     <AudioPlayerFooter
-      :loaded-audio="loadedVideo"
+      :file-name="loadedVideo"
       :audio-duration="videoDuration"
       :audio-current-time="videoCurrentTime"
       :is-playing="videoIsPlaying"

@@ -1,11 +1,9 @@
 import { defineStore } from 'pinia';
-import type { AudioPlayerPage, LoadedAudio } from '@/types/AudioPlayerTypes.ts';
+import type { LoadedAudio } from '@/types/AudioPlayerTypes.ts';
 import { computed, ref, type Ref } from 'vue';
 import { isAudioType } from '@/types/ItemTypes.ts';
 
 export const useAudioPlayerStore = defineStore('audioPlayer', () => {
-  const selectedPage: Ref<AudioPlayerPage> = ref('Home');
-
   const loadedAudio: Ref<LoadedAudio> = ref({ windowId: null, file: null });
   const hasOpenInstance: Ref<boolean> = ref(false);
   const audioElements: Ref<Map<string, { el: HTMLAudioElement; file: File }>> = ref(new Map());
@@ -79,7 +77,6 @@ export const useAudioPlayerStore = defineStore('audioPlayer', () => {
   }
 
   return {
-    selectedPage,
     loadedAudio,
     initAudioFileAndUrl,
     hasOpenInstance,

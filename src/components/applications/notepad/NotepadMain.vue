@@ -44,10 +44,6 @@ watch(
 
     if (!selectedReturnValue) return;
 
-    useFileExplorerStore().fileSelectState = useFileExplorerStore().fileSelectState.filter(
-      (element) => element.fileExplorerWindowId !== fileExplorerWindowId.value,
-    );
-
     // If it is of type 'object' then it should be a FileItem
     if (typeof selectedReturnValue.value === 'object' && selectedReturnValue.value.rawFile) {
       if (!fileExplorerWindowId.value) return;
@@ -61,7 +57,7 @@ watch(
         rawFileText,
       );
 
-      useWindowStore().removeOpenWindowReference(fileExplorerWindowId.value);
+      useWindowStore().removeOpenWindowReference(fileExplorerWindowId.value, windowId);
     }
   },
 );

@@ -5,7 +5,12 @@ import { useFileSystemStore } from '@/stores/fileSystem.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import { useDesktopStore } from '@/stores/desktop.ts';
 
-export async function useRenameFile(rayDb: RayDb, fileItem: Item, newFileName: string, windowId: string) {
+export async function useRenameFile(
+  rayDb: RayDb,
+  fileItem: Item,
+  newFileName: string,
+  windowId: string,
+) {
   if (fileItem.content.type !== 'file') return;
 
   const sanitizedFileName = useSanitizeFileName(
@@ -19,6 +24,12 @@ export async function useRenameFile(rayDb: RayDb, fileItem: Item, newFileName: s
 
   fileItem.label = sanitizedFileName;
   fileItem.content.name = sanitizedFileName;
+
+  if (fileItem.content.rawFile) {
+    fileItem.content.rawFile = new File([fileItem.content.rawFile], sanitizedFileName, {
+      type: fileItem.content.rawFile.type,
+    });
+  }
 
   await rayDb.updateOne<ItemInsert>('files', fileItem);
   await rayDb.updateManyByQuery<InsertFileSystemItem>(

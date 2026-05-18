@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import type { LoadedAudio } from '@/types/AudioPlayerTypes.ts';
 import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
 
-const { loadedAudio, audioDuration, audioCurrentTime, isPlaying } = defineProps<{
-  loadedAudio: LoadedAudio;
+const { fileName, audioDuration, audioCurrentTime, isPlaying } = defineProps<{
+  fileName: string;
   audioDuration: number;
   audioCurrentTime: number;
   isPlaying: boolean;
@@ -40,7 +39,7 @@ function onSliderInput(event: Event) {
     </div>
     <div class="audio-controls">
       <div class="start">
-        <p class="audio-file-name">{{ loadedAudio.file?.name ?? '' }}</p>
+        <p class="audio-file-name">{{ fileName ?? '' }}</p>
       </div>
       <div class="middle">
         <button class="play-button" @click="emits('playPauseAudio')">

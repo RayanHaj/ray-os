@@ -95,7 +95,7 @@ export const useWindowStore = defineStore('window', () => {
       !openWindowsReferences.value[windowName][index].minimized;
   }
 
-  function removeOpenWindowReference(windowId: string) {
+  function removeOpenWindowReference(windowId: string, fileSelectWindowId?: string) {
     const { windowName, id } = splitWindowId(windowId);
     if (typeof openWindowsReferences.value[windowName] === 'undefined') {
       return;
@@ -115,24 +115,14 @@ export const useWindowStore = defineStore('window', () => {
       }
     }
 
-    if (
-      useFileExplorerStore().fileSelectState.find(
-        (element) => element.fileExplorerWindowId === windowId,
-      )
-    ) {
-      useFileExplorerStore().fileSelectState = useFileExplorerStore().fileSelectState.filter(
-        (element) => element.fileExplorerWindowId !== windowId,
-      );
-    }
+    useFileExplorerStore().fileSelectState = useFileExplorerStore().fileSelectState.filter(
+      (element) => element.fileExplorerWindowId !== windowId,
+    );
 
-    if (
-      useFileExplorerStore().fileSelectReturnValue.find((element) => element.windowId === windowId)
-    ) {
-      useFileExplorerStore().fileSelectReturnValue =
-        useFileExplorerStore().fileSelectReturnValue.filter(
-          (element) => element.windowId !== windowId,
-        );
-    }
+    useFileExplorerStore().fileSelectReturnValue =
+      useFileExplorerStore().fileSelectReturnValue.filter(
+        (element) => element.windowId !== fileSelectWindowId,
+      );
 
     useAudioPlayerStore().setAudioElement(windowId, null);
 

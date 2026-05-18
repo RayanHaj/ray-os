@@ -1,24 +1,33 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, type Ref, ref, watch, watchEffect } from 'vue';
+import { computed, onMounted, onUnmounted, type Ref, ref, watch } from 'vue';
 import { useAudioPlayerStore } from '@/stores/audioPlayer.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import AudioPlayerFooter from '@/components/applications/audioPlayer/AudioPlayerFooter.vue';
 import type { LoadedAudio } from '@/types/AudioPlayerTypes.ts';
+import AudioPlayerListItem from '@/components/applications/audioPlayer/AudioPlayerListItem.vue';
+import { useWindowStore } from '@/stores/window.ts';
+import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
 
 const audioPlayerStore = useAudioPlayerStore();
 
 const windowId = useInjectOrThrow<string>('windowId');
 
-const loadedAudio: Ref<LoadedAudio> = ref({ windowId: null, file: null });
-const audioUrl: Ref<string | null> = ref(null);
+const loadedAudios: Ref<LoadedAudio[]> = ref([]);
+const currentLoadedAudioIndex = ref(0);
+
+const currentLoadedAudio = computed(
+  () => loadedAudios.value[currentLoadedAudioIndex.value] ?? { windowId: null, file: null },
+);
+const currentLoadedAudioUrl = computed(() => currentLoadedAudio.value.audioUrl);
+const currentLoadedAudioIsPlaying = computed(() => currentLoadedAudio.value.isPlaying);
 
 const audioObject = ref<HTMLAudioElement | null>(null);
 const audioDuration = ref(0);
 const audioCurrentTime = ref(0);
-const isPlaying = ref(false);
 
 onMounted(() => {
   audioObject.value = new Audio();
+  audioObject.value.loop = true;
   audioObject.value.addEventListener('loadedmetadata', updateAudioDuration);
   audioObject.value.addEventListener('timeupdate', onTimeUpdate);
 });
@@ -28,37 +37,88 @@ onUnmounted(() => {
     audioObject.value.removeEventListener('loadedmetadata', updateAudioDuration);
     audioObject.value.removeEventListener('timeupdate', onTimeUpdate);
     audioObject.value.src = '';
+
     audioObject.value = null;
 
     audioPlayerStore.removeAudioElement(windowId);
   }
 
-  if (audioUrl.value) {
-    URL.revokeObjectURL(audioUrl.value);
-  }
-});
-
-watchEffect(() => {
-  if (audioPlayerStore.loadedAudio.windowId !== windowId) {
-    return;
-  }
-
-  loadedAudio.value = audioPlayerStore.loadedAudio;
-  if (audioPlayerStore.loadedAudio.file) {
-    audioUrl.value = URL.createObjectURL(audioPlayerStore.loadedAudio.file);
-
-    if (audioObject.value) {
-      audioObject.value.src = audioUrl.value;
+  for (const loadedAudio of loadedAudios.value) {
+    if (loadedAudio.audioUrl) {
+      URL.revokeObjectURL(loadedAudio.audioUrl);
     }
   }
 });
 
+const fileExplorerWindowId = ref<string>();
+function handleSelectAudio() {
+  const nextFileExplorerId = useWindowStore().getNextWindowId('File Explorer');
+
+  useFileExplorerStore().setFileExplorerWindowAsFileSelect(windowId, nextFileExplorerId, [
+    'audio/mpeg',
+  ]);
+
+  fileExplorerWindowId.value = useWindowStore().pushOpenWindowReference('File Explorer');
+}
+
+watch(
+  () => useFileExplorerStore().fileSelectReturnValue,
+  async (newReturnValue) => {
+    const selectedReturnValue = newReturnValue.find(
+      (fileSelectState) => fileSelectState.windowId === windowId,
+    );
+
+    if (!selectedReturnValue) return;
+
+    // If it is of type 'object' then it should be a FileItem
+    if (typeof selectedReturnValue.value === 'object' && selectedReturnValue.value.rawFile) {
+      if (!fileExplorerWindowId.value) return;
+
+      const audioUrl = URL.createObjectURL(selectedReturnValue.value.rawFile);
+      loadedAudios.value.push({
+        windowId,
+        file: selectedReturnValue.value.rawFile,
+        audioUrl,
+        isPlaying: false,
+      });
+
+      useWindowStore().removeOpenWindowReference(fileExplorerWindowId.value, windowId);
+    }
+  },
+);
+
+watch(
+  () => audioPlayerStore.loadedAudio,
+  (newAudio) => {
+    if (newAudio.windowId !== windowId) return;
+    if (newAudio.audioUrl) return;
+
+    currentLoadedAudioIndex.value = loadedAudios.value.push(newAudio) - 1;
+
+    if (newAudio.file) {
+      const audioUrl = URL.createObjectURL(newAudio.file);
+
+      audioPlayerStore.loadedAudio = { ...newAudio, audioUrl };
+      currentLoadedAudio.value.audioUrl = audioUrl;
+
+      if (audioObject.value) {
+        audioObject.value.src = audioUrl;
+      }
+    }
+  },
+  { deep: true, immediate: true },
+);
+
 const audioElementRef = ref();
 watch(
-  [audioElementRef, audioUrl],
+  [audioElementRef, currentLoadedAudioUrl],
   () => {
-    if (audioElementRef.value instanceof HTMLAudioElement && loadedAudio.value.file) {
-      audioPlayerStore.setAudioElement(windowId, audioElementRef.value, loadedAudio.value.file);
+    if (audioElementRef.value instanceof HTMLAudioElement && currentLoadedAudio.value.file) {
+      audioPlayerStore.setAudioElement(
+        windowId,
+        audioElementRef.value,
+        currentLoadedAudio.value.file,
+      );
     }
   },
   { immediate: true },
@@ -77,18 +137,31 @@ function onTimeUpdate() {
   audioCurrentTime.value = audioObject.value?.currentTime ?? 0;
 }
 
-function playAudio() {
+function playAudio(audioIndex?: number) {
   if (audioObject.value === null) return;
 
+  if (audioIndex !== undefined) {
+    currentLoadedAudioIndex.value = audioIndex;
+    audioObject.value.src = currentLoadedAudio.value.audioUrl ?? '';
+
+    for (const loadedAudio of loadedAudios.value) {
+      if (loadedAudio === currentLoadedAudio.value) continue;
+      loadedAudio.isPlaying = false;
+    }
+  } else if (!audioObject.value.src) {
+    audioObject.value.src = currentLoadedAudioUrl.value ?? '';
+  }
+
   audioObject.value.play();
-  isPlaying.value = true;
+  currentLoadedAudio.value.isPlaying = true;
 }
 
 function pauseAudio() {
   if (audioObject.value === null) return;
 
   audioObject.value.pause();
-  isPlaying.value = false;
+
+  currentLoadedAudio.value.isPlaying = false;
 }
 
 function onSliderInput(time: number) {
@@ -98,14 +171,23 @@ function onSliderInput(time: number) {
 <template>
   <div class="audio-player">
     <div class="content">
-      {{ loadedAudio.file?.name ?? 'load audio through File Explorer' }}
+      <button @click="handleSelectAudio">Open audio or directory</button>
+      <ul v-for="(loadedAudio, index) in loadedAudios" :key="loadedAudio.audioUrl">
+        <AudioPlayerListItem
+          v-if="loadedAudio.file"
+          :file-name="loadedAudio.file.name"
+          :is-playing="loadedAudio.isPlaying ?? false"
+          @play-pause-audio="loadedAudios[index].isPlaying ? pauseAudio() : playAudio(index)"
+        />
+      </ul>
+      {{ currentLoadedAudio.file ? '' : 'load audio through File Explorer' }}
     </div>
     <AudioPlayerFooter
-      :loaded-audio="loadedAudio"
+      :file-name="currentLoadedAudio.file?.name ?? ''"
       :audio-duration="audioDuration"
       :audio-current-time="audioCurrentTime"
-      :is-playing="isPlaying"
-      @play-pause-audio="isPlaying ? pauseAudio() : playAudio()"
+      :is-playing="currentLoadedAudioIsPlaying ?? false"
+      @play-pause-audio="currentLoadedAudioIsPlaying ? pauseAudio() : playAudio()"
       @slider-input="onSliderInput"
     />
   </div>
@@ -114,20 +196,41 @@ function onSliderInput(time: number) {
 .audio-player {
   display: flex;
   flex-direction: column;
+  align-items: center;
   width: 100%;
   height: 100%;
 
   --audio-player-header-height: 50px;
   --audio-player-footer-height: 80px;
   color: var(--text-color);
+
+  container: audioPlayer / size;
 }
 
 .content {
   display: flex;
   gap: 5px;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
   height: calc(100% - var(--audio-player-header-height));
+  background: rgba(0, 0, 0, 0.5);
+  margin: 5px;
+  border-radius: 5px;
+  width: 50%;
+  padding: 10px;
+}
+
+.content ul {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  width: 100%;
+}
+
+@container (max-width: 900px) {
+  .content {
+    width: 95%;
+  }
 }
 </style>
