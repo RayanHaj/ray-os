@@ -31,12 +31,15 @@ const windowFlatReferences: ComputedRef<WindowFlatReference[]> = useFlatOpenWind
 
 const fixedSizeWindows: Record<string, { width: number; height: number }> = {
   Doom: { width: 766, height: 507 },
-  Calculator: { width: 300, height: 375 },
 };
 
-const minWidthWindows: Record<string, { width: number }> = { Notepad: { width: 445 } };
+const minWidthWindows: Record<string, { width: number }> = { Notepad: { width: 300 } };
 
-const minHeightWindows: Record<string, { height: number }> = { Notepad: { height: 208 } };
+const minHeightWindows: Record<string, { height: number }> = {
+  Notepad: { height: 208 },
+  Calculator: {height: 517 },
+  'File Explorer': { height: 315 },
+};
 
 // Windows that cannot be minified
 const inlineWindows: Record<string, boolean> = { 'Video Player': true, 'Image Viewer': true };

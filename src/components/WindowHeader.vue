@@ -5,6 +5,7 @@ import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
 import { useWindowStore } from '@/stores/window';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
 import { fileExtensions } from '@/types/ItemTypes.ts';
+import { useBrowserStore } from '@/stores/browser.ts';
 
 const { windowId, reference, windowType } = defineProps<{
   windowId: string;
@@ -43,10 +44,14 @@ onBeforeMount(async () => {
 
   windowControlButtons.value = await Promise.all(
     buttons.map(async (button) => {
+      if (button.name === 'Maximize' && useBrowserStore().isMobile) {
+        return null;
+      }
+
       const svg = useSvgOrFallback(button.name).svg;
       return { name: button.name, svg: svg ? markRaw(svg) : null };
     }),
-  );
+  ).then((buttons) => buttons.filter((button) => button !== null));
 });
 </script>
 <template>

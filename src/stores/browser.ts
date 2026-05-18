@@ -9,6 +9,8 @@ export const useBrowserStore = defineStore('browser', () => {
 
   const taskbarStore = useTaskbarStore();
 
+  const isMobile = window.matchMedia('(pointer: coarse)').matches;
+
   function updateSizes() {
     width.value = window.innerWidth;
     height.value = window.innerHeight;
@@ -26,5 +28,5 @@ export const useBrowserStore = defineStore('browser', () => {
     removeEventListener('resize', () => updateSizes());
   }
 
-  return { width, height, heightExcTaskbar, startListening, stopListening };
+  return { width, height, heightExcTaskbar, startListening, stopListening, isMobile };
 });

@@ -7,6 +7,7 @@ import type { RayDb } from 'ray-db-wrapper';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
 import type { LineTerminal } from '@/types/TerminalTypes.ts';
 import { useTerminalStore } from '@/stores/terminal.ts';
+import { useBrowserStore } from '@/stores/browser.ts';
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 const windowId = useInjectOrThrow<string>('windowId');
@@ -21,7 +22,7 @@ const lines = ref<LineTerminal[]>([
 const currentPath = ref<string[]>([]);
 const currentCacheIndex = ref<number>(-1);
 
-const fontSize = ref(20);
+const fontSize = ref(useBrowserStore().isMobile ? 16 : 20);
 onBeforeMount(async () => {
   currentPath.value = [useFileSystemStore().rootDirectory];
   const fontSizeLS = localStorage.getItem(terminalStore.FONT_SIZE_LS_KEY);

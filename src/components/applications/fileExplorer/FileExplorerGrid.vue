@@ -139,6 +139,7 @@ async function onRightClick(
               });
             }
           },
+          addToDesktop: () => {},
         },
       );
   }

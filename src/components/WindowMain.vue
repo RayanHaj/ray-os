@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type Component, computed, onBeforeMount, provide, type Ref, ref } from 'vue';
+import { type Component, computed, onBeforeMount, onMounted, provide, type Ref, ref } from 'vue';
 import type { WindowFlatReference, WindowStyleObject } from '@/types/WindowTypes.ts';
 import { useWindowStore } from '@/stores/window.ts';
 import WindowHeader from '@/components/WindowHeader.vue';
@@ -7,6 +7,7 @@ import { useWindowStateManager } from '@/composables/window/useWindowStateManage
 import { useWindowPositionManager } from '@/composables/window/useWindowPositionManager.ts';
 import { useWindowResizeManager } from '@/composables/window/useWindowResizeManager.ts';
 import { useWindowSnappingManager } from '@/composables/window/useWindowSnappingManager.ts';
+import { useBrowserStore } from '@/stores/browser.ts';
 
 const { reference, windowContentComponent, width, height, minWidth, minHeight, windowType } =
   defineProps<{
@@ -22,10 +23,10 @@ const { reference, windowContentComponent, width, height, minWidth, minHeight, w
 const styles: Ref<WindowStyleObject> = ref({
   left: '25%',
   top: '25%',
-  width: width ? width : '50%',
-  height: height ? height : '50%',
-  minWidth: minWidth ? minWidth : '250px',
-  minHeight: minHeight ? minHeight : '50px',
+  width: width ?? '50%',
+  height: height ?? '50%',
+  minWidth: minWidth ?? '250px',
+  minHeight: minHeight ?? '50px',
   zIndex: 10,
   display: 'block',
   cursor: 'auto',
@@ -36,6 +37,12 @@ const cachedStyles = ref({ left: '0', top: '0', width: '50%', height: '50%' });
 const windowStateManager = useWindowStateManager(styles, reference);
 onBeforeMount(() => {
   provide('windowId', windowStateManager.windowId);
+});
+
+onMounted(() => {
+  if (useBrowserStore().isMobile) {
+    maximizeWindow();
+  }
 });
 
 useWindowSnappingManager(

@@ -114,4 +114,11 @@ function onClickCancel() {
   outline-offset: -1px;
   box-shadow: none;
 }
+
+@container fileExplorer (max-width: 400px) {
+  .modal {
+    width: calc(100% - 10px);
+    height: calc(100% - 100px);
+  }
+}
 </style>

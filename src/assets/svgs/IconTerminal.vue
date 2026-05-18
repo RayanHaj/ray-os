@@ -3,15 +3,12 @@
     :width="customWidth"
     :height="customHeight"
     xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 48 48"
+    viewBox="0 0 12 12"
   >
-    <mask id="ipSTerminal0">
-      <g fill="none" stroke-linejoin="round" stroke-width="4">
-        <rect width="40" height="32" x="4" y="8" fill="#fff" stroke="#fff" rx="2" />
-        <path stroke="#000" stroke-linecap="round" d="m12 18l7 6l-7 6m11 2h13" />
-      </g>
-    </mask>
-    <path :fill="customColor" d="M0 0h48v48H0z" mask="url(#ipSTerminal0)" />
+    <path
+      :fill="customColor"
+      d="M11 1H1c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1h10c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1M9.5 9h-4c-.28 0-.5-.22-.5-.5s.22-.5.5-.5h4c.28 0 .5.22.5.5s-.22.5-.5.5m-7 .12a.62.62 0 0 1-.44-.18a.63.63 0 0 1 0-.88L4.12 6L2.06 3.94a.63.63 0 0 1 0-.88c.24-.24.64-.24.88 0L5.09 5.2c.44.44.44 1.15 0 1.59L2.94 8.94a.62.62 0 0 1-.44.18"
+    />
   </svg>
 </template>
 <script setup lang="ts">

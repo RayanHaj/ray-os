@@ -56,7 +56,10 @@ export function useInitializeContextMenu(event: MouseEvent) {
   };
   const fileExplorerGridItem = () => {
     const primaryActions = ['Copy', 'Paste', 'Delete'] as const;
-    const secondaryActions = [{ id: 'renameFile', label: 'rename file', disabled: false }] as const;
+    const secondaryActions = [
+      { id: 'renameFile', label: 'rename file', disabled: false },
+      { id: 'addToDesktop', label: 'add to desktop', disabled: false },
+    ] as const;
 
     const initialize = createInitialize(primaryActions, secondaryActions);
     return { initialize };
