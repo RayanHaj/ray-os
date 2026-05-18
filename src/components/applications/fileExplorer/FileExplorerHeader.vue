@@ -95,40 +95,44 @@ function onFileUploadChange(event: Event) {
 
 <template>
   <header class="file-explorer-header">
-    <div class="left-section">
-      <button
-        class="back-button"
-        @click="emit('header-event:back')"
-        @drop.prevent="onDrop"
-        @dragover.prevent
-      >
-        ^
-      </button>
+    <div class="start-wrapper">
+      <div class="left-section">
+        <button
+          class="back-button"
+          @click="emit('header-event:back')"
+          @drop.prevent="onDrop"
+          @dragover.prevent
+        >
+          ^
+        </button>
+      </div>
+      <div class="middle-section">
+        <input type="text" :value="currentPath.join('/')" disabled />
+      </div>
     </div>
-    <div class="middle-section">
-      <input type="text" :value="currentPath.join('/')" disabled />
-    </div>
-    <div class="right-section">
-      <label for="file-upload" class="custom-file-upload">Upload files</label>
-      <input
-        id="file-upload"
-        type="file"
-        multiple
-        :accept="Object.keys(fileExtensions).join(',')"
-        @change="onFileUploadChange"
-      />
-      <button
-        class="item-size-button"
-        :class="{ selected: size === selectedItemSizeButton }"
-        v-for="(size, index) of itemSizeKeys"
-        :key="size"
-        @click="updateSelectedItemSizeButton(size)"
-      >
-        <component
-          :is="directorySvg"
-          :style="{ width: `${10 * (index + 1)}px`, height: `${10 * (index + 1)}px` }"
+    <div class="end-wrapper">
+      <div class="right-section">
+        <label for="file-upload" class="custom-file-upload">Upload files</label>
+        <input
+          id="file-upload"
+          type="file"
+          multiple
+          :accept="Object.keys(fileExtensions).join(',')"
+          @change="onFileUploadChange"
         />
-      </button>
+        <button
+          class="item-size-button"
+          :class="{ selected: size === selectedItemSizeButton }"
+          v-for="(size, index) of itemSizeKeys"
+          :key="size"
+          @click="updateSelectedItemSizeButton(size)"
+        >
+          <component
+            :is="directorySvg"
+            :style="{ width: `${10 * (index + 1)}px`, height: `${10 * (index + 1)}px` }"
+          />
+        </button>
+      </div>
     </div>
   </header>
 </template>
@@ -140,6 +144,17 @@ function onFileUploadChange(event: Event) {
   justify-content: space-between;
   height: 50px;
   color: var(--text-color);
+}
+
+.start-wrapper {
+  display: flex;
+  height: 100%;
+  width: 100%;
+}
+
+.end-wrapper {
+  display: flex;
+  width: 350px;
 }
 
 .left-section,
@@ -203,5 +218,24 @@ input {
   width: 100%;
   height: 100%;
   color: var(--text-color);
+}
+
+@container fileExplorer (max-width: 790px) {
+  .file-explorer-header {
+    flex-direction: column;
+    height: 100px;
+  }
+
+  .end-wrapper {
+    width: 100%;
+  }
+
+  .right-section {
+    width: 100%;
+  }
+
+  .right-section label {
+    width: 100%;
+  }
 }
 </style>

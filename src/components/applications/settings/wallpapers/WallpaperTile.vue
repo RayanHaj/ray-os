@@ -20,7 +20,7 @@ const imageUrl = file
 
 <template>
   <div :class="{ selected }" class="wallpaper-tile">
-    <img :src="imageUrl" :alt="file ? file.name : wallpaperImageName" loading="lazy" />
+    <img :src="imageUrl" :alt="file ? file.name : wallpaperImageName" loading="lazy" draggable="false"/>
   </div>
 </template>
 <style scoped>

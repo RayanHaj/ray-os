@@ -284,5 +284,6 @@ async function onFileUpload(files: FileList) {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  container: fileExplorer / size;
 }
 </style>
