@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onBeforeMount, ref, watch } from 'vue';
+import { computed, onBeforeMount, ref, watch } from 'vue';
 import {
   fileSystemLookup,
   insertItemIntoFileSystem,
@@ -211,16 +211,17 @@ async function handleModalInput(contentType: ModalContentType, action: ModalActi
   modalOpened.value = false;
 }
 
-function filterByFileType() {
-  const foundSelectState = fileExplorerStore.fileSelectState.find(
-    (element) => element.fileExplorerWindowId === windowId,
-  );
+const fileSelectState = computed(() => fileExplorerStore.fileSelectState.find(
+  (element) => element.fileExplorerWindowId === windowId,
+));
 
-  if (!foundSelectState) {
+function filterByFileType() {
+
+  if (!fileSelectState.value) {
     return [];
   }
 
-  return foundSelectState.allowedFileTypes;
+  return fileSelectState.value.allowedFileTypes;
 }
 </script>
 

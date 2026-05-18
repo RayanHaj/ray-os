@@ -2,7 +2,7 @@
 import { useDesktopStore } from '@/stores/desktop.ts';
 import { useTileCountGrid } from '@/composables/desktop/useTileCountGrid.ts';
 import { computed, onMounted, ref, watch } from 'vue';
-import { type FileSystemItem, isImageType, isVideoType, type Item } from '@/types/ItemTypes.ts';
+import { type FileSystemItem, isAudioType, isImageType, isVideoType, type Item } from '@/types/ItemTypes.ts';
 import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import type { RayDb } from 'ray-db-wrapper';
@@ -230,6 +230,7 @@ const isSelected = computed(() => {
 
 const imageSvg = useSvgOrFallback('ImageViewer');
 const videoSvg = useSvgOrFallback('VideoPlayer');
+const audioSvg = useSvgOrFallback('Audio');
 const fileSvg = useSvgOrFallback('TextFile');
 const directorySvg = useSvgOrFallback('Directory');
 
@@ -252,6 +253,9 @@ function getSvg() {
       }
       if (isVideoType(tileItem.value.content.rawFile?.type)) {
         return videoSvg.svg;
+      }
+      if (isAudioType(tileItem.value.content.rawFile?.type)) {
+        return audioSvg.svg;
       }
 
       return fileSvg.svg;

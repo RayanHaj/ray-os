@@ -99,6 +99,7 @@ const windowContentStyles = { height: windowContentHeight.value, width: '100%', 
   >
     <slot />
     <WindowHeader
+      :window-id="windowStateManager.windowId"
       :reference="reference"
       :windowType="windowType"
       @on-mousedown-header="onMousedownHeader"

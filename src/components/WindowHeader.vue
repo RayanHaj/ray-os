@@ -1,13 +1,23 @@
 <script setup lang="ts">
-import { type Component, markRaw, onBeforeMount, type Raw, ref, shallowRef } from 'vue';
+import { type Component, computed, markRaw, onBeforeMount, type Raw, ref, shallowRef } from 'vue';
 import type { WindowFlatReference } from '@/types/WindowTypes.ts';
 import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
 import { useWindowStore } from '@/stores/window';
+import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
+import { fileExtensions } from '@/types/ItemTypes.ts';
 
-const { reference, windowType } = defineProps<{
+const { windowId, reference, windowType } = defineProps<{
+  windowId: string;
   reference: WindowFlatReference;
   windowType?: 'fixed' | 'inline';
 }>();
+
+const allowedFileTypes = computed(
+  () =>
+    useFileExplorerStore().fileSelectState.find(
+      (element) => element.fileExplorerWindowId === windowId,
+    )?.allowedFileTypes ?? [],
+);
 
 const windowControlButtons = ref<{ name: string; svg: Raw<Component> | null }[]>([]);
 const svg = shallowRef<Component | null>(null);
@@ -39,12 +49,17 @@ onBeforeMount(async () => {
   );
 });
 </script>
-
 <template>
   <header class="window-header" :style="{ height: `${useWindowStore().windowHeaderHeight}px` }">
     <div class="info-wrapper">
       <component class="svg" :is="svg" :custom-width="15" :custom-height="15" />
-      <p class="window-name">{{ reference.label }}</p>
+      <p class="window-name">
+        {{
+          allowedFileTypes.length === 0
+            ? reference.label
+            : `select a ${allowedFileTypes.map((type) => `.${fileExtensions[type]}`).join('/')} file`
+        }}
+      </p>
     </div>
     <div
       :style="{ width: '100%' }"

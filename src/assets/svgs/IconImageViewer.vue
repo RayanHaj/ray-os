@@ -3,12 +3,15 @@
     :width="customWidth"
     :height="customHeight"
     xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 384 384"
+    viewBox="0 0 24 24"
+    :fill="customColor"
   >
-    <path
-      :fill="customColor"
-      d="M384 341q0 18-12.5 30.5T341 384H43q-18 0-30.5-12.5T0 341V43q0-18 12.5-30.5T43 0h298q18 0 30.5 12.5T384 43v298zM117 224l-74 96h298l-96-128l-74 96z"
-    />
+    <g fill="none" :stroke="customColor" stroke-linejoin="round">
+      <path stroke-linecap="round" d="M7 21a2 2 0 0 1-2-2V3h9l5 5v11a2 2 0 0 1-2 2H7Z" />
+      <path stroke-linecap="round" d="m6 20l6-6l6 6" />
+      <path stroke-width="1.5" d="M9.5 10.5h.01v.01H9.5z" />
+      <path d="M13 3v6h6" />
+    </g>
   </svg>
 </template>
 

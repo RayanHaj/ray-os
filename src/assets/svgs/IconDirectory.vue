@@ -3,11 +3,14 @@
     :width="customWidth"
     :height="customHeight"
     xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 16 16"
+    viewBox="0 0 24 24"
   >
     <path
-      :fill="customColor"
-      d="M.513 1.513A1.75 1.75 0 0 1 1.75 1h3.5c.55 0 1.07.26 1.4.7l.9 1.2a.25.25 0 0 0 .2.1H13a1 1 0 0 1 1 1v.5H2.75a.75.75 0 0 0 0 1.5h11.978a1 1 0 0 1 .994 1.117L15 13.25A1.75 1.75 0 0 1 13.25 15H1.75A1.75 1.75 0 0 1 0 13.25V2.75c0-.464.184-.91.513-1.237Z"
+      fill="none"
+      :stroke="customColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      d="M3 17V5h7l2 2h9v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"
     />
   </svg>
 </template>

@@ -3,16 +3,12 @@
     :width="customWidth"
     :height="customHeight"
     xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 48 48"
+    viewBox="0 0 24 24"
     :fill="customColor"
   >
-    <g fill="none" :stroke="customColor" stroke-linejoin="round" stroke-width="4">
-      <path d="M4 10a2 2 0 0 1 2-2h36a2 2 0 0 1 2 2v28a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V10Z" />
-      <path
-        stroke-linecap="round"
-        d="M36 8v32M12 8v32m26-22h6m-6 12h6M4 18h6m-6-2v4M9 8h6M9 40h6M33 8h6m-6 32h6M4 30h6m-6-2v4m40-4v4m0-16v4"
-      />
-      <path d="m21 19l8 5l-8 5V19Z" />
+    <g fill="none" :stroke="customColor" stroke-linejoin="round">
+      <path stroke-linecap="round" d="M7 21a2 2 0 0 1-2-2V3h9l5 5v11a2 2 0 0 1-2 2H7Z" />
+      <path d="M13 3v6h6m-5 5.5l-3 1.732v-3.464l3 1.732Z" />
     </g>
   </svg>
 </template>
