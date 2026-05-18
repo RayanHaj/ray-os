@@ -23,11 +23,21 @@ const rayDb = useInjectOrThrow<RayDb>('rayDb');
 onBeforeMount(async () => {
   browserStore.startListening();
   wallpaperStore.initSelectedWallpaper();
+
   await svgsStore.initializeSvgs();
+  console.log('svgs initialized');
+
   await sereneSoundsStore.initializeSounds();
+  console.log('serene sounds initialized');
+
   await desktopStore.updateDesktopDirectory(rayDb);
+  console.log('desktop directory updated');
+
   await gridStore.initializeTileContent(rayDb);
+  console.log('grid tile content initialized');
+
   initialised.value = true;
+  console.log('app initialized');
 });
 onUnmounted(() => {
   browserStore.stopListening();
