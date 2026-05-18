@@ -109,7 +109,7 @@ function onFileUploadChange(event: Event) {
       <input type="text" :value="currentPath.join('/')" disabled />
     </div>
     <div class="right-section">
-      <label for="file-upload" class="custom-file-upload"> Upload file </label>
+      <label for="file-upload" class="custom-file-upload">Upload files</label>
       <input
         id="file-upload"
         type="file"
