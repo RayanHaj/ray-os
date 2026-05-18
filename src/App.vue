@@ -27,9 +27,6 @@ onBeforeMount(async () => {
   await svgsStore.initializeSvgs();
   console.log('svgs initialized');
 
-  await sereneSoundsStore.initializeSounds();
-  console.log('serene sounds initialized');
-
   await desktopStore.updateDesktopDirectory(rayDb);
   console.log('desktop directory updated');
 
@@ -38,6 +35,9 @@ onBeforeMount(async () => {
 
   initialised.value = true;
   console.log('app initialized');
+
+  await sereneSoundsStore.initializeSounds();
+  console.log('serene sounds initialized');
 });
 onUnmounted(() => {
   browserStore.stopListening();
