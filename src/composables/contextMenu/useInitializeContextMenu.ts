@@ -41,28 +41,33 @@ export function useInitializeContextMenu(event: MouseEvent) {
       { id: 'properties', label: 'open properties', disabled: false },
     ] as const;
 
-    const initialize = createInitialize(primaryActions, secondaryActions)
+    const initialize = createInitialize(primaryActions, secondaryActions);
     return { initialize };
   };
   const fileExplorerGrid = () => {
     const primaryActions = ['Paste'] as const;
     const secondaryActions = [
       { id: 'newDirectory', label: 'new directory', disabled: false },
-      { id: 'newTextFile', label: 'new text file', disabled: false }
+      { id: 'newTextFile', label: 'new text file', disabled: false },
     ] as const;
 
     const initialize = createInitialize(primaryActions, secondaryActions);
-    return { initialize }
-  }
+    return { initialize };
+  };
   const fileExplorerGridItem = () => {
     const primaryActions = ['Copy', 'Paste', 'Delete'] as const;
-    const secondaryActions = [
-      { id: 'renameFile', label: 'rename file', disabled: false },
-    ] as const;
+    const secondaryActions = [{ id: 'renameFile', label: 'rename file', disabled: false }] as const;
 
     const initialize = createInitialize(primaryActions, secondaryActions);
-    return { initialize }
-  }
+    return { initialize };
+  };
+  const audioPlayerListItem = () => {
+    const primaryActions = ['Delete'] as const;
+    const secondaryActions = [] as const;
 
-  return { desktop, tile, fileExplorerGrid, fileExplorerGridItem };
+    const initialize = createInitialize(primaryActions, secondaryActions);
+    return { initialize };
+  };
+
+  return { desktop, tile, fileExplorerGrid, fileExplorerGridItem, audioPlayerListItem };
 }

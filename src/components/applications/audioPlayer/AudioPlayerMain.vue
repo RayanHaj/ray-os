@@ -167,20 +167,35 @@ function pauseAudio() {
 function onSliderInput(time: number) {
   if (audioObject.value) audioObject.value.currentTime = time;
 }
+
+function removeAudioFromList(index: number) {
+  const audio = loadedAudios.value[index];
+  if (currentLoadedAudio.value.audioUrl === audio.audioUrl) {
+    if (currentLoadedAudio.value.audioUrl) {
+      URL.revokeObjectURL(currentLoadedAudio.value.audioUrl);
+    }
+  }
+
+  if (audioObject.value && audioObject.value.src === audio.audioUrl) {
+    audioObject.value.src = '';
+  }
+
+  loadedAudios.value.splice(index, 1);
+}
 </script>
 <template>
   <div class="audio-player">
     <div class="content">
-      <button @click="handleSelectAudio">Open audio or directory</button>
+      <button @click="handleSelectAudio">Add audio to list</button>
       <ul v-for="(loadedAudio, index) in loadedAudios" :key="loadedAudio.audioUrl">
         <AudioPlayerListItem
           v-if="loadedAudio.file"
           :file-name="loadedAudio.file.name"
           :is-playing="loadedAudio.isPlaying ?? false"
           @play-pause-audio="loadedAudios[index].isPlaying ? pauseAudio() : playAudio(index)"
+          @remove-audio-from-list="removeAudioFromList(index)"
         />
       </ul>
-      {{ currentLoadedAudio.file ? '' : 'load audio through File Explorer' }}
     </div>
     <AudioPlayerFooter
       :file-name="currentLoadedAudio.file?.name ?? ''"
@@ -228,7 +243,17 @@ function onSliderInput(time: number) {
   width: 100%;
 }
 
-@container (max-width: 900px) {
+.content button {
+  width: 100%;
+  height: 50px;
+  background-color: var(--button-primary-color);
+  color: var(--text-color);
+  font-size: var(--font-size-lg);
+  border: none;
+  cursor: pointer;
+}
+
+@container (max-width: 1370px) {
   .content {
     width: 95%;
   }
