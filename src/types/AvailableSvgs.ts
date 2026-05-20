@@ -11,6 +11,7 @@ export const availableSvgs = [
   'Paste',
   'Pause',
   'Play',
+  'Loop',
   'Search',
   'TextFile',
   'Calculator',

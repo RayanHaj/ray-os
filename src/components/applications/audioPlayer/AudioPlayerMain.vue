@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, type Ref, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, onUnmounted, type Ref, ref, watch } from 'vue';
 import { useAudioPlayerStore } from '@/stores/audioPlayer.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import AudioPlayerFooter from '@/components/applications/audioPlayer/AudioPlayerFooter.vue';
@@ -24,18 +24,21 @@ const currentLoadedAudioIsPlaying = computed(() => currentLoadedAudio.value.isPl
 const audioObject = ref<HTMLAudioElement | null>(null);
 const audioDuration = ref(0);
 const audioCurrentTime = ref(0);
+const audioLoop = ref(false);
 
 onMounted(() => {
   audioObject.value = new Audio();
-  audioObject.value.loop = true;
+  audioObject.value.loop = audioLoop.value;
   audioObject.value.addEventListener('loadedmetadata', updateAudioDuration);
   audioObject.value.addEventListener('timeupdate', onTimeUpdate);
+  audioObject.value.addEventListener('ended', onAudioEnded);
 });
 
 onUnmounted(() => {
   if (audioObject.value) {
     audioObject.value.removeEventListener('loadedmetadata', updateAudioDuration);
     audioObject.value.removeEventListener('timeupdate', onTimeUpdate);
+    audioObject.value.removeEventListener('ended', onAudioEnded);
     audioObject.value.src = '';
 
     audioObject.value = null;
@@ -51,16 +54,6 @@ onUnmounted(() => {
 });
 
 const fileExplorerWindowId = ref<string>();
-function handleSelectAudio() {
-  const nextFileExplorerId = useWindowStore().getNextWindowId('File Explorer');
-
-  useFileExplorerStore().setFileExplorerWindowAsFileSelect(windowId, nextFileExplorerId, [
-    'audio/mpeg',
-  ]);
-
-  fileExplorerWindowId.value = useWindowStore().pushOpenWindowReference('File Explorer');
-}
-
 watch(
   () => useFileExplorerStore().fileSelectReturnValue,
   async (newReturnValue) => {
@@ -124,23 +117,63 @@ watch(
   { immediate: true },
 );
 
+watch(audioLoop, (newValue, oldValue) => {
+  if (newValue === oldValue) return;
+  if (!audioObject.value) return;
+
+  audioObject.value.loop = newValue;
+});
+
+function handleSelectAudio() {
+  const nextFileExplorerId = useWindowStore().getNextWindowId('File Explorer');
+
+  useFileExplorerStore().setFileExplorerWindowAsFileSelect(windowId, nextFileExplorerId, [
+    'audio/mpeg',
+  ]);
+
+  fileExplorerWindowId.value = useWindowStore().pushOpenWindowReference('File Explorer');
+}
+
 function updateAudioDuration() {
   audioDuration.value = audioObject.value?.duration ?? 0;
 }
 
 function onTimeUpdate() {
+  audioCurrentTime.value = audioObject.value?.currentTime ?? 0;
+
   if (Math.floor(audioDuration.value) === Math.floor(audioCurrentTime.value) && audioObject.value) {
-    audioCurrentTime.value = 0;
-    audioObject.value.currentTime = 0;
+    if (audioLoop.value) {
+      audioCurrentTime.value = 0;
+      audioObject.value.currentTime = 0;
+    }
     return;
   }
-  audioCurrentTime.value = audioObject.value?.currentTime ?? 0;
+}
+
+function onAudioEnded() {
+  if (loadedAudios.value.length === 1 && audioObject.value) {
+    audioCurrentTime.value = 0;
+    audioObject.value.currentTime = 0;
+    audioObject.value.play();
+    return;
+  }
+
+  if (currentLoadedAudioIndex.value === loadedAudios.value.length - 1) {
+    currentLoadedAudioIndex.value = 0;
+  } else {
+    currentLoadedAudioIndex.value++;
+  }
+
+  playAudio(currentLoadedAudioIndex.value);
 }
 
 function playAudio(audioIndex?: number) {
   if (audioObject.value === null) return;
 
-  if (audioIndex !== undefined) {
+  if (
+    audioIndex !== undefined &&
+    audioObject.value.src !== loadedAudios.value[audioIndex].audioUrl
+  ) {
     currentLoadedAudioIndex.value = audioIndex;
     audioObject.value.src = currentLoadedAudio.value.audioUrl ?? '';
 
@@ -152,8 +185,25 @@ function playAudio(audioIndex?: number) {
     audioObject.value.src = currentLoadedAudioUrl.value ?? '';
   }
 
-  audioObject.value.play();
-  currentLoadedAudio.value.isPlaying = true;
+  if (audioObject.value) {
+    const audioIsLoaded = audioObject.value.readyState >= 2;
+
+    if (!audioIsLoaded) {
+      audioObject.value.addEventListener(
+        'canplaythrough',
+        () => {
+          if (audioObject.value) {
+            audioObject.value.play();
+            currentLoadedAudio.value.isPlaying = true;
+          }
+        },
+        { once: true },
+      );
+    } else {
+      audioObject.value.play();
+      currentLoadedAudio.value.isPlaying = true;
+    }
+  }
 }
 
 function pauseAudio() {
@@ -187,10 +237,11 @@ function removeAudioFromList(index: number) {
   <div class="audio-player">
     <div class="content">
       <button @click="handleSelectAudio">Add audio to list</button>
-      <ul v-for="(loadedAudio, index) in loadedAudios" :key="loadedAudio.audioUrl">
+      <ul>
         <AudioPlayerListItem
-          v-if="loadedAudio.file"
-          :file-name="loadedAudio.file.name"
+          v-for="(loadedAudio, index) in loadedAudios"
+          :key="loadedAudio.audioUrl"
+          :file-name="loadedAudio.file?.name ?? ''"
           :is-playing="loadedAudio.isPlaying ?? false"
           @play-pause-audio="loadedAudios[index].isPlaying ? pauseAudio() : playAudio(index)"
           @remove-audio-from-list="removeAudioFromList(index)"
@@ -202,8 +253,10 @@ function removeAudioFromList(index: number) {
       :audio-duration="audioDuration"
       :audio-current-time="audioCurrentTime"
       :is-playing="currentLoadedAudioIsPlaying ?? false"
+      :looped="audioLoop"
       @play-pause-audio="currentLoadedAudioIsPlaying ? pauseAudio() : playAudio()"
       @slider-input="onSliderInput"
+      @loop-audio="audioLoop = !audioLoop"
     />
   </div>
 </template>
@@ -220,6 +273,7 @@ function removeAudioFromList(index: number) {
   color: var(--text-color);
 
   container: audioPlayer / size;
+  overflow: hidden;
 }
 
 .content {
@@ -227,10 +281,8 @@ function removeAudioFromList(index: number) {
   gap: 5px;
   flex-direction: column;
   align-items: center;
-  height: calc(100% - var(--audio-player-header-height));
+  height: calc(100% - var(--audio-player-footer-height));
   background: rgba(0, 0, 0, 0.5);
-  margin: 5px;
-  border-radius: 5px;
   width: 50%;
   padding: 10px;
 }
@@ -241,11 +293,13 @@ function removeAudioFromList(index: number) {
   align-items: center;
   gap: 5px;
   width: 100%;
+  overflow: auto;
 }
 
 .content button {
   width: 100%;
   height: 50px;
+  min-height: 50px;
   background-color: var(--button-primary-color);
   color: var(--text-color);
   font-size: var(--font-size-lg);

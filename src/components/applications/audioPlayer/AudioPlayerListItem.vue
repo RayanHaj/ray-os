@@ -24,7 +24,7 @@ function onRightClick(event: MouseEvent) {
 }
 </script>
 <template>
-  <li @click.right.prevent="onRightClick">
+  <li @click.right.prevent="onRightClick" :class="{ active: isPlaying }">
     <p>{{ fileName }}</p>
     <div class="button-wrapper">
       <button class="play-button" @click="emit('playPauseAudio')">
@@ -41,8 +41,13 @@ li {
   align-items: center;
   width: 100%;
   height: 50px;
+  min-height: 50px;
   background-color: rgba(0, 0, 0, 0.5);
   padding-inline: 10px;
+}
+
+li.active {
+  background-color: var(--highlight-color);
 }
 
 .button-wrapper {
@@ -66,7 +71,7 @@ button {
   height: 35px;
 }
 
-.menu-dot-button {
+.audio-control-button {
   display: flex;
   align-items: center;
   justify-content: center;

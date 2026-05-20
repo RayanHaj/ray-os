@@ -1,18 +1,20 @@
 <script setup lang="ts">
 import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
 
-const { fileName, audioDuration, audioCurrentTime, isPlaying } = defineProps<{
+const { fileName, audioDuration, audioCurrentTime, isPlaying, looped } = defineProps<{
   fileName: string;
   audioDuration: number;
   audioCurrentTime: number;
   isPlaying: boolean;
+  looped: boolean;
 }>();
 
-const emits = defineEmits(['playPauseAudio', 'sliderInput']);
+const emits = defineEmits(['playPauseAudio', 'sliderInput', 'loopAudio']);
 
 const playSvg = useSvgOrFallback('Play');
 const pauseSvg = useSvgOrFallback('Pause');
 const menuDots = useSvgOrFallback('MenuDots');
+const loopSvg = useSvgOrFallback('Loop');
 
 const calculateTime = (seconds: number) => {
   const minutes = Math.floor(seconds / 60);
@@ -23,6 +25,13 @@ const calculateTime = (seconds: number) => {
 function onSliderInput(event: Event) {
   emits('sliderInput', Number((event.target as HTMLInputElement).value));
 }
+
+function getTrackBackground(value: number, min: number, max: number) {
+  if (!max)
+    return `linear-gradient(to right, var(--input-border-color) 0%, var(--input-border-color) 100%)`;
+  const percentage = ((value - min) / (max - min)) * 100;
+  return `linear-gradient(to right, var(--button-primary-color) ${percentage}%, var(--input-border-color) ${percentage}%)`;
+}
 </script>
 <template>
   <div class="audio-player-footer">
@@ -32,6 +41,7 @@ function onSliderInput(event: Event) {
         type="range"
         :max="audioDuration"
         :value="audioCurrentTime"
+        :style="{ background: getTrackBackground(audioCurrentTime, 0, audioDuration) }"
         step="0.1"
         @input="onSliderInput"
       />
@@ -51,7 +61,14 @@ function onSliderInput(event: Event) {
         </button>
       </div>
       <div class="end">
-        <button class="menu-dot-button">
+        <button
+          class="audio-control-button loop"
+          :class="{ active: looped }"
+          @click="emits('loopAudio')"
+        >
+          <component :is="loopSvg.svg" :custom-width="20" :custom-height="20" />
+        </button>
+        <button class="audio-control-button">
           <component :is="menuDots.svg" :custom-width="25" :custom-height="25" />
         </button>
       </div>
@@ -110,6 +127,7 @@ function onSliderInput(event: Event) {
 }
 
 .end {
+  gap: 20px;
   justify-content: end;
 }
 
@@ -132,11 +150,64 @@ button {
   height: 35px;
 }
 
-.menu-dot-button {
+.audio-control-button {
   display: flex;
   align-items: center;
   justify-content: center;
   background-color: transparent;
   border: none;
+}
+
+.audio-control-button.loop {
+  padding: 5px;
+}
+
+.audio-control-button.loop.active {
+  background: var(--highlight-color);
+  border-radius: 50%;
+}
+
+input[type='range'] {
+  -webkit-appearance: none;
+  width: 100%;
+  cursor: pointer;
+}
+
+/* --- Webkit Browsers --- */
+input[type='range']::-webkit-slider-runnable-track {
+  height: 4px;
+  background: transparent;
+  border-radius: 0px;
+  border: 0px solid #cbd5e1;
+  box-shadow: 0px 2px 0px rgba(0, 0, 0, 0.1);
+}
+
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 14px;
+  width: 14px;
+  background: var(--button-primary-color);
+  border-radius: 10px;
+  border: 0 solid #ffffff;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.3);
+  margin-top: -5px;
+}
+
+/* --- Firefox --- */
+input[type='range']::-moz-range-track {
+  height: 4px;
+  background: transparent;
+  border-radius: 0px;
+  border: 0 solid #cbd5e1;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.1);
+}
+
+input[type='range']::-moz-range-thumb {
+  height: 14px;
+  width: 14px;
+  background: var(--button-primary-color);
+  border-radius: 10px;
+  border: 0 solid #ffffff;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.3);
 }
 </style>

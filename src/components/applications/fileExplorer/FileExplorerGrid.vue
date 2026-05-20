@@ -364,4 +364,8 @@ button {
 .item:hover {
   background: var(--button-hover-color);
 }
+
+.file-name {
+  text-align: center;
+}
 </style>

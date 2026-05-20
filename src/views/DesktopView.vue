@@ -33,12 +33,16 @@ const fixedSizeWindows: Record<string, { width: number; height: number }> = {
   Doom: { width: 766, height: 507 },
 };
 
-const minWidthWindows: Record<string, { width: number }> = { Notepad: { width: 300 } };
+const minWidthWindows: Record<string, { width: number }> = {
+  Notepad: { width: 300 },
+  'Audio Player': { width: 395 },
+};
 
 const minHeightWindows: Record<string, { height: number }> = {
   Notepad: { height: 208 },
-  Calculator: {height: 517 },
+  Calculator: { height: 315 },
   'File Explorer': { height: 315 },
+  'Audio Player': { height: 315 },
 };
 
 // Windows that cannot be minified
