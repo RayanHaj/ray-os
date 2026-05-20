@@ -55,8 +55,6 @@ function getTrackBackground(value: number, min: number, max: number) {
         <button class="play-button" @click="emits('playPauseAudio')">
           <component
             :is="isPlaying ? pauseSvg.svg : playSvg.svg"
-            :custom-width="25"
-            :custom-height="25"
           />
         </button>
       </div>

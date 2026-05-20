@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
-import { onMounted, onUnmounted, ref, type Ref, watchEffect } from 'vue';
+import { onMounted, onUnmounted, ref, type Ref, watch, watchEffect } from 'vue';
 import { useVideoPlayerStore } from '@/stores/videoPlayer.ts';
 import type { LoadedVideo } from '@/types/VideoPlayerTypes.ts';
 import AudioPlayerFooter from '@/components/applications/audioPlayer/AudioPlayerFooter.vue';
@@ -16,11 +16,14 @@ const videoRef = ref<HTMLVideoElement | null>();
 const videoDuration = ref(0);
 const videoCurrentTime = ref(0);
 const videoIsPlaying = ref(false);
+const videoLoop = ref(false);
 
 onMounted(() => {
   if (videoRef.value) {
+    videoRef.value.loop = videoLoop.value;
     videoRef.value.addEventListener('loadedmetadata', updateAudioDuration);
     videoRef.value.addEventListener('timeupdate', onTimeUpdate);
+    videoRef.value.addEventListener('ended', onAudioEnded);
   }
 });
 
@@ -28,6 +31,7 @@ onUnmounted(() => {
   if (videoRef.value) {
     videoRef.value.removeEventListener('loadedmetadata', updateAudioDuration);
     videoRef.value.removeEventListener('timeupdate', onTimeUpdate);
+    videoRef.value.removeEventListener('ended', onAudioEnded);
     videoRef.value.src = '';
     videoRef.value = null;
 
@@ -50,18 +54,35 @@ watchEffect(() => {
   }
 });
 
+watch(videoLoop, (newValue, oldValue) => {
+  if (newValue === oldValue) return;
+  if (!videoRef.value) return;
+
+  videoRef.value.loop = newValue;
+});
+
 function updateAudioDuration() {
   videoDuration.value = videoRef.value?.duration ?? 0;
 }
 
 function onTimeUpdate() {
+  videoCurrentTime.value = videoRef.value?.currentTime ?? 0;
+
   if (Math.floor(videoDuration.value) === Math.floor(videoCurrentTime.value) && videoRef.value) {
-    videoCurrentTime.value = 0;
-    videoRef.value.currentTime = 0;
+    if (videoLoop.value) {
+      videoCurrentTime.value = 0;
+      videoRef.value.currentTime = 0;
+    }
     return;
   }
+}
 
-  videoCurrentTime.value = videoRef.value?.currentTime ?? 0;
+function onAudioEnded() {
+  if (!videoRef.value || videoLoop.value) return;
+
+  videoCurrentTime.value = 0;
+  videoRef.value.currentTime = 0;
+  pauseVideo();
 }
 
 function playVideo() {
@@ -90,8 +111,10 @@ function onSliderInput(time: number) {
       :audio-duration="videoDuration"
       :audio-current-time="videoCurrentTime"
       :is-playing="videoIsPlaying"
+      :looped="videoLoop"
       @play-pause-audio="videoIsPlaying ? pauseVideo() : playVideo()"
       @slider-input="onSliderInput"
+      @loop-audio="videoLoop = !videoLoop"
     />
   </div>
 </template>

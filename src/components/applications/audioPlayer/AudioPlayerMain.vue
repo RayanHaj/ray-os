@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, onUnmounted, type Ref, ref, watch } from 'vue';
+import { computed, onMounted, onUnmounted, type Ref, ref, watch } from 'vue';
 import { useAudioPlayerStore } from '@/stores/audioPlayer.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import AudioPlayerFooter from '@/components/applications/audioPlayer/AudioPlayerFooter.vue';
