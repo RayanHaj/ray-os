@@ -79,6 +79,7 @@ function getTrackBackground(value: number, min: number, max: number) {
   flex-direction: column;
   width: 100%;
   height: var(--audio-player-footer-height);
+  position: sticky;
 
   --audio-progress-controls-height: calc(var(--audio-player-footer-height) / 3);
   --audio-controls-height: calc((var(--audio-player-footer-height) / 3) * 2);
@@ -130,6 +131,9 @@ function getTrackBackground(value: number, min: number, max: number) {
 }
 
 .audio-file-name {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
   min-width: 100px;
 }
 

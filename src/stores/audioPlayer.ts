@@ -4,16 +4,16 @@ import { computed, ref, type Ref } from 'vue';
 import { isAudioType } from '@/types/ItemTypes.ts';
 
 export const useAudioPlayerStore = defineStore('audioPlayer', () => {
-  const loadedAudio: Ref<LoadedAudio> = ref({ windowId: null, file: null });
+  const loadedAudio: Ref<LoadedAudio> = ref({ windowId: null, file: null, fileId: -1 });
   const hasOpenInstance: Ref<boolean> = ref(false);
   const audioElements: Ref<Map<string, { el: HTMLAudioElement; file: File }>> = ref(new Map());
 
-  function initAudioFileAndUrl(windowId: string, audioFile: File): boolean {
+  function initAudioFileAndUrl(windowId: string, audioFile: File, fileId: number): boolean {
     if (!isAudioType(audioFile.type)) {
       return false;
     }
 
-    loadedAudio.value = { windowId: windowId, file: audioFile };
+    loadedAudio.value = { windowId: windowId, file: audioFile, fileId };
     return true;
   }
 
@@ -28,10 +28,7 @@ export const useAudioPlayerStore = defineStore('audioPlayer', () => {
   function removeAudioElement(windowId: string) {
     audioElements.value.delete(windowId);
     if (loadedAudio.value.windowId === windowId) {
-      loadedAudio.value = {
-        windowId: null,
-        file: null
-      }
+      loadedAudio.value = { windowId: null, file: null, fileId: -1 };
     }
   }
 
@@ -87,6 +84,6 @@ export const useAudioPlayerStore = defineStore('audioPlayer', () => {
     play,
     pause,
     pauseAll,
-    playAll
+    playAll,
   };
 });

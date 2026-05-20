@@ -77,7 +77,7 @@ const notepadHeaderStyles = computed<StyleValue>(() => {
   flex-direction: row;
   padding: 10px;
   width: 100%;
-  height: 50px;
+  height: var(--notepad-header-height);
   background-color: var(--taskbar-background-color);
   color: var(--text-color);
 }
@@ -128,7 +128,7 @@ const notepadHeaderStyles = computed<StyleValue>(() => {
     justify-content: center;
     flex-direction: column;
     gap: 10px;
-    height: fit-content;
+    height: var(--notepad-header-column-height);
   }
 
   .button,

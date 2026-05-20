@@ -31,6 +31,7 @@ export async function useOpenWindowByFileItem(file: Item & { content: FileItem }
       useAudioPlayerStore().initAudioFileAndUrl(
         useWindowStore().getNextWindowId('Audio Player'),
         file.content.rawFile,
+        file.id
       );
       useWindowStore().pushOpenWindowReference('Audio Player');
       return;

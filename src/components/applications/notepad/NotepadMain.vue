@@ -102,6 +102,9 @@ const fileIsLoaded = computed(() => loadedFile.value?.windowId === windowId);
   position: relative;
   container: notepadMain / size;
   overflow: hidden !important;
+
+  --notepad-header-height: 50px;
+  --notepad-header-column-height: 95px;
 }
 
 .notepad-reader {
@@ -113,7 +116,7 @@ const fileIsLoaded = computed(() => loadedFile.value?.windowId === windowId);
   width: 100%;
   padding: 10px;
   color: var(--text-color);
-  height: calc(100% - 50px);
+  height: calc(100% - var(--notepad-header-height));
   overflow: auto;
   resize: none;
   background: none;
@@ -127,7 +130,7 @@ const fileIsLoaded = computed(() => loadedFile.value?.windowId === windowId);
   justify-content: center;
   align-items: center;
   padding: 10px;
-  max-height: calc(100% - 50px);
+  max-height: calc(100% - var(--notepad-header-height));
   height: 100%;
   overflow: hidden;
 }
@@ -176,7 +179,18 @@ const fileIsLoaded = computed(() => loadedFile.value?.windowId === windowId);
 
 @container notepadMain (max-width: 550px) {
   .select-text-file {
-    max-height: calc(100% - 96px);
+    max-height: calc(100% - var(--notepad-header-column-height));
+  }
+
+  .notepad-reader textarea {
+    width: 100%;
+    padding: 10px;
+    color: var(--text-color);
+    height: calc(100% - var(--notepad-header-column-height));
+    overflow: auto;
+    resize: none;
+    background: none;
+    border: none;
   }
 }
 
@@ -188,5 +202,12 @@ const fileIsLoaded = computed(() => loadedFile.value?.windowId === windowId);
     width: 25px;
     height: 25px;
   }
+}
+::-webkit-scrollbar-track {
+  border-radius: 0 0 8px 0;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 0 0 0 0;
 }
 </style>

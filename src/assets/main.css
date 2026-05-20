@@ -12,6 +12,23 @@ body {
   background-color: #000;
 }
 
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  border-radius: 8px;
+  background-color: var(--input-border-color);
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, .3);
+  cursor: default;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 8px;
+  background: var(--button-primary-color);
+  cursor: default;
+}
+
 :root {
   --background-color: #ffffff;
   --text-color: #000000;

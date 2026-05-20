@@ -3,10 +3,12 @@ import { computed, onMounted, onUnmounted, type Ref, ref, watch } from 'vue';
 import { useAudioPlayerStore } from '@/stores/audioPlayer.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import AudioPlayerFooter from '@/components/applications/audioPlayer/AudioPlayerFooter.vue';
-import type { LoadedAudio } from '@/types/AudioPlayerTypes.ts';
+import type { LoadedAudio, PlaylistInsert } from '@/types/AudioPlayerTypes.ts';
 import AudioPlayerListItem from '@/components/applications/audioPlayer/AudioPlayerListItem.vue';
 import { useWindowStore } from '@/stores/window.ts';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
+import AudioPlayerHeader from '@/components/applications/audioPlayer/AudioPlayerHeader.vue';
+import type { RayDb } from 'ray-db-wrapper';
 
 const audioPlayerStore = useAudioPlayerStore();
 
@@ -69,9 +71,10 @@ watch(
 
       const audioUrl = URL.createObjectURL(selectedReturnValue.value.rawFile);
       loadedAudios.value.push({
-        windowId,
+        windowId: windowId,
         file: selectedReturnValue.value.rawFile,
-        audioUrl,
+        audioUrl: audioUrl,
+        fileId: selectedReturnValue.fileId,
         isPlaying: false,
       });
 
@@ -232,11 +235,27 @@ function removeAudioFromList(index: number) {
 
   loadedAudios.value.splice(index, 1);
 }
+
+const rayDb = useInjectOrThrow<RayDb>('rayDb');
+const playlistName = ref('');
+async function savePlaylist(updatedPlaylistName: string) {
+  const trimmedPlaylistName = updatedPlaylistName.trim();
+  if (!updatedPlaylistName || trimmedPlaylistName === '') return;
+
+  if (loadedAudios.value.length === 0) return;
+  const IDBAudioIds = loadedAudios.value.map((loadedAudios) => loadedAudios.fileId);
+
+  playlistName.value = trimmedPlaylistName;
+
+  const idbObject: PlaylistInsert = { name: playlistName.value, audios: IDBAudioIds };
+  await rayDb.insertOne('playlists', idbObject);
+}
 </script>
 <template>
   <div class="audio-player">
+    <AudioPlayerHeader :_playlist-name="playlistName" @save-playlist="savePlaylist" />
     <div class="content">
-      <button @click="handleSelectAudio">Add audio to list</button>
+      <button class="add-audio-button" @click="handleSelectAudio">Add audio to list</button>
       <ul>
         <AudioPlayerListItem
           v-for="(loadedAudio, index) in loadedAudios"
@@ -269,6 +288,7 @@ function removeAudioFromList(index: number) {
   height: 100%;
 
   --audio-player-header-height: 50px;
+  --audio-player-header-column-height: 95px;
   --audio-player-footer-height: 80px;
   color: var(--text-color);
 
@@ -276,12 +296,18 @@ function removeAudioFromList(index: number) {
   overflow: hidden;
 }
 
+.top-section {
+  display: flex;
+  align-items: start;
+  width: 100%;
+}
+
 .content {
   display: flex;
   gap: 5px;
   flex-direction: column;
   align-items: center;
-  height: calc(100% - var(--audio-player-footer-height));
+  height: calc(100% - var(--audio-player-footer-height) - var(--audio-player-header-height));
   background: rgba(0, 0, 0, 0.5);
   width: 50%;
   padding: 10px;
@@ -297,19 +323,41 @@ function removeAudioFromList(index: number) {
 }
 
 .content button {
+  font-size: var(--font-size-lg);
+  cursor: pointer;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--button-primary-color);
+  border: var(--input-border-color) 2px solid;
+  color: var(--text-color);
+  padding-block: 5px;
+  padding-inline: 10px;
+}
+
+.back-button {
+  height: 30px;
+  padding-inline: 10px;
+}
+
+.add-audio-button {
   width: 100%;
   height: 50px;
   min-height: 50px;
-  background-color: var(--button-primary-color);
-  color: var(--text-color);
-  font-size: var(--font-size-lg);
-  border: none;
-  cursor: pointer;
 }
 
 @container (max-width: 1370px) {
   .content {
     width: 95%;
+  }
+}
+
+@container audioPlayer (max-width: 550px) {
+  .content {
+    height: calc(
+      100% - var(--audio-player-footer-height) - var(--audio-player-header-column-height)
+    );
   }
 }
 </style>
