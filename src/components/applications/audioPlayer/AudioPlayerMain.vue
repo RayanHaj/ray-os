@@ -1,21 +1,34 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, type Ref, ref, watch } from 'vue';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useAudioPlayerStore } from '@/stores/audioPlayer.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import AudioPlayerFooter from '@/components/applications/audioPlayer/AudioPlayerFooter.vue';
-import type { LoadedAudio, PlaylistInsert } from '@/types/AudioPlayerTypes.ts';
+import type {
+  AudioPlayerPages,
+  LoadedAudio,
+  Playlist,
+  PlaylistInsert,
+} from '@/types/AudioPlayerTypes.ts';
 import AudioPlayerListItem from '@/components/applications/audioPlayer/AudioPlayerListItem.vue';
 import { useWindowStore } from '@/stores/window.ts';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
 import AudioPlayerHeader from '@/components/applications/audioPlayer/AudioPlayerHeader.vue';
 import type { RayDb } from 'ray-db-wrapper';
+import AudioPlayerPlaylistListItem from '@/components/applications/audioPlayer/AudioPlayerPlaylistListItem.vue';
+import { isAudioType, type Item } from '@/types/ItemTypes.ts';
+
+const rayDb = useInjectOrThrow<RayDb>('rayDb');
 
 const audioPlayerStore = useAudioPlayerStore();
 
 const windowId = useInjectOrThrow<string>('windowId');
 
-const loadedAudios: Ref<LoadedAudio[]> = ref([]);
+const currentPage = ref<AudioPlayerPages>('playlists');
+
+const loadedAudios = ref<LoadedAudio[]>([]);
 const currentLoadedAudioIndex = ref(0);
+
+const loadedPlaylists = ref<Playlist[]>([]);
 
 const currentLoadedAudio = computed(
   () => loadedAudios.value[currentLoadedAudioIndex.value] ?? { windowId: null, file: null },
@@ -55,6 +68,43 @@ onUnmounted(() => {
   }
 });
 
+watch(
+  currentPage,
+  async (newPage, oldPage) => {
+    if (newPage === 'playlist' || newPage === oldPage) return;
+
+    const playlists = await rayDb.findAll<Playlist>('playlists');
+    if (playlists.length === 0) return;
+
+    loadedPlaylists.value = playlists;
+  },
+  { immediate: true },
+);
+
+watch(
+  () => audioPlayerStore.loadedAudio,
+  (newAudio) => {
+    if (newAudio.windowId !== windowId) return;
+    if (newAudio.audioUrl) return;
+
+    currentLoadedAudioIndex.value = loadedAudios.value.push(newAudio) - 1;
+
+    if (newAudio.file) {
+      const audioUrl = URL.createObjectURL(newAudio.file);
+
+      audioPlayerStore.loadedAudio = { ...newAudio, audioUrl };
+      currentLoadedAudio.value.audioUrl = audioUrl;
+
+      if (audioObject.value) {
+        audioObject.value.src = audioUrl;
+      }
+
+      currentPage.value = 'playlist';
+    }
+  },
+  { deep: true, immediate: true },
+);
+
 const fileExplorerWindowId = ref<string>();
 watch(
   () => useFileExplorerStore().fileSelectReturnValue,
@@ -81,28 +131,6 @@ watch(
       useWindowStore().removeOpenWindowReference(fileExplorerWindowId.value, windowId);
     }
   },
-);
-
-watch(
-  () => audioPlayerStore.loadedAudio,
-  (newAudio) => {
-    if (newAudio.windowId !== windowId) return;
-    if (newAudio.audioUrl) return;
-
-    currentLoadedAudioIndex.value = loadedAudios.value.push(newAudio) - 1;
-
-    if (newAudio.file) {
-      const audioUrl = URL.createObjectURL(newAudio.file);
-
-      audioPlayerStore.loadedAudio = { ...newAudio, audioUrl };
-      currentLoadedAudio.value.audioUrl = audioUrl;
-
-      if (audioObject.value) {
-        audioObject.value.src = audioUrl;
-      }
-    }
-  },
-  { deep: true, immediate: true },
 );
 
 const audioElementRef = ref();
@@ -235,8 +263,6 @@ function removeAudioFromList(index: number) {
 
   loadedAudios.value.splice(index, 1);
 }
-
-const rayDb = useInjectOrThrow<RayDb>('rayDb');
 const playlistName = ref('');
 async function savePlaylist(updatedPlaylistName: string) {
   const trimmedPlaylistName = updatedPlaylistName.trim();
@@ -250,13 +276,50 @@ async function savePlaylist(updatedPlaylistName: string) {
   const idbObject: PlaylistInsert = { name: playlistName.value, audios: IDBAudioIds };
   await rayDb.insertOne('playlists', idbObject);
 }
+
+async function openPlaylist(playlist: Playlist) {
+  if (playlist.audios.length > 0) {
+    const foundLoadedAudios: LoadedAudio[] = [];
+    for (const fileId of playlist.audios) {
+      const audio = await rayDb.findOne<Item>('files', 'id', fileId);
+      if (!audio || audio.content.type !== 'file') continue;
+      if (!isAudioType(audio.content.rawFile?.type)) continue;
+
+      const audioUrl = URL.createObjectURL(audio.content.rawFile);
+      foundLoadedAudios.push({
+        windowId: windowId,
+        file: audio.content.rawFile,
+        audioUrl: audioUrl,
+        fileId: audio.id,
+        isPlaying: (currentLoadedAudio.value.fileId === fileId && currentLoadedAudio.value.isPlaying) === true,
+      });
+    }
+
+    loadedAudios.value = foundLoadedAudios;
+    playlistName.value = playlist.name;
+    currentPage.value = 'playlist';
+  }
+}
+
+function onAddPlaylist() {
+  loadedAudios.value = [];
+  playlistName.value = '';
+  currentPage.value = 'playlist';
+}
 </script>
 <template>
   <div class="audio-player">
-    <AudioPlayerHeader :_playlist-name="playlistName" @save-playlist="savePlaylist" />
+    <AudioPlayerHeader
+      :_playlist-name="playlistName"
+      :current-page="currentPage"
+      @go-to-playlists="currentPage = 'playlists'"
+      @save-playlist="savePlaylist"
+    />
     <div class="content">
-      <button class="add-audio-button" @click="handleSelectAudio">Add audio to list</button>
-      <ul>
+      <button v-if="currentPage === 'playlist'" class="add-audio-button" @click="handleSelectAudio">
+        Add audio to list
+      </button>
+      <ul v-if="currentPage === 'playlist'">
         <AudioPlayerListItem
           v-for="(loadedAudio, index) in loadedAudios"
           :key="loadedAudio.audioUrl"
@@ -264,6 +327,22 @@ async function savePlaylist(updatedPlaylistName: string) {
           :is-playing="loadedAudio.isPlaying ?? false"
           @play-pause-audio="loadedAudios[index].isPlaying ? pauseAudio() : playAudio(index)"
           @remove-audio-from-list="removeAudioFromList(index)"
+        />
+      </ul>
+      <button
+        v-if="currentPage === 'playlists'"
+        class="add-audio-button"
+        @click="onAddPlaylist"
+      >
+        Add playlist
+      </button>
+      <ul v-if="currentPage === 'playlists'">
+        <AudioPlayerPlaylistListItem
+          v-for="playlist in loadedPlaylists"
+          :key="playlist.id"
+          :playlist="playlist"
+          :is-playing="false"
+          @open-playlist="openPlaylist(playlist)"
         />
       </ul>
     </div>

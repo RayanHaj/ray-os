@@ -1,7 +1,11 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { computed, ref, type StyleValue, watch } from 'vue';
+import type { AudioPlayerPages } from '@/types/AudioPlayerTypes.ts';
 
-const { _playlistName } = defineProps<{ _playlistName?: string }>();
+const { _playlistName, currentPage } = defineProps<{
+  _playlistName?: string;
+  currentPage: AudioPlayerPages;
+}>();
 
 const playlistName = ref('');
 watch(
@@ -13,7 +17,7 @@ watch(
   { immediate: true },
 );
 
-const emit = defineEmits(['savePlaylist']);
+const emit = defineEmits(['goToPlaylists', 'savePlaylist']);
 
 function onPlaylistNameInput(event: InputEvent) {
   playlistName.value = (event.target as HTMLInputElement).value;
@@ -21,10 +25,17 @@ function onPlaylistNameInput(event: InputEvent) {
 function onFileNameBlur(event: FocusEvent) {
   (event.target as HTMLParagraphElement).scrollLeft = 0;
 }
+
+const audioPlayerHeaderStyles = computed<StyleValue>(() => {
+  return {
+    pointerEvents: currentPage === 'playlist' ? 'auto' : 'none',
+    opacity: currentPage === 'playlist' ? '1' : '0.5',
+  };
+});
 </script>
 
 <template>
-  <div class="notepad-header">
+  <div class="notepad-header" :style="audioPlayerHeaderStyles">
     <input
       class="file-name"
       contenteditable="true"
@@ -33,7 +44,7 @@ function onFileNameBlur(event: FocusEvent) {
       :value="playlistName"
     />
     <div class="buttons">
-      <button class="button">playlists</button>
+      <button @click="emit('goToPlaylists')" class="button">playlists</button>
       <button @click="emit('savePlaylist', playlistName)" class="button">save playlist</button>
     </div>
   </div>

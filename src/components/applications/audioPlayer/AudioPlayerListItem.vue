@@ -8,7 +8,6 @@ const emit = defineEmits(['playPauseAudio', 'removeAudioFromList']);
 
 const playSvg = useSvgOrFallback('Play');
 const pauseSvg = useSvgOrFallback('Pause');
-const menuDots = useSvgOrFallback('MenuDots');
 
 function onRightClick(event: MouseEvent) {
   useInitializeContextMenu(event)
