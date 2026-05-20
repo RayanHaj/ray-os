@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
+import { onMounted, onUnmounted, ref, watch } from 'vue';
 import { useAudioPlayerStore } from '@/stores/audioPlayer.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import AudioPlayerFooter from '@/components/applications/audioPlayer/AudioPlayerFooter.vue';
@@ -26,15 +26,11 @@ const windowId = useInjectOrThrow<string>('windowId');
 const currentPage = ref<AudioPlayerPages>('playlists');
 
 const loadedAudios = ref<LoadedAudio[]>([]);
-const currentLoadedAudioIndex = ref(0);
+const currentLoadedAudioUrl = ref<string>('');
+const currentLoadedAudio = ref<LoadedAudio>();
 
+const playlistName = ref('');
 const loadedPlaylists = ref<Playlist[]>([]);
-
-const currentLoadedAudio = computed(
-  () => loadedAudios.value[currentLoadedAudioIndex.value] ?? { windowId: null, file: null },
-);
-const currentLoadedAudioUrl = computed(() => currentLoadedAudio.value.audioUrl);
-const currentLoadedAudioIsPlaying = computed(() => currentLoadedAudio.value.isPlaying);
 
 const audioObject = ref<HTMLAudioElement | null>(null);
 const audioDuration = ref(0);
@@ -68,10 +64,21 @@ onUnmounted(() => {
   }
 });
 
+watch(currentLoadedAudioUrl, (newUrl, oldUrl) => {
+  if (newUrl === oldUrl) return;
+
+  const newLoadedAudio = loadedAudios.value.find((audio) => audio.audioUrl === newUrl);
+  if (!newLoadedAudio) return;
+
+  currentLoadedAudio.value = loadedAudios.value.find((audio) => audio.audioUrl === newUrl);
+});
+
 watch(
   currentPage,
   async (newPage, oldPage) => {
     if (newPage === 'playlist' || newPage === oldPage) return;
+
+    playlistName.value = '';
 
     const playlists = await rayDb.findAll<Playlist>('playlists');
     if (playlists.length === 0) return;
@@ -87,13 +94,11 @@ watch(
     if (newAudio.windowId !== windowId) return;
     if (newAudio.audioUrl) return;
 
-    currentLoadedAudioIndex.value = loadedAudios.value.push(newAudio) - 1;
-
     if (newAudio.file) {
       const audioUrl = URL.createObjectURL(newAudio.file);
 
       audioPlayerStore.loadedAudio = { ...newAudio, audioUrl };
-      currentLoadedAudio.value.audioUrl = audioUrl;
+      currentLoadedAudioUrl.value = audioUrl;
 
       if (audioObject.value) {
         audioObject.value.src = audioUrl;
@@ -126,6 +131,7 @@ watch(
         audioUrl: audioUrl,
         fileId: selectedReturnValue.fileId,
         isPlaying: false,
+        playlistName: playlistName.value,
       });
 
       useWindowStore().removeOpenWindowReference(fileExplorerWindowId.value, windowId);
@@ -135,9 +141,13 @@ watch(
 
 const audioElementRef = ref();
 watch(
-  [audioElementRef, currentLoadedAudioUrl],
+  [audioElementRef, currentLoadedAudio],
   () => {
-    if (audioElementRef.value instanceof HTMLAudioElement && currentLoadedAudio.value.file) {
+    if (
+      audioElementRef.value instanceof HTMLAudioElement &&
+      currentLoadedAudio.value &&
+      currentLoadedAudio.value.file
+    ) {
       audioPlayerStore.setAudioElement(
         windowId,
         audioElementRef.value,
@@ -189,50 +199,69 @@ function onAudioEnded() {
     return;
   }
 
-  if (currentLoadedAudioIndex.value === loadedAudios.value.length - 1) {
-    currentLoadedAudioIndex.value = 0;
-  } else {
-    currentLoadedAudioIndex.value++;
+  const currentLoadedAudioIndex = loadedAudios.value.findIndex(
+    (audio) => (audio.audioUrl = currentLoadedAudio.value?.audioUrl),
+  );
+
+  const nextAudio = loadedAudios.value[currentLoadedAudioIndex + 1];
+  if (nextAudio === undefined) {
+    playAudio(loadedAudios.value[0].audioUrl);
   }
 
-  playAudio(currentLoadedAudioIndex.value);
+  playAudio(nextAudio.audioUrl);
 }
 
-function playAudio(audioIndex?: number) {
+function playAudio(audioUrl?: string) {
   if (audioObject.value === null) return;
 
-  if (
-    audioIndex !== undefined &&
-    audioObject.value.src !== loadedAudios.value[audioIndex].audioUrl
-  ) {
-    currentLoadedAudioIndex.value = audioIndex;
-    audioObject.value.src = currentLoadedAudio.value.audioUrl ?? '';
+  if (audioUrl !== undefined && audioObject.value.src !== audioUrl) {
+    currentLoadedAudioUrl.value = audioUrl;
+    audioObject.value.src = audioUrl;
 
     for (const loadedAudio of loadedAudios.value) {
       if (loadedAudio === currentLoadedAudio.value) continue;
       loadedAudio.isPlaying = false;
     }
   } else if (!audioObject.value.src) {
-    audioObject.value.src = currentLoadedAudioUrl.value ?? '';
+    audioObject.value.src = currentLoadedAudio.value?.audioUrl ?? '';
   }
 
   if (audioObject.value) {
     const audioIsLoaded = audioObject.value.readyState >= 2;
 
+    if (!currentLoadedAudio.value) {
+      currentLoadedAudio.value = loadedAudios.value.find((audio) => audio.audioUrl === audioUrl);
+    }
+
+    const currentLoadedAudioIndex = loadedAudios.value.findIndex(
+      (audio) => audio.audioUrl === currentLoadedAudio.value?.audioUrl,
+    );
+
+    console.log(currentLoadedAudio.value);
+    console.log(loadedAudios.value);
+
     if (!audioIsLoaded) {
       audioObject.value.addEventListener(
         'canplaythrough',
         () => {
-          if (audioObject.value) {
+          if (audioObject.value && currentLoadedAudio.value) {
             audioObject.value.play();
             currentLoadedAudio.value.isPlaying = true;
+
+            if (currentLoadedAudioIndex === -1) return;
+            loadedAudios.value[currentLoadedAudioIndex].isPlaying = true;
           }
         },
         { once: true },
       );
     } else {
-      audioObject.value.play();
-      currentLoadedAudio.value.isPlaying = true;
+      if (currentLoadedAudio.value) {
+        audioObject.value.play();
+        currentLoadedAudio.value.isPlaying = true;
+
+        if (currentLoadedAudioIndex === -1) return;
+        loadedAudios.value[currentLoadedAudioIndex].isPlaying = true;
+      }
     }
   }
 }
@@ -240,9 +269,21 @@ function playAudio(audioIndex?: number) {
 function pauseAudio() {
   if (audioObject.value === null) return;
 
-  audioObject.value.pause();
+  if (!currentLoadedAudio.value || currentLoadedAudio.value.audioUrl !== audioObject.value.src)
+    return;
 
+  const currentLoadedAudioIndex = loadedAudios.value.findIndex(
+    (audio) => audio.audioUrl === currentLoadedAudio.value?.audioUrl,
+  );
+
+  console.log(currentLoadedAudio.value);
+  console.log(loadedAudios.value);
+
+  audioObject.value.pause();
   currentLoadedAudio.value.isPlaying = false;
+
+  if (currentLoadedAudioIndex === -1) return;
+  loadedAudios.value[currentLoadedAudioIndex].isPlaying = false;
 }
 
 function onSliderInput(time: number) {
@@ -251,10 +292,13 @@ function onSliderInput(time: number) {
 
 function removeAudioFromList(index: number) {
   const audio = loadedAudios.value[index];
-  if (currentLoadedAudio.value.audioUrl === audio.audioUrl) {
-    if (currentLoadedAudio.value.audioUrl) {
-      URL.revokeObjectURL(currentLoadedAudio.value.audioUrl);
-    }
+
+  if (
+    currentLoadedAudio.value &&
+    currentLoadedAudio.value.audioUrl &&
+    currentLoadedAudio.value.audioUrl === audio.audioUrl
+  ) {
+    URL.revokeObjectURL(currentLoadedAudio.value.audioUrl);
   }
 
   if (audioObject.value && audioObject.value.src === audio.audioUrl) {
@@ -263,7 +307,7 @@ function removeAudioFromList(index: number) {
 
   loadedAudios.value.splice(index, 1);
 }
-const playlistName = ref('');
+
 async function savePlaylist(updatedPlaylistName: string) {
   const trimmedPlaylistName = updatedPlaylistName.trim();
   if (!updatedPlaylistName || trimmedPlaylistName === '') return;
@@ -285,13 +329,24 @@ async function openPlaylist(playlist: Playlist) {
       if (!audio || audio.content.type !== 'file') continue;
       if (!isAudioType(audio.content.rawFile?.type)) continue;
 
-      const audioUrl = URL.createObjectURL(audio.content.rawFile);
+      const audioUrl =
+        currentLoadedAudio.value &&
+        (currentLoadedAudio.value.isPlaying ||
+          (currentLoadedAudio.value.fileId === fileId &&
+            currentLoadedAudio.value.playlistName === playlist.name))
+          ? currentLoadedAudio.value.audioUrl
+          : URL.createObjectURL(audio.content.rawFile);
+
       foundLoadedAudios.push({
         windowId: windowId,
         file: audio.content.rawFile,
         audioUrl: audioUrl,
         fileId: audio.id,
-        isPlaying: (currentLoadedAudio.value.fileId === fileId && currentLoadedAudio.value.isPlaying) === true,
+        isPlaying:
+          currentLoadedAudio.value &&
+          currentLoadedAudio.value.isPlaying &&
+          currentLoadedAudio.value.audioUrl === audioUrl,
+        playlistName: playlist.name,
       });
     }
 
@@ -325,15 +380,13 @@ function onAddPlaylist() {
           :key="loadedAudio.audioUrl"
           :file-name="loadedAudio.file?.name ?? ''"
           :is-playing="loadedAudio.isPlaying ?? false"
-          @play-pause-audio="loadedAudios[index].isPlaying ? pauseAudio() : playAudio(index)"
+          @play-pause-audio="
+            loadedAudios[index].isPlaying ? pauseAudio() : playAudio(loadedAudio.audioUrl)
+          "
           @remove-audio-from-list="removeAudioFromList(index)"
         />
       </ul>
-      <button
-        v-if="currentPage === 'playlists'"
-        class="add-audio-button"
-        @click="onAddPlaylist"
-      >
+      <button v-if="currentPage === 'playlists'" class="add-audio-button" @click="onAddPlaylist">
         Add playlist
       </button>
       <ul v-if="currentPage === 'playlists'">
@@ -347,12 +400,12 @@ function onAddPlaylist() {
       </ul>
     </div>
     <AudioPlayerFooter
-      :file-name="currentLoadedAudio.file?.name ?? ''"
+      :file-name="currentLoadedAudio?.file?.name ?? ''"
       :audio-duration="audioDuration"
       :audio-current-time="audioCurrentTime"
-      :is-playing="currentLoadedAudioIsPlaying ?? false"
+      :is-playing="currentLoadedAudio?.isPlaying ?? false"
       :looped="audioLoop"
-      @play-pause-audio="currentLoadedAudioIsPlaying ? pauseAudio() : playAudio()"
+      @play-pause-audio="currentLoadedAudio?.isPlaying ? pauseAudio() : playAudio()"
       @slider-input="onSliderInput"
       @loop-audio="audioLoop = !audioLoop"
     />

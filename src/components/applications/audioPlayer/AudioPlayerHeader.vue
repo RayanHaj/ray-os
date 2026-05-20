@@ -3,7 +3,7 @@ import { computed, ref, type StyleValue, watch } from 'vue';
 import type { AudioPlayerPages } from '@/types/AudioPlayerTypes.ts';
 
 const { _playlistName, currentPage } = defineProps<{
-  _playlistName?: string;
+  _playlistName: string;
   currentPage: AudioPlayerPages;
 }>();
 
@@ -11,7 +11,7 @@ const playlistName = ref('');
 watch(
   () => _playlistName,
   (newPlaylistName, oldPlaylistName) => {
-    if (!newPlaylistName || newPlaylistName === oldPlaylistName) return;
+    if (newPlaylistName === oldPlaylistName) return;
     playlistName.value = newPlaylistName;
   },
   { immediate: true },
