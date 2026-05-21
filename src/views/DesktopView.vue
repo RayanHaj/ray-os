@@ -35,7 +35,7 @@ const fixedSizeWindows: Record<string, { width: number; height: number }> = {
 
 const minWidthWindows: Record<string, { width: number }> = {
   Notepad: { width: 300 },
-  'Audio Player': { width: 395 },
+  'Audio Player': { width: 330 },
 };
 
 const minHeightWindows: Record<string, { height: number }> = {
