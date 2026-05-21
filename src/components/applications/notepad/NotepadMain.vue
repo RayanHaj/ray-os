@@ -203,11 +203,4 @@ const fileIsLoaded = computed(() => loadedFile.value?.windowId === windowId);
     height: 25px;
   }
 }
-::-webkit-scrollbar-track {
-  border-radius: 0 0 8px 0;
-}
-
-::-webkit-scrollbar-thumb {
-  border-radius: 0 0 0 0;
-}
 </style>

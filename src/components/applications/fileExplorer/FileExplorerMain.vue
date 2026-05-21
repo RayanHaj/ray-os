@@ -286,9 +286,4 @@ async function onFileUpload(files: FileList) {
   overflow: hidden;
   container: fileExplorer / size;
 }
-
-::-webkit-scrollbar-track,
-::-webkit-scrollbar-thumb {
-  border-radius: 0;
-}
 </style>

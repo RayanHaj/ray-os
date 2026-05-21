@@ -97,8 +97,4 @@ hr {
 .sidebar.small {
   align-items: center;
 }
-
-::-webkit-scrollbar-track, ::-webkit-scrollbar-thumb {
-  border-radius: 0;
-}
 </style>

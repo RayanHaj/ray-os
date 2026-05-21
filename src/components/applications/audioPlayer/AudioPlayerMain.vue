@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, watch } from 'vue';
+import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useAudioPlayerStore } from '@/stores/audioPlayer.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import AudioPlayerFooter from '@/components/applications/audioPlayer/AudioPlayerFooter.vue';
@@ -29,8 +29,8 @@ const loadedAudios = ref<LoadedAudio[]>([]);
 const currentLoadedAudioUrl = ref<string>('');
 const currentLoadedAudio = ref<LoadedAudio>();
 
-const playlistName = ref('');
 const loadedPlaylists = ref<Playlist[]>([]);
+const currentLoadedPlaylist = ref<Playlist>();
 
 const audioObject = ref<HTMLAudioElement | null>(null);
 const audioDuration = ref(0);
@@ -70,7 +70,7 @@ watch(currentLoadedAudioUrl, (newUrl, oldUrl) => {
   const newLoadedAudio = loadedAudios.value.find((audio) => audio.audioUrl === newUrl);
   if (!newLoadedAudio) return;
 
-  currentLoadedAudio.value = loadedAudios.value.find((audio) => audio.audioUrl === newUrl);
+  currentLoadedAudio.value = newLoadedAudio;
 });
 
 watch(
@@ -78,7 +78,7 @@ watch(
   async (newPage, oldPage) => {
     if (newPage === 'playlist' || newPage === oldPage) return;
 
-    playlistName.value = '';
+    currentLoadedPlaylist.value = undefined;
 
     const playlists = await rayDb.findAll<Playlist>('playlists');
     if (playlists.length === 0) return;
@@ -90,14 +90,22 @@ watch(
 
 watch(
   () => audioPlayerStore.loadedAudio,
-  (newAudio) => {
+  async (newAudio) => {
     if (newAudio.windowId !== windowId) return;
     if (newAudio.audioUrl) return;
 
     if (newAudio.file) {
       const audioUrl = URL.createObjectURL(newAudio.file);
 
-      audioPlayerStore.loadedAudio = { ...newAudio, audioUrl };
+      loadedAudios.value.push({
+        windowId: windowId,
+        file: newAudio.file,
+        audioUrl: audioUrl,
+        fileId: newAudio.fileId,
+        isPlaying: false,
+        playlistName: '',
+      });
+
       currentLoadedAudioUrl.value = audioUrl;
 
       if (audioObject.value) {
@@ -105,6 +113,9 @@ watch(
       }
 
       currentPage.value = 'playlist';
+
+      await nextTick();
+      await playAudio();
     }
   },
   { deep: true, immediate: true },
@@ -131,7 +142,7 @@ watch(
         audioUrl: audioUrl,
         fileId: selectedReturnValue.fileId,
         isPlaying: false,
-        playlistName: playlistName.value,
+        playlistName: currentLoadedPlaylist.value?.name ?? '',
       });
 
       useWindowStore().removeOpenWindowReference(fileExplorerWindowId.value, windowId);
@@ -191,35 +202,39 @@ function onTimeUpdate() {
   }
 }
 
-function onAudioEnded() {
+async function onAudioEnded() {
   if (loadedAudios.value.length === 1 && audioObject.value) {
     audioCurrentTime.value = 0;
     audioObject.value.currentTime = 0;
-    audioObject.value.play();
+    await audioObject.value.play();
     return;
   }
 
   const currentLoadedAudioIndex = loadedAudios.value.findIndex(
-    (audio) => (audio.audioUrl = currentLoadedAudio.value?.audioUrl),
+    (audio) => audio.audioUrl === currentLoadedAudio.value?.audioUrl,
   );
 
   const nextAudio = loadedAudios.value[currentLoadedAudioIndex + 1];
+
   if (nextAudio === undefined) {
-    playAudio(loadedAudios.value[0].audioUrl);
+    await playAudio(loadedAudios.value[0].audioUrl);
+    return;
   }
 
-  playAudio(nextAudio.audioUrl);
+  await playAudio(nextAudio.audioUrl);
 }
 
-function playAudio(audioUrl?: string) {
+async function playAudio(audioUrl?: string) {
   if (audioObject.value === null) return;
 
-  if (audioUrl !== undefined && audioObject.value.src !== audioUrl) {
+  if (audioUrl !== undefined) {
     currentLoadedAudioUrl.value = audioUrl;
     audioObject.value.src = audioUrl;
 
+    await nextTick();
+
     for (const loadedAudio of loadedAudios.value) {
-      if (loadedAudio === currentLoadedAudio.value) continue;
+      if (loadedAudio.audioUrl === audioUrl) continue;
       loadedAudio.isPlaying = false;
     }
   } else if (!audioObject.value.src) {
@@ -236,9 +251,6 @@ function playAudio(audioUrl?: string) {
     const currentLoadedAudioIndex = loadedAudios.value.findIndex(
       (audio) => audio.audioUrl === currentLoadedAudio.value?.audioUrl,
     );
-
-    console.log(currentLoadedAudio.value);
-    console.log(loadedAudios.value);
 
     if (!audioIsLoaded) {
       audioObject.value.addEventListener(
@@ -276,9 +288,6 @@ function pauseAudio() {
     (audio) => audio.audioUrl === currentLoadedAudio.value?.audioUrl,
   );
 
-  console.log(currentLoadedAudio.value);
-  console.log(loadedAudios.value);
-
   audioObject.value.pause();
   currentLoadedAudio.value.isPlaying = false;
 
@@ -315,9 +324,11 @@ async function savePlaylist(updatedPlaylistName: string) {
   if (loadedAudios.value.length === 0) return;
   const IDBAudioIds = loadedAudios.value.map((loadedAudios) => loadedAudios.fileId);
 
-  playlistName.value = trimmedPlaylistName;
+  if (!currentLoadedPlaylist.value) return;
 
-  const idbObject: PlaylistInsert = { name: playlistName.value, audios: IDBAudioIds };
+  currentLoadedPlaylist.value.name = trimmedPlaylistName;
+
+  const idbObject: PlaylistInsert = { name: currentLoadedPlaylist.value.name, audios: IDBAudioIds };
   await rayDb.insertOne('playlists', idbObject);
 }
 
@@ -329,11 +340,23 @@ async function openPlaylist(playlist: Playlist) {
       if (!audio || audio.content.type !== 'file') continue;
       if (!isAudioType(audio.content.rawFile?.type)) continue;
 
+      /**
+       * FOR DEBUGGING
+       */
+      // console.log({
+      //   currentLoadedAudio: currentLoadedAudio.value,
+      //   isPlaying: currentLoadedAudio.value?.isPlaying,
+      //   fileId: currentLoadedAudio.value?.fileId,
+      //   matchesFileId: currentLoadedAudio.value?.fileId === fileId,
+      //   playlistName: currentLoadedAudio.value?.playlistName,
+      //   matchesPlaylist: currentLoadedAudio.value?.playlistName === playlist.name,
+      // });
+
       const audioUrl =
         currentLoadedAudio.value &&
-        (currentLoadedAudio.value.isPlaying ||
-          (currentLoadedAudio.value.fileId === fileId &&
-            currentLoadedAudio.value.playlistName === playlist.name))
+        currentLoadedAudio.value.isPlaying &&
+        currentLoadedAudio.value.fileId === fileId &&
+        currentLoadedAudio.value.playlistName === playlist.name
           ? currentLoadedAudio.value.audioUrl
           : URL.createObjectURL(audio.content.rawFile);
 
@@ -351,21 +374,25 @@ async function openPlaylist(playlist: Playlist) {
     }
 
     loadedAudios.value = foundLoadedAudios;
-    playlistName.value = playlist.name;
+    currentLoadedPlaylist.value = playlist;
     currentPage.value = 'playlist';
+
+    if (!currentLoadedAudio.value) {
+      currentLoadedAudio.value = foundLoadedAudios[0];
+    }
   }
 }
 
 function onAddPlaylist() {
   loadedAudios.value = [];
-  playlistName.value = '';
+  currentLoadedPlaylist.value = undefined;
   currentPage.value = 'playlist';
 }
 </script>
 <template>
   <div class="audio-player">
     <AudioPlayerHeader
-      :_playlist-name="playlistName"
+      :_playlist-name="currentLoadedPlaylist?.name ?? ''"
       :current-page="currentPage"
       @go-to-playlists="currentPage = 'playlists'"
       @save-playlist="savePlaylist"
