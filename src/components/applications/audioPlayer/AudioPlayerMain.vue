@@ -16,17 +16,25 @@ import AudioPlayerHeader from '@/components/applications/audioPlayer/AudioPlayer
 import type { RayDb } from 'ray-db-wrapper';
 import AudioPlayerPlaylistListItem from '@/components/applications/audioPlayer/AudioPlayerPlaylistListItem.vue';
 import { isAudioType, type Item } from '@/types/ItemTypes.ts';
-
-const rayDb = useInjectOrThrow<RayDb>('rayDb');
+import { useToastStore } from '@/stores/toast.ts';
+import { useSetLoadedPlaylists } from '@/composables/audioPlayer/useSetLoadedPlaylists.ts';
+import {
+  setCurrentLoadedAudioByUrl,
+  useAddNewAudio,
+} from '@/composables/audioPlayer/useAddNewAudio.ts';
+import {
+  updateAudioDuration,
+  updateAudioTime,
+} from '@/composables/audioPlayer/useUpdateAudioValues.ts';
 
 const audioPlayerStore = useAudioPlayerStore();
 
+const rayDb = useInjectOrThrow<RayDb>('rayDb');
 const windowId = useInjectOrThrow<string>('windowId');
 
 const currentPage = ref<AudioPlayerPages>('playlists');
 
 const loadedAudios = ref<LoadedAudio[]>([]);
-const currentLoadedAudioUrl = ref<string>('');
 const currentLoadedAudio = ref<LoadedAudio>();
 
 const loadedPlaylists = ref<Playlist[]>([]);
@@ -37,53 +45,43 @@ const audioDuration = ref(0);
 const audioCurrentTime = ref(0);
 const audioLoop = ref(false);
 
+function revokeObjectURLS() {
+  for (const loadedAudio of loadedAudios.value) {
+    if (loadedAudio.audioUrl) {
+      URL.revokeObjectURL(loadedAudio.audioUrl);
+    }
+  }
+}
+
+const onLoadedMetadata = () => updateAudioDuration(audioDuration, audioObject);
+const onTimeUpdate = () => updateAudioTime(audioDuration, audioObject, audioCurrentTime, audioLoop);
+
 onMounted(() => {
   audioObject.value = new Audio();
   audioObject.value.loop = audioLoop.value;
-  audioObject.value.addEventListener('loadedmetadata', updateAudioDuration);
+  audioObject.value.addEventListener('loadedmetadata', onLoadedMetadata);
   audioObject.value.addEventListener('timeupdate', onTimeUpdate);
   audioObject.value.addEventListener('ended', onAudioEnded);
 });
 
 onUnmounted(() => {
   if (audioObject.value) {
-    audioObject.value.removeEventListener('loadedmetadata', updateAudioDuration);
+    audioObject.value.removeEventListener('loadedmetadata', onLoadedMetadata);
     audioObject.value.removeEventListener('timeupdate', onTimeUpdate);
     audioObject.value.removeEventListener('ended', onAudioEnded);
     audioObject.value.src = '';
 
     audioObject.value = null;
-
-    audioPlayerStore.removeAudioElement(windowId);
   }
 
-  for (const loadedAudio of loadedAudios.value) {
-    if (loadedAudio.audioUrl) {
-      URL.revokeObjectURL(loadedAudio.audioUrl);
-    }
-  }
-});
-
-watch(currentLoadedAudioUrl, (newUrl, oldUrl) => {
-  if (newUrl === oldUrl) return;
-
-  const newLoadedAudio = loadedAudios.value.find((audio) => audio.audioUrl === newUrl);
-  if (!newLoadedAudio) return;
-
-  currentLoadedAudio.value = newLoadedAudio;
+  revokeObjectURLS();
 });
 
 watch(
   currentPage,
   async (newPage, oldPage) => {
     if (newPage === 'playlist' || newPage === oldPage) return;
-
-    currentLoadedPlaylist.value = undefined;
-
-    const playlists = await rayDb.findAll<Playlist>('playlists');
-    if (playlists.length === 0) return;
-
-    loadedPlaylists.value = playlists;
+    await useSetLoadedPlaylists(rayDb, loadedPlaylists, currentLoadedPlaylist);
   },
   { immediate: true },
 );
@@ -91,32 +89,16 @@ watch(
 watch(
   () => audioPlayerStore.loadedAudio,
   async (newAudio) => {
-    if (newAudio.windowId !== windowId) return;
-    if (newAudio.audioUrl) return;
+    if (newAudio.windowId !== windowId || newAudio.audioUrl || !newAudio.file) return;
 
-    if (newAudio.file) {
-      const audioUrl = URL.createObjectURL(newAudio.file);
+    useAddNewAudio(audioObject, loadedAudios, currentLoadedAudio, newAudio, windowId, {
+      load: true,
+    });
 
-      loadedAudios.value.push({
-        windowId: windowId,
-        file: newAudio.file,
-        audioUrl: audioUrl,
-        fileId: newAudio.fileId,
-        isPlaying: false,
-        playlistName: '',
-      });
+    await nextTick();
 
-      currentLoadedAudioUrl.value = audioUrl;
-
-      if (audioObject.value) {
-        audioObject.value.src = audioUrl;
-      }
-
-      currentPage.value = 'playlist';
-
-      await nextTick();
-      await playAudio();
-    }
+    currentPage.value = 'playlist';
+    playAudio();
   },
   { deep: true, immediate: true },
 );
@@ -124,49 +106,30 @@ watch(
 const fileExplorerWindowId = ref<string>();
 watch(
   () => useFileExplorerStore().fileSelectReturnValue,
-  async (newReturnValue) => {
-    const selectedReturnValue = newReturnValue.find(
+  async (returnValues) => {
+    const returnValue = returnValues.find(
       (fileSelectState) => fileSelectState.windowId === windowId,
     );
 
-    if (!selectedReturnValue) return;
+    if (!returnValue) return;
 
     // If it is of type 'object' then it should be a FileItem
-    if (typeof selectedReturnValue.value === 'object' && selectedReturnValue.value.rawFile) {
+    if (typeof returnValue.value === 'object' && returnValue.value.rawFile) {
       if (!fileExplorerWindowId.value) return;
 
-      const audioUrl = URL.createObjectURL(selectedReturnValue.value.rawFile);
-      loadedAudios.value.push({
+      const newAudio: LoadedAudio = {
         windowId: windowId,
-        file: selectedReturnValue.value.rawFile,
-        audioUrl: audioUrl,
-        fileId: selectedReturnValue.fileId,
+        file: returnValue.value.rawFile,
+        fileId: returnValue.fileId,
         isPlaying: false,
         playlistName: currentLoadedPlaylist.value?.name ?? '',
-      });
+      };
+
+      useAddNewAudio(audioObject, loadedAudios, currentLoadedAudio, newAudio, windowId);
 
       useWindowStore().removeOpenWindowReference(fileExplorerWindowId.value, windowId);
     }
   },
-);
-
-const audioElementRef = ref();
-watch(
-  [audioElementRef, currentLoadedAudio],
-  () => {
-    if (
-      audioElementRef.value instanceof HTMLAudioElement &&
-      currentLoadedAudio.value &&
-      currentLoadedAudio.value.file
-    ) {
-      audioPlayerStore.setAudioElement(
-        windowId,
-        audioElementRef.value,
-        currentLoadedAudio.value.file,
-      );
-    }
-  },
-  { immediate: true },
 );
 
 watch(audioLoop, (newValue, oldValue) => {
@@ -186,22 +149,6 @@ function handleSelectAudio() {
   fileExplorerWindowId.value = useWindowStore().pushOpenWindowReference('File Explorer');
 }
 
-function updateAudioDuration() {
-  audioDuration.value = audioObject.value?.duration ?? 0;
-}
-
-function onTimeUpdate() {
-  audioCurrentTime.value = audioObject.value?.currentTime ?? 0;
-
-  if (Math.floor(audioDuration.value) === Math.floor(audioCurrentTime.value) && audioObject.value) {
-    if (audioLoop.value) {
-      audioCurrentTime.value = 0;
-      audioObject.value.currentTime = 0;
-    }
-    return;
-  }
-}
-
 async function onAudioEnded() {
   if (loadedAudios.value.length === 1 && audioObject.value) {
     audioCurrentTime.value = 0;
@@ -217,21 +164,18 @@ async function onAudioEnded() {
   const nextAudio = loadedAudios.value[currentLoadedAudioIndex + 1];
 
   if (nextAudio === undefined) {
-    await playAudio(loadedAudios.value[0].audioUrl);
+    playAudio(loadedAudios.value[0].audioUrl);
     return;
   }
 
-  await playAudio(nextAudio.audioUrl);
+  playAudio(nextAudio.audioUrl);
 }
 
-async function playAudio(audioUrl?: string) {
+function playAudio(audioUrl?: string) {
   if (audioObject.value === null) return;
 
   if (audioUrl !== undefined) {
-    currentLoadedAudioUrl.value = audioUrl;
-    audioObject.value.src = audioUrl;
-
-    await nextTick();
+    setCurrentLoadedAudioByUrl(audioUrl, audioObject, loadedAudios, currentLoadedAudio);
 
     for (const loadedAudio of loadedAudios.value) {
       if (loadedAudio.audioUrl === audioUrl) continue;
@@ -318,18 +262,50 @@ function removeAudioFromList(index: number) {
 }
 
 async function savePlaylist(updatedPlaylistName: string) {
-  const trimmedPlaylistName = updatedPlaylistName.trim();
-  if (!updatedPlaylistName || trimmedPlaylistName === '') return;
+  try {
+    const trimmedPlaylistName = updatedPlaylistName.trim();
+    if (!updatedPlaylistName || trimmedPlaylistName === '') {
+      useToastStore().createToast('enter a playlist name', 'warning', 2500, 'window', windowId);
+      return;
+    }
 
-  if (loadedAudios.value.length === 0) return;
-  const IDBAudioIds = loadedAudios.value.map((loadedAudios) => loadedAudios.fileId);
+    const IDBAudioIds = loadedAudios.value.map((loadedAudios) => loadedAudios.fileId);
+    if (!currentLoadedPlaylist.value) {
+      const playlistInsert: PlaylistInsert = { name: trimmedPlaylistName, audios: IDBAudioIds };
+      await rayDb.insertOne('playlists', playlistInsert);
+      return;
+    }
 
-  if (!currentLoadedPlaylist.value) return;
+    currentLoadedPlaylist.value.name = trimmedPlaylistName;
+    currentLoadedPlaylist.value.audios = IDBAudioIds;
 
-  currentLoadedPlaylist.value.name = trimmedPlaylistName;
+    const foundPlaylist = await rayDb.findOne<Playlist>(
+      'playlists',
+      'id',
+      currentLoadedPlaylist.value.id,
+    );
+    const updatedPlaylist = {
+      ...currentLoadedPlaylist.value,
+      audios: [...currentLoadedPlaylist.value.audios],
+    };
 
-  const idbObject: PlaylistInsert = { name: currentLoadedPlaylist.value.name, audios: IDBAudioIds };
-  await rayDb.insertOne('playlists', idbObject);
+    if (JSON.stringify(foundPlaylist) === JSON.stringify(updatedPlaylist)) {
+      useToastStore().createToast('No changes made', 'warning', 2500, 'window', windowId);
+      return;
+    }
+
+    await rayDb.updateOne<Playlist>('playlists', updatedPlaylist);
+
+    useToastStore().createToast('Playlist saved successfully', 'success', 1000, 'window', windowId);
+  } catch (e) {
+    useToastStore().createToast(
+      'Could not save playlist, try again',
+      'error',
+      5000,
+      'window',
+      windowId,
+    );
+  }
 }
 
 async function openPlaylist(playlist: Playlist) {
@@ -374,13 +350,14 @@ async function openPlaylist(playlist: Playlist) {
     }
 
     loadedAudios.value = foundLoadedAudios;
-    currentLoadedPlaylist.value = playlist;
-    currentPage.value = 'playlist';
 
     if (!currentLoadedAudio.value) {
       currentLoadedAudio.value = foundLoadedAudios[0];
     }
   }
+
+  currentLoadedPlaylist.value = playlist;
+  currentPage.value = 'playlist';
 }
 
 function onAddPlaylist() {

@@ -1,89 +1,27 @@
 import { defineStore } from 'pinia';
 import type { LoadedAudio } from '@/types/AudioPlayerTypes.ts';
-import { computed, ref, type Ref } from 'vue';
+import { ref, type Ref } from 'vue';
 import { isAudioType } from '@/types/ItemTypes.ts';
 
 export const useAudioPlayerStore = defineStore('audioPlayer', () => {
-  const loadedAudio: Ref<LoadedAudio> = ref({ windowId: null, file: null, fileId: -1 });
-  const hasOpenInstance: Ref<boolean> = ref(false);
-  const audioElements: Ref<Map<string, { el: HTMLAudioElement; file: File }>> = ref(new Map());
+  const loadedAudio: Ref<LoadedAudio> = ref({
+    windowId: null,
+    file: null,
+    fileId: -1,
+    playlistName: '',
+  });
 
   function initAudioFileAndUrl(windowId: string, audioFile: File, fileId: number): boolean {
     if (!isAudioType(audioFile.type)) {
       return false;
     }
 
-    loadedAudio.value = { windowId: windowId, file: audioFile, fileId };
+    loadedAudio.value = { windowId: windowId, file: audioFile, fileId, isPlaying: false, playlistName: '' };
     return true;
-  }
-
-  function setAudioElement(windowId: string, el: HTMLAudioElement | null, file?: File) {
-    if (el === null) {
-      audioElements.value.delete(windowId);
-    } else if (file) {
-      audioElements.value.set(windowId, { el, file });
-    }
-  }
-
-  function removeAudioElement(windowId: string) {
-    audioElements.value.delete(windowId);
-    if (loadedAudio.value.windowId === windowId) {
-      loadedAudio.value = { windowId: null, file: null, fileId: -1 };
-    }
-  }
-
-  function play(windowId: string) {
-    audioElements.value.get(windowId)?.el.play();
-  }
-
-  function pause(windowId: string) {
-    audioElements.value.get(windowId)?.el.pause();
-  }
-
-  function pauseAll() {
-    audioElements.value.forEach((element) => element.el.pause());
-  }
-
-  function playAll() {
-    audioElements.value.forEach((element) => element.el.play());
-  }
-
-  const audioElementCount = computed(() => audioElements.value.size);
-
-  function getAudioFileName(windowId?: string): string | undefined {
-    if (!windowId) {
-      if (audioElements.value.size > 0) {
-        const [firstElement] = audioElements.value.values();
-        return firstElement.file.name;
-      } else {
-        return;
-      }
-    }
-
-    const audioElement = audioElements.value.get(windowId);
-    if (!audioElement) {
-      if (audioElements.value.size > 0) {
-        const [firstElement] = audioElements.value.values();
-        return firstElement.file.name;
-      } else {
-        return;
-      }
-    }
-
-    return audioElement.file.name;
   }
 
   return {
     loadedAudio,
-    initAudioFileAndUrl,
-    hasOpenInstance,
-    setAudioElement,
-    removeAudioElement,
-    audioElementCount,
-    getAudioFileName,
-    play,
-    pause,
-    pauseAll,
-    playAll,
+    initAudioFileAndUrl
   };
 });

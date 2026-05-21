@@ -124,8 +124,6 @@ export const useWindowStore = defineStore('window', () => {
         (element) => element.windowId !== fileSelectWindowId,
       );
 
-    useAudioPlayerStore().setAudioElement(windowId, null);
-
     openWindowsReferences.value[windowName] = openWindowsReferences.value[windowName].filter(
       (windowReference) => windowReference.id !== id,
     );
