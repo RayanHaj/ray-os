@@ -20,8 +20,13 @@ export const useAudioPlayerStore = defineStore('audioPlayer', () => {
     return true;
   }
 
+  function resetLoadedAudio() {
+    loadedAudio.value = { windowId: null, file: null, fileId: -1, playlistName: '' };
+  }
+
   return {
     loadedAudio,
+    resetLoadedAudio,
     initAudioFileAndUrl
   };
 });

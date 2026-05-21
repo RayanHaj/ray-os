@@ -74,6 +74,8 @@ onUnmounted(() => {
     audioObject.value = null;
   }
 
+  audioPlayerStore.resetLoadedAudio();
+
   revokeObjectURLS();
 });
 
