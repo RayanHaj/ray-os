@@ -9,7 +9,7 @@ const emit = defineEmits(['playPauseAudio', 'removeAudioFromList']);
 const playSvg = useSvgOrFallback('Play');
 const pauseSvg = useSvgOrFallback('Pause');
 
-function onRightClick(event: MouseEvent) {
+function onContextmenu(event: MouseEvent) {
   useInitializeContextMenu(event)
     .audioPlayerListItem()
     .initialize(
@@ -23,7 +23,7 @@ function onRightClick(event: MouseEvent) {
 }
 </script>
 <template>
-  <li @click.right.prevent="onRightClick" :class="{ active: isPlaying }">
+  <li @contextmenu.prevent="onContextmenu" :class="{ active: isPlaying }">
     <p>{{ fileName }}</p>
     <div class="button-wrapper">
       <button class="play-button" @click="emit('playPauseAudio')">

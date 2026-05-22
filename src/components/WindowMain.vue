@@ -123,6 +123,7 @@ const windowContentStyles = { height: windowContentHeight.value, width: '100%', 
   height: 100%;
   position: absolute;
   user-select: none;
+  -webkit-user-select: none;
   overflow: hidden;
   background-color: var(--window-primary-color);
   border: var(--window-border-color) 2px solid;

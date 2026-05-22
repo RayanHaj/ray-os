@@ -83,6 +83,7 @@ const getTabIsOverflowingStyle = computed(() => {
   max-height: 300px;
   overflow: hidden;
   user-select: none;
+  -webkit-user-select: none;
 }
 .tabs {
   display: flex;

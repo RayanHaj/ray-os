@@ -338,6 +338,7 @@ const itemSize = computed<FileItemSizeValue>(
   flex: 0;
   width: 100%;
   user-select: none;
+  -webkit-user-select: none;
   padding: 10px;
   height: 100%;
 }

@@ -224,6 +224,7 @@ const getTitleOverflowStyle = computed(() => {
   background-color: var(--button-hover-color);
   border-radius: 5px;
   user-select: none;
+  -webkit-user-select: none;
 }
 
 hr {

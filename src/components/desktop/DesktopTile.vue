@@ -2,7 +2,13 @@
 import { useDesktopStore } from '@/stores/desktop.ts';
 import { useTileCountGrid } from '@/composables/desktop/useTileCountGrid.ts';
 import { computed, onMounted, ref, watch } from 'vue';
-import { type FileSystemItem, isAudioType, isImageType, isVideoType, type Item } from '@/types/ItemTypes.ts';
+import {
+  type FileSystemItem,
+  isAudioType,
+  isImageType,
+  isVideoType,
+  type Item,
+} from '@/types/ItemTypes.ts';
 import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import type { RayDb } from 'ray-db-wrapper';
@@ -142,10 +148,7 @@ function onDragStart(event: DragEvent) {
 
   if (!id || !type) return;
 
-  event?.dataTransfer?.setData(
-    'text/plain',
-    JSON.stringify({ id, type }),
-  );
+  event?.dataTransfer?.setData('text/plain', JSON.stringify({ id, type }));
 }
 
 async function onDrop(event: DragEvent) {
@@ -304,6 +307,7 @@ function getSvg() {
   justify-content: center;
   align-items: center;
   user-select: none;
+  -webkit-user-select: none;
   border-radius: 5px;
   padding: 5px;
 }

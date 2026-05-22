@@ -25,11 +25,11 @@ export function useAddNewAudio(
   });
 
   if (options?.load) {
-    setCurrentLoadedAudioByUrl(audioUrl, audioObject, loadedAudios, currentLoadedAudio);
+    useSetCurrentLoadedAudioByUrl(audioUrl, audioObject, loadedAudios, currentLoadedAudio);
   }
 }
 
-export function setCurrentLoadedAudioByUrl(
+export function useSetCurrentLoadedAudioByUrl(
   audioUrl: string,
   audioObject: Ref<HTMLAudioElement | null>,
   loadedAudios: Ref<LoadedAudio[]>,
