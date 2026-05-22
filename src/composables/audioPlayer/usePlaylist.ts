@@ -82,8 +82,8 @@ export async function useOpenPlaylist(
   rayDb: RayDb,
   playPlaylist: boolean = true,
 ) {
+  const foundLoadedAudios: LoadedAudio[] = [];
   if (playlist.audios.length > 0) {
-    const foundLoadedAudios: LoadedAudio[] = [];
     for (const fileId of playlist.audios) {
       const audio = await rayDb.findOne<Item>('files', 'id', fileId);
       if (!audio || audio.content.type !== 'file') continue;
@@ -129,7 +129,7 @@ export async function useOpenPlaylist(
       audioObject,
       loadedAudios,
       currentLoadedAudio,
-      loadedAudios.value[0].audioUrl,
+      currentLoadedAudio.value?.audioUrl,
     );
   }
 }

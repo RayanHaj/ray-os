@@ -146,13 +146,6 @@ watch(audioLoop, (newValue, oldValue) => {
 const onAddAudioButtonClicked = () => useOpenSelectAudioWindow(fileExplorerWindowId, windowId);
 
 async function onAudioEnded() {
-  if (loadedAudios.value.length === 1 && audioObject.value) {
-    audioCurrentTime.value = 0;
-    audioObject.value.currentTime = 0;
-    await audioObject.value.play();
-    return;
-  }
-
   const currentLoadedAudioIndex = loadedAudios.value.findIndex(
     (audio) => audio.audioUrl === currentLoadedAudio.value?.audioUrl,
   );
