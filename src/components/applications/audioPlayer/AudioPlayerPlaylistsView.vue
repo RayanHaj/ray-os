@@ -22,7 +22,6 @@ function onContextmenu(event: MouseEvent, playlist: Playlist) {
       v-for="playlist in loadedPlaylists"
       :key="playlist.id"
       :playlist="playlist"
-      :is-playing="false"
       @open-playlist="emit('onOpenPlaylist', playlist)"
       @contextmenu.prevent="onContextmenu($event, playlist)"
     />

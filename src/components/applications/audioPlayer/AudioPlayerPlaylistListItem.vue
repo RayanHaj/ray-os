@@ -1,22 +1,13 @@
 <script setup lang="ts">
 import type { Playlist } from '@/types/AudioPlayerTypes.ts';
-import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
 
-const { playlist, isPlaying } = defineProps<{ playlist: Playlist; isPlaying: boolean }>();
+const { playlist } = defineProps<{ playlist: Playlist }>();
 
 const emit = defineEmits(['openPlaylist']);
-
-const playSvg = useSvgOrFallback('Play');
-const pauseSvg = useSvgOrFallback('Pause');
 </script>
 <template>
   <li class="audio-player-playlist-list-item">
     <button @click="emit('openPlaylist')" class="playlist-name">{{ playlist.name }}</button>
-    <div class="button-wrapper">
-      <button class="play-button">
-        <component :is="isPlaying ? pauseSvg.svg : playSvg.svg" />
-      </button>
-    </div>
   </li>
 </template>
 <style scoped>

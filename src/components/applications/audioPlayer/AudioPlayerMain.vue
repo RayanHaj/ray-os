@@ -203,6 +203,7 @@ const openPlaylist = (playlist: Playlist) =>
     currentPage,
     loadedAudios,
     currentLoadedAudio,
+    audioObject,
     windowId,
     rayDb,
   );

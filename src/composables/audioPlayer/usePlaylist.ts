@@ -8,6 +8,7 @@ import { isAudioType, type Item } from '@/types/ItemTypes.ts';
 import type { Ref } from 'vue';
 import type { RayDb } from 'ray-db-wrapper';
 import { useToastStore } from '@/stores/toast.ts';
+import { usePlayAudio } from '@/composables/audioPlayer/useAudioPlayback.ts';
 
 export async function useSavePlaylist(
   updatedPlaylistName: string,
@@ -76,8 +77,10 @@ export async function useOpenPlaylist(
   currentPage: Ref<AudioPlayerPages>,
   loadedAudios: Ref<LoadedAudio[]>,
   currentLoadedAudio: Ref<LoadedAudio | undefined>,
+  audioObject: Ref<HTMLAudioElement | null>,
   windowId: string,
   rayDb: RayDb,
+  playPlaylist: boolean = true,
 ) {
   if (playlist.audios.length > 0) {
     const foundLoadedAudios: LoadedAudio[] = [];
@@ -85,18 +88,6 @@ export async function useOpenPlaylist(
       const audio = await rayDb.findOne<Item>('files', 'id', fileId);
       if (!audio || audio.content.type !== 'file') continue;
       if (!isAudioType(audio.content.rawFile?.type)) continue;
-
-      /**
-       * FOR DEBUGGING
-       */
-      // console.log({
-      //   currentLoadedAudio: currentLoadedAudio.value,
-      //   isPlaying: currentLoadedAudio.value?.isPlaying,
-      //   fileId: currentLoadedAudio.value?.fileId,
-      //   matchesFileId: currentLoadedAudio.value?.fileId === fileId,
-      //   playlistName: currentLoadedAudio.value?.playlistName,
-      //   matchesPlaylist: currentLoadedAudio.value?.playlistName === playlist.name,
-      // });
 
       const audioUrl =
         currentLoadedAudio.value &&
@@ -128,6 +119,19 @@ export async function useOpenPlaylist(
 
   currentLoadedPlaylist.value = playlist;
   currentPage.value = 'playlist';
+
+  if (playPlaylist) {
+    if (audioObject.value?.src) {
+      return;
+    }
+
+    await usePlayAudio(
+      audioObject,
+      loadedAudios,
+      currentLoadedAudio,
+      loadedAudios.value[0].audioUrl,
+    );
+  }
 }
 
 export async function useDeletePlaylist(
@@ -135,15 +139,14 @@ export async function useDeletePlaylist(
   loadedPlaylists: Ref<Playlist[]>,
   currentLoadedPlaylist: Ref<Playlist | undefined>,
   rayDb: RayDb,
-  windowId: string
+  windowId: string,
 ) {
   try {
     await rayDb.deleteOne('playlists', playlistId);
     loadedPlaylists.value = loadedPlaylists.value.filter((playlist) => playlist.id !== playlistId);
     if (currentLoadedPlaylist.value?.id !== playlistId) return;
     currentLoadedPlaylist.value = undefined;
-  }
-  catch (e) {
+  } catch (e) {
     useToastStore().createToast(
       'Could not delete playlist, try again',
       'error',
