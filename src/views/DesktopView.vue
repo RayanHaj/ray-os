@@ -92,10 +92,7 @@ watch(
 </script>
 
 <template>
-  <main
-    @click="useOnOuterClickClose($event.target as HTMLElement)"
-    :style="{ backgroundImage: wallpaperUrl }"
-  >
+  <main @click="useOnOuterClickClose($event.target as HTMLElement)">
     <UiToast toast-location="desktop" />
     <ContextMenu v-show="contextMenuStore.isShown" />
     <DesktopSnapLayout />
@@ -135,7 +132,7 @@ watch(
         :window-id="useWindowStore().getWindowId(reference.label, reference.id)"
       />
     </WindowMain>
-    <DesktopMain />
+    <DesktopMain :style="{ backgroundImage: wallpaperUrl }" />
     <TaskbarMain />
   </main>
 </template>
@@ -144,10 +141,6 @@ watch(
 main {
   height: 100dvh;
   width: 100dvw;
-  background-color: var(--background-color);
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
   overflow: hidden;
 }
 </style>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import AudioPlayerPlaylistListItem from '@/components/applications/audioPlayer/AudioPlayerPlaylistListItem.vue';
+import AudioPlayerPlaylistListItem from '@/components/applications/mediaPlayers/audioPlayer/AudioPlayerPlaylistListItem.vue';
 import type { Playlist } from '@/types/AudioPlayerTypes.ts';
 import { useInitializeContextMenu } from '@/composables/contextMenu/useInitializeContextMenu.ts';
 

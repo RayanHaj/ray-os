@@ -16,6 +16,7 @@ export const availableSvgs = [
   'TextFile',
   'Calculator',
   'FileExplorer',
+  'Fullscreen',
   'SereneSounds',
   'Terminal',
   'Paint',

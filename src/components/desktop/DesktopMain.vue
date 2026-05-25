@@ -92,6 +92,11 @@ function navigateToSocialPage(social: Socials) {
   justify-content: space-between;
   flex-direction: row;
   width: 100%;
+
+  background-color: var(--background-color);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 .desktop-grid {
   display: flex;

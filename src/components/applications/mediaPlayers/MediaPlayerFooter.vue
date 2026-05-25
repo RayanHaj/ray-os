@@ -1,20 +1,22 @@
 <script setup lang="ts">
 import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
 
-const { fileName, audioDuration, audioCurrentTime, isPlaying, looped } = defineProps<{
+const { fileName, audioDuration, audioCurrentTime, isPlaying, looped, options } = defineProps<{
   fileName: string;
   audioDuration: number;
   audioCurrentTime: number;
   isPlaying: boolean;
   looped: boolean;
+  options?: { fullscreen?: boolean; dotMenu?: boolean };
 }>();
 
-const emits = defineEmits(['playPauseAudio', 'sliderInput', 'loopAudio']);
+const emits = defineEmits(['playPauseAudio', 'sliderInput', 'loopAudio', 'fullscreen', 'dotMenu']);
 
 const playSvg = useSvgOrFallback('Play');
 const pauseSvg = useSvgOrFallback('Pause');
 const menuDots = useSvgOrFallback('MenuDots');
 const loopSvg = useSvgOrFallback('Loop');
+const fullscreenSvg = useSvgOrFallback('Fullscreen');
 
 const calculateTime = (seconds: number) => {
   const minutes = Math.floor(seconds / 60);
@@ -53,9 +55,7 @@ function getTrackBackground(value: number, min: number, max: number) {
       </div>
       <div class="middle">
         <button class="play-button" @click="emits('playPauseAudio')">
-          <component
-            :is="isPlaying ? pauseSvg.svg : playSvg.svg"
-          />
+          <component :is="isPlaying ? pauseSvg.svg : playSvg.svg" />
         </button>
       </div>
       <div class="end">
@@ -66,7 +66,10 @@ function getTrackBackground(value: number, min: number, max: number) {
         >
           <component :is="loopSvg.svg" :custom-width="20" :custom-height="20" />
         </button>
-        <button class="audio-control-button">
+        <button v-if="options?.fullscreen" @click="emits('fullscreen')" class="audio-control-button">
+          <component :is="fullscreenSvg.svg" :custom-width="25" :custom-height="25" />
+        </button>
+        <button v-if="options?.dotMenu" class="audio-control-button">
           <component :is="menuDots.svg" :custom-width="25" :custom-height="25" />
         </button>
       </div>

@@ -7,9 +7,9 @@ import SereneSoundsMain from '@/components/applications/sereneSounds/SereneSound
 import TerminalMain from '@/components/applications/terminal/TerminalMain.vue';
 import NotepadMain from '@/components/applications/notepad/NotepadMain.vue';
 import FallbackMain from '@/components/applications/FallbackMain.vue';
-import ImageViewerMain from '@/components/applications/imageViewer/ImageViewerMain.vue';
-import VideoPlayerMain from '@/components/applications/videoPlayer/VideoPlayerMain.vue';
-import AudioPlayerMain from '@/components/applications/audioPlayer/AudioPlayerMain.vue';
+import ImageViewerMain from '@/components/applications/mediaPlayers/imageViewer/ImageViewerMain.vue';
+import VideoPlayerMain from '@/components/applications/mediaPlayers/videoPlayer/VideoPlayerMain.vue';
+import AudioPlayerMain from '@/components/applications/mediaPlayers/audioPlayer/AudioPlayerMain.vue';
 
 import { useWindowNameFormatter } from '@/composables/window/useWindowNameFormatter.ts';
 

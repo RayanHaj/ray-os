@@ -2,11 +2,11 @@
 import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useAudioPlayerStore } from '@/stores/audioPlayer.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
-import AudioPlayerFooter from '@/components/applications/audioPlayer/AudioPlayerFooter.vue';
+import MediaPlayerFooter from '@/components/applications/mediaPlayers/MediaPlayerFooter.vue';
 import type { AudioPlayerPages, LoadedAudio, Playlist } from '@/types/AudioPlayerTypes.ts';
 import { useWindowStore } from '@/stores/window.ts';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
-import AudioPlayerHeader from '@/components/applications/audioPlayer/AudioPlayerHeader.vue';
+import AudioPlayerHeader from '@/components/applications/mediaPlayers/audioPlayer/AudioPlayerHeader.vue';
 import type { RayDb } from 'ray-db-wrapper';
 import { useSetLoadedPlaylists } from '@/composables/audioPlayer/useSetLoadedPlaylists.ts';
 import { useAddNewAudio } from '@/composables/audioPlayer/useAddNewAudio.ts';
@@ -21,8 +21,8 @@ import {
   useOpenPlaylist,
   useSavePlaylist,
 } from '@/composables/audioPlayer/usePlaylist.ts';
-import AudioPlayerPlaylistView from '@/components/applications/audioPlayer/AudioPlayerPlaylistView.vue';
-import AudioPlayerPlaylistsView from '@/components/applications/audioPlayer/AudioPlayerPlaylistsView.vue';
+import AudioPlayerPlaylistView from '@/components/applications/mediaPlayers/audioPlayer/AudioPlayerPlaylistView.vue';
+import AudioPlayerPlaylistsView from '@/components/applications/mediaPlayers/audioPlayer/AudioPlayerPlaylistsView.vue';
 
 const audioPlayerStore = useAudioPlayerStore();
 
@@ -236,7 +236,7 @@ function createEmptyPlaylist() {
         "
       />
     </div>
-    <AudioPlayerFooter
+    <MediaPlayerFooter
       :file-name="currentLoadedAudio?.file?.name ?? ''"
       :audio-duration="audioDuration"
       :audio-current-time="audioCurrentTime"

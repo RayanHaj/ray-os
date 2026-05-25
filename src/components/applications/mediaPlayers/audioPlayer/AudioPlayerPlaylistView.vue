@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import AudioPlayerListItem from '@/components/applications/audioPlayer/AudioPlayerListItem.vue';
+import AudioPlayerListItem from '@/components/applications/mediaPlayers/audioPlayer/AudioPlayerListItem.vue';
 import type { LoadedAudio } from '@/types/AudioPlayerTypes.ts';
 import { useSpliceFileNameExtension } from '@/composables/helpers/useSpliceFileNameExtension.ts';
 

@@ -3,7 +3,7 @@ import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import { onMounted, onUnmounted, ref, type Ref, watch, watchEffect } from 'vue';
 import { useVideoPlayerStore } from '@/stores/videoPlayer.ts';
 import type { LoadedVideo } from '@/types/VideoPlayerTypes.ts';
-import AudioPlayerFooter from '@/components/applications/audioPlayer/AudioPlayerFooter.vue';
+import MediaPlayerFooter from '@/components/applications/mediaPlayers/MediaPlayerFooter.vue';
 
 const videoPlayerStore = useVideoPlayerStore();
 const windowId = useInjectOrThrow<string>('windowId');
@@ -105,13 +105,17 @@ function onSliderInput(time: number) {
 </script>
 <template>
   <div class="video-player">
-    <video ref="videoRef" :src="videoUrl ?? undefined" />
-    <AudioPlayerFooter
+    <video
+      ref="videoRef"
+      :src="videoUrl ?? undefined"
+    />
+    <MediaPlayerFooter
       :file-name="loadedVideo.file?.name ?? ''"
       :audio-duration="videoDuration"
       :audio-current-time="videoCurrentTime"
       :is-playing="videoIsPlaying"
       :looped="videoLoop"
+      :options="{ dotMenu: true }"
       @play-pause-audio="videoIsPlaying ? pauseVideo() : playVideo()"
       @slider-input="onSliderInput"
       @loop-audio="videoLoop = !videoLoop"
