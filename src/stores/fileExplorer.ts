@@ -15,7 +15,7 @@ export const useFileExplorerStore = defineStore('fileExplorer', () => {
   }[]>([]);
 
   const fileSelectReturnValue =
-    ref<{ windowId: string; fileId: number; value: string | FileItem }[]>([]);
+    ref<{ windowId: string; id: number; fileId: number; value: string | FileItem }[]>([]);
 
   function updateItemSize(itemSizeKey: FileItemSizeKey) {
     currentFileItemSize.value = itemSizeKey;

@@ -48,7 +48,7 @@ export async function useHandleExplorerFileClicked(
       if (foundSelectState?.active) {
         useFileExplorerStore().fileSelectReturnValue = [
           ...useFileExplorerStore().fileSelectReturnValue,
-          { windowId: foundSelectState.windowId, fileId: file.id, value: file.content },
+          { windowId: foundSelectState.windowId, id: item.id, fileId: file.id, value: file.content },
         ];
         return;
       }

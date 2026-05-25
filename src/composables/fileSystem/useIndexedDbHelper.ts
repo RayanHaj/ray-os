@@ -9,6 +9,7 @@ function insertionCheck(
   foundItems: FileSystemItem[],
   item: { file?: { name: string; id: number }; directory?: { name: string; children: number[] } },
   parents: number[],
+  nameNotRootDirectoryCheck = true,
 ) {
   if (item.file) {
     let state: boolean | Error = true;
@@ -43,7 +44,7 @@ function insertionCheck(
         foundItem.parents.some((parent) => parents.includes(parent)) &&
         foundItem.directory?.name === item.directory?.name;
 
-      if (isRootDirectoryName) {
+      if (isRootDirectoryName && nameNotRootDirectoryCheck) {
         state = new Error(`directory cannot be named after root directory`);
         return true;
       } else if (hasDirectoryWithSameName) {
@@ -61,12 +62,13 @@ export async function insertItemIntoFileSystem(
   rayDb: RayDb,
   parents: number[],
   item: { file?: { name: string; id: number; type: string }; directory?: { name: string; children: number[] }, isSystemFile?: boolean },
-  updateFileSystem = true
+  updateFileSystem = true,
+  nameNotRootDirectoryCheck = true
 ): Promise<Error | number | undefined> {
   try {
     const foundItems = await rayDb.findAll<FileSystemItem>('fileSystem');
 
-    const check = insertionCheck(foundItems, item, parents);
+    const check = insertionCheck(foundItems, item, parents, nameNotRootDirectoryCheck);
     if (check && check instanceof Error) {
       throw check;
     }

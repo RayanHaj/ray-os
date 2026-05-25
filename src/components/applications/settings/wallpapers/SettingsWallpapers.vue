@@ -3,17 +3,26 @@ import WallpaperTile from '@/components/applications/settings/wallpapers/Wallpap
 import wallpapers from '@/json/wallpapers.json';
 import { onBeforeMount, type Ref, ref, watch } from 'vue';
 import { useWallpaperStore, type WallpaperType } from '@/stores/settings/wallpaper.ts';
-import { fileSystemLookup } from '@/composables/fileSystem/useIndexedDbHelper.ts';
+import {
+  fileSystemLookup,
+  insertItemIntoFileSystem,
+} from '@/composables/fileSystem/useIndexedDbHelper.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import type { RayDb } from 'ray-db-wrapper';
-import type { Item } from '@/types/ItemTypes.ts';
+import type { FileSystemItem, Item } from '@/types/ItemTypes.ts';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
+import { useWindowStore } from '@/stores/window.ts';
+import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
+import { useDeleteFileSystemItem } from '@/composables/fileSystem/useDeleteFileSystemItem.ts';
+
+const WALLPAPER_COUNT = Object.keys(wallpapers).length;
 
 const customWallpapers: Ref<{ id: number; file: File }[]> = ref([]);
-const WALLPAPER_COUNT = Object.keys(wallpapers).length;
 const wallpaperStore = useWallpaperStore();
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
+const windowId = useInjectOrThrow<string>('windowId');
+
 onBeforeMount(async () => {
   wallpaperStore.initSelectedWallpaper();
   await updateCustomWallpapers();
@@ -51,10 +60,67 @@ async function updateCustomWallpapers() {
 function onClick(id: number, type: WallpaperType) {
   wallpaperStore.setSelectedWallpaper(id, type);
 }
+
+const fileExplorerWindowId = ref<string>();
+watch(
+  () => useFileExplorerStore().fileSelectReturnValue,
+  async (returnValues) => {
+    const returnValue = returnValues.find(
+      (fileSelectState) => fileSelectState.windowId === windowId,
+    );
+
+    if (!returnValue) return;
+
+    // If it is of type 'object' then it should be a FileItem
+    if (typeof returnValue.value === 'object' && returnValue.value.rawFile) {
+      if (!fileExplorerWindowId.value) return;
+
+      const wallpaperDirectoryId = useFileSystemStore().wallpapersDirId;
+      if (!wallpaperDirectoryId) {
+        return;
+      }
+
+      const dropItem: FileSystemItem = {
+        id: returnValue.id,
+        parents: [],
+        file: {
+          name: returnValue.value.name,
+          type: returnValue.value.rawFile.type,
+          id: returnValue.fileId,
+        },
+      };
+
+      const insertedId = await insertItemIntoFileSystem(rayDb, [wallpaperDirectoryId], dropItem);
+      if (insertedId instanceof Error || insertedId === undefined) {
+        return;
+      }
+
+      await useDeleteFileSystemItem(rayDb, dropItem, true, true);
+
+      useWindowStore().removeOpenWindowReference(fileExplorerWindowId.value, windowId);
+      useFileSystemStore().updateFileSystem();
+    }
+  },
+);
+
+function openSelectWallpaperFileWindow() {
+  const nextFileExplorerId = useWindowStore().getNextWindowId('File Explorer');
+
+  useFileExplorerStore().setFileExplorerWindowAsFileSelect(windowId, nextFileExplorerId, [
+    'image/webp',
+    'image/png',
+    'image/jpeg',
+  ]);
+
+  fileExplorerWindowId.value = useWindowStore().pushOpenWindowReference('File Explorer');
+}
 </script>
 
 <template>
   <div class="settings-wallpapers">
+    <button class="add-wallpaper-button" @click="openSelectWallpaperFileWindow">
+      Add wallpaper
+    </button>
     <hr />
     <div class="custom-wallpapers">
       <h2>Custom wallpapers</h2>
@@ -159,6 +225,22 @@ function onClick(id: number, type: WallpaperType) {
   text-align: center;
   color: var(--text-secondary-color);
   font-size: var(--font-size-sm);
+}
+
+.add-wallpaper-button {
+  font-size: var(--font-size-lg);
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--button-primary-color);
+  border: var(--input-border-color) 2px solid;
+  color: var(--text-color);
+  padding-block: 5px;
+  padding-inline: 10px;
+  width: 100%;
+  height: 50px;
+  min-height: 50px;
 }
 
 hr {
