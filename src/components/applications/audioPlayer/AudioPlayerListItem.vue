@@ -11,14 +11,14 @@ const pauseSvg = useSvgOrFallback('Pause');
 
 function onContextmenu(event: MouseEvent) {
   useInitializeContextMenu(event)
-    .audioPlayerListItem()
+    .audioPlayerAudio()
     .initialize(
+      {},
       {
-        Delete: () => {
+        deleteAudio: () => {
           emit('removeAudioFromList');
         },
       },
-      {},
     );
 }
 </script>

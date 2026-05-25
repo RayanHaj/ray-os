@@ -9,8 +9,8 @@ const emit = defineEmits(['onCreateNewPlaylistClicked', 'onOpenPlaylist', 'onDel
 
 function onContextmenu(event: MouseEvent, playlist: Playlist) {
   useInitializeContextMenu(event)
-    .audioPlayerListItem()
-    .initialize({ Delete: () => emit('onDeletePlaylist', playlist.id) }, {});
+    .audioPlayerPlaylist()
+    .initialize({}, { deletePlaylist: () => emit('onDeletePlaylist', playlist.id) });
 }
 </script>
 <template>

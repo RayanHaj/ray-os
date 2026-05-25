@@ -64,13 +64,22 @@ export function useInitializeContextMenu(event: MouseEvent) {
     const initialize = createInitialize(primaryActions, secondaryActions);
     return { initialize };
   };
-  const audioPlayerListItem = () => {
-    const primaryActions = ['Delete'] as const;
-    const secondaryActions = [] as const;
+  const audioPlayerPlaylist = () => {
+    const primaryActions = [] as const;
+    const secondaryActions = [{ id: 'deletePlaylist', label: 'Delete playlist', disabled: false  }] as const;
+
+    const initialize = createInitialize(primaryActions, secondaryActions);
+    return { initialize };
+  };
+  const audioPlayerAudio = () => {
+    const primaryActions = [] as const;
+    const secondaryActions = [
+      { id: 'deleteAudio', label: 'Delete audio', disabled: false },
+    ] as const;
 
     const initialize = createInitialize(primaryActions, secondaryActions);
     return { initialize };
   };
 
-  return { desktop, tile, fileExplorerGrid, fileExplorerGridItem, audioPlayerListItem };
+  return { desktop, tile, fileExplorerGrid, fileExplorerGridItem, audioPlayerPlaylist, audioPlayerAudio };
 }

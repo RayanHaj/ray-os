@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type Component, onBeforeMount, shallowRef } from 'vue';
+import { type Component, computed, onBeforeMount, shallowRef } from 'vue';
 import { useSvgByFileNameAndDirectory } from '@/composables/svg/useSvgByFileNameAndDirectory.ts';
 import { type AllPrimaryActionsContextMenu } from '@/types/ContextMenuTypes.ts';
 import { useContextMenuStore } from '@/stores/contextMenu.ts';
@@ -15,8 +15,11 @@ onBeforeMount(async () => {
     }
   }
 });
-</script>
 
+const showDivider = computed(
+  () => contextMenuStore.primaryActions.length > 0 && contextMenuStore.secondaryActions.length > 0,
+);
+</script>
 <template>
   <div
     class="context-menu"
@@ -27,7 +30,7 @@ onBeforeMount(async () => {
       width: `${contextMenuStore.contextMenuWidth}px`,
     }"
   >
-    <div class="primary-actions">
+    <div v-if="contextMenuStore.primaryActions.length > 0" class="primary-actions">
       <button
         class="primary-action"
         v-for="action of contextMenuStore.primaryActions"
@@ -37,8 +40,8 @@ onBeforeMount(async () => {
         <component :is="primaryActionsSvgs[action]" :custom-height="18" :custom-width="18" />
       </button>
     </div>
-    <hr />
-    <div class="secondary-actions">
+    <hr v-if="showDivider" />
+    <div v-if="contextMenuStore.secondaryActions.length > 0" class="secondary-actions">
       <button
         class="secondary-action"
         v-for="action of contextMenuStore.secondaryActions"
@@ -50,7 +53,6 @@ onBeforeMount(async () => {
     </div>
   </div>
 </template>
-
 <style scoped>
 .context-menu {
   position: absolute;
