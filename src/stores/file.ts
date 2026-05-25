@@ -51,7 +51,7 @@ export const useFileStore = defineStore('file', () => {
   }
 
   async function getApplicationDirectory(rayDb: RayDb) {
-    const applicationItemsPath = `${useFileSystemStore().rootDirectory}/Applications`;
+    const applicationItemsPath = `${useFileSystemStore().ROOT_DIR_NAME}/Applications`;
     return await fileSystemLookup(rayDb, applicationItemsPath);
   }
 

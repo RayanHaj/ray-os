@@ -6,35 +6,38 @@ import type { FileSystemItem } from '@/types/ItemTypes.ts';
 
 export async function useFileSystemInit(rayDb: RayDb) {
   const fileSystemStore = useFileSystemStore();
-  const rootDirectory = fileSystemStore.rootDirectory;
-  const rootDirectoryId = fileSystemStore.rootId;
 
   const existingRootDirectory = await rayDb.findOne<FileSystemItem>(
     'fileSystem',
     'id',
-    rootDirectoryId,
+    fileSystemStore.ROOT_DIR_ID,
   );
 
   // Early escape when initial directories already have been initialized
-  if (existingRootDirectory && existingRootDirectory.directory?.name === rootDirectory) return;
-
-  const parentId = await insertItemIntoFileSystem(rayDb, [], {
-    directory: { name: rootDirectory, children: [] },
-    isSystemFile: true,
-  }, undefined, false);
-
-  if (!(parentId instanceof Error)) {
-    if (parentId) {
-      await insertItemIntoFileSystem(rayDb, [parentId], {
-        directory: { name: 'Applications', children: [] },
-        isSystemFile: true,
-      });
-      await insertItemIntoFileSystem(rayDb, [parentId], {
-        directory: { name: 'Wallpapers', children: [] },
-        isSystemFile: true,
-      });
-    }
+  if (existingRootDirectory && existingRootDirectory.directory?.name === fileSystemStore.ROOT_DIR_NAME) {
+    await useFileStore().initializeFiles(rayDb);
+    return;
   }
 
-  await useFileStore().initializeFiles(rayDb);
+  try {
+    const parentId = await insertItemIntoFileSystem(rayDb, [], {
+      directory: { name: fileSystemStore.ROOT_DIR_NAME, children: [] },
+      isSystemFile: true,
+    }, undefined, false);
+
+      if (parentId) {
+        await insertItemIntoFileSystem(rayDb, [parentId], {
+          directory: { name: 'Applications', children: [] },
+          isSystemFile: true,
+        }, undefined, false);
+        await insertItemIntoFileSystem(rayDb, [parentId], {
+          directory: { name: 'Wallpapers', children: [] },
+          isSystemFile: true,
+        }, undefined, false);
+      }
+
+    await useFileStore().initializeFiles(rayDb);
+  } catch (e) {
+    console.error(e);
+  }
 }

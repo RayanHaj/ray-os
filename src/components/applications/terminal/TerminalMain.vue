@@ -24,7 +24,7 @@ const currentCacheIndex = ref<number>(-1);
 
 const fontSize = ref(useBrowserStore().isMobile ? 16 : 20);
 onBeforeMount(async () => {
-  currentPath.value = [useFileSystemStore().rootDirectory];
+  currentPath.value = [useFileSystemStore().ROOT_DIR_NAME];
   const fontSizeLS = localStorage.getItem(terminalStore.FONT_SIZE_LS_KEY);
   if (fontSizeLS !== null) {
     fontSize.value = Number(fontSizeLS);

@@ -30,11 +30,11 @@ const rayDb = useInjectOrThrow<RayDb>('rayDb');
 const windowId = useInjectOrThrow<string>('windowId');
 
 const items = ref<FileSystemItem[]>([]);
-const path = ref<string[]>([fileSystemStore.rootDirectory]);
+const path = ref<string[]>([fileSystemStore.ROOT_DIR_NAME]);
 const parentId = ref<number>();
 
 onBeforeMount(async () => {
-  let initPath: string = fileSystemStore.rootDirectory;
+  let initPath: string = fileSystemStore.ROOT_DIR_NAME;
 
   if (fileExplorerStore.filePathAtWindow?.windowId === windowId) {
     path.value = fileExplorerStore.filePathAtWindow.path;
@@ -44,7 +44,7 @@ onBeforeMount(async () => {
   }
 
   items.value = await useUpdateItemsByCurrentPath(rayDb, initPath);
-  parentId.value = fileSystemStore.rootId;
+  parentId.value = fileSystemStore.ROOT_DIR_ID;
 
   const fileItemSize = localStorage.getItem('fileItemSize');
   if (fileItemSize) {
@@ -55,7 +55,7 @@ onBeforeMount(async () => {
 });
 
 watch(
-  () => fileSystemStore.updateFileSystemVal,
+  () => fileSystemStore.updateFileSystemSignal,
   async () => {
     items.value = await useUpdateItemsByCurrentPath(rayDb, path.value.join('/'));
   },
@@ -75,7 +75,7 @@ async function handleBackClick() {
   const cachedPath = [...path.value];
   const previousPath = path.value.pop();
 
-  if (previousPath && previousPath !== fileSystemStore.rootDirectory) {
+  if (previousPath && previousPath !== fileSystemStore.ROOT_DIR_NAME) {
     items.value = await useUpdateItemsByCurrentPath(rayDb, parseToPathString(path.value));
     parentId.value = items.value[0].parents[0];
   } else {
@@ -157,11 +157,10 @@ async function handleModalInput(contentType: ModalContentType, action: ModalActi
         const parentId = currentDir.parent.id;
         if (!parentId) return;
 
-        let hasInserted;
         switch (contentType) {
           case 'directory':
             {
-              hasInserted = await insertItemIntoFileSystem(rayDb, [parentId], {
+              await insertItemIntoFileSystem(rayDb, [parentId], {
                 directory: { name: input, children: [] },
               });
             }
@@ -193,14 +192,10 @@ async function handleModalInput(contentType: ModalContentType, action: ModalActi
               return;
             }
 
-            hasInserted = await insertItemIntoFileSystem(rayDb, [parentId], {
+            await insertItemIntoFileSystem(rayDb, [parentId], {
               file: { name: fileName, id: Number(fileId), type: file.type },
             });
           }
-        }
-
-        if (hasInserted instanceof Error) {
-          throw hasInserted;
         }
       } catch (e) {
         useToastStore().createToast((e as Error).message, 'error', 5000, 'window', windowId);

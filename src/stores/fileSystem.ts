@@ -2,23 +2,22 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
 export const useFileSystemStore = defineStore('fileSystem', () => {
+  const ROOT_DIR_NAME = 'C:';
+  const ROOT_DIR_ID = 1;
+  const APPLICATIONS_DIR_ID = 2;
+  const WALLPAPERS_DIR_ID = 3;
 
-  const rootDirectory = ref('C:');
-  const updateFileSystemVal = ref(false);
-
-  const rootId = ref<number>(1);
-  const applicationsDirId = ref<number>(2);
-  const wallpapersDirId = ref<number>(3);
-
+  const updateFileSystemSignal = ref(false);
   function updateFileSystem() {
-    updateFileSystemVal.value = !updateFileSystemVal.value;
+    updateFileSystemSignal.value = !updateFileSystemSignal.value;
   }
+
   return {
-    rootDirectory,
-    updateFileSystemVal,
+    ROOT_DIR_NAME,
+    ROOT_DIR_ID,
+    APPLICATIONS_DIR_ID,
+    WALLPAPERS_DIR_ID,
+    updateFileSystemSignal,
     updateFileSystem,
-    rootId,
-    applicationsDirId,
-    wallpapersDirId,
   };
 });

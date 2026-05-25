@@ -21,6 +21,8 @@ const directorySvg = useSvgOrFallback('Directory').svg;
 const itemSizeKeys = fileItemSizes;
 const selectedItemSizeButton = ref<FileItemSizeKey>('small');
 
+const backSvg = useSvgOrFallback('Back');
+
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 
 onBeforeMount(() => {
@@ -59,8 +61,6 @@ async function onDrop(event: DragEvent) {
       dropItem,
       false,
     );
-
-    if (!newDirectoryId || newDirectoryId instanceof Error) return;
 
     if (dropItem.directory) {
       for (const childId of dropItem.directory.children) {
@@ -103,7 +103,7 @@ function onFileUploadChange(event: Event) {
           @drop.prevent="onDrop"
           @dragover.prevent
         >
-          ^
+          Back
         </button>
       </div>
       <div class="middle-section">
@@ -127,10 +127,11 @@ function onFileUploadChange(event: Event) {
           :key="size"
           @click="updateSelectedItemSizeButton(size)"
         >
-          <component
-            :is="directorySvg"
-            :style="{ width: `${10 * (index + 1)}px`, height: `${10 * (index + 1)}px` }"
-          />
+          {{ size[0].toUpperCase() }}
+          <!--          <component-->
+          <!--            :is="directorySvg"-->
+          <!--            :style="{ width: `${10 * (index + 1)}px`, height: `${10 * (index + 1)}px` }"-->
+          <!--          />-->
         </button>
       </div>
     </div>
@@ -144,6 +145,7 @@ function onFileUploadChange(event: Event) {
   justify-content: space-between;
   height: 50px;
   color: var(--text-color);
+  font-size: var(--font-size-lg);
 }
 
 .start-wrapper {
@@ -171,7 +173,7 @@ function onFileUploadChange(event: Event) {
   border: var(--window-border-color) 1px solid;
   width: 100%;
   min-width: calc(150px / 3);
-  height: 50px;
+  height: 100%;
   color: var(--text-color);
 }
 
@@ -196,8 +198,8 @@ input[type='file'] {
 }
 
 .item-size-button {
-  font-size: var(--font-size-sm);
   width: calc(150px / 3);
+  min-width: calc(125px / 3);
   background-color: var(--button-primary-color);
   color: var(--text-color);
   border: var(--input-border-color) solid 1px;

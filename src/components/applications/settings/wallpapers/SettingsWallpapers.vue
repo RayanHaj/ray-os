@@ -29,7 +29,7 @@ onBeforeMount(async () => {
 });
 
 watch(
-  () => useFileSystemStore().updateFileSystemVal,
+  () => useFileSystemStore().updateFileSystemSignal,
   async (value, oldValue) => {
     if (value === oldValue) return;
     await updateCustomWallpapers();
@@ -75,7 +75,7 @@ watch(
     if (typeof returnValue.value === 'object' && returnValue.value.rawFile) {
       if (!fileExplorerWindowId.value) return;
 
-      const wallpaperDirectoryId = useFileSystemStore().wallpapersDirId;
+      const wallpaperDirectoryId = useFileSystemStore().WALLPAPERS_DIR_ID;
       if (!wallpaperDirectoryId) {
         return;
       }
@@ -90,11 +90,7 @@ watch(
         },
       };
 
-      const insertedId = await insertItemIntoFileSystem(rayDb, [wallpaperDirectoryId], dropItem);
-      if (insertedId instanceof Error || insertedId === undefined) {
-        return;
-      }
-
+      await insertItemIntoFileSystem(rayDb, [wallpaperDirectoryId], dropItem);
       await useDeleteFileSystemItem(rayDb, dropItem, true, true);
 
       useWindowStore().removeOpenWindowReference(fileExplorerWindowId.value, windowId);

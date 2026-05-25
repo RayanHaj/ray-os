@@ -47,6 +47,7 @@ const showDivider = computed(
         v-for="action of contextMenuStore.secondaryActions"
         :key="action.id"
         @click="contextMenuStore.setClickedButton(action.id)"
+        :disabled="action.disabled"
       >
         {{ action.label }}
       </button>
@@ -80,7 +81,7 @@ const showDivider = computed(
 }
 
 .primary-action:hover {
-  background: var(--button-hover-color);
+  background-color: var(--button-hover-color);
 }
 
 .secondary-actions {
@@ -96,7 +97,12 @@ const showDivider = computed(
   border-bottom: 1px var(--button-primary-color) solid;
 }
 
-.secondary-action:hover {
+.secondary-action:disabled {
+  background: rgba(0, 0, 0, 0.5);
+  color: #666666;
+}
+
+.secondary-action:hover:not([disabled]) {
   background-color: var(--button-hover-color);
 }
 

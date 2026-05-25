@@ -2,14 +2,16 @@ import type { RayDb } from 'ray-db-wrapper';
 import type { FileSystemItem, InsertFileSystemItem } from '@/types/ItemTypes.ts';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
 import { useGetRootDirectory } from '@/composables/fileSystem/useGetRootDirectory.ts';
-import { useHandleIDBFileOperations } from '@/composables/fileSystem/useHandleIDBFileOperations.ts';
+import {
+  useDeleteAllItemReferences,
+} from '@/composables/fileSystem/useDeleteAllItemReferences.ts';
 import { SystemFileDeleteError } from '@/exceptions/SystemFileDeleteError.ts';
+import { FileSystemInsertionError } from '@/exceptions/FileSystemInsertionError.ts';
 
 function insertionCheck(
   foundItems: FileSystemItem[],
   item: { file?: { name: string; id: number }; directory?: { name: string; children: number[] } },
   parents: number[],
-  nameNotRootDirectoryCheck = true,
 ) {
   if (item.file) {
     let state: boolean | Error = true;
@@ -37,14 +39,14 @@ function insertionCheck(
 
     foundItems.some((foundItem) => {
       const isRootDirectoryName =
-        foundItem.directory?.name === useFileSystemStore().rootDirectory &&
-        item.directory?.name === useFileSystemStore().rootDirectory;
+        foundItem.directory?.name === useFileSystemStore().ROOT_DIR_NAME &&
+        item.directory?.name === useFileSystemStore().ROOT_DIR_NAME;
 
       const hasDirectoryWithSameName =
         foundItem.parents.some((parent) => parents.includes(parent)) &&
         foundItem.directory?.name === item.directory?.name;
 
-      if (isRootDirectoryName && nameNotRootDirectoryCheck) {
+      if (isRootDirectoryName) {
         state = new Error(`directory cannot be named after root directory`);
         return true;
       } else if (hasDirectoryWithSameName) {
@@ -63,14 +65,16 @@ export async function insertItemIntoFileSystem(
   parents: number[],
   item: { file?: { name: string; id: number; type: string }; directory?: { name: string; children: number[] }, isSystemFile?: boolean },
   updateFileSystem = true,
-  nameNotRootDirectoryCheck = true
-): Promise<Error | number | undefined> {
+  performInsertionCheck = true
+): Promise<number> {
   try {
     const foundItems = await rayDb.findAll<FileSystemItem>('fileSystem');
 
-    const check = insertionCheck(foundItems, item, parents, nameNotRootDirectoryCheck);
-    if (check && check instanceof Error) {
-      throw check;
+    if (performInsertionCheck) {
+      const check = insertionCheck(foundItems, item, parents);
+      if (check && check instanceof Error) {
+        throw check;
+      }
     }
 
     if (!item.isSystemFile) {
@@ -85,7 +89,10 @@ export async function insertItemIntoFileSystem(
       type: 'directory'
     });
 
-    if (Number.isNaN(id)) return new Error('hello');
+    if (Number.isNaN(id)) {
+     throw FileSystemInsertionError;
+    }
+
     id = id as number;
 
     for (const parentId of parents) {
@@ -103,7 +110,7 @@ export async function insertItemIntoFileSystem(
     }
     return id;
   } catch (e) {
-    return e as Error;
+    throw e;
   }
 }
 
@@ -122,7 +129,7 @@ export async function fileSystemLookup(
     const fileSystemItems = await rayDb.findAll<FileSystemItem>('fileSystem');
     const startPoint = fileSystemItems.find((fileSystemItem) => {
       const isRootDirectory =
-        fileSystemItem.directory?.name === useFileSystemStore().rootDirectory &&
+        fileSystemItem.directory?.name === useFileSystemStore().ROOT_DIR_NAME &&
         fileSystemItem.id === rootDirectoryId;
       const isItemInRootDirectory = fileSystemItem.parents.includes(rootDirectoryId);
 
@@ -236,7 +243,7 @@ export async function deleteFileSystemItem(rayDb: RayDb, id: number, onlyFileSys
     if (onlyFileSystemReference) {
       await rayDb.deleteOne('fileSystem', parent.id);
     } else {
-      await useHandleIDBFileOperations(rayDb).remove(parent.file.id, parent.id, 'file');
+      await useDeleteAllItemReferences(rayDb, parent.file.id, parent.id);
     }
   } else if (parent.directory) {
     await rayDb.deleteOne('fileSystem', parent.id);
@@ -250,7 +257,7 @@ export async function deleteFileSystemItem(rayDb: RayDb, id: number, onlyFileSys
       }
 
       if (fileSystemItem.file) {
-        await useHandleIDBFileOperations(rayDb).remove(fileSystemItem.file.id, fileSystemItem.id, 'file');
+        await useDeleteAllItemReferences(rayDb, fileSystemItem.file.id, fileSystemItem.id);
       } else if (fileSystemItem.directory) {
         await deleteFileSystemItem(rayDb, fileSystemItem.id);
       }

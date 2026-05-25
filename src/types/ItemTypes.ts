@@ -57,7 +57,6 @@ export const fileExtensions = {
 export const Applications = [
   'File Explorer',
   'Calculator',
-  'Serene Sounds',
   'Settings',
   'Terminal',
   'Notepad',

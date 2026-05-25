@@ -2,7 +2,6 @@
 import { useBrowserStore } from '@/stores/browser.ts';
 import { onBeforeMount, onUnmounted, ref } from 'vue';
 import { useDesktopStore } from '@/stores/desktop.ts';
-import { useSereneSoundsStore } from '@/stores/sereneSounds.ts';
 import { useSvgsStore } from '@/stores/svgs.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import { RayDb } from 'ray-db-wrapper';
@@ -10,7 +9,6 @@ import DesktopView from '@/views/DesktopView.vue';
 import { useSnapLayoutStore } from '@/stores/snapLayout.ts';
 import { useWallpaperStore } from '@/stores/settings/wallpaper.ts';
 
-const sereneSoundsStore = useSereneSoundsStore();
 const browserStore = useBrowserStore();
 const desktopStore = useDesktopStore();
 const wallpaperStore = useWallpaperStore();
@@ -25,19 +23,9 @@ onBeforeMount(async () => {
   wallpaperStore.initSelectedWallpaper();
 
   await svgsStore.initializeSvgs();
-  console.log('svgs initialized');
-
   await desktopStore.updateDesktopDirectory(rayDb);
-  console.log('desktop directory updated');
-
   await gridStore.initializeTileContent(rayDb);
-  console.log('grid tile content initialized');
-
   initialised.value = true;
-  console.log('app initialized');
-
-  await sereneSoundsStore.initializeSounds();
-  console.log('serene sounds initialized');
 });
 onUnmounted(() => {
   browserStore.stopListening();

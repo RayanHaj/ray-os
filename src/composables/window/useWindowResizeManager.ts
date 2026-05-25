@@ -36,7 +36,9 @@ export function useWindowResizeManager(
     }
   }
 
-  function onMouseUpWindow() {
+  function onMouseUpWindow(e: MouseEvent) {
+    e.stopPropagation();
+
     if (isFixed) return;
     isMouseDown.value = false;
     styles.value.transition = 'width 0.5s, height 0.5s, left 0.5s, top 0.5s';

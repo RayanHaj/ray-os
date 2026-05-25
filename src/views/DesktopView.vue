@@ -30,7 +30,6 @@ const wallpapers: Record<string, string> = wallpapersJSON;
 const windowFlatReferences: ComputedRef<WindowFlatReference[]> = useFlatOpenWindowsReferencesFull();
 
 const fixedSizeWindows: Record<string, { width: number; height: number }> = {
-  Doom: { width: 766, height: 507 },
 };
 
 const minWidthWindows: Record<string, { width: number }> = {

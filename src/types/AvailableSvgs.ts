@@ -1,5 +1,6 @@
 export const availableSvgs = [
   'Audio',
+  'Back',
   'VideoPlayer',
   'Close',
   'Copy',
@@ -17,7 +18,6 @@ export const availableSvgs = [
   'Calculator',
   'FileExplorer',
   'Fullscreen',
-  'SereneSounds',
   'Terminal',
   'Paint',
   'Portfolio',
@@ -33,7 +33,6 @@ export const availableSvgs = [
   'Success',
   'Warning',
   'Error',
-  'Doom',
   'ImageViewer',
   'Snake',
   'AudioPlayer',

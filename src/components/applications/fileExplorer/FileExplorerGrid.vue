@@ -23,7 +23,6 @@ import { useInitializeContextMenu } from '@/composables/contextMenu/useInitializ
 import { useDblClick } from '@/composables/helpers/UseDblClick.ts';
 import { SystemFileDeleteError } from '@/exceptions/SystemFileDeleteError.ts';
 import { useToastFeatureNotImplemented } from '@/composables/helpers/useToastFeatureNotImplemented.ts';
-import { useDesktopStore } from '@/stores/desktop.ts';
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 const windowId = useInjectOrThrow<string>('windowId');
@@ -90,8 +89,9 @@ async function onRightClick(
         },
       );
   } else if (calledFrom === 'gridItem') {
+    console.log(item);
     useInitializeContextMenu(event)
-      .fileExplorerGridItem()
+      .fileExplorerGridItem({renameFile: item?.type === 'application'})
       .initialize(
         {
           Copy: () => {
@@ -207,11 +207,7 @@ async function onFileDrop(event: DragEvent) {
         return;
       }
 
-      const insertedId = await insertItemIntoFileSystem(rayDb, [targetElementId], dropItem);
-      if (insertedId instanceof Error || insertedId === undefined) {
-        return;
-      }
-
+      await insertItemIntoFileSystem(rayDb, [targetElementId], dropItem);
       await useDeleteFileSystemItem(rayDb, dropItem, true, true);
     } catch (e) {
       console.error(e);

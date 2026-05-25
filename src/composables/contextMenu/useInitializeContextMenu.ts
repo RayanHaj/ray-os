@@ -54,11 +54,14 @@ export function useInitializeContextMenu(event: MouseEvent) {
     const initialize = createInitialize(primaryActions, secondaryActions);
     return { initialize };
   };
-  const fileExplorerGridItem = () => {
+  const fileExplorerGridItem = (disableOptions?: {
+    renameFile?: boolean,
+    addToDesktop?: boolean,
+  }) => {
     const primaryActions = ['Copy', 'Paste', 'Delete'] as const;
     const secondaryActions = [
-      { id: 'renameFile', label: 'rename file', disabled: false },
-      { id: 'addToDesktop', label: 'add to desktop', disabled: false },
+      { id: 'renameFile', label: 'rename file', disabled: disableOptions?.renameFile ?? false },
+      { id: 'addToDesktop', label: 'add to desktop', disabled: disableOptions?.addToDesktop ?? false },
     ] as const;
 
     const initialize = createInitialize(primaryActions, secondaryActions);

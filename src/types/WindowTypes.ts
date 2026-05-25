@@ -24,7 +24,6 @@ export const windowNames = [
   'settings',
   'calculator',
   'fileExplorer',
-  'sereneSounds',
   'terminal',
   'notepad',
   'imageViewer',

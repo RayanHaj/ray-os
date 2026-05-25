@@ -13,7 +13,8 @@ export async function useGetRootDirectory(
 ): Promise<FileSystemItem | number | undefined> {
   if (onlyId) {
     return (
-      useFileSystemStore().rootId ?? (await fetchRootDirectory(rayDb).then((value) => value?.id))
+      useFileSystemStore().ROOT_DIR_ID ??
+      (await fetchRootDirectory(rayDb).then((value) => value?.id))
     );
   } else {
     return await fetchRootDirectory(rayDb);
@@ -23,6 +24,6 @@ export async function useGetRootDirectory(
 async function fetchRootDirectory(rayDb: RayDb) {
   const fileSystemItems = await rayDb.findAll<FileSystemItem>('fileSystem');
   return fileSystemItems.find(
-    (value) => value.directory?.name === useFileSystemStore().rootDirectory,
+    (value) => value.directory?.name === useFileSystemStore().ROOT_DIR_NAME,
   );
 }

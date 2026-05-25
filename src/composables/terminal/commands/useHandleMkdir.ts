@@ -22,13 +22,9 @@ export async function useHandleMkdir(
       throw new Error('cannot create directory at current path');
     }
 
-    const insertValue = await insertItemIntoFileSystem(rayDb, [value.parent.id], {
+    await insertItemIntoFileSystem(rayDb, [value.parent.id], {
       directory: { name: name, children: [] },
     });
-
-    if (insertValue instanceof Error) {
-      throw insertValue;
-    }
 
     const successMassage = `created directory (${name}) in '${currentPath.value.join('/')}'`;
     lines.value.push({ line: successMassage, isPlain: true });

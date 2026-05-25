@@ -23,7 +23,7 @@ export const useDesktopStore = defineStore('desktop', () => {
   const items = ref<(Item & { tileId: number })[]>([]);
 
   async function getDesktopDirectory(rayDb: RayDb) {
-    const applicationItemsPath = `${useFileSystemStore().rootDirectory}/Desktop`;
+    const applicationItemsPath = `${useFileSystemStore().ROOT_DIR_NAME}/Desktop`;
     return await fileSystemLookup(rayDb, applicationItemsPath);
   }
 
@@ -94,9 +94,9 @@ export const useDesktopStore = defineStore('desktop', () => {
       });
 
       if (fileId && typeof fileId === 'number') {
-        await insertItemIntoFileSystem(rayDb, [useFileSystemStore().rootId], {
+        await insertItemIntoFileSystem(rayDb, [useFileSystemStore().ROOT_DIR_ID], {
           file: { name: fileObject.name, id: fileId, type: file.type },
-          isSystemFile: true
+          isSystemFile: true,
         });
 
         const applicationFiles = (await rayDb.findAll<Item>('files')).filter(

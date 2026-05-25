@@ -3,7 +3,6 @@ import { type Component } from 'vue';
 import SettingsMain from '@/components/applications/settings/SettingsMain.vue';
 import CalculatorMain from '@/components/applications/calculator/CalculatorMain.vue';
 import FileExplorerMain from '@/components/applications/fileExplorer/FileExplorerMain.vue';
-import SereneSoundsMain from '@/components/applications/sereneSounds/SereneSoundsMain.vue';
 import TerminalMain from '@/components/applications/terminal/TerminalMain.vue';
 import NotepadMain from '@/components/applications/notepad/NotepadMain.vue';
 import FallbackMain from '@/components/applications/FallbackMain.vue';
@@ -17,7 +16,6 @@ const windowContentComponents: { [windowName in WindowName]: Component } = {
   settings: SettingsMain,
   calculator: CalculatorMain,
   fileExplorer: FileExplorerMain,
-  sereneSounds: SereneSoundsMain,
   terminal: TerminalMain,
   notepad: NotepadMain,
   imageViewer: ImageViewerMain,
