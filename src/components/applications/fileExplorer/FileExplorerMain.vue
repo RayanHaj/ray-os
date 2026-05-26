@@ -250,7 +250,7 @@ async function onFileUpload(files: FileList) {
 <template>
   <div class="file-explorer">
     <FileExplorerModal
-      v-show="modalOpened"
+      v-if="modalOpened"
       :title="modalContentType"
       :action="modalAction"
       @modal-event:submit-click="handleModalInput($event.contentType, $event.action, $event.input)"

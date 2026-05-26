@@ -115,6 +115,7 @@ function onSliderInput(time: number) {
       :audio-current-time="videoCurrentTime"
       :is-playing="videoIsPlaying"
       :looped="videoLoop"
+      :disabled="false"
       :options="{ dotMenu: true }"
       @play-pause-audio="videoIsPlaying ? pauseVideo() : playVideo()"
       @slider-input="onSliderInput"

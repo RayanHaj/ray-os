@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import type { ModalAction, ModalContentType } from '@/types/FileExplorerTypes.ts';
 
 const { title, action } = defineProps<{ title: ModalContentType; action: ModalAction }>();
@@ -7,8 +7,13 @@ const { title, action } = defineProps<{ title: ModalContentType; action: ModalAc
 const input = ref('');
 const emits = defineEmits(['modalEvent:submitClick', 'modalEvent:cancelClick']);
 
+const inputFieldRef = ref();
+onMounted(() => {
+  if (!inputFieldRef.value) return;
+  (inputFieldRef.value as HTMLInputElement).focus();
+});
+
 function onClickSubmit() {
-  console.log(title, action, input.value);
   emits('modalEvent:submitClick', { contentType: title, action: action, input: input.value });
   input.value = '';
 }
@@ -20,12 +25,12 @@ function onClickCancel() {
 </script>
 
 <template>
-  <div class="modal-container">
+  <div class="modal-container" @keyup.enter="onClickSubmit">
     <div class="modal">
       <h2>{{ `${action[0].toUpperCase()}${action.slice(1)}` }} {{ title }}</h2>
       <div class="input-wrapper">
         <label for="inputField">{{ `enter ${title} name` }}</label>
-        <input id="inputField" type="text" v-model="input" />
+        <input ref="inputFieldRef" id="inputField" type="text" v-model="input"/>
       </div>
       <div class="buttons">
         <button class="submit-button" @click="onClickSubmit">submit</button>

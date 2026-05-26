@@ -1,14 +1,17 @@
 <script setup lang="ts">
 import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
+import { useSpliceFileNameExtension } from '@/composables/helpers/useSpliceFileNameExtension.ts';
 
-const { fileName, audioDuration, audioCurrentTime, isPlaying, looped, options } = defineProps<{
-  fileName: string;
-  audioDuration: number;
-  audioCurrentTime: number;
-  isPlaying: boolean;
-  looped: boolean;
-  options?: { fullscreen?: boolean; dotMenu?: boolean };
-}>();
+const { fileName, audioDuration, audioCurrentTime, isPlaying, looped, disabled, options } =
+  defineProps<{
+    fileName: string;
+    audioDuration: number;
+    audioCurrentTime: number;
+    isPlaying: boolean;
+    looped: boolean;
+    disabled: boolean;
+    options?: { fullscreen?: boolean; dotMenu?: boolean };
+  }>();
 
 const emits = defineEmits(['playPauseAudio', 'sliderInput', 'loopAudio', 'fullscreen', 'dotMenu']);
 
@@ -46,15 +49,16 @@ function getTrackBackground(value: number, min: number, max: number) {
         :style="{ background: getTrackBackground(audioCurrentTime, 0, audioDuration) }"
         step="0.1"
         @input="onSliderInput"
+        :disabled="disabled"
       />
       <div>{{ calculateTime(audioDuration) }}</div>
     </div>
     <div class="audio-controls">
       <div class="start">
-        <p class="audio-file-name">{{ fileName ?? '' }}</p>
+        <p class="audio-file-name">{{ useSpliceFileNameExtension(fileName) ?? '' }}</p>
       </div>
       <div class="middle">
-        <button class="play-button" @click="emits('playPauseAudio')">
+        <button class="play-button" :disabled="disabled" @click="emits('playPauseAudio')">
           <component :is="isPlaying ? pauseSvg.svg : playSvg.svg" />
         </button>
       </div>
@@ -63,10 +67,15 @@ function getTrackBackground(value: number, min: number, max: number) {
           class="audio-control-button loop"
           :class="{ active: looped }"
           @click="emits('loopAudio')"
+          :disabled="disabled"
         >
           <component :is="loopSvg.svg" :custom-width="20" :custom-height="20" />
         </button>
-        <button v-if="options?.fullscreen" @click="emits('fullscreen')" class="audio-control-button">
+        <button
+          v-if="options?.fullscreen"
+          @click="emits('fullscreen')"
+          class="audio-control-button"
+        >
           <component :is="fullscreenSvg.svg" :custom-width="25" :custom-height="25" />
         </button>
         <button v-if="options?.dotMenu" class="audio-control-button">
@@ -111,6 +120,11 @@ function getTrackBackground(value: number, min: number, max: number) {
   height: var(--audio-controls-height);
   background-color: rgba(0, 0, 0, 0.5);
   padding-inline: 10px;
+}
+
+button:disabled,
+input[type='range']:disabled {
+  cursor: default;
 }
 
 .start,

@@ -242,6 +242,7 @@ function createEmptyPlaylist() {
       :audio-current-time="audioCurrentTime"
       :is-playing="currentLoadedAudio?.isPlaying ?? false"
       :looped="audioLoop"
+      :disabled="!currentLoadedAudio"
       @play-pause-audio="currentLoadedAudio?.isPlaying ? pauseAudio() : playAudio()"
       @slider-input="onSliderInput"
       @loop-audio="audioLoop = !audioLoop"
