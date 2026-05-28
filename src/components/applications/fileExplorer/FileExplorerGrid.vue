@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import {
-  type FileSystemItem,
-  type FileItem,
   fileExtensions,
-  type ItemInsert,
+  type FileItem,
+  type FileSystemItem,
   type FileType,
   type Item,
+  type ItemInsert,
 } from '@/types/ItemTypes.ts';
 import { computed, ref, watch } from 'vue';
 import type { RayDb } from 'ray-db-wrapper';
@@ -32,7 +32,14 @@ const { currentFileSystemItems, path, parentId, filterByFileType } = defineProps
   filterByFileType: FileType[];
 }>();
 
-const emit = defineEmits(['itemEvent:dblClick', 'newDirectory', 'newTextFile', 'renameFile', 'onDragStart', 'onDragEnd']);
+const emit = defineEmits([
+  'itemEvent:dblClick',
+  'newDirectory',
+  'newTextFile',
+  'renameFile',
+  'onDragStart',
+  'onDragEnd',
+]);
 
 const currentItems = ref<Item[]>([]);
 
@@ -164,6 +171,27 @@ function onDragStart(event: DragEvent, fileSystemItem: FileSystemItem) {
   if (fileSystemItem.directory) {
     fileSystemItem.path = `${path}/${fileSystemItem.directory.name}`;
   }
+
+  if (multiSelect.size() > 1) {
+    const el = document.createElement('div');
+    el.innerText = multiSelect.size().toString();
+
+    el.style.width = '75px';
+    el.style.height = '75px';
+    el.style.position = 'absolute';
+    el.style.top = '-9999px';
+    el.style.border = '1px dashed var(--input-border-color)';
+    el.style.backgroundColor = 'rgba(0, 0, 0, 0.3)';
+    el.style.color = 'var(--text-color)';
+    el.style.textAlign = 'end';
+    el.style.paddingInline = '5px';
+    document.body.appendChild(el);
+
+    event.dataTransfer?.setDragImage(el, 75 / 2, 75 / 2);
+
+    requestAnimationFrame(() => document.body.removeChild(el));
+  }
+
   event.dataTransfer?.setData('text/plain', JSON.stringify(fileSystemItem));
 }
 
