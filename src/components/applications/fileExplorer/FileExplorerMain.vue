@@ -263,7 +263,7 @@ async function onFileUpload(files: FileList) {
     />
     <FileExplorerGrid
       :parent-id="parentId ?? -1"
-      :current-directories="items"
+      :current-file-system-items="items"
       :path="parseToPathString(path)"
       :filter-by-file-type="filterByFileType()"
       @item-event:dbl-click="onDblClickItem"

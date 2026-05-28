@@ -19,13 +19,14 @@ import { useInitializeContextMenu } from '@/composables/contextMenu/useInitializ
 import { useToastFeatureNotImplemented } from '@/composables/helpers/useToastFeatureNotImplemented.ts';
 import { useMultiSelect } from '@/composables/helpers/useMultiSelect.ts';
 import FileExplorerItem from '@/components/applications/fileExplorer/FileExplorerItem.vue';
-import { useDblClick } from '@/composables/helpers/UseDblClick.ts';
+import { SystemFileDeleteError } from '@/exceptions/SystemFileDeleteError.ts';
+import { useBrowserStore } from '@/stores/browser.ts';
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 const windowId = useInjectOrThrow<string>('windowId');
 
-const { currentDirectories, path, parentId, filterByFileType } = defineProps<{
-  currentDirectories: FileSystemItem[];
+const { currentFileSystemItems, path, parentId, filterByFileType } = defineProps<{
+  currentFileSystemItems: FileSystemItem[];
   path: string;
   parentId: number;
   filterByFileType: FileType[];
@@ -36,12 +37,12 @@ const emit = defineEmits(['itemEvent:dblClick', 'newDirectory', 'newTextFile', '
 const currentItems = ref<Item[]>([]);
 
 watch(
-  () => currentDirectories,
+  () => currentFileSystemItems,
   async () => await updateFilesList(),
 );
 
 async function updateFilesList() {
-  for (const fileSystemItem of currentDirectories) {
+  for (const fileSystemItem of currentFileSystemItems) {
     if (!fileSystemItem.file) {
       continue;
     }
@@ -95,7 +96,7 @@ async function onFileDrop(event: DragEvent) {
       if (dropItem.isSystemFile) return;
 
       const targetElementName = targetElement.innerText;
-      const targetElementId = currentDirectories.find(
+      const targetElementId = currentFileSystemItems.find(
         (dirEl) => dirEl.directory?.name == targetElementName,
       )?.id;
 
@@ -155,7 +156,7 @@ async function onFileDrop(event: DragEvent) {
 const multiSelect = useMultiSelect<number>();
 function onDragStart(event: DragEvent, fileSystemItem: FileSystemItem) {
   if (!multiSelect.isSelected(fileSystemItem.id)) {
-   multiSelect.toggle(fileSystemItem.id);
+    multiSelect.toggle(fileSystemItem.id);
   }
   if (fileSystemItem.directory) {
     fileSystemItem.path = `${path}/${fileSystemItem.directory.name}`;
@@ -164,7 +165,17 @@ function onDragStart(event: DragEvent, fileSystemItem: FileSystemItem) {
 }
 
 function onItemSingleClick(fileSystemItem: FileSystemItem) {
-  multiSelect.toggle(fileSystemItem.id)
+  if (useBrowserStore().isMobile) {
+    if (
+      multiSelect.selectedItems.value.size === 1 &&
+      multiSelect.selectedItems.value.has(fileSystemItem.id)
+    ) {
+      return;
+    }
+
+    multiSelect.clear();
+  }
+  multiSelect.toggle(fileSystemItem.id);
 }
 
 const fileExplorerStore = useFileExplorerStore();
@@ -174,6 +185,39 @@ const itemSize = computed<FileItemSizeValue>(
 
 function onClickGrid() {
   multiSelect.clear();
+}
+
+function onItemsDelete() {
+  multiSelect.forEachSelected(async (id) => {
+    const fileSystemItem = currentFileSystemItems.find((item) => item.id === id);
+    if (fileSystemItem) {
+      if (fileSystemItem.isSystemFile) {
+        useToastStore().createToast(
+          'cannot delete system files',
+          'error',
+          5000,
+          'window',
+          windowId,
+        );
+
+        return;
+      }
+
+      try {
+        await useDeleteFileSystemItem(rayDb, fileSystemItem);
+      } catch (e) {
+        if (e instanceof SystemFileDeleteError) {
+          useToastStore().createToast(
+            'cannot delete system files',
+            'error',
+            5000,
+            'window',
+            windowId,
+          );
+        }
+      }
+    }
+  });
 }
 </script>
 
@@ -188,7 +232,7 @@ function onClickGrid() {
   >
     <div class="grid-wrapper">
       <FileExplorerItem
-        v-for="fileSystemItem in currentDirectories"
+        v-for="fileSystemItem in currentFileSystemItems"
         :key="fileSystemItem.id"
         :file-system-item="fileSystemItem"
         :current-items="currentItems"
@@ -196,10 +240,12 @@ function onClickGrid() {
         :is-selected="multiSelect.selectedItems.value.has(fileSystemItem.id)"
         :ray-db="rayDb"
         :window-id="windowId"
+        @on-add-to-multi-select="multiSelect.toggle(fileSystemItem.id)"
         @on-double-click="emit('itemEvent:dblClick', fileSystemItem)"
         @on-single-click="onItemSingleClick(fileSystemItem)"
         @on-drag-start="onDragStart($event, fileSystemItem)"
         @rename-file="emit('renameFile', $event)"
+        @on-delete="onItemsDelete"
       />
     </div>
   </section>

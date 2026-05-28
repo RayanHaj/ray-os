@@ -7,23 +7,26 @@ import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
 import { type FileItemSizeValue, itemSizes } from '@/types/FileExplorerTypes.ts';
 import { useInitializeContextMenu } from '@/composables/contextMenu/useInitializeContextMenu.ts';
 import { useToastFeatureNotImplemented } from '@/composables/helpers/useToastFeatureNotImplemented.ts';
-import { useToastStore } from '@/stores/toast.ts';
-import { useDeleteFileSystemItem } from '@/composables/fileSystem/useDeleteFileSystemItem.ts';
-import { SystemFileDeleteError } from '@/exceptions/SystemFileDeleteError.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import { useDblClick } from '@/composables/helpers/UseDblClick.ts';
 
-const { fileSystemItem, currentItems, filterByFileType, isSelected, rayDb, windowId } =
-  defineProps<{
-    fileSystemItem: FileSystemItem;
-    currentItems: Item[];
-    filterByFileType: FileType[];
-    isSelected: boolean;
-    rayDb: RayDb;
-    windowId: string;
-  }>();
+const { fileSystemItem, currentItems, filterByFileType, isSelected } = defineProps<{
+  fileSystemItem: FileSystemItem;
+  currentItems: Item[];
+  filterByFileType: FileType[];
+  isSelected: boolean;
+  rayDb: RayDb;
+  windowId: string;
+}>();
 
-const emit = defineEmits(['onDragStart', 'onDoubleClick', 'onSingleClick', 'renameFile']);
+const emit = defineEmits([
+  'onDragStart',
+  'onDoubleClick',
+  'onSingleClick',
+  'renameFile',
+  'onDelete',
+  'onAddToMultiSelect',
+]);
 
 const isItemDisabled = computed(() =>
   useGetIsDisabledItem(fileSystemItem, currentItems, filterByFileType),
@@ -35,6 +38,10 @@ const itemSize = computed<FileItemSizeValue>(
 );
 
 function onContextMenu(event: MouseEvent) {
+  if (!isSelected) {
+    emit('onAddToMultiSelect');
+  }
+
   useInitializeContextMenu(event)
     .fileExplorerGridItem({ renameFile: fileSystemItem?.type === 'application' })
     .initialize(
@@ -45,34 +52,8 @@ function onContextMenu(event: MouseEvent) {
         Paste: () => {
           useToastFeatureNotImplemented();
         },
-        Delete: async () => {
-          if (fileSystemItem) {
-            if (fileSystemItem.isSystemFile) {
-              useToastStore().createToast(
-                'cannot delete system files',
-                'error',
-                5000,
-                'window',
-                windowId,
-              );
-
-              return;
-            }
-
-            try {
-              await useDeleteFileSystemItem(rayDb, fileSystemItem);
-            } catch (e) {
-              if (e instanceof SystemFileDeleteError) {
-                useToastStore().createToast(
-                  'cannot delete system files',
-                  'error',
-                  5000,
-                  'window',
-                  windowId,
-                );
-              }
-            }
-          }
+        Delete: () => {
+          emit('onDelete');
         },
       },
       {
@@ -90,6 +71,9 @@ function onContextMenu(event: MouseEvent) {
 }
 
 function onClick(event: MouseEvent) {
+  if (event.ctrlKey) {
+    console.log('aaa');
+  }
   useDblClick(
     () => emit('onDoubleClick', event),
     () => emit('onSingleClick', event),
@@ -100,7 +84,8 @@ function onClick(event: MouseEvent) {
   <div
     class="item"
     draggable="true"
-    :style="{ pointerEvents: isItemDisabled ? 'none' : 'auto', background: isSelected ? 'var(--button-hover-color)' : 'transparent' }"
+    :class="{ selected: isSelected }"
+    :style="{ pointerEvents: isItemDisabled ? 'none' : 'auto' }"
     @click.stop="onClick"
     @dragstart="emit('onDragStart', $event)"
     @contextmenu.prevent.stop="onContextMenu"
@@ -132,8 +117,12 @@ function onClick(event: MouseEvent) {
   pointer-events: none;
 }
 
+.item.selected {
+  background-color: var(--button-hover-color);
+}
+
 .item:hover {
-  background: var(--button-hover-color) !important;
+  background-color: var(--button-hover-color);
 }
 
 .file-name {
