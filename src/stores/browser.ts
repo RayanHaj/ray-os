@@ -9,23 +9,31 @@ export const useBrowserStore = defineStore('browser', () => {
 
   const taskbarStore = useTaskbarStore();
 
-  const isMobile = window.matchMedia('(pointer: coarse)').matches;
+  const isMobile = ref(window.matchMedia('(any-pointer: coarse)').matches);
 
   function updateSizes() {
     width.value = window.innerWidth;
     height.value = window.innerHeight;
-    heightExcTaskbar.value = (height.value - taskbarStore.taskbarHeight) + 1;
+    heightExcTaskbar.value = height.value - taskbarStore.taskbarHeight + 1;
   }
+
+  const onPointerDown = (e) => {
+    if (e.pointerType === 'touch') {
+      isMobile.value = true;
+    } else if (e.pointerType === 'mouse') {
+      isMobile.value = false;
+    }
+  };
 
   function startListening() {
     updateSizes();
-    addEventListener('resize', () => {
-      updateSizes();
-    });
+    addEventListener('resize', updateSizes);
+    addEventListener('pointerdown', onPointerDown);
   }
 
   function stopListening() {
-    removeEventListener('resize', () => updateSizes());
+    removeEventListener('resize', updateSizes);
+    removeEventListener('pointerdown', onPointerDown);
   }
 
   return { width, height, heightExcTaskbar, startListening, stopListening, isMobile };

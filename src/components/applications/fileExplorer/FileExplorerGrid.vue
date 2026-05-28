@@ -164,7 +164,13 @@ function onDragStart(event: DragEvent, fileSystemItem: FileSystemItem) {
   event.dataTransfer?.setData('text/plain', JSON.stringify(fileSystemItem));
 }
 
+function onItemDoubleClick(fileSystemItem: FileSystemItem) {
+  multiSelect.clear();
+  emit('itemEvent:dblClick', fileSystemItem);
+}
+
 function onItemSingleClick(fileSystemItem: FileSystemItem) {
+  console.log(useBrowserStore().isMobile);
   if (useBrowserStore().isMobile) {
     if (
       multiSelect.selectedItems.value.size === 1 &&
@@ -241,7 +247,7 @@ function onItemsDelete() {
         :ray-db="rayDb"
         :window-id="windowId"
         @on-add-to-multi-select="multiSelect.toggle(fileSystemItem.id)"
-        @on-double-click="emit('itemEvent:dblClick', fileSystemItem)"
+        @on-double-click="onItemDoubleClick(fileSystemItem)"
         @on-single-click="onItemSingleClick(fileSystemItem)"
         @on-drag-start="onDragStart($event, fileSystemItem)"
         @rename-file="emit('renameFile', $event)"
