@@ -32,7 +32,7 @@ const { currentFileSystemItems, path, parentId, filterByFileType } = defineProps
   filterByFileType: FileType[];
 }>();
 
-const emit = defineEmits(['itemEvent:dblClick', 'newDirectory', 'newTextFile', 'renameFile']);
+const emit = defineEmits(['itemEvent:dblClick', 'newDirectory', 'newTextFile', 'renameFile', 'onDragStart', 'onDragEnd']);
 
 const currentItems = ref<Item[]>([]);
 
@@ -155,7 +155,10 @@ async function onFileDrop(event: DragEvent) {
 
 const multiSelect = useMultiSelect<number>();
 function onDragStart(event: DragEvent, fileSystemItem: FileSystemItem) {
+  emit('onDragStart', event);
+
   if (!multiSelect.isSelected(fileSystemItem.id)) {
+    multiSelect.clear();
     multiSelect.toggle(fileSystemItem.id);
   }
   if (fileSystemItem.directory) {
@@ -164,14 +167,17 @@ function onDragStart(event: DragEvent, fileSystemItem: FileSystemItem) {
   event.dataTransfer?.setData('text/plain', JSON.stringify(fileSystemItem));
 }
 
+function onDragEnd(event: DragEvent) {
+  emit('onDragEnd', event);
+}
+
 function onItemDoubleClick(fileSystemItem: FileSystemItem) {
   multiSelect.clear();
   emit('itemEvent:dblClick', fileSystemItem);
 }
 
-function onItemSingleClick(fileSystemItem: FileSystemItem) {
-  console.log(useBrowserStore().isMobile);
-  if (useBrowserStore().isMobile) {
+function onItemSingleClick(event: MouseEvent, fileSystemItem: FileSystemItem) {
+  if (useBrowserStore().isMobile || !event.ctrlKey) {
     if (
       multiSelect.selectedItems.value.size === 1 &&
       multiSelect.selectedItems.value.has(fileSystemItem.id)
@@ -181,6 +187,7 @@ function onItemSingleClick(fileSystemItem: FileSystemItem) {
 
     multiSelect.clear();
   }
+
   multiSelect.toggle(fileSystemItem.id);
 }
 
@@ -225,6 +232,25 @@ function onItemsDelete() {
     }
   });
 }
+
+function onRenameFile() {
+  const fileSystemItemId = multiSelect.getFirst();
+  const fileSystemItem = currentFileSystemItems.find(
+    (fileSystemItem) => fileSystemItem.id === fileSystemItemId,
+  );
+
+  if (!fileSystemItem) return;
+
+  emit('renameFile', {
+    contentType: fileSystemItem.directory ? 'directory' : 'file',
+    item: fileSystemItem,
+  });
+}
+
+function onGridItemContextMenu(fileSystemItem: FileSystemItem) {
+  multiSelect.clear();
+  multiSelect.toggle(fileSystemItem.id);
+}
 </script>
 
 <template>
@@ -246,11 +272,12 @@ function onItemsDelete() {
         :is-selected="multiSelect.selectedItems.value.has(fileSystemItem.id)"
         :ray-db="rayDb"
         :window-id="windowId"
-        @on-add-to-multi-select="multiSelect.toggle(fileSystemItem.id)"
+        @on-context-menu="onGridItemContextMenu(fileSystemItem)"
+        @on-click="onItemSingleClick($event, fileSystemItem)"
         @on-double-click="onItemDoubleClick(fileSystemItem)"
-        @on-single-click="onItemSingleClick(fileSystemItem)"
         @on-drag-start="onDragStart($event, fileSystemItem)"
-        @rename-file="emit('renameFile', $event)"
+        @on-drag-end="onDragEnd($event)"
+        @rename-file="onRenameFile"
         @on-delete="onItemsDelete"
       />
     </div>
@@ -278,5 +305,6 @@ function onItemsDelete() {
   -webkit-user-select: none;
   padding: 10px;
   height: 100%;
+  gap: 5px;
 }
 </style>

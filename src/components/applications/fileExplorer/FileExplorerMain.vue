@@ -33,6 +33,8 @@ const items = ref<FileSystemItem[]>([]);
 const path = ref<string[]>([fileSystemStore.ROOT_DIR_NAME]);
 const parentId = ref<number>();
 
+const isDragging = ref<boolean>(false);
+
 onBeforeMount(async () => {
   let initPath: string = fileSystemStore.ROOT_DIR_NAME;
 
@@ -253,11 +255,15 @@ async function onFileUpload(files: FileList) {
       v-if="modalOpened"
       :title="modalContentType"
       :action="modalAction"
+      :file-system-item-title="
+        modalItem?.file ? modalItem.file.name : (modalItem?.directory?.name ?? '')
+      "
       @modal-event:submit-click="handleModalInput($event.contentType, $event.action, $event.input)"
       @modal-event:cancel-click="modalOpened = false"
     />
     <FileExplorerHeader
       :current-path="path"
+      :is-dragging="isDragging"
       @header-event:back="handleBackClick"
       @header-event:file-upload="onFileUpload"
     />
@@ -266,6 +272,8 @@ async function onFileUpload(files: FileList) {
       :current-file-system-items="items"
       :path="parseToPathString(path)"
       :filter-by-file-type="filterByFileType()"
+      @on-drag-start="isDragging = true"
+      @on-drag-end="isDragging = false"
       @item-event:dbl-click="onDblClickItem"
       @new-directory="toggleAddNewItemModal($event.contentType, 'add')"
       @new-text-file="toggleAddNewItemModal($event.contentType, 'add')"

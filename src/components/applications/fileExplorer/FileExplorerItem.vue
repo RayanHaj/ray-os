@@ -21,11 +21,13 @@ const { fileSystemItem, currentItems, filterByFileType, isSelected } = definePro
 
 const emit = defineEmits([
   'onDragStart',
+  'onDragEnd',
+  'onClick',
   'onDoubleClick',
   'onSingleClick',
   'renameFile',
   'onDelete',
-  'onAddToMultiSelect',
+  'onContextMenu',
 ]);
 
 const isItemDisabled = computed(() =>
@@ -39,7 +41,7 @@ const itemSize = computed<FileItemSizeValue>(
 
 function onContextMenu(event: MouseEvent) {
   if (!isSelected) {
-    emit('onAddToMultiSelect');
+    emit('onContextMenu');
   }
 
   useInitializeContextMenu(event)
@@ -58,12 +60,7 @@ function onContextMenu(event: MouseEvent) {
       },
       {
         renameFile: () => {
-          if (fileSystemItem) {
-            emit('renameFile', {
-              contentType: fileSystemItem.directory ? 'directory' : 'file',
-              item: fileSystemItem,
-            });
-          }
+          emit('renameFile');
         },
         addToDesktop: () => {},
       },
@@ -71,9 +68,7 @@ function onContextMenu(event: MouseEvent) {
 }
 
 function onClick(event: MouseEvent) {
-  if (event.ctrlKey) {
-    console.log('aaa');
-  }
+  emit('onClick', event);
   useDblClick(
     () => emit('onDoubleClick', event),
     () => emit('onSingleClick', event),
@@ -88,6 +83,7 @@ function onClick(event: MouseEvent) {
     :style="{ pointerEvents: isItemDisabled ? 'none' : 'auto' }"
     @click.stop="onClick"
     @dragstart="emit('onDragStart', $event)"
+    @dragend="emit('onDragEnd', $event)"
     @contextmenu.prevent.stop="onContextMenu"
   >
     <component
@@ -115,14 +111,18 @@ function onClick(event: MouseEvent) {
   padding: 10px;
   overflow-wrap: anywhere;
   pointer-events: none;
+  border: 1px dashed transparent;
 }
 
-.item.selected {
-  background-color: var(--button-hover-color);
+.item.selected,
+.item.selected:hover {
+  border-color: var(--input-border-color);
+  background-color: rgba(0, 0, 0, 0.3);
 }
 
 .item:hover {
-  background-color: var(--button-hover-color);
+  border-color: white;
+  background-color: rgba(0, 0, 0, 0.3);
 }
 
 .file-name {

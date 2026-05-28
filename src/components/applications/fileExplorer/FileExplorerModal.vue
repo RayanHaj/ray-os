@@ -1,11 +1,18 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import type { ModalAction, ModalContentType } from '@/types/FileExplorerTypes.ts';
+import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
 
-const { title, action } = defineProps<{ title: ModalContentType; action: ModalAction }>();
+const { title, action, fileSystemItemTitle } = defineProps<{
+  title: ModalContentType;
+  action: ModalAction;
+  fileSystemItemTitle: string;
+}>();
 
 const input = ref('');
 const emits = defineEmits(['modalEvent:submitClick', 'modalEvent:cancelClick']);
+
+const arrowRightSvg = useSvgOrFallback('ArrowRight');
 
 const inputFieldRef = ref();
 onMounted(() => {
@@ -28,9 +35,13 @@ function onClickCancel() {
   <div class="modal-container" @keyup.enter="onClickSubmit">
     <div class="modal">
       <h2>{{ `${action[0].toUpperCase()}${action.slice(1)}` }} {{ title }}</h2>
+      <div class="current-title-wrapper">
+        <p>{{ fileSystemItemTitle }}</p>
+        <component :is="arrowRightSvg.svg" :custom-width="35" :custom-height="35" />
+      </div>
       <div class="input-wrapper">
-        <label for="inputField">{{ `enter ${title} name` }}</label>
-        <input ref="inputFieldRef" id="inputField" type="text" v-model="input"/>
+        <label for="inputField">{{ `Enter ${title} name` }}</label>
+        <input ref="inputFieldRef" id="inputField" type="text" v-model="input" />
       </div>
       <div class="buttons">
         <button class="submit-button" @click="onClickSubmit">submit</button>
@@ -47,6 +58,21 @@ function onClickCancel() {
   width: 100%;
   height: 100%;
   z-index: 9998;
+}
+
+.current-title-wrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
+}
+
+.current-title-wrapper p {
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 5px 20px;
+  border-radius: 5px;
+  width: fit-content;
+  font-size: var(--font-size-elg);
 }
 
 .modal {
@@ -86,7 +112,7 @@ function onClickCancel() {
   border-bottom-right-radius: 5px;
   border: var(--window-border-color) 1px solid;
   background: var(--button-primary-color);
-  color: var(--text-color);
+  color: var(--text-secondary-color);
 }
 
 .cancel-button:hover,
@@ -102,6 +128,7 @@ function onClickCancel() {
   border: var(--window-border-color) 1px solid;
   background: var(--button-primary-color);
   color: var(--text-color);
+  font-weight: bold;
 }
 
 #inputField {
@@ -123,7 +150,6 @@ function onClickCancel() {
 @container fileExplorer (max-width: 400px) {
   .modal {
     width: calc(100% - 10px);
-    height: calc(100% - 100px);
   }
 }
 </style>

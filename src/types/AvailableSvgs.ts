@@ -1,5 +1,6 @@
 export const availableSvgs = [
   'Audio',
+  'ArrowRight',
   'Back',
   'VideoPlayer',
   'Close',

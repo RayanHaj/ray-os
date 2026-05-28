@@ -17,7 +17,7 @@ export const useBrowserStore = defineStore('browser', () => {
     heightExcTaskbar.value = height.value - taskbarStore.taskbarHeight + 1;
   }
 
-  const onPointerDown = (e) => {
+  const onPointerDown = (e: PointerEvent) => {
     if (e.pointerType === 'touch') {
       isMobile.value = true;
     } else if (e.pointerType === 'mouse') {

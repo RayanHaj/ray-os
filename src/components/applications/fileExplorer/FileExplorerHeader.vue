@@ -12,7 +12,10 @@ import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import { RayDb } from 'ray-db-wrapper';
 import { fileExtensions, type FileSystemItem } from '@/types/ItemTypes.ts';
 
-const { currentPath = ['C:/'] } = defineProps<{ currentPath?: string[] }>();
+const { currentPath = ['C:/'], isDragging } = defineProps<{
+  currentPath?: string[];
+  isDragging: boolean;
+}>();
 
 const emit = defineEmits(['header-event:back', 'header-event:file-upload']);
 
@@ -20,8 +23,6 @@ const directorySvg = useSvgOrFallback('Directory').svg;
 
 const itemSizeKeys = fileItemSizes;
 const selectedItemSizeButton = ref<FileItemSizeKey>('small');
-
-const backSvg = useSvgOrFallback('Back');
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 
@@ -103,7 +104,7 @@ function onFileUploadChange(event: Event) {
           @drop.prevent="onDrop"
           @dragover.prevent
         >
-          Back
+          {{ isDragging ? 'Move up' : 'Back' }}
         </button>
       </div>
       <div class="middle-section">

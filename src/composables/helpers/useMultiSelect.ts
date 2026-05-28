@@ -28,9 +28,9 @@ export function useMultiSelect<T>(initSet?: T[]) {
     return returnVal;
   }
 
-  function clear() {
-    set.value.clear();
-    triggerRef(set);
+  function getFirst() {
+    const [firstEl] = set.value;
+    return firstEl;
   }
 
   function forEachSelected(func: (value: T) => void) {
@@ -39,8 +39,14 @@ export function useMultiSelect<T>(initSet?: T[]) {
     }
   }
 
+  function clear() {
+    set.value.clear();
+    triggerRef(set);
+  }
+
   return {
     selectedItems: readonly(set),
+    getFirst,
     isSelected,
     toggle,
     clear,
