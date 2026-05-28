@@ -28,9 +28,23 @@ export function useMultiSelect<T>(initSet?: T[]) {
     return returnVal;
   }
 
+  function add(value: T) {
+    if (set.value.has(value)) {
+      return;
+    }
+
+    set.value.add(value);
+    triggerRef(set);
+  }
+
   function getFirst() {
     const [firstEl] = set.value;
     return firstEl;
+  }
+
+  function getLast() {
+    const lastValue = [...set.value].pop();
+    return lastValue ?? null;
   }
 
   function size() {
@@ -51,8 +65,10 @@ export function useMultiSelect<T>(initSet?: T[]) {
   return {
     selectedItems: readonly(set),
     getFirst,
+    getLast,
     isSelected,
     toggle,
+    add,
     size,
     clear,
     forEachSelected

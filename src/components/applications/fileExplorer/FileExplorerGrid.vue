@@ -206,6 +206,30 @@ function onItemDoubleClick(fileSystemItem: FileSystemItem) {
 
 function onItemSingleClick(event: MouseEvent, fileSystemItem: FileSystemItem) {
   if (useBrowserStore().isMobile || !event.ctrlKey) {
+    if (event.shiftKey) {
+      const lastSelectedElement = multiSelect.getLast();
+      if (lastSelectedElement) {
+        const oldSelectedItem = currentFileSystemItems.findIndex(
+          (item) => item.id === lastSelectedElement,
+        );
+        const newSelectedItem = currentFileSystemItems.findIndex(
+          (item) => item.id === fileSystemItem.id,
+        );
+
+        if (oldSelectedItem !== -1 && newSelectedItem !== -1) {
+          if (newSelectedItem > oldSelectedItem) {
+            for (let i = oldSelectedItem + 1; i <= newSelectedItem; i++) {
+              multiSelect.add(currentFileSystemItems[i].id);
+            }
+          } else {
+            for (let i = oldSelectedItem - 1; i >= newSelectedItem; i--) {
+              multiSelect.add(currentFileSystemItems[i].id);
+            }
+          }
+          return;
+        }
+      }
+    }
     if (
       multiSelect.selectedItems.value.size === 1 &&
       multiSelect.selectedItems.value.has(fileSystemItem.id)
