@@ -6,23 +6,20 @@ import {
   type ItemInsert,
   type FileType,
   type Item,
-  isImageType,
-  isVideoType,
-  isAudioType,
 } from '@/types/ItemTypes.ts';
 import { computed, ref, watch } from 'vue';
 import type { RayDb } from 'ray-db-wrapper';
 import { useDeleteFileSystemItem } from '@/composables/fileSystem/useDeleteFileSystemItem.ts';
-import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
 import { insertItemIntoFileSystem } from '@/composables/fileSystem/useIndexedDbHelper.ts';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
 import { type FileItemSizeValue, itemSizes } from '@/types/FileExplorerTypes.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import { useToastStore } from '@/stores/toast.ts';
 import { useInitializeContextMenu } from '@/composables/contextMenu/useInitializeContextMenu.ts';
-import { useDblClick } from '@/composables/helpers/UseDblClick.ts';
-import { SystemFileDeleteError } from '@/exceptions/SystemFileDeleteError.ts';
 import { useToastFeatureNotImplemented } from '@/composables/helpers/useToastFeatureNotImplemented.ts';
+import { useMultiSelect } from '@/composables/helpers/useMultiSelect.ts';
+import FileExplorerItem from '@/components/applications/fileExplorer/FileExplorerItem.vue';
+import { useDblClick } from '@/composables/helpers/UseDblClick.ts';
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 const windowId = useInjectOrThrow<string>('windowId');
@@ -34,12 +31,13 @@ const { currentDirectories, path, parentId, filterByFileType } = defineProps<{
   filterByFileType: FileType[];
 }>();
 
-const files = ref<Item[]>([]);
+const emit = defineEmits(['itemEvent:dblClick', 'newDirectory', 'newTextFile', 'renameFile']);
+
+const currentItems = ref<Item[]>([]);
+
 watch(
   () => currentDirectories,
-  async () => {
-    await updateFilesList();
-  },
+  async () => await updateFilesList(),
 );
 
 async function updateFilesList() {
@@ -54,131 +52,33 @@ async function updateFilesList() {
         continue;
       }
 
-      if (files.value.some((listFile) => listFile.id === file.id)) {
+      if (currentItems.value.some((listFile) => listFile.id === file.id)) {
         continue;
       }
 
-      files.value.push(file);
+      currentItems.value.push(file);
     }
   }
 }
 
-const emits = defineEmits(['itemEvent:dblClick', 'newDirectory', 'newTextFile', 'renameFile']);
-
-async function onRightClick(
-  event: MouseEvent,
-  item: FileSystemItem | null,
-  calledFrom: 'grid' | 'gridItem',
-) {
-  if (calledFrom === 'grid') {
-    useInitializeContextMenu(event)
-      .fileExplorerGrid()
-      .initialize(
-        {
-          Paste: () => {
-            useToastFeatureNotImplemented();
-          },
+async function onContextMenu(event: MouseEvent) {
+  useInitializeContextMenu(event)
+    .fileExplorerGrid()
+    .initialize(
+      {
+        Paste: () => {
+          useToastFeatureNotImplemented();
         },
-        {
-          newDirectory: () => {
-            emits('newDirectory', { contentType: 'directory' });
-          },
-          newTextFile: () => {
-            emits('newTextFile', { contentType: 'file' });
-          },
+      },
+      {
+        newDirectory: () => {
+          emit('newDirectory', { contentType: 'directory' });
         },
-      );
-  } else if (calledFrom === 'gridItem') {
-    console.log(item);
-    useInitializeContextMenu(event)
-      .fileExplorerGridItem({renameFile: item?.type === 'application'})
-      .initialize(
-        {
-          Copy: () => {
-            useToastFeatureNotImplemented();
-          },
-          Paste: () => {
-            useToastFeatureNotImplemented();
-          },
-          Delete: async () => {
-            if (item) {
-              if (item.isSystemFile) {
-                useToastStore().createToast(
-                  'cannot delete system files',
-                  'error',
-                  5000,
-                  'window',
-                  windowId,
-                );
-
-                return;
-              }
-
-              try {
-                await useDeleteFileSystemItem(rayDb, item);
-              } catch (e) {
-                if (e instanceof SystemFileDeleteError) {
-                  useToastStore().createToast(
-                    'cannot delete system files',
-                    'error',
-                    5000,
-                    'window',
-                    windowId,
-                  );
-                }
-              }
-            }
-          },
+        newTextFile: () => {
+          emit('newTextFile', { contentType: 'file' });
         },
-        {
-          renameFile: () => {
-            if (item) {
-              emits('renameFile', {
-                contentType: item.directory ? 'directory' : 'file',
-                item: item,
-              });
-            }
-          },
-          addToDesktop: () => {},
-        },
-      );
-  }
-}
-
-const imageSvg = useSvgOrFallback('ImageViewer');
-const videoSvg = useSvgOrFallback('VideoPlayer');
-const audioSvg = useSvgOrFallback('Audio');
-const fileSvg = useSvgOrFallback('TextFile');
-const directorySvg = useSvgOrFallback('Directory');
-
-function getSvg(fileSystemItem: FileSystemItem) {
-  switch (fileSystemItem.type) {
-    case 'application': {
-      if (fileSystemItem.file?.name) {
-        return useSvgOrFallback(fileSystemItem.file.name).svg;
-      } else {
-        return fileSvg.svg;
-      }
-    }
-    case 'file': {
-      if (isImageType(fileSystemItem.file?.type)) {
-        return imageSvg.svg;
-      }
-      if (isVideoType(fileSystemItem.file?.type)) {
-        return videoSvg.svg;
-      }
-      if (isAudioType(fileSystemItem.file?.type)) {
-        return audioSvg.svg;
-      }
-      return fileSvg.svg;
-    }
-    case 'directory': {
-      return directorySvg.svg;
-    }
-    default: {
-      return fileSvg.svg;
-    }
-  }
+      },
+    );
 }
 
 async function onFileDrop(event: DragEvent) {
@@ -252,71 +152,60 @@ async function onFileDrop(event: DragEvent) {
   }
 }
 
+const multiSelect = useMultiSelect<number>();
 function onDragStart(event: DragEvent, fileSystemItem: FileSystemItem) {
+  if (!multiSelect.isSelected(fileSystemItem.id)) {
+   multiSelect.toggle(fileSystemItem.id);
+  }
   if (fileSystemItem.directory) {
     fileSystemItem.path = `${path}/${fileSystemItem.directory.name}`;
   }
   event.dataTransfer?.setData('text/plain', JSON.stringify(fileSystemItem));
 }
 
-function handleDisabledItem(item: FileSystemItem) {
-  if (!item.file || filterByFileType.length === 0) {
-    return false;
-  }
-
-  const file = files.value.find((file) => file.id === item.file?.id);
-  if (file?.content.type === 'file') {
-    return !filterByFileType.includes(file.content.rawFile?.type as FileType);
-  }
-
-  return true;
+function onItemSingleClick(fileSystemItem: FileSystemItem) {
+  multiSelect.toggle(fileSystemItem.id)
 }
 
 const fileExplorerStore = useFileExplorerStore();
 const itemSize = computed<FileItemSizeValue>(
   () => itemSizes[fileExplorerStore.currentFileItemSize],
 );
+
+function onClickGrid() {
+  multiSelect.clear();
+}
 </script>
 
 <template>
   <section
     class="file-explorer-grid"
-    ref="gridRef"
-    @contextmenu.prevent="onRightClick($event, null, 'grid')"
+    @click="onClickGrid"
+    @contextmenu.prevent="onContextMenu"
     @dragover.prevent
     @drop.prevent="onFileDrop"
     :style="{ fontSize: `${itemSize.font}px` }"
   >
-    <div class="desktop-grid">
-      <div
-        class="item"
-        :style="{ pointerEvents: handleDisabledItem(fileSystemItem) ? 'none' : 'auto' }"
-        v-for="fileSystemItem of currentDirectories"
+    <div class="grid-wrapper">
+      <FileExplorerItem
+        v-for="fileSystemItem in currentDirectories"
         :key="fileSystemItem.id"
-        draggable="true"
-        @dragstart="onDragStart($event, fileSystemItem)"
-        @click="useDblClick(() => $emit('itemEvent:dblClick', fileSystemItem))"
-        @contextmenu.prevent.stop="onRightClick($event, fileSystemItem, 'gridItem')"
-      >
-        <component
-          class="file-svg"
-          :is="getSvg(fileSystemItem)"
-          :custom-width="itemSize.size"
-          :custom-height="itemSize.size"
-        />
-        <p class="file-name">
-          {{ fileSystemItem.directory?.name ?? fileSystemItem.file?.name }}
-        </p>
-      </div>
+        :file-system-item="fileSystemItem"
+        :current-items="currentItems"
+        :filter-by-file-type="filterByFileType"
+        :is-selected="multiSelect.selectedItems.value.has(fileSystemItem.id)"
+        :ray-db="rayDb"
+        :window-id="windowId"
+        @on-double-click="emit('itemEvent:dblClick', fileSystemItem)"
+        @on-single-click="onItemSingleClick(fileSystemItem)"
+        @on-drag-start="onDragStart($event, fileSystemItem)"
+        @rename-file="emit('renameFile', $event)"
+      />
     </div>
   </section>
 </template>
 
 <style scoped>
-.item * {
-  pointer-events: none;
-}
-
 .file-explorer-grid {
   position: relative;
   height: calc(100% - 50px);
@@ -328,7 +217,7 @@ const itemSize = computed<FileItemSizeValue>(
   overflow: auto;
 }
 
-.desktop-grid {
+.grid-wrapper {
   display: flex;
   flex-wrap: wrap;
   flex: 0;
@@ -337,32 +226,5 @@ const itemSize = computed<FileItemSizeValue>(
   -webkit-user-select: none;
   padding: 10px;
   height: 100%;
-}
-
-button {
-  all: unset;
-  display: inline-block;
-}
-
-.item {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  justify-content: center;
-  align-items: center;
-  height: max-content;
-  width: max-content;
-  max-width: 100px;
-  color: var(--text-color);
-  padding: 10px;
-  overflow-wrap: anywhere;
-}
-
-.item:hover {
-  background: var(--button-hover-color);
-}
-
-.file-name {
-  text-align: center;
 }
 </style>

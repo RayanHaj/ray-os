@@ -53,7 +53,7 @@ function navigateToSocialPage(social: Socials) {
 <template>
   <div class="desktop" :style="{ height: `calc(100% - ${useTaskbarStore().taskbarHeight}px)` }">
     <div
-      class="desktop-grid"
+      class="grid-wrapper"
       @mouseleave="onMouseLeave"
       @dragover.prevent
       @dragenter.prevent
@@ -98,7 +98,7 @@ function navigateToSocialPage(social: Socials) {
   background-repeat: no-repeat;
   background-size: cover;
 }
-.desktop-grid {
+.grid-wrapper {
   display: flex;
   align-items: center;
   justify-content: center;
