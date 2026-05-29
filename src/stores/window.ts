@@ -6,7 +6,6 @@ import type { Application } from '@/types/ItemTypes.ts';
 import { useVideoPlayerStore } from '@/stores/videoPlayer.ts';
 import { useImageViewerStore } from '@/stores/imageViewer.ts';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
-import { useAudioPlayerStore } from '@/stores/audioPlayer.ts';
 import { useToastStore } from '@/stores/toast.ts';
 
 type WindowReferences = { [applicationName: string]: WindowReference[] };

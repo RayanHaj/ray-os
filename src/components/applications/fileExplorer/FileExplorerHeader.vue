@@ -2,7 +2,6 @@
 import { onBeforeMount, ref } from 'vue';
 import { type FileItemSizeKey, fileItemSizes } from '@/types/FileExplorerTypes.ts';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
-import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
 import {
   fileSystemLookup,
   insertItemIntoFileSystem,
@@ -18,8 +17,6 @@ const { currentPath = ['C:/'], isDragging } = defineProps<{
 }>();
 
 const emit = defineEmits(['header-event:back', 'header-event:file-upload']);
-
-const directorySvg = useSvgOrFallback('Directory').svg;
 
 const itemSizeKeys = fileItemSizes;
 const selectedItemSizeButton = ref<FileItemSizeKey>('small');
@@ -124,7 +121,7 @@ function onFileUploadChange(event: Event) {
         <button
           class="item-size-button"
           :class="{ selected: size === selectedItemSizeButton }"
-          v-for="(size, index) of itemSizeKeys"
+          v-for="size in itemSizeKeys"
           :key="size"
           @click="updateSelectedItemSizeButton(size)"
         >

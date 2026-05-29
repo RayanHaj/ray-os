@@ -47,5 +47,5 @@ export const useToastStore = defineStore('toast', () => {
     timeoutIds.value = [];
   }
 
-  return { toasts, createToast, closeToast, closeToastsByWindowId };
+  return { toasts, createToast, closeToast, closeToastsByWindowId, clearToasts };
 });

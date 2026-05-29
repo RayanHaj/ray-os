@@ -61,6 +61,7 @@ export async function useSavePlaylist(
 
     useToastStore().createToast('Playlist saved successfully', 'success', 2500, 'window', windowId);
   } catch (e) {
+    console.error(e);
     useToastStore().createToast(
       'Could not save playlist, try again',
       'error',
@@ -147,6 +148,7 @@ export async function useDeletePlaylist(
     if (currentLoadedPlaylist.value?.id !== playlistId) return;
     currentLoadedPlaylist.value = undefined;
   } catch (e) {
+    console.error(e);
     useToastStore().createToast(
       'Could not delete playlist, try again',
       'error',

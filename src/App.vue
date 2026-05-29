@@ -23,9 +23,10 @@ onBeforeMount(async () => {
   wallpaperStore.initSelectedWallpaper();
 
   await svgsStore.initializeSvgs();
-  await desktopStore.updateDesktopDirectory(rayDb);
   await gridStore.initializeTileContent(rayDb);
   initialised.value = true;
+
+  await desktopStore.updateDesktopDirectory(rayDb);
 });
 onUnmounted(() => {
   browserStore.stopListening();
