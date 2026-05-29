@@ -35,7 +35,7 @@ function onClickCancel() {
   <div class="modal-container" @keyup.enter="onClickSubmit">
     <div class="modal">
       <h2>{{ `${action[0].toUpperCase()}${action.slice(1)}` }} {{ title }}</h2>
-      <div class="current-title-wrapper">
+      <div v-if="action === 'rename'" class="current-title-wrapper">
         <p>{{ fileSystemItemTitle }}</p>
         <component
           class="arrow-right-svg"
