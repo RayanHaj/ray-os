@@ -9,6 +9,7 @@ import { useInitializeContextMenu } from '@/composables/contextMenu/useInitializ
 import { useToastFeatureNotImplemented } from '@/composables/helpers/useToastFeatureNotImplemented.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import { useDblClick } from '@/composables/helpers/UseDblClick.ts';
+import { useContextMenuStore } from '@/stores/contextMenu.ts';
 
 const { fileSystemItem, currentItems, filterByFileType, isSelected } = defineProps<{
   fileSystemItem: FileSystemItem;
@@ -69,6 +70,8 @@ function onContextMenu(event: MouseEvent) {
 
 function onClick(event: MouseEvent) {
   emit('onClick', event);
+  useContextMenuStore().hide();
+
   useDblClick(
     () => emit('onDoubleClick', event),
     () => emit('onSingleClick', event),

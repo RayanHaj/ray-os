@@ -37,7 +37,12 @@ function onClickCancel() {
       <h2>{{ `${action[0].toUpperCase()}${action.slice(1)}` }} {{ title }}</h2>
       <div class="current-title-wrapper">
         <p>{{ fileSystemItemTitle }}</p>
-        <component :is="arrowRightSvg.svg" :custom-width="35" :custom-height="35" />
+        <component
+          class="arrow-right-svg"
+          :is="arrowRightSvg.svg"
+          :custom-width="35"
+          :custom-height="35"
+        />
       </div>
       <div class="input-wrapper">
         <label for="inputField">{{ `Enter ${title} name` }}</label>
@@ -71,8 +76,15 @@ function onClickCancel() {
   background-color: rgba(0, 0, 0, 0.5);
   padding: 5px 20px;
   border-radius: 5px;
-  width: fit-content;
-  font-size: var(--font-size-elg);
+  max-width: 90%;
+  font-size: var(--font-size-md);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.arrow-right-svg {
+  width: max-content;
 }
 
 .modal {
