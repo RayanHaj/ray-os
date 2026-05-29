@@ -364,7 +364,7 @@ watch(selectAllToggle, (newToggledVal) => {
     console.log(filterByFileType);
     for (const fileSystemItem of currentFileSystemItems) {
       if (fileSystemItem.file) {
-        if (!filterByFileType.includes(fileSystemItem.file.type as FileType)) {
+        if (!filterByFileType.includes(fileSystemItem.file.type as FileType) && isInFileSelectState) {
           continue;
         }
       }
