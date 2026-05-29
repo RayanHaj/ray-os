@@ -7,7 +7,7 @@ export function useOpenSelectAudioWindow(fileExplorerWindowId: Ref<string | unde
 
   useFileExplorerStore().setFileExplorerWindowAsFileSelect(windowId, nextFileExplorerId, [
     'audio/mpeg',
-  ]);
+  ], true);
 
   fileExplorerWindowId.value = useWindowStore().pushOpenWindowReference('File Explorer');
 }

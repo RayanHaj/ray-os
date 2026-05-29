@@ -20,6 +20,12 @@ const allowedFileTypes = computed(
     )?.allowedFileTypes ?? [],
 );
 
+const isInMultiSelectState = computed(
+  () =>
+    useFileExplorerStore().fileSelectState.find((element) => element.fileExplorerWindowId === windowId)
+      ?.multiSelect ?? false,
+);
+
 const windowControlButtons = ref<{ name: string; svg: Raw<Component> | null }[]>([]);
 const svg = shallowRef<Component | null>(null);
 onBeforeMount(async () => {
@@ -62,7 +68,7 @@ onBeforeMount(async () => {
         {{
           allowedFileTypes.length === 0
             ? reference.label
-            : `select a ${allowedFileTypes.map((type) => `.${fileExtensions[type]}`).join('/')} file`
+            : `select ${!isInMultiSelectState ? 'a' : ''} ${allowedFileTypes.map((type) => `.${fileExtensions[type]}`).join('/')} ${isInMultiSelectState ? 'files' : 'file'}`
         }}
       </p>
     </div>

@@ -1,3 +1,5 @@
+import type { FileItem } from '@/types/ItemTypes.ts';
+
 export const itemSizes = {
   small: { font: 9, size: 30 },
   medium: { font: 10, size: 40 },
@@ -10,3 +12,5 @@ export const fileItemSizes = Object.keys(itemSizes) as FileItemSizeKey[];
 
 export type ModalContentType = 'directory' | 'file';
 export type ModalAction = 'add' | 'rename';
+
+export type FileSelectReturnItem = { fileSystemItemId: number; fileId: number; fileItem: FileItem };

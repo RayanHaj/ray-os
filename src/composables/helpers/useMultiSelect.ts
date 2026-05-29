@@ -56,9 +56,9 @@ export function useMultiSelect<T>(initSet?: T[]) {
     triggerRef(set);
   }
 
-  function forEachSelected(func: (value: T) => void) {
+  async function forEachSelected(func: (value: T) => Promise<void>) {
     for (const value of set.value) {
-      func(value);
+      await func(value);
     }
   }
 

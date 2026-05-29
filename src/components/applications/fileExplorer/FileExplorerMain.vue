@@ -92,8 +92,8 @@ async function onDblClickItem(item: FileSystemItem & { type: string }) {
     path.value = [...path.value, item.directory.name];
     parentId.value = item.id;
     fileSystemStore.updateFileSystem();
-  } else if (item.file) {
-    await useHandleExplorerFileClicked(item, parentId, rayDb, windowId);
+  } else {
+    await useHandleExplorerFileClicked(item, parentId, rayDb);
   }
 }
 
@@ -212,14 +212,6 @@ const fileSelectState = computed(() =>
   fileExplorerStore.fileSelectState.find((element) => element.fileExplorerWindowId === windowId),
 );
 
-function filterByFileType() {
-  if (!fileSelectState.value) {
-    return [];
-  }
-
-  return fileSelectState.value.allowedFileTypes;
-}
-
 async function onFileUpload(files: FileList) {
   for (const file of files) {
     const fileObject: FileItem = {
@@ -271,7 +263,9 @@ async function onFileUpload(files: FileList) {
       :parent-id="parentId ?? -1"
       :current-file-system-items="items"
       :path="parseToPathString(path)"
-      :filter-by-file-type="filterByFileType()"
+      :is-in-file-select-state="fileSelectState?.active ?? false"
+      :filter-by-file-type="fileSelectState?.allowedFileTypes ?? []"
+      :multi-select-activated="fileSelectState?.multiSelect ?? true"
       @on-drag-start="isDragging = true"
       @on-drag-end="isDragging = false"
       @item-event:dbl-click="onDblClickItem"

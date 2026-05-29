@@ -12,24 +12,37 @@ import type { RayDb } from 'ray-db-wrapper';
 import { useDeleteFileSystemItem } from '@/composables/fileSystem/useDeleteFileSystemItem.ts';
 import { insertItemIntoFileSystem } from '@/composables/fileSystem/useIndexedDbHelper.ts';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
-import { type FileItemSizeValue, itemSizes } from '@/types/FileExplorerTypes.ts';
+import {
+  type FileItemSizeValue,
+  type FileSelectReturnItem,
+  itemSizes,
+} from '@/types/FileExplorerTypes.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import { useToastStore } from '@/stores/toast.ts';
 import { useInitializeContextMenu } from '@/composables/contextMenu/useInitializeContextMenu.ts';
 import { useToastFeatureNotImplemented } from '@/composables/helpers/useToastFeatureNotImplemented.ts';
-import { useMultiSelect } from '@/composables/helpers/useMultiSelect.ts';
 import FileExplorerItem from '@/components/applications/fileExplorer/FileExplorerItem.vue';
 import { SystemFileDeleteError } from '@/exceptions/SystemFileDeleteError.ts';
 import { useBrowserStore } from '@/stores/browser.ts';
+import { useMultiSelect } from '@/composables/helpers/useMultiSelect.ts';
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 const windowId = useInjectOrThrow<string>('windowId');
 
-const { currentFileSystemItems, path, parentId, filterByFileType } = defineProps<{
+const {
+  currentFileSystemItems,
+  path,
+  parentId,
+  isInFileSelectState,
+  filterByFileType,
+  multiSelectActivated,
+} = defineProps<{
   currentFileSystemItems: FileSystemItem[];
   path: string;
   parentId: number;
+  isInFileSelectState: boolean;
   filterByFileType: FileType[];
+  multiSelectActivated: boolean;
 }>();
 
 const emit = defineEmits([
@@ -199,13 +212,45 @@ function onDragEnd(event: DragEvent) {
   emit('onDragEnd', event);
 }
 
-function onItemDoubleClick(fileSystemItem: FileSystemItem) {
+async function onItemDoubleClick(fileSystemItem: FileSystemItem) {
+  if (isInFileSelectState && !fileSystemItem.directory) {
+    const foundSelectState = useFileExplorerStore().fileSelectState.find(
+      (element) => element.fileExplorerWindowId === windowId,
+    );
+
+    if (!foundSelectState?.windowId) return;
+
+    const selectedFilesList: FileSelectReturnItem[] = [];
+    await multiSelect.forEachSelected(async (value) => {
+      const fileSystemItem = await rayDb.findOne<FileSystemItem>('fileSystem', 'id', value);
+      if (!fileSystemItem || !fileSystemItem.file) return;
+
+      const fileItem = await rayDb.findOne<Item>('files', 'id', fileSystemItem.file.id);
+      if (!fileItem || fileItem.content.type !== 'file') return;
+
+      selectedFilesList.push({
+        fileSystemItemId: fileSystemItem.id,
+        fileId: fileItem.id,
+        fileItem: fileItem.content,
+      });
+      return;
+    });
+
+    useFileExplorerStore().fileSelectReturnValue = [
+      ...useFileExplorerStore().fileSelectReturnValue,
+      { windowId: foundSelectState.windowId, value: selectedFilesList },
+    ];
+
+    return;
+  } else {
+    emit('itemEvent:dblClick', fileSystemItem);
+  }
+
   multiSelect.clear();
-  emit('itemEvent:dblClick', fileSystemItem);
 }
 
-function onItemSingleClick(event: MouseEvent, fileSystemItem: FileSystemItem) {
-  if (useBrowserStore().isMobile || !event.ctrlKey) {
+function onItemClick(event: MouseEvent, fileSystemItem: FileSystemItem) {
+  if ((useBrowserStore().isMobile || !event.ctrlKey) && multiSelectActivated) {
     if (event.shiftKey) {
       const lastSelectedElement = multiSelect.getLast();
       if (lastSelectedElement) {
@@ -234,9 +279,18 @@ function onItemSingleClick(event: MouseEvent, fileSystemItem: FileSystemItem) {
       multiSelect.selectedItems.value.size === 1 &&
       multiSelect.selectedItems.value.has(fileSystemItem.id)
     ) {
+      if (isInFileSelectState) {
+        multiSelect.toggle(fileSystemItem.id);
+      }
       return;
     }
 
+    if (!isInFileSelectState) {
+      multiSelect.clear();
+    }
+  }
+
+  if (!multiSelectActivated) {
     multiSelect.clear();
   }
 
@@ -325,7 +379,8 @@ function onGridItemContextMenu(fileSystemItem: FileSystemItem) {
         :ray-db="rayDb"
         :window-id="windowId"
         @on-context-menu="onGridItemContextMenu(fileSystemItem)"
-        @on-click="onItemSingleClick($event, fileSystemItem)"
+        @on-click="onItemClick($event, fileSystemItem)"
+        @on-single-click="onItemSingleClick(fileSystemItem)"
         @on-double-click="onItemDoubleClick(fileSystemItem)"
         @on-drag-start="onDragStart($event, fileSystemItem)"
         @on-drag-end="onDragEnd($event)"

@@ -4,7 +4,6 @@ import { useAudioPlayerStore } from '@/stores/audioPlayer.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import MediaPlayerFooter from '@/components/applications/mediaPlayers/MediaPlayerFooter.vue';
 import type { AudioPlayerPages, LoadedAudio, Playlist } from '@/types/AudioPlayerTypes.ts';
-import { useWindowStore } from '@/stores/window.ts';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
 import AudioPlayerHeader from '@/components/applications/mediaPlayers/audioPlayer/AudioPlayerHeader.vue';
 import type { RayDb } from 'ray-db-wrapper';
@@ -23,6 +22,7 @@ import {
 } from '@/composables/audioPlayer/usePlaylist.ts';
 import AudioPlayerPlaylistView from '@/components/applications/mediaPlayers/audioPlayer/AudioPlayerPlaylistView.vue';
 import AudioPlayerPlaylistsView from '@/components/applications/mediaPlayers/audioPlayer/AudioPlayerPlaylistsView.vue';
+import { useWindowStore } from '@/stores/window.ts';
 
 const audioPlayerStore = useAudioPlayerStore();
 
@@ -107,32 +107,31 @@ const fileExplorerWindowId = ref<string>();
 watch(
   () => useFileExplorerStore().fileSelectReturnValue,
   async (returnValues) => {
+    console.log(returnValues);
     const returnValue = returnValues.find(
       (fileSelectState) => fileSelectState.windowId === windowId,
     );
 
-    if (!returnValue) return;
+    if (!returnValue || !fileExplorerWindowId.value) return;
 
-    // If it is of type 'object' then it should be a FileItem
-    if (typeof returnValue.value === 'object' && returnValue.value.rawFile) {
-      if (!fileExplorerWindowId.value) return;
-
+    for (const value of returnValue.value) {
+      if (!value.fileItem.rawFile) return;
       useAddNewAudio(
         audioObject,
         loadedAudios,
         currentLoadedAudio,
         {
           windowId: windowId,
-          file: returnValue.value.rawFile,
-          fileId: returnValue.fileId,
+          file: value.fileItem.rawFile,
+          fileId: value.fileId,
           isPlaying: false,
           playlistName: currentLoadedPlaylist.value?.name ?? '',
         },
         windowId,
       );
-
-      useWindowStore().removeOpenWindowReference(fileExplorerWindowId.value, windowId);
     }
+
+    useWindowStore().removeOpenWindowReference(fileExplorerWindowId.value, windowId);
   },
 );
 

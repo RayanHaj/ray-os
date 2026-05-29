@@ -30,35 +30,34 @@ function handleSelectTextFile() {
 
   useFileExplorerStore().setFileExplorerWindowAsFileSelect(windowId, nextFileExplorerId, [
     'text/plain',
-  ]);
+  ], false);
 
   fileExplorerWindowId.value = useWindowStore().pushOpenWindowReference('File Explorer');
 }
 
 watch(
   () => useFileExplorerStore().fileSelectReturnValue,
-  async (newReturnValue) => {
-    const selectedReturnValue = newReturnValue.find(
+  async (returnValues) => {
+    const returnValue = returnValues.find(
       (fileSelectState) => fileSelectState.windowId === windowId,
     );
 
-    if (!selectedReturnValue) return;
+    if (!returnValue || !fileExplorerWindowId.value) return;
 
-    // If it is of type 'object' then it should be a FileItem
-    if (typeof selectedReturnValue.value === 'object' && selectedReturnValue.value.rawFile) {
-      if (!fileExplorerWindowId.value) return;
+    for (const value of returnValue.value) {
+      if (!value.fileItem.rawFile) return;
 
-      const rawFileText = await selectedReturnValue.value.rawFile.text();
+      const rawFileText = await value.fileItem.rawFile.text();
 
       useNotepadStore().initializeNotepadFile(
         windowId,
-        selectedReturnValue.fileId,
-        selectedReturnValue.value.name,
+        value.fileId,
+        value.fileItem.name,
         rawFileText,
       );
-
-      useWindowStore().removeOpenWindowReference(fileExplorerWindowId.value, windowId);
     }
+
+    useWindowStore().removeOpenWindowReference(fileExplorerWindowId.value, windowId);
   },
 );
 

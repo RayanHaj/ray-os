@@ -69,11 +69,10 @@ watch(
       (fileSelectState) => fileSelectState.windowId === windowId,
     );
 
-    if (!returnValue) return;
+    if (!returnValue || !fileExplorerWindowId.value) return;
 
-    // If it is of type 'object' then it should be a FileItem
-    if (typeof returnValue.value === 'object' && returnValue.value.rawFile) {
-      if (!fileExplorerWindowId.value) return;
+    for (const value of returnValue.value) {
+      if (!value.fileItem.rawFile) return;
 
       const wallpaperDirectoryId = useFileSystemStore().WALLPAPERS_DIR_ID;
       if (!wallpaperDirectoryId) {
@@ -81,32 +80,33 @@ watch(
       }
 
       const dropItem: FileSystemItem = {
-        id: returnValue.id,
+        id: value.fileSystemItemId,
         parents: [],
         file: {
-          name: returnValue.value.name,
-          type: returnValue.value.rawFile.type,
-          id: returnValue.fileId,
+          name: value.fileItem.rawFile.name,
+          type: value.fileItem.rawFile.type,
+          id: value.fileId,
         },
       };
 
       await insertItemIntoFileSystem(rayDb, [wallpaperDirectoryId], dropItem);
       await useDeleteFileSystemItem(rayDb, dropItem, true, true);
-
-      useWindowStore().removeOpenWindowReference(fileExplorerWindowId.value, windowId);
-      useFileSystemStore().updateFileSystem();
     }
+
+    useWindowStore().removeOpenWindowReference(fileExplorerWindowId.value, windowId);
+    useFileSystemStore().updateFileSystem();
   },
 );
 
 function openSelectWallpaperFileWindow() {
   const nextFileExplorerId = useWindowStore().getNextWindowId('File Explorer');
 
-  useFileExplorerStore().setFileExplorerWindowAsFileSelect(windowId, nextFileExplorerId, [
-    'image/webp',
-    'image/png',
-    'image/jpeg',
-  ]);
+  useFileExplorerStore().setFileExplorerWindowAsFileSelect(
+    windowId,
+    nextFileExplorerId,
+    ['image/webp', 'image/png', 'image/jpeg'],
+    true,
+  );
 
   fileExplorerWindowId.value = useWindowStore().pushOpenWindowReference('File Explorer');
 }
