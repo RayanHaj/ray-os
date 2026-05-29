@@ -357,6 +357,23 @@ function onGridItemContextMenu(fileSystemItem: FileSystemItem) {
   multiSelect.clear();
   multiSelect.toggle(fileSystemItem.id);
 }
+
+const selectAllToggle = ref(false);
+watch(selectAllToggle, (newToggledVal) => {
+  if (newToggledVal) {
+    console.log(filterByFileType);
+    for (const fileSystemItem of currentFileSystemItems) {
+      if (fileSystemItem.file) {
+        if (!filterByFileType.includes(fileSystemItem.file.type as FileType)) {
+          continue;
+        }
+      }
+      multiSelect.add(fileSystemItem.id);
+    }
+  } else {
+    multiSelect.clear();
+  }
+});
 </script>
 
 <template>
@@ -368,7 +385,14 @@ function onGridItemContextMenu(fileSystemItem: FileSystemItem) {
     @drop.prevent="onFileDrop"
     :style="{ fontSize: `${itemSize.font}px` }"
   >
-    <div class="grid-wrapper">
+    <div class="checkbox-wrapper">
+      <input id="select-all-checkbox" type="checkbox" v-model="selectAllToggle" />
+      <label for="select-all-checkbox">Select all</label>
+    </div>
+    <div
+      class="grid-wrapper"
+      :style="{ padding: useBrowserStore().isMobile ? '10px 75px 10px 10px' : '10px' }"
+    >
       <FileExplorerItem
         v-for="fileSystemItem in currentFileSystemItems"
         :key="fileSystemItem.id"
@@ -380,7 +404,6 @@ function onGridItemContextMenu(fileSystemItem: FileSystemItem) {
         :window-id="windowId"
         @on-context-menu="onGridItemContextMenu(fileSystemItem)"
         @on-click="onItemClick($event, fileSystemItem)"
-        @on-single-click="onItemSingleClick(fileSystemItem)"
         @on-double-click="onItemDoubleClick(fileSystemItem)"
         @on-drag-start="onDragStart($event, fileSystemItem)"
         @on-drag-end="onDragEnd($event)"
@@ -399,8 +422,9 @@ function onGridItemContextMenu(fileSystemItem: FileSystemItem) {
   flex-direction: column;
   width: 100%;
   margin-left: 0;
-  padding-left: 0;
   overflow: auto;
+  align-items: start;
+  padding: 10px;
 }
 
 .grid-wrapper {
@@ -410,8 +434,22 @@ function onGridItemContextMenu(fileSystemItem: FileSystemItem) {
   width: 100%;
   user-select: none;
   -webkit-user-select: none;
-  padding: 10px;
   height: 100%;
   gap: 5px;
+}
+
+.checkbox-wrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 5px;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 5px 20px;
+  border-radius: 5px;
+}
+
+.checkbox-wrapper label {
+  color: var(--text-color);
+  font-size: var(--font-size-md);
 }
 </style>
