@@ -107,7 +107,8 @@ const fileExplorerWindowId = ref<string>();
 watch(
   () => useFileExplorerStore().fileSelectReturnValue,
   async (returnValues) => {
-    console.log(returnValues);
+    if (returnValues.length === 0) return;
+
     const returnValue = returnValues.find(
       (fileSelectState) => fileSelectState.windowId === windowId,
     );

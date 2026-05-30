@@ -279,9 +279,6 @@ function onItemClick(event: MouseEvent, fileSystemItem: FileSystemItem) {
       multiSelect.selectedItems.value.size === 1 &&
       multiSelect.selectedItems.value.has(fileSystemItem.id)
     ) {
-      if (isInFileSelectState) {
-        multiSelect.toggle(fileSystemItem.id);
-      }
       return;
     }
 
