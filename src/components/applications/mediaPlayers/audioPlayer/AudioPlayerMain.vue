@@ -4,7 +4,6 @@ import { useAudioPlayerStore } from '@/stores/audioPlayer.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import MediaPlayerFooter from '@/components/applications/mediaPlayers/MediaPlayerFooter.vue';
 import type { AudioPlayerPages, LoadedAudio, Playlist } from '@/types/AudioPlayerTypes.ts';
-import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
 import AudioPlayerHeader from '@/components/applications/mediaPlayers/audioPlayer/AudioPlayerHeader.vue';
 import type { RayDb } from 'ray-db-wrapper';
 import { useSetLoadedPlaylists } from '@/composables/audioPlayer/useSetLoadedPlaylists.ts';
@@ -13,7 +12,6 @@ import {
   useUpdateAudioDuration,
   useUpdateAudioTime,
 } from '@/composables/audioPlayer/useUpdateAudioValues.ts';
-import { useOpenSelectAudioWindow } from '@/composables/audioPlayer/useSelectAudioFileWindow.ts';
 import { usePauseAudio, usePlayAudio } from '@/composables/audioPlayer/useAudioPlayback.ts';
 import {
   useDeletePlaylist,
@@ -22,7 +20,7 @@ import {
 } from '@/composables/audioPlayer/usePlaylist.ts';
 import AudioPlayerPlaylistView from '@/components/applications/mediaPlayers/audioPlayer/AudioPlayerPlaylistView.vue';
 import AudioPlayerPlaylistsView from '@/components/applications/mediaPlayers/audioPlayer/AudioPlayerPlaylistsView.vue';
-import { useWindowStore } from '@/stores/window.ts';
+import { useAudioSelectManager } from '@/composables/audioPlayer/useAudioSelectManager.ts';
 
 const audioPlayerStore = useAudioPlayerStore();
 
@@ -110,7 +108,7 @@ watch(
     if (newAudio.windowId !== windowId || newAudio.audioUrl || !newAudio.file) return;
 
     useAddNewAudio(audioObject, loadedAudios, currentLoadedAudioUrl, newAudio, windowId, {
-      load: true,
+      loadAudio: true,
     });
 
     await nextTick();
@@ -118,40 +116,7 @@ watch(
     currentPage.value = 'playlist';
     await playAudio();
   },
-  { deep: true, immediate: true },
-);
-
-const fileExplorerWindowId = ref<string>();
-watch(
-  () => useFileExplorerStore().fileSelectReturnValue,
-  async (returnValues) => {
-    if (returnValues.length === 0) return;
-
-    const returnValue = returnValues.find(
-      (fileSelectState) => fileSelectState.windowId === windowId,
-    );
-
-    if (!returnValue || !fileExplorerWindowId.value) return;
-
-    for (const value of returnValue.value) {
-      if (!value.fileItem.rawFile) return;
-      useAddNewAudio(
-        audioObject,
-        loadedAudios,
-        currentLoadedAudioUrl,
-        {
-          windowId: windowId,
-          file: value.fileItem.rawFile,
-          fileId: value.fileId,
-          isPlaying: false,
-          playlistName: currentLoadedPlaylist.value.playlist?.name ?? '',
-        },
-        windowId,
-      );
-    }
-
-    useWindowStore().removeOpenWindowReference(fileExplorerWindowId.value, windowId);
-  },
+  { immediate: true },
 );
 
 watch(audioLoop, (newValue, oldValue) => {
@@ -161,7 +126,15 @@ watch(audioLoop, (newValue, oldValue) => {
   audioObject.value.loop = newValue;
 });
 
-const onAddAudioButtonClicked = () => useOpenSelectAudioWindow(fileExplorerWindowId, windowId);
+const audioSelectManager = useAudioSelectManager(
+  audioObject,
+  loadedAudios,
+  currentLoadedAudioUrl,
+  currentLoadedPlaylist.value.playlist?.name ?? '',
+  windowId,
+);
+
+const onAddAudioButtonClicked = () => audioSelectManager.openSelectAudioWindow(windowId);
 
 async function onAudioEnded() {
   const nextAudio = loadedAudios.value[currentLoadedAudio.value.index + 1];
@@ -175,12 +148,8 @@ async function onAudioEnded() {
 }
 
 const playAudio = async (audioUrl?: string) =>
-  await usePlayAudio(
-    audioObject,
-    loadedAudios,
-    currentLoadedAudioUrl,
-    audioUrl
-  );
+  await usePlayAudio(audioObject, loadedAudios, currentLoadedAudioUrl, audioUrl);
+
 const pauseAudio = () => usePauseAudio(audioObject, loadedAudios, currentLoadedAudioUrl);
 
 function onSliderInput(time: number) {
@@ -203,7 +172,13 @@ function removeAudioFromList(index: number) {
 }
 
 const savePlaylist = (updatedPlaylistName: string) =>
-  useSavePlaylist(updatedPlaylistName, loadedAudios, currentLoadedPlaylist.value.playlist, windowId, rayDb);
+  useSavePlaylist(
+    updatedPlaylistName,
+    loadedAudios,
+    currentLoadedPlaylist.value.playlist,
+    windowId,
+    rayDb,
+  );
 
 const openPlaylist = (playlist: Playlist) =>
   useOpenPlaylist(

@@ -102,7 +102,7 @@ const windowContentStyles = { height: windowContentHeight.value, width: '100%', 
     :id="windowStateManager.windowId"
     :style="{ ...styles, borderRadius: getWindowBorderRadius }"
     @mousemove="windowResizeManager.onMouseMoveWindow($event)"
-    @mousedown="windowResizeManager.onMouseDownWindow()"
+    @mousedown="windowResizeManager.onMouseDownWindow($event)"
   >
     <slot />
     <WindowHeader

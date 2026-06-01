@@ -8,7 +8,7 @@ export function useAddNewAudio(
   newAudio: LoadedAudio,
   windowId: string,
   options?: {
-    load?: boolean
+    loadAudio?: boolean
   }
 ) {
   if (!newAudio.file) return;
@@ -24,7 +24,7 @@ export function useAddNewAudio(
     playlistName: newAudio.playlistName,
   });
 
-  if (options?.load) {
+  if (options?.loadAudio) {
     useSetCurrentLoadedAudioByUrl(audioUrl, audioObject, loadedAudios, currentLoadedAudio);
   }
 }

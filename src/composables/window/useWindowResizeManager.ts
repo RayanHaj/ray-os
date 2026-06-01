@@ -49,6 +49,8 @@ export function useWindowResizeManager(
   }
 
   function resizeWindow(event: MouseEvent) {
+    event.stopPropagation();
+
     if (isFixed) return;
     if (windowStateManager.isSnapped.value === true) {
       windowStateManager.isSnapped.value = false;
