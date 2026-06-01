@@ -5,7 +5,7 @@ import type { RayDb } from 'ray-db-wrapper';
 export async function useSetLoadedPlaylists(
   rayDb: RayDb,
   loadedPlaylists: Ref<Playlist[]>,
-  currentLoadedPlaylist: Ref<Playlist | undefined>,
+  currentLoadedPlaylist: Ref<number | undefined>,
 ) {
   currentLoadedPlaylist.value = undefined;
 

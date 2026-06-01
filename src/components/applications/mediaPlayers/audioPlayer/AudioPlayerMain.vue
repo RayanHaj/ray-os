@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useAudioPlayerStore } from '@/stores/audioPlayer.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import MediaPlayerFooter from '@/components/applications/mediaPlayers/MediaPlayerFooter.vue';
@@ -32,10 +32,28 @@ const windowId = useInjectOrThrow<string>('windowId');
 const currentPage = ref<AudioPlayerPages>('playlists');
 
 const loadedAudios = ref<LoadedAudio[]>([]);
-const currentLoadedAudio = ref<LoadedAudio>();
+const currentLoadedAudioUrl = ref<string | undefined>();
+
+const currentLoadedAudio = computed(() => {
+  return {
+    audio: loadedAudios.value.find((audio) => audio.audioUrl === currentLoadedAudioUrl.value),
+    index: loadedAudios.value.findIndex((audio) => audio.audioUrl === currentLoadedAudioUrl.value),
+  };
+});
 
 const loadedPlaylists = ref<Playlist[]>([]);
-const currentLoadedPlaylist = ref<Playlist>();
+const currentLoadedPlaylistId = ref<number>();
+
+const currentLoadedPlaylist = computed(() => {
+  return {
+    playlist: loadedPlaylists.value.find(
+      (playlist) => playlist.id === currentLoadedPlaylistId.value,
+    ),
+    index: loadedPlaylists.value.findIndex(
+      (playlist) => playlist.id === currentLoadedPlaylistId.value,
+    ),
+  };
+});
 
 const audioObject = ref<HTMLAudioElement | null>(null);
 const audioDuration = ref(0);
@@ -81,7 +99,7 @@ watch(
   currentPage,
   async (newPage, oldPage) => {
     if (newPage === 'playlist' || newPage === oldPage) return;
-    await useSetLoadedPlaylists(rayDb, loadedPlaylists, currentLoadedPlaylist);
+    await useSetLoadedPlaylists(rayDb, loadedPlaylists, currentLoadedPlaylistId);
   },
   { immediate: true },
 );
@@ -91,7 +109,7 @@ watch(
   async (newAudio) => {
     if (newAudio.windowId !== windowId || newAudio.audioUrl || !newAudio.file) return;
 
-    useAddNewAudio(audioObject, loadedAudios, currentLoadedAudio, newAudio, windowId, {
+    useAddNewAudio(audioObject, loadedAudios, currentLoadedAudioUrl, newAudio, windowId, {
       load: true,
     });
 
@@ -120,13 +138,13 @@ watch(
       useAddNewAudio(
         audioObject,
         loadedAudios,
-        currentLoadedAudio,
+        currentLoadedAudioUrl,
         {
           windowId: windowId,
           file: value.fileItem.rawFile,
           fileId: value.fileId,
           isPlaying: false,
-          playlistName: currentLoadedPlaylist.value?.name ?? '',
+          playlistName: currentLoadedPlaylist.value.playlist?.name ?? '',
         },
         windowId,
       );
@@ -143,44 +161,10 @@ watch(audioLoop, (newValue, oldValue) => {
   audioObject.value.loop = newValue;
 });
 
-watch(
-  loadedPlaylists,
-  (newPlaylists) => {
-    if (currentLoadedPlaylist.value) {
-      const newCurrentLoadedPlaylist = newPlaylists.find(
-        (playlist) => playlist.id === currentLoadedPlaylist.value?.id,
-      );
-      if (!newCurrentLoadedPlaylist) return;
-
-      currentLoadedPlaylist.value = newCurrentLoadedPlaylist;
-    }
-  },
-  { deep: true },
-);
-
-watch(
-  loadedAudios,
-  (newAudios) => {
-    if (currentLoadedAudio.value) {
-      const newCurrentLoadedAudio = newAudios.find(
-        (audio) => audio.audioUrl === currentLoadedAudio.value?.audioUrl
-      );
-      if (!newCurrentLoadedAudio) return;
-
-      currentLoadedAudio.value = newCurrentLoadedAudio;
-    }
-  },
-  { deep: true }
-)
-
 const onAddAudioButtonClicked = () => useOpenSelectAudioWindow(fileExplorerWindowId, windowId);
 
 async function onAudioEnded() {
-  const currentLoadedAudioIndex = loadedAudios.value.findIndex(
-    (audio) => audio.audioUrl === currentLoadedAudio.value?.audioUrl,
-  );
-
-  const nextAudio = loadedAudios.value[currentLoadedAudioIndex + 1];
+  const nextAudio = loadedAudios.value[currentLoadedAudio.value.index + 1];
 
   if (nextAudio === undefined) {
     await playAudio(loadedAudios.value[0].audioUrl);
@@ -194,13 +178,10 @@ const playAudio = async (audioUrl?: string) =>
   await usePlayAudio(
     audioObject,
     loadedAudios,
-    loadedPlaylists,
-    currentLoadedAudio,
-    currentLoadedPlaylist,
-    rayDb,
-    audioUrl,
+    currentLoadedAudioUrl,
+    audioUrl
   );
-const pauseAudio = () => usePauseAudio(audioObject, loadedAudios, currentLoadedAudio);
+const pauseAudio = () => usePauseAudio(audioObject, loadedAudios, currentLoadedAudioUrl);
 
 function onSliderInput(time: number) {
   if (audioObject.value) audioObject.value.currentTime = time;
@@ -209,12 +190,9 @@ function onSliderInput(time: number) {
 function removeAudioFromList(index: number) {
   const audio = loadedAudios.value[index];
 
-  if (
-    currentLoadedAudio.value &&
-    currentLoadedAudio.value.audioUrl &&
-    currentLoadedAudio.value.audioUrl === audio.audioUrl
-  ) {
-    URL.revokeObjectURL(currentLoadedAudio.value.audioUrl);
+  if (currentLoadedAudioUrl.value === audio.audioUrl) {
+    if (!currentLoadedAudioUrl.value) return;
+    URL.revokeObjectURL(currentLoadedAudioUrl.value);
   }
 
   if (audioObject.value && audioObject.value.src === audio.audioUrl) {
@@ -225,33 +203,33 @@ function removeAudioFromList(index: number) {
 }
 
 const savePlaylist = (updatedPlaylistName: string) =>
-  useSavePlaylist(updatedPlaylistName, loadedAudios, currentLoadedPlaylist, windowId, rayDb);
+  useSavePlaylist(updatedPlaylistName, loadedAudios, currentLoadedPlaylist.value.playlist, windowId, rayDb);
 
 const openPlaylist = (playlist: Playlist) =>
   useOpenPlaylist(
     playlist,
-    currentLoadedPlaylist,
+    currentLoadedPlaylistId,
     currentPage,
     loadedAudios,
-    currentLoadedAudio,
+    currentLoadedAudioUrl,
     audioObject,
     windowId,
     rayDb,
   );
 
 const deletePlaylist = (id: number) =>
-  useDeletePlaylist(id, loadedPlaylists, currentLoadedPlaylist, rayDb, windowId);
+  useDeletePlaylist(id, loadedPlaylists, currentLoadedPlaylistId, rayDb, windowId);
 
 function createEmptyPlaylist() {
   loadedAudios.value = [];
-  currentLoadedPlaylist.value = undefined;
+  currentLoadedPlaylistId.value = undefined;
   currentPage.value = 'playlist';
 }
 </script>
 <template>
   <div class="audio-player">
     <AudioPlayerHeader
-      :_playlist-name="currentLoadedPlaylist?.name ?? ''"
+      :_playlist-name="currentLoadedPlaylist.playlist?.name ?? ''"
       :current-page="currentPage"
       @go-to-playlists="currentPage = 'playlists'"
       @save-playlist="savePlaylist"
@@ -275,13 +253,13 @@ function createEmptyPlaylist() {
       />
     </div>
     <MediaPlayerFooter
-      :file-name="currentLoadedAudio?.file?.name ?? ''"
+      :file-name="currentLoadedAudio.audio?.file?.name ?? ''"
       :audio-duration="audioDuration"
       :audio-current-time="audioCurrentTime"
-      :is-playing="currentLoadedAudio?.isPlaying ?? false"
+      :is-playing="currentLoadedAudio.audio?.isPlaying ?? false"
       :looped="audioLoop"
-      :disabled="!currentLoadedAudio"
-      @play-pause-audio="currentLoadedAudio?.isPlaying ? pauseAudio() : playAudio()"
+      :disabled="!currentLoadedAudioUrl"
+      @play-pause-audio="currentLoadedAudio.audio?.isPlaying ? pauseAudio() : playAudio()"
       @slider-input="onSliderInput"
       @loop-audio="audioLoop = !audioLoop"
     />

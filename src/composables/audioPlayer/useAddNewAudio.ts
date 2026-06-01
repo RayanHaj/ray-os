@@ -4,7 +4,7 @@ import type { Ref } from 'vue';
 export function useAddNewAudio(
   audioObject: Ref<HTMLAudioElement | null>,
   loadedAudios: Ref<LoadedAudio[]>,
-  currentLoadedAudio: Ref<LoadedAudio | undefined>,
+  currentLoadedAudio: Ref<string | undefined>,
   newAudio: LoadedAudio,
   windowId: string,
   options?: {
@@ -33,12 +33,12 @@ export function useSetCurrentLoadedAudioByUrl(
   audioUrl: string,
   audioObject: Ref<HTMLAudioElement | null>,
   loadedAudios: Ref<LoadedAudio[]>,
-  currentLoadedAudio: Ref<LoadedAudio | undefined>,
+  currentLoadedAudio: Ref<string | undefined>,
 ) {
   const newLoadedAudio = loadedAudios.value.find((audio) => audio.audioUrl === audioUrl);
   if (!newLoadedAudio) return;
 
-  currentLoadedAudio.value = newLoadedAudio;
+  currentLoadedAudio.value = newLoadedAudio.audioUrl;
 
   if (audioObject.value) {
     audioObject.value.src = audioUrl;
