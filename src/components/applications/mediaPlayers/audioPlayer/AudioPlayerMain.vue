@@ -62,7 +62,7 @@ onMounted(() => {
   audioObject.value.addEventListener('ended', onAudioEnded);
 });
 
-onUnmounted(() => {
+onUnmounted(async () => {
   if (audioObject.value) {
     audioObject.value.removeEventListener('loadedmetadata', onLoadedMetadata);
     audioObject.value.removeEventListener('timeupdate', onTimeUpdate);
@@ -143,6 +143,36 @@ watch(audioLoop, (newValue, oldValue) => {
   audioObject.value.loop = newValue;
 });
 
+watch(
+  loadedPlaylists,
+  (newPlaylists) => {
+    if (currentLoadedPlaylist.value) {
+      const newCurrentLoadedPlaylist = newPlaylists.find(
+        (playlist) => playlist.id === currentLoadedPlaylist.value?.id,
+      );
+      if (!newCurrentLoadedPlaylist) return;
+
+      currentLoadedPlaylist.value = newCurrentLoadedPlaylist;
+    }
+  },
+  { deep: true },
+);
+
+watch(
+  loadedAudios,
+  (newAudios) => {
+    if (currentLoadedAudio.value) {
+      const newCurrentLoadedAudio = newAudios.find(
+        (audio) => audio.audioUrl === currentLoadedAudio.value?.audioUrl
+      );
+      if (!newCurrentLoadedAudio) return;
+
+      currentLoadedAudio.value = newCurrentLoadedAudio;
+    }
+  },
+  { deep: true }
+)
+
 const onAddAudioButtonClicked = () => useOpenSelectAudioWindow(fileExplorerWindowId, windowId);
 
 async function onAudioEnded() {
@@ -160,8 +190,16 @@ async function onAudioEnded() {
   await playAudio(nextAudio.audioUrl);
 }
 
-const playAudio = (audioUrl?: string) =>
-  usePlayAudio(audioObject, loadedAudios, currentLoadedAudio, audioUrl);
+const playAudio = async (audioUrl?: string) =>
+  await usePlayAudio(
+    audioObject,
+    loadedAudios,
+    loadedPlaylists,
+    currentLoadedAudio,
+    currentLoadedPlaylist,
+    rayDb,
+    audioUrl,
+  );
 const pauseAudio = () => usePauseAudio(audioObject, loadedAudios, currentLoadedAudio);
 
 function onSliderInput(time: number) {
