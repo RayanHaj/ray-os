@@ -14,6 +14,7 @@ import { useFileSystemStore } from '@/stores/fileSystem.ts';
 import { useWindowStore } from '@/stores/window.ts';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
 import { useDeleteFileSystemItem } from '@/composables/fileSystem/useDeleteFileSystemItem.ts';
+import { useToastStore } from '@/stores/toast.ts';
 
 const WALLPAPER_COUNT = Object.keys(wallpapers).length;
 
@@ -71,6 +72,7 @@ watch(
 
     if (!returnValue || !fileExplorerWindowId.value) return;
 
+    const setErrorsMessages: Set<string> = new Set();
     for (const value of returnValue.value) {
       if (!value.fileItem.rawFile) return;
 
@@ -89,8 +91,19 @@ watch(
         },
       };
 
-      await insertItemIntoFileSystem(rayDb, [wallpaperDirectoryId], dropItem);
-      await useDeleteFileSystemItem(rayDb, dropItem, true, true);
+      try {
+        await insertItemIntoFileSystem(rayDb, [wallpaperDirectoryId], dropItem);
+        await useDeleteFileSystemItem(rayDb, dropItem, true, true);
+      } catch (e) {
+        console.error(e);
+        setErrorsMessages.add((e as Error).message);
+      }
+    }
+
+    if (setErrorsMessages.size > 0) {
+      for (const message of setErrorsMessages) {
+        useToastStore().createToast(message, 'error', 2500, 'window', windowId);
+      }
     }
 
     useWindowStore().removeOpenWindowReference(fileExplorerWindowId.value, windowId);
