@@ -10,12 +10,22 @@ const { fileName, audioDuration, audioCurrentTime, isPlaying, looped, disabled, 
     isPlaying: boolean;
     looped: boolean;
     disabled: boolean;
-    options?: { fullscreen?: boolean; dotMenu?: boolean };
+    options?: { fullscreen?: boolean; dotMenu?: boolean; nextAndPrevious?: boolean };
   }>();
 
-const emits = defineEmits(['playPauseAudio', 'sliderInput', 'loopAudio', 'fullscreen', 'dotMenu']);
+const emit = defineEmits([
+  'playPauseAudio',
+  'sliderInput',
+  'loopAudio',
+  'fullscreen',
+  'dotMenu',
+  'previous',
+  'next',
+]);
 
 const playSvg = useSvgOrFallback('Play');
+const nextSvg = useSvgOrFallback('Next');
+const previousSvg = useSvgOrFallback('Previous');
 const pauseSvg = useSvgOrFallback('Pause');
 const menuDots = useSvgOrFallback('MenuDots');
 const loopSvg = useSvgOrFallback('Loop');
@@ -28,7 +38,7 @@ const calculateTime = (seconds: number) => {
 };
 
 function onSliderInput(event: Event) {
-  emits('sliderInput', Number((event.target as HTMLInputElement).value));
+  emit('sliderInput', Number((event.target as HTMLInputElement).value));
 }
 
 function getTrackBackground(value: number, min: number, max: number) {
@@ -57,30 +67,38 @@ function getTrackBackground(value: number, min: number, max: number) {
       <div class="start">
         <p class="audio-file-name">{{ useSpliceFileNameExtension(fileName) ?? '' }}</p>
       </div>
-      <div class="middle">
-        <button class="play-button" :disabled="disabled" @click="emits('playPauseAudio')">
-          <component :is="isPlaying ? pauseSvg.svg : playSvg.svg" />
-        </button>
-      </div>
-      <div class="end">
-        <button
-          class="audio-control-button loop"
-          :class="{ active: looped }"
-          @click="emits('loopAudio')"
-          :disabled="disabled"
-        >
-          <component :is="loopSvg.svg" :custom-width="20" :custom-height="20" />
-        </button>
-        <button
-          v-if="options?.fullscreen"
-          @click="emits('fullscreen')"
-          class="audio-control-button"
-        >
-          <component :is="fullscreenSvg.svg" :custom-width="25" :custom-height="25" />
-        </button>
-        <button v-if="options?.dotMenu" class="audio-control-button">
-          <component :is="menuDots.svg" :custom-width="25" :custom-height="25" />
-        </button>
+      <div class="middle-end-wrapper">
+        <div class="middle">
+          <button class="previous-button" :disabled="disabled" @click="emit('previous')">
+            <component :is="previousSvg.svg" />
+          </button>
+          <button class="play-button" :disabled="disabled" @click="emit('playPauseAudio')">
+            <component :is="isPlaying ? pauseSvg.svg : playSvg.svg" />
+          </button>
+          <button class="next-button" :disabled="disabled" @click="emit('next')">
+            <component :is="nextSvg.svg" />
+          </button>
+        </div>
+        <div class="end">
+          <button
+            class="audio-control-button loop"
+            :class="{ active: looped }"
+            @click="emit('loopAudio')"
+            :disabled="disabled"
+          >
+            <component :is="loopSvg.svg" :custom-width="20" :custom-height="20" />
+          </button>
+          <button
+            v-if="options?.fullscreen"
+            @click="emit('fullscreen')"
+            class="audio-control-button"
+          >
+            <component :is="fullscreenSvg.svg" :custom-width="25" :custom-height="25" />
+          </button>
+          <button v-if="options?.dotMenu" class="audio-control-button">
+            <component :is="menuDots.svg" :custom-width="25" :custom-height="25" />
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -92,6 +110,8 @@ function getTrackBackground(value: number, min: number, max: number) {
   width: 100%;
   height: var(--audio-player-footer-height);
   position: sticky;
+
+  container: mediaPlayerFooter / size;
 
   --audio-progress-controls-height: calc(var(--audio-player-footer-height) / 3);
   --audio-controls-height: calc((var(--audio-player-footer-height) / 3) * 2);
@@ -127,22 +147,29 @@ input[type='range']:disabled {
   cursor: default;
 }
 
-.start,
-.middle,
-.end {
+.middle-end-wrapper {
   display: flex;
-  width: calc(100% / 3);
+  flex-direction: row;
+  width: calc(100% / 3 * 2);
+  justify-content: end;
 }
 
 .start {
+  display: flex;
+  width: calc(100% / 3);
   justify-content: start;
 }
 
 .middle {
+  display: flex;
+  width: 50%;
+  gap: 20px;
   justify-content: center;
 }
 
 .end {
+  display: flex;
+  width: 50%;
   gap: 20px;
   justify-content: end;
 }
@@ -158,6 +185,13 @@ button {
   cursor: pointer;
 }
 
+.play-button,
+.previous-button,
+.next-button {
+  width: 35px;
+  height: 35px;
+}
+
 .play-button {
   display: flex;
   align-items: center;
@@ -165,8 +199,13 @@ button {
   background-color: var(--button-primary-color);
   border: none;
   border-radius: 100%;
-  width: 35px;
-  height: 35px;
+}
+
+.previous-button,
+.next-button {
+  background: none;
+  border: none;
+  color: var(--text-color);
 }
 
 .audio-control-button {
@@ -179,6 +218,8 @@ button {
 
 .audio-control-button.loop {
   padding: 5px;
+  width: 35px;
+  height: 35px;
 }
 
 .audio-control-button.loop.active {
@@ -228,5 +269,18 @@ input[type='range']::-moz-range-thumb {
   border-radius: 10px;
   border: 0 solid #ffffff;
   box-shadow: 0 4px 0 rgba(0, 0, 0, 0.3);
+}
+
+@container mediaPlayerFooter (max-width: 575px) {
+  .middle-end-wrapper {
+    gap: 10px;
+  }
+  .middle {
+    width: 100%;
+    justify-content: end;
+  }
+  .end {
+    width: fit-content;
+  }
 }
 </style>

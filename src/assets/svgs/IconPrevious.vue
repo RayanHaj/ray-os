@@ -1,0 +1,20 @@
+<template>
+  <svg
+    :width="customWidth"
+    :height="customHeight"
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+  >
+    <path
+      :fill="customColor"
+      d="M3 3.75a.75.75 0 0 1 1.5 0v16.5a.75.75 0 0 1-1.5 0V3.75Zm18 1.003c0-1.408-1.578-2.24-2.74-1.444L7.763 10.503a1.75 1.75 0 0 0-.01 2.88l10.499 7.302c1.16.807 2.749-.024 2.749-1.437V4.753Z"
+    />
+  </svg>
+</template>
+<script setup lang="ts">
+defineProps({
+  customWidth: { type: Number, required: false, default: 20 },
+  customHeight: { type: Number, required: false, default: 20 },
+  customColor: { type: String, required: false, default: 'var(--svg-color)' },
+});
+</script>

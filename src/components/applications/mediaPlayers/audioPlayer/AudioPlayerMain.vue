@@ -200,6 +200,34 @@ function createEmptyPlaylist() {
   currentLoadedPlaylistId.value = undefined;
   currentPage.value = 'playlist';
 }
+
+async function onPrevious() {
+  if (audioObject.value === null) return;
+
+  const currentIndex = currentLoadedAudio.value.index;
+  if (currentIndex === 0) {
+    audioObject.value.currentTime = 0;
+    return;
+  }
+
+  if (audioObject.value.currentTime > 3) {
+    audioObject.value.currentTime = 0;
+  } else {
+    currentLoadedAudioUrl.value = loadedAudios.value[currentIndex - 1].audioUrl;
+    await playAudio(currentLoadedAudioUrl.value);
+  }
+}
+
+async function onNext() {
+  if (audioObject.value === null) return;
+
+  const currentIndex = currentLoadedAudio.value.index;
+  currentLoadedAudioUrl.value =
+    loadedAudios.value[
+      currentIndex === loadedAudios.value.length - 1 ? 0 : currentIndex + 1
+    ].audioUrl;
+  await playAudio(currentLoadedAudioUrl.value);
+}
 </script>
 <template>
   <div class="audio-player">
@@ -234,9 +262,12 @@ function createEmptyPlaylist() {
       :is-playing="currentLoadedAudio.audio?.isPlaying ?? false"
       :looped="audioLoop"
       :disabled="!currentLoadedAudioUrl"
+      :options="{ nextAndPrevious: true }"
       @play-pause-audio="currentLoadedAudio.audio?.isPlaying ? pauseAudio() : playAudio()"
       @slider-input="onSliderInput"
       @loop-audio="audioLoop = !audioLoop"
+      @previous="onPrevious"
+      @next="onNext"
     />
   </div>
 </template>

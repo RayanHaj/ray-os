@@ -27,6 +27,7 @@ const emit = defineEmits([
   'onDoubleClick',
   'onSingleClick',
   'renameFile',
+  'addToDesktop',
   'onDelete',
   'onContextMenu',
 ]);
@@ -63,7 +64,9 @@ function onContextMenu(event: MouseEvent) {
         renameFile: () => {
           emit('renameFile');
         },
-        addToDesktop: () => {},
+        addToDesktop: () => {
+          emit('addToDesktop');
+        },
       },
     );
 }

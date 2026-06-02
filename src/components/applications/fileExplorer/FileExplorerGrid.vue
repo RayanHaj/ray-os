@@ -350,18 +350,60 @@ function onRenameFile() {
   });
 }
 
+async function onAddToDesktop() {
+  // const fileSystemItemId = multiSelect.getFirst();
+  // const fileSystemItem = currentFileSystemItems.find(
+  //   (fileSystemItem) => fileSystemItem.id === fileSystemItemId,
+  // );
+  //
+  // if (!fileSystemItem) return;
+  //
+  // // sort in ascending tileId order
+  // const desktopItems = await useDesktopStore()
+  //   .getDesktopItems(rayDb)
+  //   .then((desktopItems) => desktopItems.sort((a, b) => a.tileId - b.tileId));
+  //
+  // console.log(desktopItems);
+  //
+  // let tileId = 1;
+  // let previousTileId = -1;
+  // if (desktopItems.length > 0) {
+  //   for (const desktopItem of desktopItems) {
+  //     if (previousTileId === -1 || desktopItem.tileId - 1 === previousTileId) {
+  //       previousTileId = desktopItem.tileId;
+  //       tileId = previousTileId + 1;
+  //     }
+  //   }
+  // }
+  //
+  // console.log({
+  //   id: fileSystemItem.id,
+  //   tileId: tileId,
+  //   type: fileSystemItem.type as 'application' | 'file' | 'directory',
+  //   path: fileSystemItem.path,
+  // });
+  //
+  // await useDesktopStore().addDesktopItem(rayDb, {
+  //   id: fileSystemItem.id ?? fileSystemItem.file?.id,
+  //   tileId: tileId,
+  //   type: fileSystemItem.type as 'application' | 'file' | 'directory',
+  //   path: fileSystemItem.path,
+  // });
+}
+
 function onGridItemContextMenu(fileSystemItem: FileSystemItem) {
   multiSelect.clear();
   multiSelect.toggle(fileSystemItem.id);
 }
-
 const selectAllToggle = ref(false);
 watch(selectAllToggle, (newToggledVal) => {
   if (newToggledVal) {
-    console.log(filterByFileType);
     for (const fileSystemItem of currentFileSystemItems) {
       if (fileSystemItem.file) {
-        if (!filterByFileType.includes(fileSystemItem.file.type as FileType) && isInFileSelectState) {
+        if (
+          !filterByFileType.includes(fileSystemItem.file.type as FileType) &&
+          isInFileSelectState
+        ) {
           continue;
         }
       }
@@ -371,6 +413,10 @@ watch(selectAllToggle, (newToggledVal) => {
     multiSelect.clear();
   }
 });
+
+const ctrlKeyDown = (event: KeyboardEvent) => {
+  console.log(event);
+};
 </script>
 
 <template>
@@ -380,6 +426,7 @@ watch(selectAllToggle, (newToggledVal) => {
     @contextmenu.prevent="onContextMenu"
     @dragover.prevent
     @drop.prevent="onFileDrop"
+    @keydown.stop="ctrlKeyDown"
     :style="{ fontSize: `${itemSize.font}px` }"
   >
     <div class="checkbox-wrapper">
@@ -405,6 +452,7 @@ watch(selectAllToggle, (newToggledVal) => {
         @on-drag-start="onDragStart($event, fileSystemItem)"
         @on-drag-end="onDragEnd($event)"
         @rename-file="onRenameFile"
+        @add-to-desktop="onAddToDesktop"
         @on-delete="onItemsDelete"
       />
     </div>

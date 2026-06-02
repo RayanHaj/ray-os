@@ -25,6 +25,8 @@ export const availableSvgs = [
   'Settings',
   'Upload',
   'Notepad',
+  'Next',
+  'Previous',
   'Todo',
   'Github',
   'LinkedIn',
@@ -37,6 +39,6 @@ export const availableSvgs = [
   'ImageViewer',
   'Snake',
   'AudioPlayer',
-  'MenuDots'
+  'MenuDots',
 ] as const;
 export type AvailableSvgs = (typeof availableSvgs)[number];
