@@ -271,7 +271,7 @@ input[type='range']::-moz-range-thumb {
   box-shadow: 0 4px 0 rgba(0, 0, 0, 0.3);
 }
 
-@container mediaPlayerFooter (max-width: 575px) {
+@container mediaPlayerFooter (max-width: 450px) {
   .middle-end-wrapper {
     gap: 10px;
   }
