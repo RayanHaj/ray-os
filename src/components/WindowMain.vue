@@ -9,16 +9,25 @@ import { useWindowResizeManager } from '@/composables/window/useWindowResizeMana
 import { useWindowSnappingManager } from '@/composables/window/useWindowSnappingManager.ts';
 import { useBrowserStore } from '@/stores/browser.ts';
 
-const { reference, windowContentComponent, width, height, minWidth, minHeight, windowType } =
-  defineProps<{
-    reference: WindowFlatReference;
-    windowContentComponent: Component;
-    width?: string;
-    height?: string;
-    minWidth?: string;
-    minHeight?: string;
-    windowType?: 'fixed' | 'inline';
-  }>();
+const {
+  reference,
+  windowContentComponent,
+  width,
+  height,
+  minWidth,
+  minHeight,
+  windowType,
+  showNoApplicationSvgsFor,
+} = defineProps<{
+  reference: WindowFlatReference;
+  windowContentComponent: Component;
+  width?: string;
+  height?: string;
+  minWidth?: string;
+  minHeight?: string;
+  windowType?: 'fixed' | 'inline';
+  showNoApplicationSvgsFor: string[];
+}>();
 
 const styles: Ref<WindowStyleObject> = ref({
   left: '25%',
@@ -108,7 +117,8 @@ const windowContentStyles = { height: windowContentHeight.value, width: '100%', 
     <WindowHeader
       :window-id="windowStateManager.windowId"
       :reference="reference"
-      :windowType="windowType"
+      :window-type="windowType"
+      :show-no-application-svgs-for="showNoApplicationSvgsFor"
       @on-mousedown-header="onMousedownHeader"
       @window-control-close="closeWindow"
       @window-control-maximize="maximizeWindow"

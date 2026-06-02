@@ -25,7 +25,7 @@ import FileExplorerItem from '@/components/applications/fileExplorer/FileExplore
 import { SystemFileDeleteError } from '@/exceptions/SystemFileDeleteError.ts';
 import { useBrowserStore } from '@/stores/browser.ts';
 import { useMultiSelect } from '@/composables/helpers/useMultiSelect.ts';
-import { type FileProperties, useFilePropertiesStore } from '@/stores/fileProperties.ts';
+import { useFilePropertiesStore } from '@/stores/fileProperties.ts';
 import { useWindowStore } from '@/stores/window.ts';
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
@@ -417,13 +417,13 @@ watch(selectAllToggle, (newToggledVal) => {
 });
 
 async function onProperties(fileSystemItem: FileSystemItem) {
-  const propertiesWindowId = useWindowStore().getNextWindowId('properties');
+  const propertiesWindowId = useWindowStore().getNextWindowId('Properties');
 
   if (fileSystemItem.directory) {
     useFilePropertiesStore().loadFileProperties({
       name: fileSystemItem.directory.name,
       type: 'Directory',
-      location: path,
+      location: `${path}/${fileSystemItem.directory.name}`,
       windowId: propertiesWindowId,
     });
   } else if (fileSystemItem.file) {
@@ -436,7 +436,7 @@ async function onProperties(fileSystemItem: FileSystemItem) {
           useFilePropertiesStore().loadFileProperties({
             name: file.label,
             type: 'Application',
-            location: path,
+            location: `${path}/${file.label}`,
             windowId: propertiesWindowId,
           });
         }
@@ -446,7 +446,7 @@ async function onProperties(fileSystemItem: FileSystemItem) {
           useFilePropertiesStore().loadFileProperties({
             name: file.label,
             type: 'Directory',
-            location: path,
+            location: `${path}/${file.label}`,
             windowId: propertiesWindowId,
           });
         }
@@ -455,14 +455,14 @@ async function onProperties(fileSystemItem: FileSystemItem) {
         useFilePropertiesStore().loadFileProperties({
           name: file.content.name,
           type: file.content.rawFile?.type as FileType,
-          location: path,
+          location: `${path}/${file.content.name}`,
           windowId: propertiesWindowId,
         });
       }
     }
   }
 
-  useWindowStore().pushOpenWindowReference('properties');
+  useWindowStore().pushOpenWindowReference('Properties');
 }
 </script>
 

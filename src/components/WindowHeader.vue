@@ -7,10 +7,16 @@ import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
 import { fileExtensions } from '@/types/ItemTypes.ts';
 import { useBrowserStore } from '@/stores/browser.ts';
 
-const { windowId, reference, windowType } = defineProps<{
+const {
+  windowId,
+  reference,
+  windowType,
+  showNoApplicationSvgsFor = [],
+} = defineProps<{
   windowId: string;
   reference: WindowFlatReference;
   windowType?: 'fixed' | 'inline';
+  showNoApplicationSvgsFor?: string[];
 }>();
 
 const allowedFileTypes = computed(
@@ -22,8 +28,9 @@ const allowedFileTypes = computed(
 
 const isInMultiSelectState = computed(
   () =>
-    useFileExplorerStore().fileSelectState.find((element) => element.fileExplorerWindowId === windowId)
-      ?.multiSelect ?? false,
+    useFileExplorerStore().fileSelectState.find(
+      (element) => element.fileExplorerWindowId === windowId,
+    )?.multiSelect ?? false,
 );
 
 const windowControlButtons = ref<{ name: string; svg: Raw<Component> | null }[]>([]);
@@ -63,7 +70,13 @@ onBeforeMount(async () => {
 <template>
   <header class="window-header" :style="{ height: `${useWindowStore().windowHeaderHeight}px` }">
     <div class="info-wrapper">
-      <component class="svg" :is="svg" :custom-width="15" :custom-height="15" />
+      <component
+        v-if="!showNoApplicationSvgsFor.includes(reference.label)"
+        class="svg"
+        :is="svg"
+        :custom-width="15"
+        :custom-height="15"
+      />
       <p class="window-name">
         {{
           allowedFileTypes.length === 0

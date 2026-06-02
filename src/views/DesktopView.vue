@@ -29,12 +29,16 @@ const wallpapers: Record<string, string> = wallpapersJSON;
 
 const windowFlatReferences: ComputedRef<WindowFlatReference[]> = useFlatOpenWindowsReferencesFull();
 
-const fixedSizeWindows: Record<string, { width: number; height: number }> = {
-};
+const fixedSizeWindows: Record<string, { width: number; height: number }> = {};
+
+// const fixedSizeWindows: Record<string, { width: number; height: number }> = {
+//   Properties: { width: 300, height: 350 },
+// };
 
 const minWidthWindows: Record<string, { width: number }> = {
   Notepad: { width: 300 },
   'Audio Player': { width: 330 },
+  Properties: { width: 300 },
 };
 
 const minHeightWindows: Record<string, { height: number }> = {
@@ -42,10 +46,18 @@ const minHeightWindows: Record<string, { height: number }> = {
   Calculator: { height: 315 },
   'File Explorer': { height: 315 },
   'Audio Player': { height: 315 },
+  Properties: { height: 350 },
 };
 
 // Windows that cannot be minified
-const inlineWindows: Record<string, boolean> = { 'Video Player': true, 'Image Viewer': true };
+const inlineWindows: Record<string, boolean> = {
+  'Video Player': true,
+  'Image Viewer': true,
+  Properties: true,
+};
+
+// Windows that should not show a svg in the window header
+const showNoApplicationSvgsFor: string[] = ['Properties'];
 
 const contextMenuStore = useContextMenuStore();
 const wallpaperStore = useWallpaperStore();
@@ -125,6 +137,7 @@ watch(
           ? `${minHeightWindows[reference.label].height}px`
           : undefined
       "
+      :show-no-application-svgs-for="showNoApplicationSvgsFor"
     >
       <UiToast
         toast-location="window"
