@@ -18,6 +18,8 @@ import { useDblClick } from '@/composables/helpers/UseDblClick.ts';
 import { useMultiSelectionBoxStore } from '@/stores/multiSelectionBox.ts';
 import { useHandleDesktopFileClicked } from '@/composables/desktop/useHandleDesktopFileClicked.ts';
 import { useToastFeatureNotImplemented } from '@/composables/helpers/useToastFeatureNotImplemented.ts';
+import { useWindowStore } from '@/stores/window.ts';
+import { useFilePropertiesStore } from '@/stores/fileProperties.ts';
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 
@@ -52,11 +54,7 @@ function onTileRightClick(event: MouseEvent) {
           await desktopStore.deleteDesktopItem(rayDb, tileItem.value.tileId);
         },
       },
-      {
-        properties: () => {
-          useToastFeatureNotImplemented();
-        },
-      },
+      {},
     );
 }
 

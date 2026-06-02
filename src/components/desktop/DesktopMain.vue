@@ -27,11 +27,6 @@ function onDesktopRightClick(event: MouseEvent) {
           useToastFeatureNotImplemented();
         },
       },
-      {
-        properties: () => {
-          useToastFeatureNotImplemented();
-        },
-      },
     );
 }
 

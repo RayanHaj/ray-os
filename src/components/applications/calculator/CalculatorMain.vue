@@ -9,18 +9,18 @@ provide('calculatorManager', useCalculatorManager());
 </script>
 
 <template>
-  <div class="calculator">
+  <section class="calculator">
     <div class="header">
-      <button @click="historyToggled = !historyToggled">Show history</button>
+      <button id="showHistoryButton" @click="historyToggled = !historyToggled">Show history</button>
     </div>
-    <div v-if="historyToggled" class="history-wrapper">
-      <CalculatorHistory :history-toggled="historyToggled" />
-    </div>
-    <div v-else class="calculator-wrapper">
+    <div v-show="!historyToggled" class="calculator-wrapper" :class="{ toggled: historyToggled }">
       <CalculatorAnswer />
       <CalculatorGrid />
     </div>
-  </div>
+    <div v-show="historyToggled" class="history-wrapper">
+      <CalculatorHistory :history-toggled="historyToggled" />
+    </div>
+  </section>
 </template>
 
 <style scoped>
@@ -39,7 +39,12 @@ provide('calculatorManager', useCalculatorManager());
   padding: 10px;
 }
 
-.header button {
+.calculator-wrapper,
+.history-wrapper {
+  height: calc(100% - 70px);
+}
+
+#showHistoryButton {
   background: var(--button-primary-color);
   color: var(--text-color);
   border: var(--highlight-color) solid 2px;
@@ -47,10 +52,5 @@ provide('calculatorManager', useCalculatorManager());
   height: 100%;
   border-radius: 5px;
   cursor: pointer;
-}
-
-.calculator-wrapper,
-.history-wrapper {
-  height: calc(100% - 70px);
 }
 </style>
