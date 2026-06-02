@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import { type Component, computed, markRaw, onBeforeMount, type Raw, ref, shallowRef } from 'vue';
+import { computed, onBeforeMount, ref } from 'vue';
 import type { WindowFlatReference } from '@/types/WindowTypes.ts';
 import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
 import { useWindowStore } from '@/stores/window';
-import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
 import { fileExtensions } from '@/types/ItemTypes.ts';
-import { useBrowserStore } from '@/stores/browser.ts';
+import { useFileSelectStateGetter } from '@/composables/fileExplorer/useFileSelectStateGetter.js';
 
 const {
   windowId,
@@ -19,52 +18,41 @@ const {
   showNoApplicationSvgsFor?: string[];
 }>();
 
-const allowedFileTypes = computed(
-  () =>
-    useFileExplorerStore().fileSelectState.find(
-      (element) => element.fileExplorerWindowId === windowId,
-    )?.allowedFileTypes ?? [],
-);
+const activeActions = ref<('Minimize' | 'Maximize' | 'Close')[]>(['Minimize', 'Maximize', 'Close']);
+onBeforeMount(() => {
+  switch (windowType) {
+    case 'fixed':
+      activeActions.value = ['Minimize', 'Close'];
+      break;
+    case 'inline':
+      activeActions.value = ['Maximize', 'Close'];
+  }
+});
 
-const isInMultiSelectState = computed(
-  () =>
-    useFileExplorerStore().fileSelectState.find(
-      (element) => element.fileExplorerWindowId === windowId,
-    )?.multiSelect ?? false,
-);
+const windowName = computed(() => {
+  const fileSelectStateGetter = useFileSelectStateGetter(windowId).value;
 
-const windowControlButtons = ref<{ name: string; svg: Raw<Component> | null }[]>([]);
-const svg = shallowRef<Component | null>(null);
-onBeforeMount(async () => {
-  svg.value = useSvgOrFallback(reference.label).svg;
+  if (fileSelectStateGetter.active) {
+    const stringBuilder = ['select'];
 
-  const buttons =
-    windowType === 'fixed'
-      ? [
-          { name: 'Minimize', svg: null },
-          { name: 'Close', svg: null },
-        ]
-      : windowType === 'inline'
-        ? [
-            { name: 'Maximize', svg: null },
-            { name: 'Close', svg: null },
-          ]
-        : [
-            { name: 'Minimize', svg: null },
-            { name: 'Maximize', svg: null },
-            { name: 'Close', svg: null },
-          ];
+    if (!fileSelectStateGetter.multiSelect) {
+      stringBuilder.push('a');
+    }
 
-  windowControlButtons.value = await Promise.all(
-    buttons.map(async (button) => {
-      if (button.name === 'Maximize' && useBrowserStore().isMobile) {
-        return null;
-      }
+    stringBuilder.push(
+      fileSelectStateGetter.allowedFileTypes.map((type) => `.${fileExtensions[type]}`).join('/'),
+    );
 
-      const svg = useSvgOrFallback(button.name).svg;
-      return { name: button.name, svg: svg ? markRaw(svg) : null };
-    }),
-  ).then((buttons) => buttons.filter((button) => button !== null));
+    if (fileSelectStateGetter.multiSelect) {
+      stringBuilder.push('files');
+    } else {
+      stringBuilder.push('file');
+    }
+
+    return stringBuilder.join(' ');
+  }
+
+  return reference.label;
 });
 </script>
 <template>
@@ -72,32 +60,25 @@ onBeforeMount(async () => {
     <div class="info-wrapper">
       <component
         v-if="!showNoApplicationSvgsFor.includes(reference.label)"
-        class="svg"
-        :is="svg"
-        :custom-width="15"
-        :custom-height="15"
+        :is="useSvgOrFallback(reference.label).svg"
       />
       <p class="window-name">
-        {{
-          allowedFileTypes.length === 0
-            ? reference.label
-            : `select ${!isInMultiSelectState ? 'a' : ''} ${allowedFileTypes.map((type) => `.${fileExtensions[type]}`).join('/')} ${isInMultiSelectState ? 'files' : 'file'}`
-        }}
+        {{ windowName }}
       </p>
     </div>
     <div
-      :style="{ width: '100%' }"
       @mousedown="$emit('onMousedownHeader', $event)"
       @touchstart="$emit('onMousedownHeader', $event)"
+      class="drag-zone"
     />
     <div class="window-controls">
       <button
-        v-for="button of windowControlButtons"
-        :key="button.name"
-        :id="button.name.toLowerCase()"
-        @click="$emit(`windowControl${button.name}`)"
+        v-for="action in ['Minimize', 'Maximize', 'Close']"
+        :key="action"
+        :class="action.toLowerCase()"
+        @click="$emit(`windowControl${action}`)"
       >
-        <component :is="button.svg" :custom-width="15" :custom-height="15" />
+        <component :is="useSvgOrFallback(action).svg" />
       </button>
     </div>
   </header>
@@ -105,16 +86,11 @@ onBeforeMount(async () => {
 
 <style scoped>
 .window-header {
-  position: relative;
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
-  top: 0;
-  width: 100%;
+  padding-left: 10px;
   background-color: var(--window-secondary-color);
-  padding-left: 12px;
   border-bottom: var(--window-border-color) solid 1px;
-  z-index: 9999;
 }
 
 .info-wrapper {
@@ -126,7 +102,7 @@ onBeforeMount(async () => {
   font-size: var(--font-size-lg);
 }
 
-.window-name {
+.info-wrapper p {
   font-weight: bold;
   min-width: max-content;
 }
@@ -138,7 +114,7 @@ onBeforeMount(async () => {
   align-items: center;
 }
 
-button {
+.window-controls button {
   background-color: transparent;
   padding: 0;
   width: 35px;
@@ -147,13 +123,23 @@ button {
   cursor: pointer;
 }
 
-#close:hover {
-  background-color: red;
-  border: none;
+.info-wrapper svg,
+.window-controls svg {
+  width: 15px;
+  height: 15px;
 }
 
-#minimize:hover,
-#maximize:hover {
+.drag-zone {
+  width: stretch;
+}
+
+.minimize:hover,
+.maximize:hover {
   background-color: var(--button-hover-color);
+}
+
+.close:hover {
+  background-color: red;
+  border: none;
 }
 </style>

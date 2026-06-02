@@ -1,19 +1,17 @@
 <script setup lang="ts">
-import { type Component, computed, onBeforeMount, shallowRef } from 'vue';
-import { useSvgByFileNameAndDirectory } from '@/composables/svg/useSvgByFileNameAndDirectory.ts';
-import { type AllPrimaryActionsContextMenu } from '@/types/ContextMenuTypes.ts';
+import { computed, type StyleValue } from 'vue';
 import { useContextMenuStore } from '@/stores/contextMenu.ts';
+import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
 
 const contextMenuStore = useContextMenuStore();
 
-const primaryActionsSvgs = shallowRef<Record<string, Component>>({});
-onBeforeMount(async () => {
-  for (const action of ['Copy', 'Paste', 'Delete', 'Rename'] as AllPrimaryActionsContextMenu) {
-    const svg = await useSvgByFileNameAndDirectory(action);
-    if (svg) {
-      primaryActionsSvgs.value[action] = svg;
-    }
-  }
+const contextMenuStyle = computed<StyleValue>(() => {
+  return {
+    left: `${contextMenuStore.position.left}px`,
+    top: `${contextMenuStore.position.top}px`,
+    height: `${contextMenuStore.contextMenuHeight}px`,
+    width: `${contextMenuStore.contextMenuWidth}px`,
+  };
 });
 
 const showDivider = computed(
@@ -21,23 +19,15 @@ const showDivider = computed(
 );
 </script>
 <template>
-  <div
-    class="context-menu"
-    :style="{
-      left: `${contextMenuStore.position.left}px`,
-      top: `${contextMenuStore.position.top}px`,
-      height: `${contextMenuStore.contextMenuHeight}px`,
-      width: `${contextMenuStore.contextMenuWidth}px`,
-    }"
-  >
+  <div class="context-menu" :style="contextMenuStyle">
     <div v-if="contextMenuStore.primaryActions.length > 0" class="primary-actions">
       <button
-        class="primary-action"
         v-for="action of contextMenuStore.primaryActions"
         :key="action"
         @click="contextMenuStore.setClickedButton(action)"
+        class="primary-action"
       >
-        <component :is="primaryActionsSvgs[action]" :custom-height="18" :custom-width="18" />
+        <component :is="useSvgOrFallback(action).svg" />
       </button>
     </div>
     <hr v-if="showDivider" />
@@ -78,6 +68,11 @@ const showDivider = computed(
   text-align: center;
   padding: 2px 2px 0 2px;
   border-radius: 2px;
+}
+
+.primary-action svg {
+  height: 18px;
+  width: 18px;
 }
 
 .primary-action:hover {

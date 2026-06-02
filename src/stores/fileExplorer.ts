@@ -9,7 +9,7 @@ export const useFileExplorerStore = defineStore('fileExplorer', () => {
   const filePathAtWindow = ref<{ windowId: string; path: string[] }>();
   const fileSelectState = ref<{
     active: boolean;
-    windowId: string;
+    targetWindowId: string;
     fileExplorerWindowId: string;
     allowedFileTypes: FileType[];
     multiSelect: boolean;
@@ -26,7 +26,7 @@ export const useFileExplorerStore = defineStore('fileExplorer', () => {
   function setFileExplorerWindowAsFileSelect(windowId: string, fileExplorerWindowId: string, allowedFileTypes: FileType[], multiSelect: boolean = false) {
     fileSelectState.value.push({
       active: true,
-      windowId: windowId,
+      targetWindowId: windowId,
       fileExplorerWindowId: fileExplorerWindowId,
       allowedFileTypes: allowedFileTypes,
       multiSelect: multiSelect

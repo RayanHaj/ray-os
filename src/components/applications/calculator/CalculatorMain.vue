@@ -11,7 +11,9 @@ provide('calculatorManager', useCalculatorManager());
 <template>
   <section class="calculator">
     <div class="header">
-      <button id="showHistoryButton" @click="historyToggled = !historyToggled">Show history</button>
+      <button class="show-history-button" @click="historyToggled = !historyToggled">
+        Show history
+      </button>
     </div>
     <div v-show="!historyToggled" class="calculator-wrapper" :class="{ toggled: historyToggled }">
       <CalculatorAnswer />
@@ -24,10 +26,6 @@ provide('calculatorManager', useCalculatorManager());
 </template>
 
 <style scoped>
-* {
-  color: white;
-}
-
 .calculator {
   position: relative;
   display: flex;
@@ -44,7 +42,7 @@ provide('calculatorManager', useCalculatorManager());
   height: calc(100% - 70px);
 }
 
-#showHistoryButton {
+.show-history-button {
   background: var(--button-primary-color);
   border: var(--highlight-color) solid 2px;
   padding: 10px;

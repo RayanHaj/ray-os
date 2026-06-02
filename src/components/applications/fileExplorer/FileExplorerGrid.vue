@@ -220,7 +220,7 @@ async function onItemDoubleClick(fileSystemItem: FileSystemItem) {
       (element) => element.fileExplorerWindowId === windowId,
     );
 
-    if (!foundSelectState?.windowId) return;
+    if (!foundSelectState?.targetWindowId) return;
 
     const selectedFilesList: FileSelectReturnItem[] = [];
     await multiSelect.forEachSelected(async (value) => {
@@ -240,7 +240,7 @@ async function onItemDoubleClick(fileSystemItem: FileSystemItem) {
 
     useFileExplorerStore().fileSelectReturnValue = [
       ...useFileExplorerStore().fileSelectReturnValue,
-      { windowId: foundSelectState.windowId, value: selectedFilesList },
+      { windowId: foundSelectState.targetWindowId, value: selectedFilesList },
     ];
 
     return;
