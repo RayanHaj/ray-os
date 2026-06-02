@@ -45,7 +45,6 @@ onMounted(() => {
 .settings {
   display: flex;
   flex-direction: row;
-  color: var(--text-color);
 }
 
 .selected-setting-window {

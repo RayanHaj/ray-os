@@ -46,7 +46,6 @@ provide('calculatorManager', useCalculatorManager());
 
 #showHistoryButton {
   background: var(--button-primary-color);
-  color: var(--text-color);
   border: var(--highlight-color) solid 2px;
   padding: 10px;
   height: 100%;

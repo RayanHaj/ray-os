@@ -282,7 +282,6 @@ async function onNext() {
   --audio-player-header-height: 50px;
   --audio-player-header-column-height: 95px;
   --audio-player-footer-height: 80px;
-  color: var(--text-color);
 
   container: audioPlayer / size;
   overflow: hidden;

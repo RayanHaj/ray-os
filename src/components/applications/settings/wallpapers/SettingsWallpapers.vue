@@ -231,7 +231,6 @@ function openSelectWallpaperFileWindow() {
   align-items: center;
   background-color: var(--button-primary-color);
   border: var(--input-border-color) 2px solid;
-  color: var(--text-color);
   padding-block: 5px;
   padding-inline: 10px;
   width: 100%;

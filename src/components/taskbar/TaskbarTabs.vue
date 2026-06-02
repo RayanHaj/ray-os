@@ -95,7 +95,6 @@ const getTabIsOverflowingStyle = computed(() => {
 .add-new-instance-button {
   width: 100%;
   background: var(--button-primary-color);
-  color: var(--text-color);
   padding-block: 5px;
   border-radius: 5px;
   border: none;

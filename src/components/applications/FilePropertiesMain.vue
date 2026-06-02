@@ -72,9 +72,6 @@ const filePropertiesItemValues: { title: string; value: string }[] = [
   width: 30px;
   height: 30px;
 }
-.top-section p {
-  color: var(--text-color);
-}
 hr {
   width: 100%;
   border: var(--window-border-color) solid 1px;

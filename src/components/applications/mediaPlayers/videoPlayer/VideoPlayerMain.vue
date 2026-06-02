@@ -132,7 +132,6 @@ function onSliderInput(time: number) {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  color: var(--text-color);
 
   --audio-player-header-height: 50px;
   --audio-player-footer-height: 80px;

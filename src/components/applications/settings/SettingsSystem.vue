@@ -55,7 +55,6 @@ async function resetState() {
 }
 
 p {
-  color: var(--text-color);
   font-weight: bold;
 }
 </style>

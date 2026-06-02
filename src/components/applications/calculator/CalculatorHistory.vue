@@ -67,7 +67,6 @@ li {
 
 #answer,
 #calculation {
-  color: var(--text-color);
   font-weight: bold;
   font-size: var(--font-size-elg);
 }

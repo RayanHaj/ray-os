@@ -114,7 +114,6 @@ const fileIsLoaded = computed(() => loadedFile.value?.windowId === windowId);
 .notepad-reader textarea {
   width: 100%;
   padding: 10px;
-  color: var(--text-color);
   height: calc(100% - var(--notepad-header-height));
   overflow: auto;
   resize: none;
@@ -154,7 +153,6 @@ const fileIsLoaded = computed(() => loadedFile.value?.windowId === windowId);
   height: 100%;
   border-radius: 10px;
   background: rgb(0, 0, 0, 0.5);
-  color: var(--text-color);
   font-size: var(--font-size-elg);
   border: none;
   display: flex;
@@ -184,7 +182,6 @@ const fileIsLoaded = computed(() => loadedFile.value?.windowId === windowId);
   .notepad-reader textarea {
     width: 100%;
     padding: 10px;
-    color: var(--text-color);
     height: calc(100% - var(--notepad-header-column-height));
     overflow: auto;
     resize: none;

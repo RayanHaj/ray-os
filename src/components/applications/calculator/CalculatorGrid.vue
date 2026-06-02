@@ -63,7 +63,6 @@ function onClickGridItem(key: CalculatorKey) {
 <style scoped>
 button {
   font-size: var(--font-size-elg);
-  color: var(--text-color);
   background: var(--button-primary-color);
   border: none;
   height: 100%;

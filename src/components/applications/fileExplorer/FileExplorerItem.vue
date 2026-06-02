@@ -117,7 +117,6 @@ function onClick(event: MouseEvent) {
   height: max-content;
   width: max-content;
   max-width: 100px;
-  color: var(--text-color);
   padding: 10px;
   overflow-wrap: anywhere;
   pointer-events: none;

@@ -36,7 +36,6 @@ watch(
 }
 
 .calculator-answer {
-  color: var(--text-color);
   font-size: var(--font-size-huge);
   padding-right: 10px;
 }

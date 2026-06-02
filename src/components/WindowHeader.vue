@@ -111,7 +111,6 @@ onBeforeMount(async () => {
   justify-content: space-between;
   top: 0;
   width: 100%;
-  color: var(--text-color);
   background-color: var(--window-secondary-color);
   padding-left: 12px;
   border-bottom: var(--window-border-color) solid 1px;

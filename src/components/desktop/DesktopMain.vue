@@ -131,7 +131,6 @@ button.socials-icons {
 
 .socials-name {
   padding-bottom: 6px;
-  color: var(--text-color);
   transform: rotate(90deg);
   font-size: 20px;
   width: max-content;

@@ -1,10 +1,10 @@
 <template>
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     :width="customWidth"
     :height="customHeight"
-    viewBox="0 0 20 20"
     :fill="customColor"
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 20 20"
   >
     <g :fill="customColor" fill-rule="evenodd" clip-rule="evenodd">
       <path

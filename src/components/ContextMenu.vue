@@ -116,6 +116,5 @@ hr {
 button {
   background: none;
   border: none;
-  color: var(--text-color);
 }
 </style>

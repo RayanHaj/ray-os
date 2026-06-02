@@ -15,7 +15,6 @@ const { title, value } = defineProps<{ title: string; value: string }>();
 }
 
 .file-properties-item label {
-  color: var(--text-color);
   font-size: var(--font-size-sm);
 }
 

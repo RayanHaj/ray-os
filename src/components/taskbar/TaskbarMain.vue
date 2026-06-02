@@ -45,7 +45,6 @@ const startMenuStore = useStartMenuStore();
   position: sticky;
   z-index: 9999;
   background-color: var(--taskbar-background-color);
-  color: var(--text-color);
   padding-left: 25px;
   padding-right: 25px;
 }

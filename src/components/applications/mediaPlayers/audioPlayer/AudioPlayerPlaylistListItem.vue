@@ -48,7 +48,6 @@ button {
   background: none;
   border: none;
   padding: 0;
-  color: var(--text-color);
   text-decoration: underline;
   font-size: var(--font-size-lg);
 }

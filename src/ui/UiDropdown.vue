@@ -8,7 +8,6 @@ select {
   height: 30px;
   border: var(--input-border-color) 1px solid;
   font-size: var(--font-size-elg);
-  color: var(--text-color);
   background-color: var(--input-primary-color);
   border-radius: 5px;
 }

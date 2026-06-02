@@ -5,7 +5,4 @@
 </template>
 
 <style scoped>
-div {
-  color: var(--text-color);
-}
 </style>

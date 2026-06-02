@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { type ComputedRef, type Ref, ref, watch } from 'vue';
-import { type WindowFlatReference } from '@/types/WindowTypes.ts';
+import { type WindowFlatReference } from '@/types/WindowTypes.js';
 
 import DesktopMain from '@/components/desktop/DesktopMain.vue';
 import TaskbarMain from '@/components/taskbar/TaskbarMain.vue';
@@ -10,17 +10,17 @@ import DesktopSnapLayout from '@/components/DesktopSnapLayout.vue';
 import ContextMenu from '@/components/ContextMenu.vue';
 import UiToast from '@/ui/UiToast.vue';
 
-import { useWindowStore } from '@/stores/window.ts';
-import { useWallpaperStore } from '@/stores/settings/wallpaper.ts';
-import { useContextMenuStore } from '@/stores/contextMenu.ts';
+import { useWindowStore } from '@/stores/window.js';
+import { useWallpaperStore } from '@/stores/settings/wallpaper.js';
+import { useContextMenuStore } from '@/stores/contextMenu.js';
 
-import { useFlatOpenWindowsReferencesFull } from '@/composables/window/useFlatOpenWindowsReferencesFull.ts';
-import { useOnOuterClickClose } from '@/composables/helpers/useOnOuterClickClose.ts';
-import { useGetWindowContentComponent } from '@/composables/window/useGetWindowContentComponent.ts';
-import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
-import { fileSystemLookup } from '@/composables/fileSystem/useIndexedDbHelper.ts';
+import { useFlatOpenWindowsReferencesFull } from '@/composables/window/useFlatOpenWindowsReferencesFull.js';
+import { useOnOuterClickClose } from '@/composables/helpers/useOnOuterClickClose.js';
+import { useGetWindowContentComponent } from '@/composables/window/useGetWindowContentComponent.js';
+import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.js';
+import { fileSystemLookup } from '@/composables/fileSystem/useIndexedDbHelper.js';
 
-import type { Item } from '@/types/ItemTypes.ts';
+import type { Item } from '@/types/ItemTypes.js';
 import type { RayDb } from 'ray-db-wrapper';
 
 import wallpapersJSON from '@/json/wallpapers.json';

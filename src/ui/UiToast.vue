@@ -198,7 +198,6 @@ function returnSvgColorByToastType(toastType: ToastTypes, onlyBlackWhite?: boole
 }
 
 .message {
-  color: var(--text-color);
   font-size: var(--font-size-lg);
 }
 

@@ -79,13 +79,11 @@ const notepadHeaderStyles = computed<StyleValue>(() => {
   width: 100%;
   height: var(--notepad-header-height);
   background-color: var(--taskbar-background-color);
-  color: var(--text-color);
 }
 
 .file-name {
   font-size: var(--font-size-elg);
   background-color: var(--input-primary-color);
-  color: var(--text-color);
   border: var(--input-border-color) 2px solid;
   padding-inline: 10px;
   padding-block: 3px;
@@ -107,7 +105,6 @@ const notepadHeaderStyles = computed<StyleValue>(() => {
   background-color: var(--button-primary-color);
   border: var(--input-border-color) 2px solid;
   border-radius: 5px;
-  color: var(--text-color);
   padding-block: 5px;
   padding-inline: 10px;
 }

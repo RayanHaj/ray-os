@@ -334,6 +334,5 @@ function getSvg() {
 .content {
   text-align: center;
   font-size: var(--font-size-sm);
-  color: var(--text-color);
 }
 </style>

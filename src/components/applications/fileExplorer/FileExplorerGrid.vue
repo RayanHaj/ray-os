@@ -541,7 +541,6 @@ async function onProperties(fileSystemItem: FileSystemItem) {
 }
 
 .checkbox-wrapper label {
-  color: var(--text-color);
   font-size: var(--font-size-md);
 }
 </style>

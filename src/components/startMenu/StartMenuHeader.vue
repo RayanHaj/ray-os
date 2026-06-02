@@ -31,7 +31,6 @@ async function handleInput() {
   height: 100%;
   border-radius: 10px;
   background: var(--input-primary-color);
-  color: var(--text-color);
   border: var(--input-border-color) 1px solid;
   font-size: var(--font-size-elg);
   padding-left: 10px;

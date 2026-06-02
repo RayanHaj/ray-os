@@ -209,7 +209,6 @@ const onResizing = (event: WheelEvent) => {
 .terminal {
   display: flex;
   flex-direction: column;
-  color: var(--text-color);
   background-color: black;
   padding: 10px;
   gap: 5px;

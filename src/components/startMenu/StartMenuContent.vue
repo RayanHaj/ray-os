@@ -41,7 +41,6 @@ function handleClick(content: string) {
 <style scoped>
 .start-menu-content {
   padding: 5px;
-  color: var(--text-color);
   width: 100%;
 }
 

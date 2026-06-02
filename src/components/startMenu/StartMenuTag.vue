@@ -25,7 +25,6 @@ const tagIsSelected = computed(() => startMenuStore.selectedTag === tagValue);
 <style scoped>
 .start-menu-tag {
   background-color: var(--button-primary-color);
-  color: var(--text-color);
   padding: 10px;
   font-size: var(--font-size-sm);
   border-radius: 10px;

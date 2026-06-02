@@ -60,7 +60,6 @@ const audioPlayerHeaderStyles = computed<StyleValue>(() => {
   width: 100%;
   height: var(--audio-player-header-height);
   background-color: var(--taskbar-background-color);
-  color: var(--text-color);
 }
 
 .playlist-name-wrapper {
@@ -71,7 +70,6 @@ const audioPlayerHeaderStyles = computed<StyleValue>(() => {
 .file-name {
   font-size: var(--font-size-elg);
   background-color: var(--input-primary-color);
-  color: var(--text-color);
   border: var(--input-border-color) 2px solid;
   padding-inline: 10px;
   padding-block: 3px;
@@ -93,7 +91,6 @@ const audioPlayerHeaderStyles = computed<StyleValue>(() => {
   background-color: var(--button-primary-color);
   border: var(--input-border-color) 2px solid;
   border-radius: 5px;
-  color: var(--text-color);
   padding-block: 5px;
   padding-inline: 10px;
 }

@@ -91,7 +91,6 @@ function onClickCancel() {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  color: var(--text-color);
   position: absolute;
   width: 300px;
   height: 250px;
@@ -139,14 +138,12 @@ function onClickCancel() {
   border-top-right-radius: 5px;
   border: var(--window-border-color) 1px solid;
   background: var(--button-primary-color);
-  color: var(--text-color);
   font-weight: bold;
 }
 
 #inputField {
   background: var(--input-primary-color);
   border: var(--input-border-color) 1px solid;
-  color: var(--text-color);
   padding: 7px;
   width: 100%;
   border-radius: 5px;

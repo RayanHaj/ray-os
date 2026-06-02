@@ -205,7 +205,6 @@ button {
 .next-button {
   background: none;
   border: none;
-  color: var(--text-color);
 }
 
 .audio-control-button {

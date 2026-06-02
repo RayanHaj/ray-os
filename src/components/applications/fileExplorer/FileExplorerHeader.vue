@@ -142,7 +142,6 @@ function onFileUploadChange(event: Event) {
   flex-direction: row;
   justify-content: space-between;
   height: 50px;
-  color: var(--text-color);
   font-size: var(--font-size-lg);
 }
 
@@ -172,7 +171,6 @@ function onFileUploadChange(event: Event) {
   width: 100%;
   min-width: calc(150px / 3);
   height: 100%;
-  color: var(--text-color);
 }
 
 input[type='file'] {
@@ -199,7 +197,6 @@ input[type='file'] {
   width: calc(150px / 3);
   min-width: calc(125px / 3);
   background-color: var(--button-primary-color);
-  color: var(--text-color);
   border: var(--input-border-color) solid 1px;
 }
 
@@ -217,7 +214,6 @@ input {
   background: var(--input-primary-color);
   width: 100%;
   height: 100%;
-  color: var(--text-color);
 }
 
 @container fileExplorer (max-width: 790px) {
