@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
 import { useInitializeContextMenu } from '@/composables/contextMenu/useInitializeContextMenu.ts';
+import { useTemplateRef } from 'vue';
 
 const { fileName, isPlaying } = defineProps<{ fileName: string; isPlaying: boolean }>();
 
@@ -21,9 +22,12 @@ function onContextmenu(event: MouseEvent) {
       },
     );
 }
+
+const audioPlayerListItemRef = useTemplateRef('audioPlayerListItem');
+defineExpose({audioPlayerListItemRef});
 </script>
 <template>
-  <li @contextmenu.prevent="onContextmenu" :class="{ active: isPlaying }">
+  <li ref="audioPlayerListItem" @contextmenu.prevent="onContextmenu" :class="{ active: isPlaying }">
     <p>{{ fileName }}</p>
     <div class="button-wrapper">
       <button class="play-button" @click="emit('playPauseAudio')">

@@ -248,6 +248,7 @@ async function onNext() {
       <AudioPlayerPlaylistView
         v-if="currentPage === 'playlist'"
         :loaded-audios="loadedAudios"
+        :current-loaded-audio-url="currentLoadedAudioUrl"
         @add-audio-button-clicked="onAddAudioButtonClicked"
         @on-remove-audio="(index) => removeAudioFromList(index)"
         @on-play-pause-audio="
