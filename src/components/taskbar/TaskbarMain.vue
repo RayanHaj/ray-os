@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { useTaskbarStore } from '@/stores/taskbar.ts';
 import TaskbarTile from '@/components/taskbar/TaskbarTile.vue';
-import StartMenuMain from '@/components/startMenu/StartMenuMain.vue';
-import { useStartMenuStore } from '@/stores/startMenu.ts';
 import TimeProcessSection from '@/components/TimeProcessSection.vue';
 import { useFileStore } from '@/stores/file.ts';
+import { ref } from 'vue';
 
 const taskbarStore = useTaskbarStore();
 const fileStore = useFileStore();
@@ -12,26 +11,20 @@ const fileStore = useFileStore();
 const taskbarHeight = taskbarStore.taskbarHeight;
 const taskbarItems = fileStore.applications;
 
-const startMenuStore = useStartMenuStore();
+const tileAlignment = ref<'center' | 'left'>('left');
 </script>
 <template>
-  <StartMenuMain v-if="startMenuStore.isShown()" />
-  <div class="taskbar" :style="{ height: `${taskbarHeight}px` }">
-    <div class="left-section">
-<!--      <button-->
-<!--        class="taskbar-search-button"-->
-<!--        @click="startMenuStore.isShown() ? startMenuStore.hide() : startMenuStore.show()"-->
-<!--        :style="{ backgroundColor: startMenuStore.isShown() ? 'var(&#45;&#45;button-hover-color)' : '' }"-->
-<!--      >-->
-<!--        <component class="search-svg" :is="useSvgOrFallback('Search').svg" />-->
-<!--      </button>-->
-    </div>
-    <div class="middle-section">
+  <div
+    :class="{ left: tileAlignment === 'left', center: tileAlignment === 'center' }"
+    :style="{ height: `${taskbarHeight}px` }"
+    class="taskbar"
+  >
+    <div class="taskbar-tiles-wrapper">
       <div class="taskbar-tiles">
         <TaskbarTile v-for="item of taskbarItems" :key="item.id" :id="item.id" />
       </div>
     </div>
-    <div class="right-section">
+    <div class="end-alignment">
       <TimeProcessSection />
     </div>
   </div>
@@ -45,78 +38,53 @@ const startMenuStore = useStartMenuStore();
   position: sticky;
   z-index: 9999;
   background-color: var(--taskbar-background-color);
-  padding-left: 25px;
-  padding-right: 25px;
+  padding-inline: 25px;
 }
 
-.middle-section {
+.taskbar-tiles-wrapper {
   display: flex;
-  flex-direction: row;
-  justify-content: center;
   align-content: center;
-  gap: 15px;
-  width: 60%;
+  flex-direction: row;
+  width: 100%;
+}
+
+.taskbar.left {
+  .taskbar-tiles-wrapper {
+    justify-content: start;
+  }
+}
+
+.taskbar.center {
+  .taskbar-tiles-wrapper {
+    justify-content: center;
+  }
 }
 
 .taskbar-tiles {
   display: flex;
+  flex-direction: row;
 }
 
-.taskbar-search-button {
-  background: none;
-  border: none;
-  border-radius: 5px;
-}
-
-.taskbar-search-button:hover {
-  background: var(--button-hover-color);
-}
-
-.left-section,
-.right-section {
-  width: 20%;
-}
-
-.right-section {
+.end-alignment {
+  position: absolute;
   display: flex;
   flex-direction: row;
   justify-content: end;
+  padding-inline: 25px;
+  right: 0;
 }
 
-.search-svg {
-  width: 45px;
-  height: 45px;
-}
-
-@media (max-width: 1120px) {
-  .left-section {
+@media (max-width: 510px) {
+  .end-alignment {
     display: none;
   }
-  .middle-section {
-    display: flex;
-    justify-content: start;
-    width: 80%;
-  }
-  .taskbar-tiles {
-    align-items: start;
-  }
-  .search-svg {
-    width: 40px;
-    height: 40px;
-  }
-
-  .time-process-wrapper {
-    font-size: var(--font-size-md);
-  }
-}
-
-@media (max-width: 690px) {
-  .right-section {
-    display: none;
-  }
-  .middle-section {
+  .taskbar-tiles-wrapper {
     justify-content: center;
-    width: 100%;
+  }
+  .taskbar.left {
+    .taskbar-tiles-wrapper {
+      justify-content: center;
+    }
   }
 }
 </style>

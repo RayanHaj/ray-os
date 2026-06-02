@@ -104,12 +104,12 @@ function onFileUploadChange(event: Event) {
           {{ isDragging ? 'Move up' : 'Back' }}
         </button>
       </div>
-      <div class="middle-section">
+      <div class="taskbar-tiles-wrapper">
         <input type="text" :value="currentPath.join('/')" disabled />
       </div>
     </div>
     <div class="end-wrapper">
-      <div class="right-section">
+      <div class="end-alignment">
         <label for="file-upload" class="custom-file-upload">Upload files</label>
         <input
           id="file-upload"
@@ -161,7 +161,7 @@ function onFileUploadChange(event: Event) {
   width: 150px;
 }
 
-.middle-section {
+.taskbar-tiles-wrapper {
   width: 100%;
 }
 
@@ -177,13 +177,13 @@ input[type='file'] {
   display: none;
 }
 
-.right-section {
+.end-alignment {
   display: flex;
   flex-direction: row;
   width: 350px;
 }
 
-.right-section label {
+.end-alignment label {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -226,11 +226,11 @@ input {
     width: 100%;
   }
 
-  .right-section {
+  .end-alignment {
     width: 100%;
   }
 
-  .right-section label {
+  .end-alignment label {
     width: 100%;
   }
 }
