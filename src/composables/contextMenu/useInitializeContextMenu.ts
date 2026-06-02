@@ -61,7 +61,12 @@ export function useInitializeContextMenu(event: MouseEvent) {
     const primaryActions = ['Copy', 'Paste', 'Delete'] as const;
     const secondaryActions = [
       { id: 'renameFile', label: 'rename file', disabled: disableOptions?.renameFile ?? false },
-      { id: 'addToDesktop', label: 'add to desktop', disabled: disableOptions?.addToDesktop ?? false },
+      {
+        id: 'addToDesktop',
+        label: 'add to desktop',
+        disabled: disableOptions?.addToDesktop ?? false,
+      },
+      { id: 'properties', label: 'open properties', disabled: false },
     ] as const;
 
     const initialize = createInitialize(primaryActions, secondaryActions);

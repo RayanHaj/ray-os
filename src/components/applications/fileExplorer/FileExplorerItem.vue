@@ -30,6 +30,7 @@ const emit = defineEmits([
   'addToDesktop',
   'onDelete',
   'onContextMenu',
+  'properties'
 ]);
 
 const isItemDisabled = computed(() =>
@@ -67,6 +68,9 @@ function onContextMenu(event: MouseEvent) {
         addToDesktop: () => {
           emit('addToDesktop');
         },
+        properties: () => {
+          emit('properties');
+        }
       },
     );
 }

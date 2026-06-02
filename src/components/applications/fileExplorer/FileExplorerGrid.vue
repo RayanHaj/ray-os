@@ -25,6 +25,8 @@ import FileExplorerItem from '@/components/applications/fileExplorer/FileExplore
 import { SystemFileDeleteError } from '@/exceptions/SystemFileDeleteError.ts';
 import { useBrowserStore } from '@/stores/browser.ts';
 import { useMultiSelect } from '@/composables/helpers/useMultiSelect.ts';
+import { type FileProperties, useFilePropertiesStore } from '@/stores/fileProperties.ts';
+import { useWindowStore } from '@/stores/window.ts';
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 const windowId = useInjectOrThrow<string>('windowId');
@@ -414,9 +416,54 @@ watch(selectAllToggle, (newToggledVal) => {
   }
 });
 
-const ctrlKeyDown = (event: KeyboardEvent) => {
-  console.log(event);
-};
+async function onProperties(fileSystemItem: FileSystemItem) {
+  const propertiesWindowId = useWindowStore().getNextWindowId('properties');
+
+  if (fileSystemItem.directory) {
+    useFilePropertiesStore().loadFileProperties({
+      name: fileSystemItem.directory.name,
+      type: 'Directory',
+      location: path,
+      windowId: propertiesWindowId,
+    });
+  } else if (fileSystemItem.file) {
+    const file = await rayDb.findOne<Item>('files', 'id', fileSystemItem.file.id);
+    if (!file) return;
+
+    switch (file.content.type) {
+      case 'application':
+        {
+          useFilePropertiesStore().loadFileProperties({
+            name: file.label,
+            type: 'Application',
+            location: path,
+            windowId: propertiesWindowId,
+          });
+        }
+        break;
+      case 'directory':
+        {
+          useFilePropertiesStore().loadFileProperties({
+            name: file.label,
+            type: 'Directory',
+            location: path,
+            windowId: propertiesWindowId,
+          });
+        }
+        break;
+      case 'file': {
+        useFilePropertiesStore().loadFileProperties({
+          name: file.content.name,
+          type: file.content.rawFile?.type as FileType,
+          location: path,
+          windowId: propertiesWindowId,
+        });
+      }
+    }
+  }
+
+  useWindowStore().pushOpenWindowReference('properties');
+}
 </script>
 
 <template>
@@ -426,7 +473,6 @@ const ctrlKeyDown = (event: KeyboardEvent) => {
     @contextmenu.prevent="onContextMenu"
     @dragover.prevent
     @drop.prevent="onFileDrop"
-    @keydown.stop="ctrlKeyDown"
     :style="{ fontSize: `${itemSize.font}px` }"
   >
     <div class="checkbox-wrapper">
@@ -454,6 +500,7 @@ const ctrlKeyDown = (event: KeyboardEvent) => {
         @rename-file="onRenameFile"
         @add-to-desktop="onAddToDesktop"
         @on-delete="onItemsDelete"
+        @properties="onProperties(fileSystemItem)"
       />
     </div>
   </section>

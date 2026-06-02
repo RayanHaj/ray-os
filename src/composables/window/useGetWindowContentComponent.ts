@@ -9,6 +9,7 @@ import FallbackMain from '@/components/applications/FallbackMain.vue';
 import ImageViewerMain from '@/components/applications/mediaPlayers/imageViewer/ImageViewerMain.vue';
 import VideoPlayerMain from '@/components/applications/mediaPlayers/videoPlayer/VideoPlayerMain.vue';
 import AudioPlayerMain from '@/components/applications/mediaPlayers/audioPlayer/AudioPlayerMain.vue';
+import FilePropertiesMain from '@/components/applications/FilePropertiesMain.vue';
 
 import { useWindowNameFormatter } from '@/composables/window/useWindowNameFormatter.ts';
 
@@ -21,6 +22,7 @@ const windowContentComponents: { [windowName in WindowName]: Component } = {
   imageViewer: ImageViewerMain,
   videoPlayer: VideoPlayerMain,
   audioPlayer: AudioPlayerMain,
+  properties: FilePropertiesMain,
 } as const;
 
 export function useGetWindowContentComponent(windowName: string) {
