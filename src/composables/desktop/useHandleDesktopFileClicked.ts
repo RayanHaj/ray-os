@@ -35,7 +35,7 @@ export async function useHandleDesktopFileClicked(item: Item & { tileId: number 
 
   function handleDirectoryClicked() {
     const nextWindowId = useWindowStore().getNextWindowId('File Explorer');
-
+    console.log(item)
     if (!item.path) {
       return;
     }

@@ -18,8 +18,6 @@ import { useDblClick } from '@/composables/helpers/UseDblClick.ts';
 import { useMultiSelectionBoxStore } from '@/stores/multiSelectionBox.ts';
 import { useHandleDesktopFileClicked } from '@/composables/desktop/useHandleDesktopFileClicked.ts';
 import { useToastFeatureNotImplemented } from '@/composables/helpers/useToastFeatureNotImplemented.ts';
-import { useWindowStore } from '@/stores/window.ts';
-import { useFilePropertiesStore } from '@/stores/fileProperties.ts';
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 
@@ -62,9 +60,8 @@ onMounted(async () => await updateTile());
 
 watch(
   () => desktopStore.items,
-  (newValue) => {
-    const item = newValue.find((item) => item.tileId === tileId.value);
-
+  (newItems) => {
+    const item = newItems.find((item) => item.tileId === tileId.value);
     if (!item) {
       tileItem.value = null;
       return;
