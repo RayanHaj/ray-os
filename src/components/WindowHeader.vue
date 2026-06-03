@@ -5,6 +5,7 @@ import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
 import { useWindowStore } from '@/stores/window';
 import { fileExtensions } from '@/types/ItemTypes.ts';
 import { useFileSelectStateGetter } from '@/composables/fileExplorer/useFileSelectStateGetter.js';
+import { useBrowserStore } from '@/stores/browser.ts';
 
 const {
   windowId,
@@ -20,6 +21,11 @@ const {
 
 const activeActions = ref<('Minimize' | 'Maximize' | 'Close')[]>(['Minimize', 'Maximize', 'Close']);
 onBeforeMount(() => {
+  if (useBrowserStore().isMobile) {
+    activeActions.value = ['Minimize', 'Close']
+    return;
+  }
+
   switch (windowType) {
     case 'fixed':
       activeActions.value = ['Minimize', 'Close'];
@@ -73,7 +79,7 @@ const windowName = computed(() => {
     />
     <div class="window-controls">
       <button
-        v-for="action in ['Minimize', 'Maximize', 'Close']"
+        v-for="action in activeActions"
         :key="action"
         :class="action.toLowerCase()"
         @click="$emit(`windowControl${action}`)"
