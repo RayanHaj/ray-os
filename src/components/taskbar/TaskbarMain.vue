@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { useTaskbarStore } from '@/stores/taskbar.ts';
+import { type TaskbarPosition, useTaskbarStore } from '@/stores/taskbar.ts';
 import TaskbarTile from '@/components/taskbar/TaskbarTile.vue';
 import TimeProcessSection from '@/components/TimeProcessSection.vue';
 import { useFileStore } from '@/stores/file.ts';
-import { ref } from 'vue';
+import { watch } from 'vue';
 
 const taskbarStore = useTaskbarStore();
 const fileStore = useFileStore();
@@ -11,11 +11,23 @@ const fileStore = useFileStore();
 const taskbarHeight = taskbarStore.taskbarHeight;
 const taskbarItems = fileStore.applications;
 
-const tileAlignment = ref<'center' | 'left'>('left');
+watch(
+  () => taskbarStore.taskbarPosition,
+  (newPosition) => {
+    const lsTaskbarPosition = localStorage.getItem('taskbarPosition');
+    if (lsTaskbarPosition !== newPosition) {
+      useTaskbarStore().setTaskbarPosition(lsTaskbarPosition as TaskbarPosition);
+    }
+  },
+  { immediate: true },
+);
 </script>
 <template>
   <div
-    :class="{ left: tileAlignment === 'left', center: tileAlignment === 'center' }"
+    :class="{
+      left: taskbarStore.taskbarPosition === 'left',
+      center: taskbarStore.taskbarPosition === 'center',
+    }"
     :style="{ height: `${taskbarHeight}px` }"
     class="taskbar"
   >

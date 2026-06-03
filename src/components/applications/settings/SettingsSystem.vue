@@ -2,6 +2,7 @@
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import { useToastStore } from '@/stores/toast.ts';
+import { useTaskbarStore } from '@/stores/taskbar.ts';
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 
@@ -35,13 +36,52 @@ async function resetState() {
 
 <template>
   <div class="settings-system">
-    <p>Warning: close all other RayOS tabs before resetting</p>
-    <button class="reset-state-button" @click="resetState">Reset everything</button>
+    <div class="taskbar-tiles-position">
+      <p>Taskbar tiles position:</p>
+      <div class="radio-group">
+        <label for="leftTiles" @click="useTaskbarStore().setTaskbarPosition('left')"
+          ><input
+            id="leftTiles"
+            type="radio"
+            :checked="useTaskbarStore().taskbarPosition === 'left'"
+          />
+          left</label
+        >
+        <label for="centerTiles" @click="useTaskbarStore().setTaskbarPosition('center')"
+          ><input
+            id="centerTiles"
+            type="radio"
+            :checked="useTaskbarStore().taskbarPosition === 'center'"
+          />
+          center</label
+        >
+      </div>
+    </div>
+    <hr />
+    <div class="reset-state-wrapper">
+      <p>Warning: close all other RayOS tabs before resetting</p>
+      <button class="reset-state-button" @click="resetState">Reset everything</button>
+    </div>
   </div>
 </template>
 
 <style scoped>
 .settings-system {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: 100%;
+}
+.taskbar-tiles-position {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.radio-group {
+  display: flex;
+  gap: 50px;
+}
+.reset-state-wrapper {
   display: flex;
   flex-direction: column;
   gap: 5px;
@@ -56,5 +96,11 @@ async function resetState() {
 
 p {
   font-weight: bold;
+}
+
+hr {
+  width: 100%;
+  border: var(--window-border-color) solid 2px;
+  border-radius: 5px;
 }
 </style>

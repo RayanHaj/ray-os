@@ -185,7 +185,7 @@ function openSelectWallpaperFileWindow() {
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  gap: 5px;
+  gap: 10px;
 }
 
 .pre-defined-wallpapers {
