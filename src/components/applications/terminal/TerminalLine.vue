@@ -18,6 +18,7 @@ const terminalLineRef = ref();
 
 onBeforeMount(() => {
   path.value = currentPath;
+  console.log(isError);
 });
 
 onMounted(() => {
@@ -77,11 +78,13 @@ defineExpose({
 </script>
 
 <template>
-  <div v-if="isReadonly" class="wrapper" :style="{ color: isError ? 'red' : 'var(--text-color)' }">
+  <div v-if="isReadonly" class="wrapper">
     <p v-if="!inputValue.isPlain" class="current-location">{{ displayPath }}</p>
     <div class="terminal-line">
       <p v-if="inputValue.line">
-        <span class="input-value">{{ inputValue.line }}</span>
+        <span :style="{ color: isError ? 'red' : 'var(--text-color)' }" class="input-value">{{
+          inputValue.line
+        }}</span>
       </p>
     </div>
   </div>
