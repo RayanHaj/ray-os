@@ -136,7 +136,7 @@ const windowName = computed(() => {
 }
 
 .drag-zone {
-  width: stretch;
+  width: 100%;
 }
 
 .minimize:hover,
