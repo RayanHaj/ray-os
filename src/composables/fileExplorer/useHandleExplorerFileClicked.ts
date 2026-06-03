@@ -39,18 +39,6 @@ export async function useHandleExplorerFileClicked(
     if (!file) return;
 
     if (file.content.type === 'file') {
-      // const foundSelectState = useFileExplorerStore().fileSelectState.find(
-      //   (element) => element.fileExplorerWindowId === windowId,
-      // );
-      //
-      // if (foundSelectState?.active) {
-      //   useFileExplorerStore().fileSelectReturnValue = [
-      //     ...useFileExplorerStore().fileSelectReturnValue,
-      //     { windowId: foundSelectState.windowId, id: item.id, fileId: file.id, value: file.content },
-      //   ];
-      //   return;
-      // }
-
       await useOpenWindowByFileItem(file as Item & { content: FileItem });
     }
   }

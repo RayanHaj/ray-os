@@ -1,16 +1,12 @@
 import type { RayDb } from 'ray-db-wrapper';
 import { fileSystemLookup } from '@/composables/fileSystem/useIndexedDbHelper.ts';
-import type { Application, FileItem, FileSystemItem, Item } from '@/types/itemTypes.ts';
+import type { Application, FileSystemItem, Item } from '@/types/itemTypes.ts';
 import { useWindowStore } from '@/stores/window.ts';
-import { useNotepadStore } from '@/stores/notepad.ts';
 import type { Ref } from 'vue';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
+import { useOpenWindowByFileItem } from '@/composables/window/useOpenWindowByFileItem.ts';
 
-export async function useHandleStart(
-  rayDb: RayDb,
-  name: string,
-  currentPath: Ref<string[]>,
-) {
+export async function useHandleStart(rayDb: RayDb, name: string, currentPath: Ref<string[]>) {
   if (!name) {
     return;
   }
@@ -49,7 +45,7 @@ export async function useHandleStart(
         handleApplication(fileItem.label as Application);
         break;
       case 'file':
-        await handleFile(fileItem.content, fileId);
+        await useOpenWindowByFileItem({ ...fileItem, content: fileItem.content });
     }
   }
 }
@@ -58,20 +54,13 @@ function handleDirectory(item: FileSystemItem, currentPath: string[]) {
   const nextWindowId = useWindowStore().getNextWindowId('File Explorer');
 
   if (!item.directory?.name) {
-    return
+    return;
   }
 
   currentPath.push(item.directory?.name);
 
   useFileExplorerStore().setFilePathAtWindow(nextWindowId, currentPath);
   useWindowStore().pushOpenWindowReference('File Explorer');
-}
-
-async function handleFile(item: FileItem, fileId: number) {
-  if (!item.rawFile) return;
-
-  useNotepadStore().initializeNotepadFile(useWindowStore().getNextWindowId('Notepad'), fileId, item.name, await item.rawFile.text());
-  useWindowStore().pushOpenWindowReference('Notepad');
 }
 
 function handleApplication(applicationName: Application) {
