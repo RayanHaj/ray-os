@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import SettingsSidebar from '@/components/applications/settings/SettingsSidebar.vue';
 import { onMounted, ref } from 'vue';
-import { type AllowedSettingsOptions, settingsOptionsComponents } from '@/types/SettingsTypes.ts';
+import { type AllowedSettingsOptions, settingsOptionsComponents } from '@/types/settingsTypes.js';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 
 const selectedOption = ref<AllowedSettingsOptions>('Themes');

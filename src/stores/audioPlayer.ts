@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
-import type { LoadedAudio } from '@/types/AudioPlayerTypes.ts';
+import type { LoadedAudio } from '@/types/audioPlayerTypes.ts';
 import { ref, type Ref } from 'vue';
-import { isAudioType } from '@/types/ItemTypes.ts';
+import { isAudioType } from '@/types/itemTypes.ts';
 
 export const useAudioPlayerStore = defineStore('audioPlayer', () => {
   const loadedAudio: Ref<LoadedAudio> = ref({

@@ -2,7 +2,7 @@
 import { computed, ref, type StyleValue, watch } from 'vue';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import type { RayDb } from 'ray-db-wrapper';
-import type { FileItem, Item } from '@/types/ItemTypes.ts';
+import type { FileItem, Item } from '@/types/itemTypes.js';
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 

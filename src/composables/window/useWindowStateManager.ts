@@ -1,4 +1,4 @@
-import type { WindowFlatReference } from '@/types/WindowTypes.ts';
+import type { WindowFlatReference } from '@/types/windowTypes.ts';
 import { computed, onBeforeMount, ref, type Ref, watch } from 'vue';
 import { useWindowStore } from '@/stores/window.ts';
 import { useBrowserStore } from '@/stores/browser.ts';

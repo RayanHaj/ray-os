@@ -1,5 +1,5 @@
-// import { specialKeys } from '@/types/CalculatorTypes.ts';
-// import type { SpecialKey } from '@/types/CalculatorTypes.ts';
+// import { specialKeys } from '@/types/calculatorTypes.ts';
+// import type { SpecialKey } from '@/types/calculatorTypes.ts';
 //
 // export function useProcessSpecialKey(key: SpecialKey) {
 //   switch (key) {

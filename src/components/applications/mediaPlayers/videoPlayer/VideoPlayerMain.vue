@@ -2,7 +2,7 @@
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import { onMounted, onUnmounted, ref, type Ref, watch, watchEffect } from 'vue';
 import { useVideoPlayerStore } from '@/stores/videoPlayer.ts';
-import type { LoadedVideo } from '@/types/VideoPlayerTypes.ts';
+import type { LoadedVideo } from '@/types/videoPlayerTypes.js';
 import MediaPlayerFooter from '@/components/applications/mediaPlayers/MediaPlayerFooter.vue';
 
 const videoPlayerStore = useVideoPlayerStore();

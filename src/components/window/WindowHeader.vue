@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { computed, onBeforeMount, ref } from 'vue';
-import type { WindowFlatReference } from '@/types/WindowTypes.ts';
-import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
+import type { WindowFlatReference } from '@/types/windowTypes.js';
+import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.js';
 import { useWindowStore } from '@/stores/window';
-import { fileExtensions } from '@/types/ItemTypes.ts';
+import { fileExtensions } from '@/types/itemTypes.js';
 import { useFileSelectStateGetter } from '@/composables/fileExplorer/useFileSelectStateGetter.js';
-import { useBrowserStore } from '@/stores/browser.ts';
+import { useBrowserStore } from '@/stores/browser.js';
 
 const {
   windowId,

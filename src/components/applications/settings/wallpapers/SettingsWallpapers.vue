@@ -9,7 +9,7 @@ import {
 } from '@/composables/fileSystem/useIndexedDbHelper.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import type { RayDb } from 'ray-db-wrapper';
-import type { FileSystemItem, Item } from '@/types/ItemTypes.ts';
+import type { FileSystemItem, Item } from '@/types/itemTypes.js';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
 import { useWindowStore } from '@/stores/window.ts';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';

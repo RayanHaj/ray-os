@@ -1,7 +1,7 @@
 import { ref } from 'vue';
 import { defineStore } from 'pinia';
-import type { Item } from '@/types/ItemTypes.ts';
-import { Applications } from '@/types/ItemTypes.ts';
+import type { Item } from '@/types/itemTypes.ts';
+import { Applications } from '@/types/itemTypes.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import {
   fileSystemLookup,

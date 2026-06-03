@@ -1,12 +1,12 @@
 import type { RayDb } from 'ray-db-wrapper';
-import type { FileSystemItem, InsertFileSystemItem } from '@/types/ItemTypes.ts';
+import type { FileSystemItem, InsertFileSystemItem } from '@/types/itemTypes.ts';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
 import { useGetRootDirectory } from '@/composables/fileSystem/useGetRootDirectory.ts';
 import {
   useDeleteAllItemReferences,
 } from '@/composables/fileSystem/useDeleteAllItemReferences.ts';
-import { SystemFileDeleteError } from '@/exceptions/SystemFileDeleteError.ts';
-import { FileSystemInsertionError } from '@/exceptions/FileSystemInsertionError.ts';
+import { SystemFileDeleteError } from '@/exceptions/systemFileDeleteError.ts';
+import { FileSystemInsertionError } from '@/exceptions/fileSystemInsertionError.ts';
 
 function insertionCheck(
   foundItems: FileSystemItem[],

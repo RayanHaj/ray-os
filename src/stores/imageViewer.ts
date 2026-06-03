@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { type Ref, ref } from 'vue';
-import { isImageType } from '@/types/ItemTypes.ts';
+import { isImageType } from '@/types/itemTypes.ts';
 import type { LoadedImage } from '@/types/imageViewerTypes.ts';
 
 export const useImageViewerStore = defineStore('imageViewer', () => {

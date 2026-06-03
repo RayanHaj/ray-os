@@ -1,4 +1,4 @@
-import type { FileSystemItem, FileType, Item } from '@/types/ItemTypes.ts';
+import type { FileSystemItem, FileType, Item } from '@/types/itemTypes.ts';
 
 export function useGetIsDisabledItem(
   fileSystemItem: FileSystemItem,

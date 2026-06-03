@@ -1,5 +1,5 @@
 import type { Component } from 'vue';
-import type { AvailableSvgs } from '@/types/AvailableSvgs.ts';
+import type { AvailableSvgs } from '@/types/availableSvgs.ts';
 import { useFormatValueToCorrectSvgString } from '@/composables/svg/useFormatValueToCorrectSvgString.ts';
 
 const svgs = import.meta.glob(`@/assets/svgs/*.vue`);

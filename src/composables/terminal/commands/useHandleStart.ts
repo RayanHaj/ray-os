@@ -1,6 +1,6 @@
 import type { RayDb } from 'ray-db-wrapper';
 import { fileSystemLookup } from '@/composables/fileSystem/useIndexedDbHelper.ts';
-import type { Application, FileItem, FileSystemItem, Item } from '@/types/ItemTypes.ts';
+import type { Application, FileItem, FileSystemItem, Item } from '@/types/itemTypes.ts';
 import { useWindowStore } from '@/stores/window.ts';
 import { useNotepadStore } from '@/stores/notepad.ts';
 import type { Ref } from 'vue';

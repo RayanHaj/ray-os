@@ -8,7 +8,7 @@ export const useWallpaperStore = defineStore('wallpaper', () => {
   const FILE_URL_LS_KEY = 'wallpaperFileUrl';
 
   function getWallpaperUrl(wallpaperName: string) {
-    return `/wallpaperThumbnails/${wallpaperName}`;
+    return `/wallpapers/${wallpaperName}`;
   }
 
   function getWallpaperByLSFileUrl() {

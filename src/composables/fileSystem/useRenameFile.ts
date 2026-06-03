@@ -1,4 +1,4 @@
-import type { FileType, InsertFileSystemItem, Item, ItemInsert } from '@/types/ItemTypes.ts';
+import type { FileType, InsertFileSystemItem, Item, ItemInsert } from '@/types/itemTypes.ts';
 import { useSanitizeFileName } from '@/composables/fileSystem/useSanitizeFileName.ts';
 import { useValidateFileName } from '@/composables/fileSystem/useValidateFileName.ts';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';

@@ -1,4 +1,4 @@
-import { type WindowName, windowNames } from '@/types/WindowTypes.ts';
+import { type WindowName, windowNames } from '@/types/windowTypes.ts';
 import { type Component } from 'vue';
 import SettingsMain from '@/components/applications/settings/SettingsMain.vue';
 import CalculatorMain from '@/components/applications/calculator/CalculatorMain.vue';

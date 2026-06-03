@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useCalculatorManager } from '@/composables/calculator/useCalculatorManager.ts';
-import type { CalculatorKey, SpecialKey } from '@/types/CalculatorTypes.ts';
+import type { CalculatorKey, SpecialKey } from '@/types/calculatorTypes.js';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 
 const calculatorManager =

@@ -5,7 +5,7 @@ import { useHandleTerminalCommand } from '@/composables/terminal/useHandleTermin
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
-import type { LineTerminal } from '@/types/TerminalTypes.ts';
+import type { LineTerminal } from '@/types/terminalTypes.js';
 import { useTerminalStore } from '@/stores/terminal.ts';
 import { useBrowserStore } from '@/stores/browser.ts';
 

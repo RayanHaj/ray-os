@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import { type FileItemSizeKey, type FileSelectReturnItem } from '@/types/FileExplorerTypes.ts';
-import type { FileType } from '@/types/ItemTypes.ts';
+import { type FileItemSizeKey, type FileSelectReturnItem } from '@/types/fileExplorerTypes.ts';
+import type { FileType } from '@/types/itemTypes.ts';
 
 export const useFileExplorerStore = defineStore('fileExplorer', () => {
   const currentFileItemSize = ref<FileItemSizeKey>('small');

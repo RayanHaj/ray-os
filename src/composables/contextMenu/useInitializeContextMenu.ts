@@ -2,7 +2,7 @@ import { useContextMenuStore } from '@/stores/contextMenu.ts';
 import type {
   primaryActionsContextMenu,
   SecondaryActionsContextMenu,
-} from '@/types/ContextMenuTypes.ts';
+} from '@/types/contextMenuTypes.ts';
 
 export function useInitializeContextMenu(event: MouseEvent) {
   function createInitialize<

@@ -1,6 +1,6 @@
 import { ref } from 'vue';
-import type { CalculatorKey, SpecialKey } from '@/types/CalculatorTypes.ts';
-import { specialKeys } from '@/types/CalculatorTypes.ts';
+import type { CalculatorKey, SpecialKey } from '@/types/calculatorTypes.ts';
+import { specialKeys } from '@/types/calculatorTypes.ts';
 import { useProcessCalculation } from '@/composables/calculator/useProcessCalculation.ts';
 
 type CalculationArray = CalculatorKey[];

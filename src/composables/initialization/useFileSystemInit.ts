@@ -2,7 +2,7 @@ import { useFileSystemStore } from '@/stores/fileSystem.ts';
 import { insertItemIntoFileSystem } from '@/composables/fileSystem/useIndexedDbHelper.ts';
 import { useFileStore } from '@/stores/file.ts';
 import type { RayDb } from 'ray-db-wrapper';
-import type { FileSystemItem } from '@/types/ItemTypes.ts';
+import type { FileSystemItem } from '@/types/itemTypes.ts';
 
 export async function useFileSystemInit(rayDb: RayDb) {
   const fileSystemStore = useFileSystemStore();

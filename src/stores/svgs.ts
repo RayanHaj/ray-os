@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { type Component, shallowRef } from 'vue';
-import { availableSvgs, type AvailableSvgs } from '@/types/AvailableSvgs.ts';
+import { availableSvgs, type AvailableSvgs } from '@/types/availableSvgs.ts';
 import { useSvgByFileNameAndDirectory } from '@/composables/svg/useSvgByFileNameAndDirectory.ts';
 import { useSvgFallback } from '@/composables/svg/useSvgFallback.ts';
 

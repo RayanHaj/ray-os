@@ -4,7 +4,7 @@ import {
   isImageType,
   isVideoType,
   type Item,
-} from '@/types/ItemTypes.ts';
+} from '@/types/itemTypes.ts';
 import { useImageViewerStore } from '@/stores/imageViewer.ts';
 import { useWindowStore } from '@/stores/window.ts';
 import { useVideoPlayerStore } from '@/stores/videoPlayer.ts';

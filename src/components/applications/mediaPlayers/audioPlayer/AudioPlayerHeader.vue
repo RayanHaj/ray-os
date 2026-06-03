@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, type StyleValue, watch } from 'vue';
-import type { AudioPlayerPages } from '@/types/AudioPlayerTypes.ts';
+import type { AudioPlayerPages } from '@/types/audioPlayerTypes.js';
 
 const { _playlistName, currentPage } = defineProps<{
   _playlistName: string;

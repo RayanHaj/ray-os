@@ -1,5 +1,5 @@
 import { useSvgsStore } from '@/stores/svgs.ts';
-import type { AvailableSvgs } from '@/types/AvailableSvgs.ts';
+import type { AvailableSvgs } from '@/types/availableSvgs.ts';
 import { useSvgFallback } from '@/composables/svg/useSvgFallback.ts';
 
 export function useSvgOrFallback(value: string | AvailableSvgs) {

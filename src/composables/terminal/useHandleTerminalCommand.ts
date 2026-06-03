@@ -1,4 +1,4 @@
-import { type CommandKeyword, commands, type LineTerminal } from '@/types/TerminalTypes.ts';
+import { type CommandKeyword, commands, type LineTerminal } from '@/types/terminalTypes.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import { useHandleCdDots } from '@/composables/terminal/commands/useHandleCdDots.ts';
 import { useHandleCd } from '@/composables/terminal/commands/useHandleCd.ts';

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AudioPlayerPlaylistListItem from '@/components/applications/mediaPlayers/audioPlayer/AudioPlayerPlaylistListItem.vue';
-import type { Playlist } from '@/types/AudioPlayerTypes.ts';
+import type { Playlist } from '@/types/audioPlayerTypes.js';
 import { useInitializeContextMenu } from '@/composables/contextMenu/useInitializeContextMenu.ts';
 
 const { loadedPlaylists } = defineProps<{ loadedPlaylists: Playlist[] }>();

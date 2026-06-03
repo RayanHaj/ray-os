@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeMount, onMounted, ref, watch } from 'vue';
 import { useWindowStore } from '@/stores/window.ts';
-import type { LineTerminal } from '@/types/TerminalTypes.ts';
+import type { LineTerminal } from '@/types/terminalTypes.js';
 
 const { currentPath, inputValue, isReadonly, isError, windowId } = defineProps<{
   currentPath: string;

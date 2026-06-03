@@ -6,7 +6,7 @@ import type {
   Item,
   ItemInsert,
   ItemType,
-} from '@/types/ItemTypes.ts';
+} from '@/types/itemTypes.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import { useToastStore } from '@/stores/toast.ts';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
@@ -14,13 +14,14 @@ import {
   fileSystemLookup,
   insertItemIntoFileSystem,
 } from '@/composables/fileSystem/useIndexedDbHelper.ts';
+import type { DesktopTileItem } from '@/types/desktopTypes.ts';
 
 type DesktopItem = { id: number; type: ItemType; tileId: number; path?: string };
 
 export const useDesktopStore = defineStore('desktop', () => {
   const tileWidth = ref(85);
   const tileHeight = ref(85);
-  const items = ref<(Item & { tileId: number })[]>([]);
+  const items = ref<DesktopTileItem[]>([]);
 
   async function getDesktopDirectory(rayDb: RayDb) {
     const applicationItemsPath = `${useFileSystemStore().ROOT_DIR_NAME}/Desktop`;
@@ -272,9 +273,9 @@ export const useDesktopStore = defineStore('desktop', () => {
     }
   }
 
-  async function getDesktopItemByTileId(rayDb: RayDb, tileId: number) {
+  function getDesktopItemByTileId(tileId: number) {
     try {
-      return await rayDb.findOne<DesktopItem>('desktopFiles', 'tileId', tileId);
+      return items.value.find((item) => item.tileId === tileId);
     } catch (e) {
       throw (e as Error).message;
     }

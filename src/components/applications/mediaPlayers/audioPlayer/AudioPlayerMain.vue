@@ -3,7 +3,7 @@ import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useAudioPlayerStore } from '@/stores/audioPlayer.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import MediaPlayerFooter from '@/components/applications/mediaPlayers/MediaPlayerFooter.vue';
-import type { AudioPlayerPages, LoadedAudio, Playlist } from '@/types/AudioPlayerTypes.ts';
+import type { AudioPlayerPages, LoadedAudio, Playlist } from '@/types/audioPlayerTypes.js';
 import AudioPlayerHeader from '@/components/applications/mediaPlayers/audioPlayer/AudioPlayerHeader.vue';
 import type { RayDb } from 'ray-db-wrapper';
 import { useSetLoadedPlaylists } from '@/composables/audioPlayer/useSetLoadedPlaylists.ts';

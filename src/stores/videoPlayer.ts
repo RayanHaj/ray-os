@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref, type Ref } from 'vue';
-import { isVideoType } from '@/types/ItemTypes.ts';
-import type { LoadedVideo } from '@/types/VideoPlayerTypes.ts';
+import { isVideoType } from '@/types/itemTypes.ts';
+import type { LoadedVideo } from '@/types/videoPlayerTypes.ts';
 
 export const useVideoPlayerStore = defineStore('videoPlayer', () => {
   const loadedVideo: Ref<LoadedVideo> = ref({ windowId: null, file: null });

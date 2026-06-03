@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useWindowStore } from '@/stores/window.ts';
 import { computed, nextTick, onBeforeMount, ref, watch } from 'vue';
-import type { Item } from '@/types/ItemTypes.ts';
+import type { Item } from '@/types/itemTypes.js';
 import TaskbarTabs from '@/components/taskbar/TaskbarTabs.vue';
 import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
 import { useFileStore } from '@/stores/file.ts';

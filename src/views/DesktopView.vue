@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { type ComputedRef, type Ref, ref, watch } from 'vue';
-import { type WindowFlatReference } from '@/types/WindowTypes.js';
+import { type WindowFlatReference } from '@/types/windowTypes';
 
 import DesktopMain from '@/components/desktop/DesktopMain.vue';
 import TaskbarMain from '@/components/taskbar/TaskbarMain.vue';
-import WindowMain from '@/components/WindowMain.vue';
+import WindowMain from '@/components/window/WindowMain.vue';
 
 import DesktopSnapLayout from '@/components/DesktopSnapLayout.vue';
 import ContextMenu from '@/components/ContextMenu.vue';
@@ -20,7 +20,7 @@ import { useGetWindowContentComponent } from '@/composables/window/useGetWindowC
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.js';
 import { fileSystemLookup } from '@/composables/fileSystem/useIndexedDbHelper.js';
 
-import type { Item } from '@/types/ItemTypes.js';
+import type { Item } from '@/types/itemTypes';
 import type { RayDb } from 'ray-db-wrapper';
 
 import wallpapersJSON from '@/json/wallpapers.json';

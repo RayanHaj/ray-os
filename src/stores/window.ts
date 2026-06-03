@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia';
 import { readonly, ref } from 'vue';
 
-import type { WindowReference } from '@/types/WindowTypes.ts';
-import type { Application } from '@/types/ItemTypes.ts';
+import type { WindowReference } from '@/types/windowTypes.ts';
+import type { Application } from '@/types/itemTypes.ts';
 import { useVideoPlayerStore } from '@/stores/videoPlayer.ts';
 import { useImageViewerStore } from '@/stores/imageViewer.ts';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';

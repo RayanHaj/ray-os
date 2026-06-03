@@ -3,8 +3,8 @@ import type {
   LoadedAudio,
   Playlist,
   PlaylistInsert,
-} from '@/types/AudioPlayerTypes.ts';
-import { isAudioType, type Item } from '@/types/ItemTypes.ts';
+} from '@/types/audioPlayerTypes.ts';
+import { isAudioType, type Item } from '@/types/itemTypes.ts';
 import type { Ref } from 'vue';
 import type { RayDb } from 'ray-db-wrapper';
 import { useToastStore } from '@/stores/toast.ts';

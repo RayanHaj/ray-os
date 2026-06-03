@@ -1,4 +1,4 @@
-import type { LoadedAudio } from '@/types/AudioPlayerTypes.ts';
+import type { LoadedAudio } from '@/types/audioPlayerTypes.ts';
 import type { Ref } from 'vue';
 
 export function useAddNewAudio(

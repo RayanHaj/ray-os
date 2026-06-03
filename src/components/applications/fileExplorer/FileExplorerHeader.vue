@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onBeforeMount, ref } from 'vue';
-import { type FileItemSizeKey, fileItemSizes } from '@/types/FileExplorerTypes.ts';
+import { type FileItemSizeKey, fileItemSizes } from '@/types/fileExplorerTypes.js';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
 import {
   fileSystemLookup,
@@ -9,7 +9,7 @@ import {
 import { useDeleteFileSystemItem } from '@/composables/fileSystem/useDeleteFileSystemItem.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import { RayDb } from 'ray-db-wrapper';
-import { fileExtensions, type FileSystemItem } from '@/types/ItemTypes.ts';
+import { fileExtensions, type FileSystemItem } from '@/types/itemTypes.js';
 
 const { currentPath = ['C:/'], isDragging } = defineProps<{
   currentPath?: string[];

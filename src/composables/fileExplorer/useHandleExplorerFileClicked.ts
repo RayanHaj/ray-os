@@ -2,7 +2,7 @@ import {
   type FileItem,
   type FileSystemItem,
   type Item,
-} from '@/types/ItemTypes.ts';
+} from '@/types/itemTypes.ts';
 import { useWindowStore } from '@/stores/window.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import type { Ref } from 'vue';

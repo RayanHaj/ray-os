@@ -2,7 +2,7 @@ import { type Ref, ref, watch } from 'vue';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
 import { useAddNewAudio } from '@/composables/audioPlayer/useAddNewAudio.ts';
 import { useWindowStore } from '@/stores/window.ts';
-import type { LoadedAudio } from '@/types/AudioPlayerTypes.ts';
+import type { LoadedAudio } from '@/types/audioPlayerTypes.ts';
 
 export function useAudioSelectManager(
   audioObject: Ref<HTMLAudioElement | null>,

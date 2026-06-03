@@ -8,13 +8,13 @@ import {
 import type { RayDb } from 'ray-db-wrapper';
 import FileExplorerHeader from '@/components/applications/fileExplorer/FileExplorerHeader.vue';
 import FileExplorerGrid from '@/components/applications/fileExplorer/FileExplorerGrid.vue';
-import type { FileItem, FileSystemItem, Item, ItemInsert } from '@/types/ItemTypes.ts';
+import type { FileItem, FileSystemItem, Item, ItemInsert } from '@/types/itemTypes.js';
 import FileExplorerModal from '@/components/applications/fileExplorer/FileExplorerModal.vue';
 import { useContextMenuStore } from '@/stores/contextMenu.ts';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
-import type { FileItemSizeKey, ModalAction, ModalContentType } from '@/types/FileExplorerTypes.ts';
+import type { FileItemSizeKey, ModalAction, ModalContentType } from '@/types/fileExplorerTypes.js';
 import { useToastStore } from '@/stores/toast.ts';
 import { useUpdateItemsByCurrentPath } from '@/composables/fileExplorer/useUpdateItemsByCurrentPath.ts';
 import { useHandleExplorerFileClicked } from '@/composables/fileExplorer/useHandleExplorerFileClicked.ts';

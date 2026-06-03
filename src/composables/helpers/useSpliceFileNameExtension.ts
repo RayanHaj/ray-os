@@ -1,4 +1,4 @@
-import { fileExtensions } from '@/types/ItemTypes.ts';
+import { fileExtensions } from '@/types/itemTypes.ts';
 
 export function useSpliceFileNameExtension(fileName: string) {
   if (!fileName) return '';

@@ -4,7 +4,7 @@ import type {
   PrimaryActionsContextMenu,
   primaryActionsContextMenu,
   SecondaryActionsContextMenu,
-} from '@/types/ContextMenuTypes.ts';
+} from '@/types/contextMenuTypes.ts';
 import { useBrowserStore } from '@/stores/browser.ts';
 import { useTaskbarStore } from '@/stores/taskbar.ts';
 

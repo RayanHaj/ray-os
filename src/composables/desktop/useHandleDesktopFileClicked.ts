@@ -1,7 +1,7 @@
 import {
   type FileItem,
   type Item,
-} from '@/types/ItemTypes.ts';
+} from '@/types/itemTypes.ts';
 import { useWindowStore } from '@/stores/window.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';

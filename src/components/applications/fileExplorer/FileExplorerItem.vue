@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { useGetIsDisabledItem } from '@/composables/fileExplorer/useGetIsDisabledItem.ts';
-import { type FileSystemItem, type FileType, type Item } from '@/types/ItemTypes.ts';
+import { type FileSystemItem, type FileType, type Item } from '@/types/itemTypes.js';
 import { computed } from 'vue';
 import { useGetSvgByFileSystemItem } from '@/composables/fileExplorer/useGetSvgByFileSystemItem.ts';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
-import { type FileItemSizeValue, itemSizes } from '@/types/FileExplorerTypes.ts';
+import { type FileItemSizeValue, itemSizes } from '@/types/fileExplorerTypes.js';
 import { useInitializeContextMenu } from '@/composables/contextMenu/useInitializeContextMenu.ts';
 import { useToastFeatureNotImplemented } from '@/composables/helpers/useToastFeatureNotImplemented.ts';
 import type { RayDb } from 'ray-db-wrapper';

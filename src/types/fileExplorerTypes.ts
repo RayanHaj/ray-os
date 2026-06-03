@@ -1,4 +1,4 @@
-import type { FileItem } from '@/types/ItemTypes.ts';
+import type { FileItem } from '@/types/itemTypes.ts';
 
 export const itemSizes = {
   small: { font: 9, size: 30 },

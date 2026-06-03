@@ -7,6 +7,7 @@ import { useInitializeContextMenu } from '@/composables/contextMenu/useInitializ
 import { useTaskbarStore } from '@/stores/taskbar.ts';
 import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
 import { useToastFeatureNotImplemented } from '@/composables/helpers/useToastFeatureNotImplemented.ts';
+import { useGetTileId } from '@/composables/desktop/useGetTileId.ts';
 
 const socials = ['Github'] as const;
 type Socials = (typeof socials)[number];
@@ -27,6 +28,7 @@ function onDesktopRightClick(event: MouseEvent) {
           useToastFeatureNotImplemented();
         },
       },
+      {}
     );
 }
 
@@ -59,7 +61,7 @@ function navigateToSocialPage(social: Socials) {
         <DesktopTile
           v-for="columnPosition in columnCount"
           :key="columnPosition"
-          :tile-position="{ x: rowPosition, y: columnPosition }"
+          :tile-id="useGetTileId({ x: rowPosition, y: columnPosition }).value"
           @drag-started="tileIsBeingDragged = true"
           @drag-ended="tileIsBeingDragged = false"
         />

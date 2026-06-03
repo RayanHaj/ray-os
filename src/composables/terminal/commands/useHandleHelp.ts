@@ -1,5 +1,5 @@
 import type { Ref } from 'vue';
-import type { LineTerminal } from '@/types/TerminalTypes.ts';
+import type { LineTerminal } from '@/types/terminalTypes.ts';
 
 const helpArray = [
   'cd          : change directory',

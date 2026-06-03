@@ -6,7 +6,7 @@ import {
   type FileType,
   type Item,
   type ItemInsert,
-} from '@/types/ItemTypes.ts';
+} from '@/types/itemTypes.js';
 import { computed, ref, watch } from 'vue';
 import type { RayDb } from 'ray-db-wrapper';
 import { useDeleteFileSystemItem } from '@/composables/fileSystem/useDeleteFileSystemItem.ts';
@@ -16,13 +16,13 @@ import {
   type FileItemSizeValue,
   type FileSelectReturnItem,
   itemSizes,
-} from '@/types/FileExplorerTypes.ts';
+} from '@/types/fileExplorerTypes.js';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import { useToastStore } from '@/stores/toast.ts';
 import { useInitializeContextMenu } from '@/composables/contextMenu/useInitializeContextMenu.ts';
 import { useToastFeatureNotImplemented } from '@/composables/helpers/useToastFeatureNotImplemented.ts';
 import FileExplorerItem from '@/components/applications/fileExplorer/FileExplorerItem.vue';
-import { SystemFileDeleteError } from '@/exceptions/SystemFileDeleteError.ts';
+import { SystemFileDeleteError } from '@/exceptions/systemFileDeleteError.js';
 import { useBrowserStore } from '@/stores/browser.ts';
 import { useMultiSelect } from '@/composables/helpers/useMultiSelect.ts';
 import { useFilePropertiesStore } from '@/stores/fileProperties.ts';

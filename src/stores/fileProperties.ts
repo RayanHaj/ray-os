@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import type { FileType } from '@/types/ItemTypes.ts';
+import type { FileType } from '@/types/itemTypes.ts';
 import { readonly, ref } from 'vue';
 
 export type FileProperties = {

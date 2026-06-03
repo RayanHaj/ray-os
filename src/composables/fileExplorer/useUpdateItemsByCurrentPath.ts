@@ -1,5 +1,5 @@
 import { fileSystemLookup } from '@/composables/fileSystem/useIndexedDbHelper.ts';
-import type { FileSystemItem, Item } from '@/types/ItemTypes.ts';
+import type { FileSystemItem, Item } from '@/types/itemTypes.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import { useDeleteFileSystemItem } from '@/composables/fileSystem/useDeleteFileSystemItem.ts';
 

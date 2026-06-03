@@ -1,10 +1,10 @@
 import type { RayDb } from 'ray-db-wrapper';
-import type { FileSystemItem } from '@/types/ItemTypes.ts';
+import type { FileSystemItem } from '@/types/itemTypes.ts';
 import { useDesktopStore } from '@/stores/desktop.ts';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
 import { updateFileSystemItem } from '@/composables/fileSystem/useIndexedDbHelper.ts';
 import { useToastStore } from '@/stores/toast.ts';
-import { SystemFileRenameError } from '@/exceptions/SystemFileRenameError.ts';
+import { SystemFileRenameError } from '@/exceptions/systemFileRenameError.ts';
 
 export async function useRenameDirectory(
   rayDb: RayDb,

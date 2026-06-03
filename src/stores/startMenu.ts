@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import type { Item, ItemType } from '@/types/ItemTypes.ts';
+import type { Item, ItemType } from '@/types/itemTypes.ts';
 import type { RayDb } from 'ray-db-wrapper';
 
 export const useStartMenuStore = defineStore('startMenu', () => {

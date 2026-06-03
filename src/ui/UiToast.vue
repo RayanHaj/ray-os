@@ -3,8 +3,8 @@ import { useToastStore } from '@/stores/toast.ts';
 import { useTaskbarStore } from '@/stores/taskbar.ts';
 import { nextTick, ref, watch } from 'vue';
 import { useSvgsStore } from '@/stores/svgs.ts';
-import type { Toast, ToastTypes } from '@/types/ToastTypes.ts';
-import type { AvailableSvgs } from '@/types/AvailableSvgs.ts';
+import type { Toast, ToastTypes } from '@/types/toastTypes.js';
+import type { AvailableSvgs } from '@/types/availableSvgs.js';
 
 const taskbarStore = useTaskbarStore();
 const toastStore = useToastStore();

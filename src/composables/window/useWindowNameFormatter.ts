@@ -1,4 +1,4 @@
-import { type WindowName, windowNames } from '@/types/WindowTypes.ts';
+import { type WindowName, windowNames } from '@/types/windowTypes.ts';
 
 export function useWindowNameFormatter(windowName: string): WindowName | undefined {
   const formattedName = windowName[0].toLowerCase() + windowName.replace(' ', '').substring(1);

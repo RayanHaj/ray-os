@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { type Component, computed, onBeforeMount, onMounted, provide, type Ref, ref } from 'vue';
-import type { WindowFlatReference, WindowStyleObject } from '@/types/WindowTypes.ts';
-import { useWindowStore } from '@/stores/window.ts';
-import WindowHeader from '@/components/WindowHeader.vue';
-import { useWindowStateManager } from '@/composables/window/useWindowStateManager.ts';
-import { useWindowPositionManager } from '@/composables/window/useWindowPositionManager.ts';
-import { useWindowResizeManager } from '@/composables/window/useWindowResizeManager.ts';
-import { useWindowSnappingManager } from '@/composables/window/useWindowSnappingManager.ts';
-import { useBrowserStore } from '@/stores/browser.ts';
+import type { WindowFlatReference, WindowStyleObject } from '@/types/windowTypes.js';
+import { useWindowStore } from '@/stores/window.js';
+import WindowHeader from '@/components/window/WindowHeader.vue';
+import { useWindowStateManager } from '@/composables/window/useWindowStateManager.js';
+import { useWindowPositionManager } from '@/composables/window/useWindowPositionManager.js';
+import { useWindowResizeManager } from '@/composables/window/useWindowResizeManager.js';
+import { useWindowSnappingManager } from '@/composables/window/useWindowSnappingManager.js';
+import { useBrowserStore } from '@/stores/browser.js';
 
 const {
   reference,

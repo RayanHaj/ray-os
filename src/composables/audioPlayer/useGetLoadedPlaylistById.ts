@@ -1,4 +1,4 @@
-import type { Playlist } from '@/types/AudioPlayerTypes.ts';
+import type { Playlist } from '@/types/audioPlayerTypes.ts';
 import type { Ref } from 'vue';
 
 export function useGetLoadedPlaylistById(

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Playlist } from '@/types/AudioPlayerTypes.ts';
+import type { Playlist } from '@/types/audioPlayerTypes.js';
 
 const { playlist } = defineProps<{ playlist: Playlist }>();
 

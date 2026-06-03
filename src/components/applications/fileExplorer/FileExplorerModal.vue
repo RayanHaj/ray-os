@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import type { ModalAction, ModalContentType } from '@/types/FileExplorerTypes.ts';
+import type { ModalAction, ModalContentType } from '@/types/fileExplorerTypes.js';
 import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
 
 const { title, action, fileSystemItemTitle } = defineProps<{

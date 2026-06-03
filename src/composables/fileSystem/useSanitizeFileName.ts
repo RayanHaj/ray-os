@@ -1,4 +1,4 @@
-import { fileExtensions, type FileType } from '@/types/ItemTypes.ts';
+import { fileExtensions, type FileType } from '@/types/itemTypes.ts';
 
 export function useSanitizeFileName(fileName: string, type: FileType) {
   const fileNameWithoutExtension = fileName.split('.')[0];

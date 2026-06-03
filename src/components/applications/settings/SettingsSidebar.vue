@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { allowedSettingsOptions, type AllowedSettingsOptions } from '@/types/SettingsTypes.ts';
+import { allowedSettingsOptions, type AllowedSettingsOptions } from '@/types/settingsTypes.js';
 
 const emits = defineEmits(['optionSelected']);
 

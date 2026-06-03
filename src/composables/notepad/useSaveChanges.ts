@@ -3,7 +3,7 @@ import type {
   InsertFileSystemItem,
   Item,
   ItemInsert,
-} from '@/types/ItemTypes.ts';
+} from '@/types/itemTypes.ts';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import { useToastStore } from '@/stores/toast.ts';

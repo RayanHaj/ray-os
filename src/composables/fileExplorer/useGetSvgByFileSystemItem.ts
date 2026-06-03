@@ -1,5 +1,5 @@
 import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
-import { type FileSystemItem, isAudioType, isImageType, isVideoType } from '@/types/ItemTypes.ts';
+import { type FileSystemItem, isAudioType, isImageType, isVideoType } from '@/types/itemTypes.ts';
 
 export function useGetSvgByFileSystemItem(fileSystemItem: FileSystemItem) {
   const imageSvg = useSvgOrFallback('ImageViewer');

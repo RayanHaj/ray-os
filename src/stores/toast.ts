@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import type { TimeoutId, Toast, ToastTypes } from '@/types/ToastTypes.ts';
+import type { TimeoutId, Toast, ToastTypes } from '@/types/toastTypes.ts';
 
 export const useToastStore = defineStore('toast', () => {
   const toasts = ref<Toast[]>([]);
