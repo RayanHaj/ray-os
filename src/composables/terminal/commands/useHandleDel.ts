@@ -22,7 +22,7 @@ export async function useHandleDel(
     }
 
     try {
-      await useDeleteFileSystemItem(rayDb, targetValue.id);
+      await useDeleteFileSystemItem(rayDb, targetValue, { updateFileSystem: true });
     } catch (e) {
       return new Error((e as Error).message);
     }

@@ -19,5 +19,11 @@ export const useImageViewerStore = defineStore('imageViewer', () => {
     return true;
   }
 
-  return { loadedImage, initImageFileAndUrl, hasOpenInstance };
+  function removeLoadedImage(windowId: string) {
+    if (loadedImage.value.windowId === windowId) {
+      loadedImage.value = { windowId: null, file: null };
+    }
+  }
+
+  return { loadedImage, initImageFileAndUrl, removeLoadedImage, hasOpenInstance };
 });

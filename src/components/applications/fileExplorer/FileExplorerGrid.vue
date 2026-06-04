@@ -27,6 +27,8 @@ import { useBrowserStore } from '@/stores/browser.ts';
 import { useMultiSelect } from '@/composables/helpers/useMultiSelect.ts';
 import { useFilePropertiesStore } from '@/stores/fileProperties.ts';
 import { useWindowStore } from '@/stores/window.ts';
+import { useFileSystemStore } from '@/stores/fileSystem.ts';
+import { useDesktopStore } from '@/stores/desktop.ts';
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 const windowId = useInjectOrThrow<string>('windowId');
@@ -131,7 +133,11 @@ async function onFileDrop(event: DragEvent) {
       }
 
       await insertItemIntoFileSystem(rayDb, [targetElementId], dropItem);
-      await useDeleteFileSystemItem(rayDb, dropItem, true, true);
+      await useDeleteFileSystemItem(rayDb, dropItem, {
+        files: { dontDeleteFromFilesStore: true },
+        directories: { onlyDeleteParent: true },
+        updateFileSystem: true,
+      });
     } catch (e) {
       console.error(e);
     }
@@ -305,8 +311,8 @@ function onClickGrid() {
   multiSelect.clear();
 }
 
-function onItemsDelete() {
-  multiSelect.forEachSelected(async (id) => {
+async function onItemsDelete() {
+  await multiSelect.forEachSelected(async (id) => {
     const fileSystemItem = currentFileSystemItems.find((item) => item.id === id);
     if (fileSystemItem) {
       if (fileSystemItem.isSystemFile) {
@@ -336,6 +342,9 @@ function onItemsDelete() {
       }
     }
   });
+
+  await useDesktopStore().updateTiles(rayDb);
+  useFileSystemStore().updateFileSystem();
 }
 
 function onRenameFile() {

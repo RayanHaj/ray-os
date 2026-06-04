@@ -46,7 +46,11 @@ async function onDrop(event: DragEvent) {
     const dropItem = parsedItem as FileSystemItem;
     if (dropItem.isSystemFile) return;
 
-    await useDeleteFileSystemItem(rayDb, dropItem, true, true, false);
+    await useDeleteFileSystemItem(rayDb, dropItem, {
+      files: { dontDeleteFromFilesStore: true },
+      directories: { onlyDeleteParent: true },
+      updateFileSystem: false,
+    });
 
     const parentPath = currentPath.slice(0, -1).join('/') || 'C:';
     const parentDir = await fileSystemLookup(rayDb, parentPath);

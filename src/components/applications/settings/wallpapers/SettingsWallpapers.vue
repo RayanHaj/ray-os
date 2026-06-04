@@ -15,6 +15,7 @@ import { useWindowStore } from '@/stores/window.ts';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
 import { useDeleteFileSystemItem } from '@/composables/fileSystem/useDeleteFileSystemItem.ts';
 import { useToastStore } from '@/stores/toast.ts';
+import { useUpdateFileSystem } from '@/composables/fileSystem/useUpdateFileSystem.ts';
 
 const WALLPAPER_COUNT = Object.keys(wallpapers).length;
 
@@ -93,7 +94,10 @@ watch(
 
       try {
         await insertItemIntoFileSystem(rayDb, [wallpaperDirectoryId], dropItem);
-        await useDeleteFileSystemItem(rayDb, dropItem, true, true);
+        await useDeleteFileSystemItem(rayDb, dropItem, {
+          files: { dontDeleteFromFilesStore: true },
+          directories: { onlyDeleteParent: true },
+        });
       } catch (e) {
         console.error(e);
         setErrorsMessages.add((e as Error).message);
@@ -107,7 +111,7 @@ watch(
     }
 
     useWindowStore().removeOpenWindowReference(fileExplorerWindowId.value, windowId);
-    useFileSystemStore().updateFileSystem();
+    await useUpdateFileSystem(rayDb);
   },
 );
 

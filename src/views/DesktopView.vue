@@ -51,8 +51,6 @@ const minHeightWindows: Record<string, { height: number }> = {
 
 // Windows that cannot be minified
 const inlineWindows: Record<string, boolean> = {
-  'Video Player': true,
-  'Image Viewer': true,
   Properties: true,
 };
 
