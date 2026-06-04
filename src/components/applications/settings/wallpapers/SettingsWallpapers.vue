@@ -5,7 +5,6 @@ import { onBeforeMount, type Ref, ref, watch } from 'vue';
 import { useWallpaperStore, type WallpaperType } from '@/stores/settings/wallpaper.ts';
 import {
   fileSystemLookup,
-  insertItemIntoFileSystem,
 } from '@/composables/fileSystem/useIndexedDbHelper.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import type { RayDb } from 'ray-db-wrapper';
@@ -16,6 +15,7 @@ import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
 import { useDeleteFileSystemItem } from '@/composables/fileSystem/useDeleteFileSystemItem.ts';
 import { useToastStore } from '@/stores/toast.ts';
 import { useUpdateFileSystem } from '@/composables/fileSystem/useUpdateFileSystem.ts';
+import { useInsertFileSystemItem } from '@/composables/fileSystem/useInsertFileSystemItem.ts';
 
 const WALLPAPER_COUNT = Object.keys(wallpapers).length;
 
@@ -93,7 +93,7 @@ watch(
       };
 
       try {
-        await insertItemIntoFileSystem(rayDb, [wallpaperDirectoryId], dropItem);
+        await useInsertFileSystemItem(rayDb, [wallpaperDirectoryId], dropItem);
         await useDeleteFileSystemItem(rayDb, dropItem.id, {
           files: { dontDeleteFromFilesStore: true },
           directories: { onlyDeleteParent: true },

@@ -1,10 +1,10 @@
 import type { RayDb } from 'ray-db-wrapper';
 import {
   fileSystemLookup,
-  insertItemIntoFileSystem,
 } from '@/composables/fileSystem/useIndexedDbHelper.ts';
 import type { Ref } from 'vue';
 import type { LineTerminal } from '@/types/terminalTypes.ts';
+import { useInsertFileSystemItem } from '@/composables/fileSystem/useInsertFileSystemItem.ts';
 
 export async function useHandleMkdir(
   rayDb: RayDb,
@@ -22,7 +22,7 @@ export async function useHandleMkdir(
       throw new Error('cannot create directory at current path');
     }
 
-    await insertItemIntoFileSystem(rayDb, [value.parent.id], {
+    await useInsertFileSystemItem(rayDb, [value.parent.id], {
       directory: { name: name, children: [] },
     });
 

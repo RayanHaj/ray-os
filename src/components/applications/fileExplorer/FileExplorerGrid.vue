@@ -10,7 +10,6 @@ import {
 import { computed, ref, watch } from 'vue';
 import type { RayDb } from 'ray-db-wrapper';
 import { useDeleteFileSystemItem } from '@/composables/fileSystem/useDeleteFileSystemItem.ts';
-import { insertItemIntoFileSystem } from '@/composables/fileSystem/useIndexedDbHelper.ts';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
 import {
   type FileItemSizeValue,
@@ -29,6 +28,7 @@ import { useFilePropertiesStore } from '@/stores/fileProperties.ts';
 import { useWindowStore } from '@/stores/window.ts';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
 import { useDesktopStore } from '@/stores/desktop.ts';
+import { useInsertFileSystemItem } from '@/composables/fileSystem/useInsertFileSystemItem.ts';
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 const windowId = useInjectOrThrow<string>('windowId');
@@ -132,7 +132,7 @@ async function onFileDrop(event: DragEvent) {
         return;
       }
 
-      await insertItemIntoFileSystem(rayDb, [targetElementId], dropItem);
+      await useInsertFileSystemItem(rayDb, [targetElementId], dropItem);
       await useDeleteFileSystemItem(rayDb, dropItem.id, {
         files: { dontDeleteFromFilesStore: true },
         directories: { onlyDeleteParent: true },
@@ -172,7 +172,7 @@ async function onFileDrop(event: DragEvent) {
       content: fileObject as FileItem,
     });
     if (fileId && typeof fileId === 'number') {
-      await insertItemIntoFileSystem(rayDb, [parentId], {
+      await useInsertFileSystemItem(rayDb, [parentId], {
         file: { name: file.name, id: fileId, type: file.type },
       });
     }

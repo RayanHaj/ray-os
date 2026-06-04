@@ -2,9 +2,9 @@ import type { RayDb } from 'ray-db-wrapper';
 import type { FileSystemItem } from '@/types/itemTypes.ts';
 import { useDesktopStore } from '@/stores/desktop.ts';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
-import { updateFileSystemItem } from '@/composables/fileSystem/useIndexedDbHelper.ts';
 import { useToastStore } from '@/stores/toast.ts';
 import { SystemFileRenameError } from '@/exceptions/systemFileRenameError.ts';
+import { useUpdateFileSystemItem } from '@/composables/fileSystem/useUpdateFileSystemItem.ts';
 
 export async function useRenameDirectory(
   rayDb: RayDb,
@@ -23,7 +23,7 @@ export async function useRenameDirectory(
 
     fileSystemItem.directory.name = newDirectoryName.trim();
 
-    await updateFileSystemItem(rayDb, fileSystemItem, true);
+    await useUpdateFileSystemItem(rayDb, fileSystemItem, true);
 
     await useDesktopStore().updateTiles(rayDb);
     useFileSystemStore().updateFileSystem();

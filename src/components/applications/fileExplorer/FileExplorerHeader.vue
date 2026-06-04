@@ -4,12 +4,12 @@ import { type FileItemSizeKey, fileItemSizes } from '@/types/fileExplorerTypes.j
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
 import {
   fileSystemLookup,
-  insertItemIntoFileSystem,
 } from '@/composables/fileSystem/useIndexedDbHelper.ts';
 import { useDeleteFileSystemItem } from '@/composables/fileSystem/useDeleteFileSystemItem.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import { RayDb } from 'ray-db-wrapper';
 import { fileExtensions, type FileSystemItem } from '@/types/itemTypes.js';
+import { useInsertFileSystemItem } from '@/composables/fileSystem/useInsertFileSystemItem.ts';
 
 const { currentPath = ['C:/'], isDragging } = defineProps<{
   currentPath?: string[];
@@ -57,7 +57,7 @@ async function onDrop(event: DragEvent) {
 
     if (!parentDir || parentDir instanceof Error) return;
 
-    const newDirectoryId = await insertItemIntoFileSystem(
+    const newDirectoryId = await useInsertFileSystemItem(
       rayDb,
       [parentDir.parent.id!],
       dropItem,

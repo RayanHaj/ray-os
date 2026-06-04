@@ -2,7 +2,6 @@
 import { computed, onBeforeMount, ref, watch } from 'vue';
 import {
   fileSystemLookup,
-  insertItemIntoFileSystem,
   parseToPathString,
 } from '@/composables/fileSystem/useIndexedDbHelper.ts';
 import type { RayDb } from 'ray-db-wrapper';
@@ -22,6 +21,7 @@ import { useSanitizeFileName } from '@/composables/fileSystem/useSanitizeFileNam
 import { useValidateFileName } from '@/composables/fileSystem/useValidateFileName.ts';
 import { useRenameFile } from '@/composables/fileSystem/useRenameFile.ts';
 import { useRenameDirectory } from '@/composables/fileSystem/useRenameDirectory.ts';
+import { useInsertFileSystemItem } from '@/composables/fileSystem/useInsertFileSystemItem.ts';
 
 const fileExplorerStore = useFileExplorerStore();
 const fileSystemStore = useFileSystemStore();
@@ -162,7 +162,7 @@ async function handleModalInput(contentType: ModalContentType, action: ModalActi
         switch (contentType) {
           case 'directory':
             {
-              await insertItemIntoFileSystem(rayDb, [parentId], {
+              await useInsertFileSystemItem(rayDb, [parentId], {
                 directory: { name: input, children: [] },
               });
             }
@@ -194,7 +194,7 @@ async function handleModalInput(contentType: ModalContentType, action: ModalActi
               return;
             }
 
-            await insertItemIntoFileSystem(rayDb, [parentId], {
+            await useInsertFileSystemItem(rayDb, [parentId], {
               file: { name: fileName, id: Number(fileId), type: file.type },
             });
           }
@@ -230,7 +230,7 @@ async function onFileUpload(files: FileList) {
         content: fileObject as FileItem,
       });
       if (fileId && typeof fileId === 'number') {
-        await insertItemIntoFileSystem(rayDb, [parentId.value], {
+        await useInsertFileSystemItem(rayDb, [parentId.value], {
           file: { name: file.name, id: fileId, type: file.type },
         });
       }

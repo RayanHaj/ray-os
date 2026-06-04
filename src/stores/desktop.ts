@@ -12,9 +12,9 @@ import { useToastStore } from '@/stores/toast.ts';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
 import {
   fileSystemLookup,
-  insertItemIntoFileSystem,
 } from '@/composables/fileSystem/useIndexedDbHelper.ts';
 import type { DesktopTileItem } from '@/types/desktopTypes.ts';
+import { useInsertFileSystemItem } from '@/composables/fileSystem/useInsertFileSystemItem.ts';
 
 type DesktopItem = { id: number; type: ItemType; tileId: number; path?: string };
 
@@ -52,18 +52,18 @@ export const useDesktopStore = defineStore('desktop', () => {
       }
 
       if (item.content.type === 'directory' && item.content.directory?.children) {
-        await insertItemIntoFileSystem(rayDb, [directory.id], {
+        await useInsertFileSystemItem(rayDb, [directory.id], {
           directory: {
             name: item.content.directory.name,
             children: item.content.directory.children,
           },
         });
       } else if (item.content.type === 'file') {
-        await insertItemIntoFileSystem(rayDb, [directory.id], {
+        await useInsertFileSystemItem(rayDb, [directory.id], {
           file: { name: item.content.name, id: item.id, type: item.content.type },
         });
       } else if (item.content.type === 'application') {
-        await insertItemIntoFileSystem(rayDb, [directory.id], {
+        await useInsertFileSystemItem(rayDb, [directory.id], {
           file: { name: item.label, id: item.id, type: item.content.type },
         });
       }
@@ -95,7 +95,7 @@ export const useDesktopStore = defineStore('desktop', () => {
       });
 
       if (fileId && typeof fileId === 'number') {
-        await insertItemIntoFileSystem(rayDb, [useFileSystemStore().ROOT_DIR_ID], {
+        await useInsertFileSystemItem(rayDb, [useFileSystemStore().ROOT_DIR_ID], {
           file: { name: fileObject.name, id: fileId, type: file.type },
           isSystemFile: true,
         });

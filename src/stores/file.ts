@@ -5,9 +5,9 @@ import { Applications } from '@/types/itemTypes.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import {
   fileSystemLookup,
-  insertItemIntoFileSystem,
 } from '@/composables/fileSystem/useIndexedDbHelper.ts';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
+import { useInsertFileSystemItem } from '@/composables/fileSystem/useInsertFileSystemItem.ts';
 
 export const useFileStore = defineStore('file', () => {
   const applications = ref<Item[]>([]);
@@ -39,7 +39,7 @@ export const useFileStore = defineStore('file', () => {
       if (directoryContainsApplication) break;
 
       await rayDb.insertOne<Item>('files', applicationItem);
-      await insertItemIntoFileSystem(rayDb, [directory.id], {
+      await useInsertFileSystemItem(rayDb, [directory.id], {
         file: {
           name: applicationItem.label,
           id: applicationItem.id,

@@ -1,8 +1,8 @@
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
-import { insertItemIntoFileSystem } from '@/composables/fileSystem/useIndexedDbHelper.ts';
 import { useFileStore } from '@/stores/file.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import type { FileSystemItem } from '@/types/itemTypes.ts';
+import { useInsertFileSystemItem } from '@/composables/fileSystem/useInsertFileSystemItem.ts';
 
 export async function useFileSystemInit(rayDb: RayDb) {
   const fileSystemStore = useFileSystemStore();
@@ -20,17 +20,17 @@ export async function useFileSystemInit(rayDb: RayDb) {
   }
 
   try {
-    const parentId = await insertItemIntoFileSystem(rayDb, [], {
+    const parentId = await useInsertFileSystemItem(rayDb, [], {
       directory: { name: fileSystemStore.ROOT_DIR_NAME, children: [] },
       isSystemFile: true,
     }, undefined, false);
 
       if (parentId) {
-        await insertItemIntoFileSystem(rayDb, [parentId], {
+        await useInsertFileSystemItem(rayDb, [parentId], {
           directory: { name: 'Applications', children: [] },
           isSystemFile: true,
         }, undefined, false);
-        await insertItemIntoFileSystem(rayDb, [parentId], {
+        await useInsertFileSystemItem(rayDb, [parentId], {
           directory: { name: 'Wallpapers', children: [] },
           isSystemFile: true,
         }, undefined, false);
