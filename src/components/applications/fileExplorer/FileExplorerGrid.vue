@@ -133,7 +133,7 @@ async function onFileDrop(event: DragEvent) {
       }
 
       await insertItemIntoFileSystem(rayDb, [targetElementId], dropItem);
-      await useDeleteFileSystemItem(rayDb, dropItem, {
+      await useDeleteFileSystemItem(rayDb, dropItem.id, {
         files: { dontDeleteFromFilesStore: true },
         directories: { onlyDeleteParent: true },
         updateFileSystem: true,
@@ -328,7 +328,7 @@ async function onItemsDelete() {
       }
 
       try {
-        await useDeleteFileSystemItem(rayDb, fileSystemItem);
+        await useDeleteFileSystemItem(rayDb, fileSystemItem.id);
       } catch (e) {
         if (e instanceof SystemFileDeleteError) {
           useToastStore().createToast(

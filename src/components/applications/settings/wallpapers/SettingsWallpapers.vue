@@ -94,7 +94,7 @@ watch(
 
       try {
         await insertItemIntoFileSystem(rayDb, [wallpaperDirectoryId], dropItem);
-        await useDeleteFileSystemItem(rayDb, dropItem, {
+        await useDeleteFileSystemItem(rayDb, dropItem.id, {
           files: { dontDeleteFromFilesStore: true },
           directories: { onlyDeleteParent: true },
         });

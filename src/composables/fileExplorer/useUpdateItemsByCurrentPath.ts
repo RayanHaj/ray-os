@@ -26,7 +26,7 @@ async function mapItemsWithType(rayDb: RayDb, items: FileSystemItem[]): Promise<
 
           // if file does not exist in the files store but somehow a reference is still in the fileSystem store, it will be deleted
           if (!file) {
-            await useDeleteFileSystemItem(rayDb, item, {
+            await useDeleteFileSystemItem(rayDb, item.id, {
               files: { dontDeleteFromFilesStore: false },
               directories: { onlyDeleteParent: true },
               updateFileSystem: true,
