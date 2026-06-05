@@ -69,13 +69,23 @@ function getTrackBackground(value: number, min: number, max: number) {
       </div>
       <div class="middle-end-wrapper">
         <div class="middle">
-          <button class="previous-button" :disabled="disabled" @click="emit('previous')">
+          <button
+            v-if="options?.nextAndPrevious"
+            class="previous-button"
+            :disabled="disabled"
+            @click="emit('previous')"
+          >
             <component :is="previousSvg.svg" />
           </button>
           <button class="play-button" :disabled="disabled" @click="emit('playPauseAudio')">
             <component :is="isPlaying ? pauseSvg.svg : playSvg.svg" />
           </button>
-          <button class="next-button" :disabled="disabled" @click="emit('next')">
+          <button
+            v-if="options?.nextAndPrevious"
+            class="next-button"
+            :disabled="disabled"
+            @click="emit('next')"
+          >
             <component :is="nextSvg.svg" />
           </button>
         </div>

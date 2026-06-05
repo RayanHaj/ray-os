@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
-import { onMounted, onUnmounted, ref, type Ref, watch, watchEffect } from 'vue';
+import { nextTick, onMounted, onUnmounted, ref, type Ref, useTemplateRef, watch } from 'vue';
 import { useVideoPlayerStore } from '@/stores/videoPlayer.ts';
 import type { LoadedVideo } from '@/types/videoPlayerTypes.js';
 import MediaPlayerFooter from '@/components/applications/mediaPlayers/MediaPlayerFooter.vue';
@@ -13,7 +13,7 @@ const windowId = useInjectOrThrow<string>('windowId');
 const loadedVideo: Ref<LoadedVideo> = ref({ windowId: null, file: null });
 const videoUrl: Ref<string | null> = ref(null);
 
-const videoRef = ref<HTMLVideoElement | null>();
+const videoRef = useTemplateRef('videoRef');
 
 const videoDuration = ref(0);
 const videoCurrentTime = ref(0);
@@ -35,7 +35,6 @@ onUnmounted(() => {
     videoRef.value.removeEventListener('timeupdate', onTimeUpdate);
     videoRef.value.removeEventListener('ended', onAudioEnded);
     videoRef.value.src = '';
-    videoRef.value = null;
   }
 
   if (videoUrl.value) {
@@ -45,16 +44,27 @@ onUnmounted(() => {
   videoPlayerStore.removeLoadedVideo(windowId);
 });
 
-watchEffect(() => {
-  if (videoPlayerStore.loadedVideo.windowId !== windowId) {
-    return;
-  }
+watch(
+  () => videoPlayerStore.loadedVideo,
+  async (newLoadedVideo) => {
+    if (newLoadedVideo.windowId !== windowId) return;
 
-  loadedVideo.value = videoPlayerStore.loadedVideo;
-  if (videoPlayerStore.loadedVideo.file) {
-    videoUrl.value = URL.createObjectURL(videoPlayerStore.loadedVideo.file);
-  }
-});
+    loadedVideo.value = newLoadedVideo;
+    if (loadedVideo.value.file) {
+      videoUrl.value = URL.createObjectURL(loadedVideo.value.file);
+    }
+
+    await nextTick();
+
+    if (videoRef.value) {
+      videoRef.value.loop = videoLoop.value;
+      videoRef.value.addEventListener('loadedmetadata', updateAudioDuration);
+      videoRef.value.addEventListener('timeupdate', onTimeUpdate);
+      videoRef.value.addEventListener('ended', onAudioEnded);
+    }
+  },
+  { immediate: true },
+);
 
 watch(videoLoop, (newValue, oldValue) => {
   if (newValue === oldValue) return;
@@ -121,7 +131,8 @@ function onFileSelectReturnValue(returnValue: { windowId: string; value: FileSel
       :window-id="windowId"
       :allowed-file-types="['video/mp4']"
       @return-value="onFileSelectReturnValue"
-    >video file</FileSelectButton>
+      >video file</FileSelectButton
+    >
     <MediaPlayerFooter
       :file-name="loadedVideo.file?.name ?? ''"
       :audio-duration="videoDuration"
@@ -129,7 +140,7 @@ function onFileSelectReturnValue(returnValue: { windowId: string; value: FileSel
       :is-playing="videoIsPlaying"
       :looped="videoLoop"
       :disabled="false"
-      :options="{ dotMenu: true }"
+      :options="{ dotMenu: true, nextAndPrevious: false }"
       @play-pause-audio="videoIsPlaying ? pauseVideo() : playVideo()"
       @slider-input="onSliderInput"
       @loop-audio="videoLoop = !videoLoop"
