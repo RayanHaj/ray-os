@@ -42,10 +42,12 @@ const minWidthWindows: Record<string, { width: number }> = {
 };
 
 const minHeightWindows: Record<string, { height: number }> = {
-  Notepad: { height: 208 },
+  Notepad: { height: 245 },
   Calculator: { height: 315 },
   'File Explorer': { height: 315 },
   'Audio Player': { height: 315 },
+  'Video Player': { height: 245 },
+  'Image Viewer': { height: 245 },
   Properties: { height: 350 },
 };
 

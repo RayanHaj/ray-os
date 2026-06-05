@@ -525,7 +525,6 @@ async function onProperties(fileSystemItem: FileSystemItem) {
   margin-left: 0;
   overflow: auto;
   align-items: start;
-  padding: 10px;
 }
 
 .grid-wrapper {
