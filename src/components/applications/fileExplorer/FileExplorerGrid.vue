@@ -257,15 +257,18 @@ const itemSize = computed<FileItemSizeValue>(
   -webkit-user-select: none;
   height: 100%;
   gap: 5px;
+  margin-top: 35px;
 }
 
 .checkbox-wrapper {
+  position: fixed;
   display: flex;
   flex-direction: row;
   justify-content: center;
   gap: 5px;
   background-color: rgba(0, 0, 0, 0.5);
   padding: 5px 20px;
+  margin: 10px;
   border-radius: 5px;
 }
 

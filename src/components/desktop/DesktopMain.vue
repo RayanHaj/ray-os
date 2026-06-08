@@ -66,7 +66,6 @@ function navigateToSocialPage(social: Socials) {
     </div>
   </div>
 </template>
-
 <style scoped>
 .desktop {
   --socials-width: 70px;
