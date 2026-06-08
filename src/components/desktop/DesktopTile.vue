@@ -7,7 +7,6 @@ import { useBrowserStore } from '@/stores/browser.ts';
 import { useInitializeContextMenu } from '@/composables/contextMenu/useInitializeContextMenu.ts';
 import { useDblClick } from '@/composables/helpers/UseDblClick.ts';
 import { useHandleDesktopFileClicked } from '@/composables/desktop/useHandleDesktopFileClicked.ts';
-import { useToastFeatureNotImplemented } from '@/composables/helpers/useToastFeatureNotImplemented.ts';
 import type { DesktopTileItem } from '@/types/desktopTypes.ts';
 import { useHandleDesktopTileDragStart } from '@/composables/desktop/useHandleDesktopTileDragStart.ts';
 import { useHandleDesktopTileDrop } from '@/composables/desktop/useHandleDesktopTileDrop.ts';
@@ -31,12 +30,6 @@ function onTileRightClick(event: MouseEvent) {
     .tile()
     .initialize(
       {
-        Copy: () => {
-          useToastFeatureNotImplemented();
-        },
-        Paste: () => {
-          useToastFeatureNotImplemented();
-        },
         Delete: async () => {
           if (!desktopTileItem.value) {
             return;

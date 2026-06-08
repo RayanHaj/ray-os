@@ -1,12 +1,9 @@
 <script setup lang="ts">
 import DesktopTile from '@/components/desktop/DesktopTile.vue';
 import { useTileCountGrid } from '@/composables/desktop/useTileCountGrid.ts';
-import { useBrowserStore } from '@/stores/browser.ts';
 import { computed, ref } from 'vue';
 import { useInitializeContextMenu } from '@/composables/contextMenu/useInitializeContextMenu.ts';
-import { useTaskbarStore } from '@/stores/taskbar.ts';
 import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
-import { useToastFeatureNotImplemented } from '@/composables/helpers/useToastFeatureNotImplemented.ts';
 import { useGetTileId } from '@/composables/desktop/useGetTileId.ts';
 
 const socials = ['Github'] as const;
@@ -17,19 +14,7 @@ const columnCount = computed(() => useTileCountGrid().y.value);
 const tileIsBeingDragged = ref<boolean>(false);
 
 function onDesktopRightClick(event: MouseEvent) {
-  useInitializeContextMenu(event)
-    .desktop()
-    .initialize(
-      {
-        Copy: () => {
-          useToastFeatureNotImplemented();
-        },
-        Paste: () => {
-          useToastFeatureNotImplemented();
-        },
-      },
-      {}
-    );
+  useInitializeContextMenu(event).desktop().initialize({}, {});
 }
 
 function onMouseLeave(_: MouseEvent) {

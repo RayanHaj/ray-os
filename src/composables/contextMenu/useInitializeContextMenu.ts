@@ -27,14 +27,14 @@ export function useInitializeContextMenu(event: MouseEvent) {
   }
 
   const desktop = () => {
-    const primaryActions = ['Copy', 'Paste'] as const;
+    const primaryActions = [] as const;
     const secondaryActions = [] as const;
 
     const initialize = createInitialize(primaryActions, secondaryActions);
     return { initialize };
   };
   const tile = () => {
-    const primaryActions = ['Copy', 'Paste', 'Delete'] as const;
+    const primaryActions = ['Delete'] as const;
     const secondaryActions = [] as const;
 
     const initialize = createInitialize(primaryActions, secondaryActions);
