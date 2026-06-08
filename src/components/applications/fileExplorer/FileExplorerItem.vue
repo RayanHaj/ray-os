@@ -1,24 +1,35 @@
 <script setup lang="ts">
 import { useGetIsDisabledItem } from '@/composables/fileExplorer/useGetIsDisabledItem.ts';
 import { type FileSystemItem, type FileType, type Item } from '@/types/itemTypes.js';
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useGetSvgByFileSystemItem } from '@/composables/fileExplorer/useGetSvgByFileSystemItem.ts';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
 import { type FileItemSizeValue, itemSizes } from '@/types/fileExplorerTypes.js';
 import { useInitializeContextMenu } from '@/composables/contextMenu/useInitializeContextMenu.ts';
 import { useToastFeatureNotImplemented } from '@/composables/helpers/useToastFeatureNotImplemented.ts';
-import type { RayDb } from 'ray-db-wrapper';
 import { useDblClick } from '@/composables/helpers/UseDblClick.ts';
 import { useContextMenuStore } from '@/stores/contextMenu.ts';
+import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
+import type { RayDb } from 'ray-db-wrapper';
 
-const { fileSystemItem, currentItems, filterByFileType, isSelected } = defineProps<{
+const rayDb = useInjectOrThrow<RayDb>('rayDb');
+const { fileSystemItem, filterByFileType, isSelected } = defineProps<{
   fileSystemItem: FileSystemItem;
-  currentItems: Item[];
   filterByFileType: FileType[];
   isSelected: boolean;
-  rayDb: RayDb;
   windowId: string;
 }>();
+
+// Used to determine if this item should be disabled or not
+const currentFileItem = ref<Item | null>(null);
+watch(
+  () => fileSystemItem,
+  async (newFileSystemItem) => {
+    if (!newFileSystemItem.file) return;
+    currentFileItem.value = await rayDb.findOne<Item>('files', 'id', newFileSystemItem.file.id);
+  },
+  { immediate: true },
+);
 
 const emit = defineEmits([
   'onDragStart',
@@ -30,11 +41,11 @@ const emit = defineEmits([
   'addToDesktop',
   'onDelete',
   'onContextMenu',
-  'properties'
+  'properties',
 ]);
 
 const isItemDisabled = computed(() =>
-  useGetIsDisabledItem(fileSystemItem, currentItems, filterByFileType),
+  useGetIsDisabledItem(currentFileItem.value, filterByFileType),
 );
 
 const fileExplorerStore = useFileExplorerStore();
@@ -70,7 +81,7 @@ function onContextMenu(event: MouseEvent) {
         },
         properties: () => {
           emit('properties');
-        }
+        },
       },
     );
 }

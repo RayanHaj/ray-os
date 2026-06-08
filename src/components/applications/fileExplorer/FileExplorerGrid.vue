@@ -1,34 +1,23 @@
 <script setup lang="ts">
-import {
-  fileExtensions,
-  type FileItem,
-  type FileSystemItem,
-  type FileType,
-  type Item,
-  type ItemInsert,
-} from '@/types/itemTypes.js';
+import { type FileSystemItem, type FileType, type Item } from '@/types/itemTypes.js';
 import { computed, ref, watch } from 'vue';
 import type { RayDb } from 'ray-db-wrapper';
-import { useDeleteFileSystemItem } from '@/composables/fileSystem/useDeleteFileSystemItem.ts';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
-import {
-  type FileItemSizeValue,
-  type FileSelectReturnItem,
-  itemSizes,
-} from '@/types/fileExplorerTypes.js';
+import { type FileItemSizeValue, itemSizes } from '@/types/fileExplorerTypes.js';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
-import { useToastStore } from '@/stores/toast.ts';
 import { useInitializeContextMenu } from '@/composables/contextMenu/useInitializeContextMenu.ts';
 import { useToastFeatureNotImplemented } from '@/composables/helpers/useToastFeatureNotImplemented.ts';
 import FileExplorerItem from '@/components/applications/fileExplorer/FileExplorerItem.vue';
-import { SystemFileDeleteError } from '@/exceptions/systemFileDeleteError.js';
 import { useBrowserStore } from '@/stores/browser.ts';
 import { useMultiSelect } from '@/composables/helpers/useMultiSelect.ts';
 import { useFilePropertiesStore } from '@/stores/fileProperties.ts';
 import { useWindowStore } from '@/stores/window.ts';
-import { useFileSystemStore } from '@/stores/fileSystem.ts';
-import { useDesktopStore } from '@/stores/desktop.ts';
-import { useInsertFileSystemItem } from '@/composables/fileSystem/useInsertFileSystemItem.ts';
+import { useAddFileToDesktop } from '@/composables/fileExplorer/useAddFileToDesktop.ts';
+import { useOnFileDrop } from '@/composables/fileExplorer/useOnFileDrop.ts';
+import { useOnDragStart } from '@/composables/fileExplorer/useOnDragStart.ts';
+import { useOnDblClickItemInFileSelectState } from '@/composables/fileExplorer/useOnDblClickItemInFileSelectState.js';
+import { useOnClickItem } from '@/composables/fileExplorer/useOnClickItem.ts';
+import { useOnDeleteItems } from '@/composables/fileExplorer/useOnDeleteItems.ts';
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 const windowId = useInjectOrThrow<string>('windowId');
@@ -58,34 +47,6 @@ const emit = defineEmits([
   'onDragEnd',
 ]);
 
-const currentItems = ref<Item[]>([]);
-
-watch(
-  () => currentFileSystemItems,
-  async () => await updateFilesList(),
-);
-
-async function updateFilesList() {
-  for (const fileSystemItem of currentFileSystemItems) {
-    if (!fileSystemItem.file) {
-      continue;
-    }
-
-    const file = await rayDb.findOne<Item>('files', 'id', fileSystemItem.file.id);
-    if (file.content.type === 'file') {
-      if (!file.content.rawFile) {
-        continue;
-      }
-
-      if (currentItems.value.some((listFile) => listFile.id === file.id)) {
-        continue;
-      }
-
-      currentItems.value.push(file);
-    }
-  }
-}
-
 async function onContextMenu(event: MouseEvent) {
   useInitializeContextMenu(event)
     .fileExplorerGrid()
@@ -106,252 +67,45 @@ async function onContextMenu(event: MouseEvent) {
     );
 }
 
-async function onFileDrop(event: DragEvent) {
-  const targetElement = (event.target as Element).closest('div');
-  if (targetElement?.className === 'item') {
-    try {
-      const plainItem = event.dataTransfer?.getData('text/plain');
-      if (!plainItem) return;
-
-      const parsedItem = JSON.parse(plainItem);
-      if (typeof parsedItem !== 'object') return;
-
-      const dropItem = parsedItem as FileSystemItem;
-      if (dropItem.isSystemFile) return;
-
-      const targetElementName = targetElement.innerText;
-      const targetElementId = currentFileSystemItems.find(
-        (dirEl) => dirEl.directory?.name == targetElementName,
-      )?.id;
-
-      if (targetElementId === undefined) {
-        return;
-      }
-
-      if (targetElementId === dropItem.id) {
-        return;
-      }
-
-      await useInsertFileSystemItem(rayDb, [targetElementId], dropItem);
-      await useDeleteFileSystemItem(rayDb, dropItem.id, {
-        files: { dontDeleteFromFilesStore: true },
-        directories: { onlyDeleteParent: true },
-        updateFileSystem: true,
-      });
-    } catch (e) {
-      console.error(e);
-    }
-
-    return;
-  }
-
-  const file = event.dataTransfer?.files[0];
-  if (!file) {
-    return;
-  }
-
-  if (!Object.keys(fileExtensions).includes(file.type)) {
-    return;
-  }
-
-  const fileObject: FileItem = {
-    type: 'file',
-    name: file.name,
-    size: file.size,
-    createdAt: file.lastModified.toString(),
-    rawFile: file,
-  };
-
-  if (parentId === -1) {
-    return;
-  }
-
-  try {
-    const fileId = await rayDb.insertOne<ItemInsert>('files', {
-      label: file.name,
-      content: fileObject as FileItem,
-    });
-    if (fileId && typeof fileId === 'number') {
-      await useInsertFileSystemItem(rayDb, [parentId], {
-        file: { name: file.name, id: fileId, type: file.type },
-      });
-    }
-  } catch (e) {
-    useToastStore().createToast((e as Error).message, 'error', 5000, 'desktop');
-  }
-}
+const onFileDrop = async (event: DragEvent) =>
+  await useOnFileDrop(event, rayDb, currentFileSystemItems, parentId);
 
 const multiSelect = useMultiSelect<number>();
-function onDragStart(event: DragEvent, fileSystemItem: FileSystemItem) {
+const onDragStart = (event: DragEvent, fileSystemItem: FileSystemItem) => {
   emit('onDragStart', event);
+  useOnDragStart(event, multiSelect, fileSystemItem, path);
+};
 
-  if (!multiSelect.isSelected(fileSystemItem.id)) {
-    multiSelect.clear();
-    multiSelect.toggle(fileSystemItem.id);
-  }
-  if (fileSystemItem.directory) {
-    fileSystemItem.path = `${path}/${fileSystemItem.directory.name}`;
-  }
+const onDragEnd = (event: DragEvent) => emit('onDragEnd', event);
 
-  if (multiSelect.size() > 1) {
-    const el = document.createElement('div');
-    el.innerText = multiSelect.size().toString();
-
-    el.style.width = '75px';
-    el.style.height = '75px';
-    el.style.position = 'absolute';
-    el.style.top = '-9999px';
-    el.style.border = '1px dashed var(--input-border-color)';
-    el.style.backgroundColor = 'rgba(0, 0, 0, 0.3)';
-    el.style.color = 'var(--text-color)';
-    el.style.textAlign = 'end';
-    el.style.paddingInline = '5px';
-    document.body.appendChild(el);
-
-    event.dataTransfer?.setDragImage(el, 75 / 2, 75 / 2);
-
-    requestAnimationFrame(() => document.body.removeChild(el));
-  }
-
-  event.dataTransfer?.setData('text/plain', JSON.stringify(fileSystemItem));
-}
-
-function onDragEnd(event: DragEvent) {
-  emit('onDragEnd', event);
-}
-
-async function onItemDoubleClick(fileSystemItem: FileSystemItem) {
+const onDblClick = async (_: MouseEvent, fileSystemItem: FileSystemItem) => {
   if (isInFileSelectState && !fileSystemItem.directory) {
-    const foundSelectState = useFileExplorerStore().fileSelectState.find(
-      (element) => element.fileExplorerWindowId === windowId,
-    );
-
-    if (!foundSelectState?.targetWindowId) return;
-
-    const selectedFilesList: FileSelectReturnItem[] = [];
-    await multiSelect.forEachSelected(async (value) => {
-      const fileSystemItem = await rayDb.findOne<FileSystemItem>('fileSystem', 'id', value);
-      if (!fileSystemItem || !fileSystemItem.file) return;
-
-      const fileItem = await rayDb.findOne<Item>('files', 'id', fileSystemItem.file.id);
-      if (!fileItem || fileItem.content.type !== 'file') return;
-
-      selectedFilesList.push({
-        fileSystemItemId: fileSystemItem.id,
-        fileId: fileItem.id,
-        fileItem: fileItem.content,
-      });
-      return;
-    });
-
-    useFileExplorerStore().fileSelectReturnValue = [
-      ...useFileExplorerStore().fileSelectReturnValue,
-      { windowId: foundSelectState.targetWindowId, value: selectedFilesList },
-    ];
-
-    return;
+    await useOnDblClickItemInFileSelectState(rayDb, multiSelect, windowId);
   } else {
     emit('itemEvent:dblClick', fileSystemItem);
   }
 
   multiSelect.clear();
-}
+};
 
-function onItemClick(event: MouseEvent, fileSystemItem: FileSystemItem) {
-  if ((useBrowserStore().isMobile || !event.ctrlKey) && multiSelectActivated) {
-    if (event.shiftKey) {
-      const lastSelectedElement = multiSelect.getLast();
-      if (lastSelectedElement) {
-        const oldSelectedItem = currentFileSystemItems.findIndex(
-          (item) => item.id === lastSelectedElement,
-        );
-        const newSelectedItem = currentFileSystemItems.findIndex(
-          (item) => item.id === fileSystemItem.id,
-        );
-
-        if (oldSelectedItem !== -1 && newSelectedItem !== -1) {
-          if (newSelectedItem > oldSelectedItem) {
-            for (let i = oldSelectedItem + 1; i <= newSelectedItem; i++) {
-              multiSelect.add(currentFileSystemItems[i].id);
-            }
-          } else {
-            for (let i = oldSelectedItem - 1; i >= newSelectedItem; i--) {
-              multiSelect.add(currentFileSystemItems[i].id);
-            }
-          }
-          return;
-        }
-      }
-    }
-    if (
-      multiSelect.selectedItems.value.size === 1 &&
-      multiSelect.selectedItems.value.has(fileSystemItem.id)
-    ) {
-      return;
-    }
-
-    if (!isInFileSelectState) {
-      multiSelect.clear();
-    }
-  }
-
-  if (!multiSelectActivated) {
-    multiSelect.clear();
-  }
-
-  multiSelect.toggle(fileSystemItem.id);
-}
-
-const fileExplorerStore = useFileExplorerStore();
-const itemSize = computed<FileItemSizeValue>(
-  () => itemSizes[fileExplorerStore.currentFileItemSize],
-);
-
-function onClickGrid() {
-  multiSelect.clear();
-}
-
-async function onItemsDelete() {
-  await multiSelect.forEachSelected(async (id) => {
-    const fileSystemItem = currentFileSystemItems.find((item) => item.id === id);
-    if (fileSystemItem) {
-      if (fileSystemItem.isSystemFile) {
-        useToastStore().createToast(
-          'cannot delete system files',
-          'error',
-          5000,
-          'window',
-          windowId,
-        );
-
-        return;
-      }
-
-      try {
-        await useDeleteFileSystemItem(rayDb, fileSystemItem.id);
-      } catch (e) {
-        if (e instanceof SystemFileDeleteError) {
-          useToastStore().createToast(
-            'cannot delete system files',
-            'error',
-            5000,
-            'window',
-            windowId,
-          );
-        }
-      }
-    }
-  });
-
-  await useDesktopStore().updateTiles(rayDb);
-  useFileSystemStore().updateFileSystem();
-}
-
-function onRenameFile() {
-  const fileSystemItemId = multiSelect.getFirst();
-  const fileSystemItem = currentFileSystemItems.find(
-    (fileSystemItem) => fileSystemItem.id === fileSystemItemId,
+const onClickItem = (event: MouseEvent, fileSystemItem: FileSystemItem) =>
+  useOnClickItem(
+    event,
+    currentFileSystemItems,
+    fileSystemItem,
+    multiSelect,
+    multiSelectActivated,
+    isInFileSelectState,
   );
+
+const onClickGrid = () => multiSelect.clear();
+
+const onItemsDelete = async () =>
+  await useOnDeleteItems(rayDb, multiSelect, currentFileSystemItems, windowId);
+
+const onRenameFile = () => {
+  const id = multiSelect.getFirst();
+  const fileSystemItem = currentFileSystemItems.find((fileSystemItem) => fileSystemItem.id === id);
 
   if (!fileSystemItem) return;
 
@@ -359,54 +113,19 @@ function onRenameFile() {
     contentType: fileSystemItem.directory ? 'directory' : 'file',
     item: fileSystemItem,
   });
-}
+};
 
-async function onAddToDesktop() {
-  // const fileSystemItemId = multiSelect.getFirst();
-  // const fileSystemItem = currentFileSystemItems.find(
-  //   (fileSystemItem) => fileSystemItem.id === fileSystemItemId,
-  // );
-  //
-  // if (!fileSystemItem) return;
-  //
-  // // sort in ascending tileId order
-  // const desktopItems = await useDesktopStore()
-  //   .getDesktopItems(rayDb)
-  //   .then((desktopItems) => desktopItems.sort((a, b) => a.tileId - b.tileId));
-  //
-  // console.log(desktopItems);
-  //
-  // let tileId = 1;
-  // let previousTileId = -1;
-  // if (desktopItems.length > 0) {
-  //   for (const desktopItem of desktopItems) {
-  //     if (previousTileId === -1 || desktopItem.tileId - 1 === previousTileId) {
-  //       previousTileId = desktopItem.tileId;
-  //       tileId = previousTileId + 1;
-  //     }
-  //   }
-  // }
-  //
-  // console.log({
-  //   id: fileSystemItem.id,
-  //   tileId: tileId,
-  //   type: fileSystemItem.type as 'application' | 'file' | 'directory',
-  //   path: fileSystemItem.path,
-  // });
-  //
-  // await useDesktopStore().addDesktopItem(rayDb, {
-  //   id: fileSystemItem.id ?? fileSystemItem.file?.id,
-  //   tileId: tileId,
-  //   type: fileSystemItem.type as 'application' | 'file' | 'directory',
-  //   path: fileSystemItem.path,
-  // });
-}
-
-function onGridItemContextMenu(fileSystemItem: FileSystemItem) {
+const onGridItemContextMenu = (fileSystemItem: FileSystemItem) => {
   multiSelect.clear();
   multiSelect.toggle(fileSystemItem.id);
-}
-const selectAllToggle = ref(false);
+};
+
+const selectAllToggle = ref<boolean>(false);
+watch(
+  () => currentFileSystemItems,
+  async () => (selectAllToggle.value = false),
+);
+
 watch(selectAllToggle, (newToggledVal) => {
   if (newToggledVal) {
     for (const fileSystemItem of currentFileSystemItems) {
@@ -473,6 +192,10 @@ async function onProperties(fileSystemItem: FileSystemItem) {
 
   useWindowStore().pushOpenWindowReference('Properties');
 }
+
+const itemSize = computed<FileItemSizeValue>(
+  () => itemSizes[useFileExplorerStore().currentFileItemSize],
+);
 </script>
 
 <template>
@@ -496,18 +219,16 @@ async function onProperties(fileSystemItem: FileSystemItem) {
         v-for="fileSystemItem in currentFileSystemItems"
         :key="fileSystemItem.id"
         :file-system-item="fileSystemItem"
-        :current-items="currentItems"
         :filter-by-file-type="filterByFileType"
         :is-selected="multiSelect.selectedItems.value.has(fileSystemItem.id)"
-        :ray-db="rayDb"
         :window-id="windowId"
         @on-context-menu="onGridItemContextMenu(fileSystemItem)"
-        @on-click="onItemClick($event, fileSystemItem)"
-        @on-double-click="onItemDoubleClick(fileSystemItem)"
+        @on-click="onClickItem($event, fileSystemItem)"
+        @on-double-click="onDblClick($event, fileSystemItem)"
         @on-drag-start="onDragStart($event, fileSystemItem)"
         @on-drag-end="onDragEnd($event)"
         @rename-file="onRenameFile"
-        @add-to-desktop="onAddToDesktop"
+        @add-to-desktop="useAddFileToDesktop"
         @on-delete="onItemsDelete"
         @properties="onProperties(fileSystemItem)"
       />

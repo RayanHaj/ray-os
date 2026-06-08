@@ -1,17 +1,14 @@
-import type { FileSystemItem, FileType, Item } from '@/types/itemTypes.ts';
+import type { FileType, Item } from '@/types/itemTypes.ts';
 
 export function useGetIsDisabledItem(
-  fileSystemItem: FileSystemItem,
-  currentItems: Item[],
+  currentFileItem: Item | null,
   filterByFileType: FileType[],
 ) {
-  if (!fileSystemItem.file || filterByFileType.length === 0) {
-    return false;
-  }
+  if (filterByFileType.length === 0 || currentFileItem === null) return false;
 
-  const file = currentItems.find((file) => file.id === fileSystemItem.file?.id);
-  if (file?.content.type === 'file') {
-    return !filterByFileType.includes(file.content.rawFile?.type as FileType);
+  if (currentFileItem?.content.type === 'file') {
+    console.log(currentFileItem.content.rawFile?.type);
+    return !filterByFileType.includes(currentFileItem.content.rawFile?.type as FileType);
   }
 
   return true;
