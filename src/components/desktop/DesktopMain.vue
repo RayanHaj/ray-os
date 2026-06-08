@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import DesktopTile from '@/components/desktop/DesktopTile.vue';
 import { useTileCountGrid } from '@/composables/desktop/useTileCountGrid.ts';
+import { useBrowserStore } from '@/stores/browser.ts';
 import { computed, ref } from 'vue';
 import { useInitializeContextMenu } from '@/composables/contextMenu/useInitializeContextMenu.ts';
+import { useTaskbarStore } from '@/stores/taskbar.ts';
 import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
 import { useGetTileId } from '@/composables/desktop/useGetTileId.ts';
 
@@ -31,7 +33,6 @@ function navigateToSocialPage(social: Socials) {
   }
 }
 </script>
-
 <template>
   <div class="desktop" :style="{ height: `calc(100% - ${useTaskbarStore().taskbarHeight}px)` }">
     <div
