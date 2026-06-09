@@ -18,8 +18,8 @@ export function useSnakeState() {
   const fruitPositions: FruitPosition[] = [];
 
   const START_POSITION_SNAKE = {
-    x: useSnakeStore().GRID_ROWS / 2,
-    y: useSnakeStore().GRID_COLUMNS / 2,
+    x: Math.floor(useSnakeStore().GRID_ROWS / 2),
+    y: Math.floor(useSnakeStore().GRID_COLUMNS / 2),
   };
 
   const snakePositions: SnakePosition[] = [
@@ -39,72 +39,52 @@ export function useSnakeState() {
     if (cantMoveSnakeToDirection) return;
 
     snakeNextDirection = nextDirection;
-  }
-
-  const getSnakeNextDirection = () => snakeNextDirection;
+  };
 
   let snakeDirection: SnakeDirection = 'left';
   function moveSnake() {
     const headPosition = snakePositions[0];
+    if (headPosition.x >= useSnakeStore().GRID_COLUMNS) {
+      move({ x: 0 });
+      return;
+    }
+    if (headPosition.x < 0) {
+      move({ x: useSnakeStore().GRID_COLUMNS - 1 });
+      return;
+    }
+    if (headPosition.y >= useSnakeStore().GRID_ROWS) {
+      move({ y: 0 });
+      return;
+    }
+    if (headPosition.y < 0) {
+      move({ y: useSnakeStore().GRID_ROWS - 1 });
+      return;
+    }
     switch (snakeNextDirection ?? snakeDirection) {
       case 'left':
-        {
-          snakePositions.unshift({ ...headPosition, x: headPosition.x - 1 });
-          snakePositions.pop();
-
-          if (snakeNextDirection) {
-            snakeDirection = snakeNextDirection;
-          }
-
-          snakeNextDirection = null;
-        }
+        move({ x: headPosition.x - 1 });
         break;
       case 'right':
-        {
-          snakePositions.unshift({ ...headPosition, x: headPosition.x + 1 });
-          snakePositions.pop();
-
-          if (snakeNextDirection) {
-            snakeDirection = snakeNextDirection;
-          }
-
-          snakeNextDirection = null;
-        }
+        move({ x: headPosition.x + 1 });
         break;
       case 'up':
-        {
-          snakePositions.unshift({ ...headPosition, y: headPosition.y - 1 });
-          snakePositions.pop();
-
-          if (snakeNextDirection) {
-            snakeDirection = snakeNextDirection;
-          }
-
-          snakeNextDirection = null;
-        }
+        move({ y: headPosition.y - 1 });
         break;
       case 'down': {
-        snakePositions.unshift({ ...headPosition, y: headPosition.y + 1 });
-        snakePositions.pop();
-
-        if (snakeNextDirection) {
-          snakeDirection = snakeNextDirection;
-        }
-
-        snakeNextDirection = null;
+        move({ y: headPosition.y + 1 });
       }
     }
-  }
 
-  function updateSnakeDirection(direction: SnakeDirection) {
-    const cantMoveSnakeToDirection =
-      (snakeDirection === 'up' && direction === 'down') ||
-      (snakeDirection === 'down' && direction === 'up') ||
-      (snakeDirection === 'left' && direction === 'right') ||
-      (snakeDirection === 'right' && direction === 'left');
-    if (cantMoveSnakeToDirection) return;
+    function move(position: { x?: number; y?: number }) {
+      snakePositions.unshift({ ...headPosition, ...position });
+      snakePositions.pop();
 
-    snakeDirection = direction;
+      if (snakeNextDirection) {
+        snakeDirection = snakeNextDirection;
+      }
+
+      snakeNextDirection = null;
+    }
   }
 
   const getSnakeLength = () => snakePositions.length;
@@ -113,9 +93,7 @@ export function useSnakeState() {
     gameStatus,
     moveSnake,
     getSnakeLength,
-    updateSnakeDirection,
     setSnakeNextDirection,
-    getSnakeNextDirection,
     fruitPositions: readonly(fruitPositions),
     snakePositions,
   };
