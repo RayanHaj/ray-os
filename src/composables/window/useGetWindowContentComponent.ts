@@ -12,6 +12,7 @@ import AudioPlayerMain from '@/components/applications/mediaPlayers/audioPlayer/
 import FilePropertiesMain from '@/components/applications/FilePropertiesMain.vue';
 
 import { useWindowNameFormatter } from '@/composables/window/useWindowNameFormatter.ts';
+import SnakeMain from '@/components/applications/games/snake/SnakeMain.vue';
 
 const windowContentComponents: { [windowName in WindowName]: Component } = {
   settings: SettingsMain,
@@ -23,6 +24,7 @@ const windowContentComponents: { [windowName in WindowName]: Component } = {
   videoPlayer: VideoPlayerMain,
   audioPlayer: AudioPlayerMain,
   properties: FilePropertiesMain,
+  snake: SnakeMain
 } as const;
 
 export function useGetWindowContentComponent(windowName: string) {

@@ -62,7 +62,8 @@ export const Applications = [
   'Notepad',
   'Audio Player',
   'Image Viewer',
-  'Video Player'
+  'Video Player',
+  'Snake'
 ] as const;
 
 export type Application = (typeof Applications)[number];

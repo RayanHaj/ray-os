@@ -24,16 +24,15 @@ import type { Item } from '@/types/itemTypes';
 import type { RayDb } from 'ray-db-wrapper';
 
 import wallpapersJSON from '@/json/wallpapers.json';
+import { useSnakeStore } from '@/stores/games/snake.ts';
 
 const wallpapers: Record<string, string> = wallpapersJSON;
 
 const windowFlatReferences: ComputedRef<WindowFlatReference[]> = useFlatOpenWindowsReferencesFull();
 
-const fixedSizeWindows: Record<string, { width: number; height: number }> = {};
-
-// const fixedSizeWindows: Record<string, { width: number; height: number }> = {
-//   Properties: { width: 300, height: 350 },
-// };
+const fixedSizeWindows = ref<
+  Record<string, { width: number; height: number }>
+>({ Snake: { width: useSnakeStore().CANVAS_WIDTH, height: useSnakeStore().CANVAS_HEIGHT } });
 
 const minWidthWindows: Record<string, { width: number }> = {
   Notepad: { width: 300 },
@@ -52,9 +51,7 @@ const minHeightWindows: Record<string, { height: number }> = {
 };
 
 // Windows that cannot be minified
-const inlineWindows: Record<string, boolean> = {
-  Properties: true,
-};
+const inlineWindows: Record<string, boolean> = { Properties: true };
 
 // Windows that should not show a svg in the window header
 const showNoApplicationSvgsFor: string[] = ['Properties'];
