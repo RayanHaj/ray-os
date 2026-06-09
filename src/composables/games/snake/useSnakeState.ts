@@ -1,14 +1,15 @@
-import { readonly } from 'vue';
 import { useSnakeStore } from '@/stores/games/snake.ts';
 
-export type FruitType = 'banana' | 'apple' | 'poison';
+export const fruitTypes = ['banana', 'apple', 'poison'] as const;
+export type FruitType = (typeof fruitTypes)[number];
+
 export enum GameStatus {
   NOT_STARTED,
   PLAYING,
   GAME_OVER,
 }
 
-type FruitPosition = { fruitType: FruitType; position: { x: number; y: number } };
+export type FruitPosition = { fruitType: FruitType; position: { x: number; y: number } };
 export type SnakePosition = { x: number; y: number };
 export type SnakeDirection = 'left' | 'right' | 'up' | 'down';
 
@@ -16,6 +17,80 @@ export function useSnakeState() {
   const gameStatus: GameStatus = GameStatus.NOT_STARTED;
 
   const fruitPositions: FruitPosition[] = [];
+
+  function positionContainsSnake(position: { x: number; y: number }) {
+    for (const snakePosition of snakePositions) {
+      if (snakePosition.y === position.y && snakePosition.x === position.x) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  function spawnFruit() {
+    let position: { x: number; y: number } = {
+      x: Math.floor(Math.random() * useSnakeStore().GRID_ROWS ),
+      y: Math.floor(Math.random() * useSnakeStore().GRID_COLUMNS ),
+    };
+
+    while (positionContainsSnake(position)) {
+      position = {
+        x: Math.floor(Math.random() * useSnakeStore().GRID_ROWS),
+        y: Math.floor(Math.random() * useSnakeStore().GRID_COLUMNS),
+      };
+    }
+
+    const randomFruit = Math.floor(Math.random() * fruitTypes.length);
+    fruitPositions.push({ fruitType: fruitTypes[randomFruit] as FruitType, position });
+  }
+
+  function checkAndHandleFruitEaten() {
+    const snakeHead = snakePositions[0];
+    for (let i = 0; i < fruitPositions.length; i++) {
+      if (
+        snakeHead.x === fruitPositions[i].position.x &&
+        snakeHead.y === fruitPositions[i].position.y
+      ) {
+        fruitPositions.splice(i, 1);
+        spawnFruit();
+        moveSnake(true);
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  function checkAndHandleSnakeCollision() {
+    const snakeHead = snakePositions[0];
+    for (let i = 1; i < snakePositions.length; i++) {
+      const snakePosition = snakePositions[i];
+      if (snakeHead.x === snakePosition.x && snakeHead.y === snakePosition.y) {
+        resetGame();
+        return true;
+      }
+    }
+
+    return false
+  }
+
+  function resetGame() {
+    fruitPositions.length = 0;
+    snakePositions.length = 0;
+
+    snakePositions.push(
+      START_POSITION_SNAKE,
+      { ...START_POSITION_SNAKE, x: START_POSITION_SNAKE.y + 1 },
+      { ...START_POSITION_SNAKE, x: START_POSITION_SNAKE.y + 2 },
+      { ...START_POSITION_SNAKE, x: START_POSITION_SNAKE.y + 3 },
+    );
+
+    snakeDirection = 'left';
+    snakeNextDirection = null;
+
+    spawnFruit();
+  }
 
   const START_POSITION_SNAKE = {
     x: Math.floor(useSnakeStore().GRID_ROWS / 2),
@@ -42,7 +117,7 @@ export function useSnakeState() {
   };
 
   let snakeDirection: SnakeDirection = 'left';
-  function moveSnake() {
+  function moveSnake(incrementSnakeLength = false) {
     const headPosition = snakePositions[0];
     if (headPosition.x >= useSnakeStore().GRID_COLUMNS) {
       move({ x: 0 });
@@ -77,7 +152,8 @@ export function useSnakeState() {
 
     function move(position: { x?: number; y?: number }) {
       snakePositions.unshift({ ...headPosition, ...position });
-      snakePositions.pop();
+
+      if (!incrementSnakeLength) snakePositions.pop();
 
       if (snakeNextDirection) {
         snakeDirection = snakeNextDirection;
@@ -92,9 +168,12 @@ export function useSnakeState() {
   return {
     gameStatus,
     moveSnake,
+    spawnFruit,
     getSnakeLength,
+    checkAndHandleFruitEaten,
+    checkAndHandleSnakeCollision,
     setSnakeNextDirection,
-    fruitPositions: readonly(fruitPositions),
+    fruitPositions,
     snakePositions,
   };
 }

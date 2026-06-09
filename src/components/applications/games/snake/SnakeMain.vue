@@ -3,18 +3,19 @@
 import { useSnakeStore } from '@/stores/games/snake.ts';
 import { onMounted, onUnmounted, ref, useTemplateRef } from 'vue';
 import { useSnakeState } from '@/composables/games/snake/useSnakeState.ts';
-import { useDrawSnake } from '@/composables/games/snake/useDrawSnake.ts';
+import { useDrawFruits, useDrawSnake } from '@/composables/games/snake/useDrawSnake.ts';
 
 const state = useSnakeState();
 
 const canvas = useTemplateRef('canvas');
 const context = ref<CanvasRenderingContext2D | null>(null);
 
-const TICK_INTERVAL = 150;
-const animationFrameId = ref<number>();
+const TICK_INTERVAL = 100;
+const animationFrameId = ref<number | null>(null);
 onMounted(() => {
   context.value = canvas.value?.getContext('2d') ?? null;
   animationFrameId.value = window.requestAnimationFrame(gameLoop);
+  state.spawnFruit();
 });
 
 onUnmounted(() => {
@@ -28,11 +29,16 @@ function gameLoop(timeStamp: number) {
     if (context.value) {
       context.value.clearRect(0, 0, useSnakeStore().CANVAS_WIDTH, useSnakeStore().CANVAS_HEIGHT);
     }
+    state.checkAndHandleSnakeCollision();
+
     state.moveSnake();
     previousTimeStamp = timeStamp;
   }
 
+  state.checkAndHandleFruitEaten();
+
   useDrawSnake(context.value, state.snakePositions);
+  useDrawFruits(context.value, state.fruitPositions);
 
   animationFrameId.value = window.requestAnimationFrame(gameLoop);
 }
@@ -40,16 +46,28 @@ function gameLoop(timeStamp: number) {
 function onKeyUp(event: KeyboardEvent) {
   switch (event.key) {
     case 'ArrowLeft':
+    case 'a':
       state.setSnakeNextDirection('left');
       break;
     case 'ArrowRight':
+    case 'd':
       state.setSnakeNextDirection('right');
       break;
     case 'ArrowUp':
+    case 'w':
       state.setSnakeNextDirection('up');
       break;
     case 'ArrowDown':
+    case 's':
       state.setSnakeNextDirection('down');
+      break;
+    case 'Escape':
+      if (animationFrameId.value === null) {
+        animationFrameId.value = window.requestAnimationFrame(gameLoop);
+      } else {
+        window.cancelAnimationFrame(animationFrameId.value);
+        animationFrameId.value = null
+      }
   }
 }
 </script>
