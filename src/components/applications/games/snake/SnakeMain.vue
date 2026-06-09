@@ -10,7 +10,7 @@ const state = useSnakeState();
 const canvas = useTemplateRef('canvas');
 const context = ref<CanvasRenderingContext2D | null>(null);
 
-const TICK_INTERVAL = 100;
+const TICK_INTERVAL = 150;
 const animationFrameId = ref<number>();
 onMounted(() => {
   context.value = canvas.value?.getContext('2d') ?? null;
@@ -37,40 +37,47 @@ function gameLoop(timeStamp: number) {
   animationFrameId.value = window.requestAnimationFrame(gameLoop);
 }
 
-function draw() {
-  if (!context.value) return;
-
-  context.value.fillStyle = Math.random() > 0.5 ? '#ff8080' : '#0099b0';
-  context.value.fillRect(0, 0, 350, 350);
-}
-
 function onKeyUp(event: KeyboardEvent) {
   switch (event.key) {
     case 'ArrowLeft':
-      state.updateSnakeDirection('left');
+      state.setSnakeNextDirection('left');
       break;
     case 'ArrowRight':
-      state.updateSnakeDirection('right');
+      state.setSnakeNextDirection('right');
       break;
     case 'ArrowUp':
-      state.updateSnakeDirection('up');
+      state.setSnakeNextDirection('up');
       break;
     case 'ArrowDown':
-      state.updateSnakeDirection('down');
+      state.setSnakeNextDirection('down');
   }
 }
 </script>
 <template>
-  <canvas
-    ref="canvas"
-    @keyup.prevent="onKeyUp"
-    :width="useSnakeStore().CANVAS_WIDTH"
-    :height="useSnakeStore().CANVAS_HEIGHT"
+  <div
+    class="snake"
+    @keydown.prevent="onKeyUp"
+    :style="{
+      width: `${useSnakeStore().CANVAS_WIDTH}px`,
+      height: `${useSnakeStore().CANVAS_HEIGHT}px`,
+    }"
     tabindex="0"
-  />
+  >
+    <canvas
+      ref="canvas"
+      :width="useSnakeStore().CANVAS_WIDTH"
+      :height="useSnakeStore().CANVAS_HEIGHT"
+    />
+  </div>
 </template>
 <style scoped>
-canvas {
+.snake {
+  position: relative;
+  overflow: hidden;
   outline: none;
+}
+.snake canvas {
+  width: 100%;
+  height: 100%;
 }
 </style>

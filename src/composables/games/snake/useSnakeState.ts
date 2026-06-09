@@ -13,8 +13,6 @@ export type SnakePosition = { x: number; y: number };
 export type SnakeDirection = 'left' | 'right' | 'up' | 'down';
 
 export function useSnakeState() {
-  const SNAKE_START_LENGTH = 4;
-
   const gameStatus: GameStatus = GameStatus.NOT_STARTED;
 
   const fruitPositions: FruitPosition[] = [];
@@ -31,31 +29,69 @@ export function useSnakeState() {
     { ...START_POSITION_SNAKE, x: START_POSITION_SNAKE.y + 3 },
   ];
 
+  let snakeNextDirection: SnakeDirection | null = null;
+  const setSnakeNextDirection = (nextDirection: SnakeDirection | null) => {
+    const cantMoveSnakeToDirection =
+      (snakeDirection === 'up' && nextDirection === 'down') ||
+      (snakeDirection === 'down' && nextDirection === 'up') ||
+      (snakeDirection === 'left' && nextDirection === 'right') ||
+      (snakeDirection === 'right' && nextDirection === 'left');
+    if (cantMoveSnakeToDirection) return;
+
+    snakeNextDirection = nextDirection;
+  }
+
+  const getSnakeNextDirection = () => snakeNextDirection;
+
   let snakeDirection: SnakeDirection = 'left';
   function moveSnake() {
     const headPosition = snakePositions[0];
-    switch (snakeDirection) {
+    switch (snakeNextDirection ?? snakeDirection) {
       case 'left':
         {
           snakePositions.unshift({ ...headPosition, x: headPosition.x - 1 });
           snakePositions.pop();
+
+          if (snakeNextDirection) {
+            snakeDirection = snakeNextDirection;
+          }
+
+          snakeNextDirection = null;
         }
         break;
       case 'right':
         {
           snakePositions.unshift({ ...headPosition, x: headPosition.x + 1 });
           snakePositions.pop();
+
+          if (snakeNextDirection) {
+            snakeDirection = snakeNextDirection;
+          }
+
+          snakeNextDirection = null;
         }
         break;
       case 'up':
         {
           snakePositions.unshift({ ...headPosition, y: headPosition.y - 1 });
           snakePositions.pop();
+
+          if (snakeNextDirection) {
+            snakeDirection = snakeNextDirection;
+          }
+
+          snakeNextDirection = null;
         }
         break;
       case 'down': {
         snakePositions.unshift({ ...headPosition, y: headPosition.y + 1 });
         snakePositions.pop();
+
+        if (snakeNextDirection) {
+          snakeDirection = snakeNextDirection;
+        }
+
+        snakeNextDirection = null;
       }
     }
   }
@@ -78,6 +114,8 @@ export function useSnakeState() {
     moveSnake,
     getSnakeLength,
     updateSnakeDirection,
+    setSnakeNextDirection,
+    getSnakeNextDirection,
     fruitPositions: readonly(fruitPositions),
     snakePositions,
   };

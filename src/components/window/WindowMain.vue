@@ -101,7 +101,7 @@ const getWindowBorderRadius = computed(() =>
 );
 
 const windowContentHeight = computed(() => `calc(100% - ${windowStore.windowHeaderHeight}px`);
-const windowContentStyles = { height: windowContentHeight.value, width: '100%', overflow: 'auto' };
+const windowContentStyles = { height: windowContentHeight.value, width: '100%' };
 </script>
 
 <template>
