@@ -28,13 +28,13 @@ export const useFileStore = defineStore('file', () => {
     if (!directory || !directory.children || !directory.id) return;
 
     for (let i = 0; i < applicationItems.length; i++) {
-      const containsApplicationItem = fileItems.some((item) => applicationItems[i].id === item.id);
+      const containsApplicationItem = fileItems.some(
+        (item) => item.content.type === 'application' && item.label === applicationItems[i].label,
+      );
       if (!containsApplicationItem) {
         const id = await rayDb.insertOne<Item>('files', applicationItems[i]);
         if (typeof id === 'number') {
-          console.log(id);
           applicationItems[i] = { ...applicationItems[i], id: id };
-          console.log(applicationItems[i]);
         }
       }
 
