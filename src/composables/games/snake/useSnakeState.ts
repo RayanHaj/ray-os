@@ -16,6 +16,8 @@ export type SnakeDirection = 'left' | 'right' | 'up' | 'down';
 export function useSnakeState() {
   const gameStatus: GameStatus = GameStatus.NOT_STARTED;
 
+  let gameScore: number = 0;
+
   const fruitPositions: FruitPosition[] = [];
 
   function positionContainsSnake(position: { x: number; y: number }) {
@@ -52,6 +54,7 @@ export function useSnakeState() {
         snakeHead.x === fruitPositions[i].position.x &&
         snakeHead.y === fruitPositions[i].position.y
       ) {
+        gameScore += 1;
         fruitPositions.splice(i, 1);
         spawnFruit();
         moveSnake(true);
@@ -175,5 +178,6 @@ export function useSnakeState() {
     setSnakeNextDirection,
     fruitPositions,
     snakePositions,
+    gameScore
   };
 }

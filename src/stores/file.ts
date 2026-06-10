@@ -3,9 +3,7 @@ import { defineStore } from 'pinia';
 import type { Item } from '@/types/itemTypes.ts';
 import { Applications } from '@/types/itemTypes.ts';
 import type { RayDb } from 'ray-db-wrapper';
-import {
-  fileSystemLookup,
-} from '@/composables/fileSystem/useIndexedDbHelper.ts';
+import { fileSystemLookup } from '@/composables/fileSystem/useIndexedDbHelper.ts';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
 import { useInsertFileSystemItem } from '@/composables/fileSystem/useInsertFileSystemItem.ts';
 
@@ -29,24 +27,29 @@ export const useFileStore = defineStore('file', () => {
 
     if (!directory || !directory.children || !directory.id) return;
 
-    for (const applicationItem of applicationItems) {
-      const containsApplicationItem = fileItems.some((item) => applicationItem.id === item.id);
-      if (containsApplicationItem) break;
+    for (let i = 0; i < applicationItems.length; i++) {
+      const containsApplicationItem = fileItems.some((item) => applicationItems[i].id === item.id);
+      if (!containsApplicationItem) {
+        const id = await rayDb.insertOne<Item>('files', applicationItems[i]);
+        if (typeof id === 'number') {
+          applicationItems[i].id = id;
+        }
+      }
 
       const directoryContainsApplication = directory.children.some(
-        (child) => child.id === applicationItem.id,
+        (child) => child.file?.id === applicationItems[i].id,
       );
-      if (directoryContainsApplication) break;
 
-      await rayDb.insertOne<Item>('files', applicationItem);
-      await useInsertFileSystemItem(rayDb, [directory.id], {
-        file: {
-          name: applicationItem.label,
-          id: applicationItem.id,
-          type: applicationItem.content.type,
-        },
-        isSystemFile: true,
-      });
+      if (!directoryContainsApplication) {
+        await useInsertFileSystemItem(rayDb, [directory.id], {
+          file: {
+            name: applicationItems[i].label,
+            id: applicationItems[i].id,
+            type: applicationItems[i].content.type,
+          },
+          isSystemFile: true,
+        });
+      }
     }
   }
 

@@ -7,6 +7,8 @@ import { useDrawFruits, useDrawSnake } from '@/composables/games/snake/useDrawSn
 
 const state = useSnakeState();
 
+const gameScore = ref<number>(0);
+
 const canvas = useTemplateRef('canvas');
 const context = ref<CanvasRenderingContext2D | null>(null);
 
@@ -36,6 +38,7 @@ function gameLoop(timeStamp: number) {
   }
 
   state.checkAndHandleFruitEaten();
+  gameScore.value = state.gameScore;
 
   useDrawSnake(context.value, state.snakePositions);
   useDrawFruits(context.value, state.fruitPositions);
@@ -75,10 +78,6 @@ function onKeyUp(event: KeyboardEvent) {
   <div
     class="snake"
     @keydown.prevent="onKeyUp"
-    :style="{
-      width: `${useSnakeStore().CANVAS_WIDTH}px`,
-      height: `${useSnakeStore().CANVAS_HEIGHT}px`,
-    }"
     tabindex="0"
   >
     <canvas
