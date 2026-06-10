@@ -1,6 +1,6 @@
 import { ref } from 'vue';
 import { defineStore } from 'pinia';
-import type { Item } from '@/types/itemTypes.ts';
+import type { Item, ItemInsert } from '@/types/itemTypes.ts';
 import { Applications } from '@/types/itemTypes.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import { fileSystemLookup } from '@/composables/fileSystem/useIndexedDbHelper.ts';
@@ -31,8 +31,13 @@ export const useFileStore = defineStore('file', () => {
       const containsApplicationItem = fileItems.some(
         (item) => item.content.type === 'application' && item.label === applicationItems[i].label,
       );
+
       if (!containsApplicationItem) {
-        const id = await rayDb.insertOne<Item>('files', applicationItems[i]);
+        const id = await rayDb.insertOne<ItemInsert>('files', {
+          label: applicationItems[i].label,
+          content: applicationItems[i].content,
+        });
+
         if (typeof id === 'number') {
           applicationItems[i] = { ...applicationItems[i], id: id };
         }
