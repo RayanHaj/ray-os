@@ -32,7 +32,9 @@ export const useFileStore = defineStore('file', () => {
       if (!containsApplicationItem) {
         const id = await rayDb.insertOne<Item>('files', applicationItems[i]);
         if (typeof id === 'number') {
-          applicationItems[i].id = id;
+          console.log(id);
+          applicationItems[i] = { ...applicationItems[i], id: id };
+          console.log(applicationItems[i]);
         }
       }
 
