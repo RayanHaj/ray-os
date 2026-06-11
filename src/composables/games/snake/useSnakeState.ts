@@ -32,14 +32,14 @@ export function useSnakeState() {
 
   function spawnFruit() {
     let position: { x: number; y: number } = {
-      x: Math.floor(Math.random() * useSnakeStore().GRID_ROWS ),
-      y: Math.floor(Math.random() * useSnakeStore().GRID_COLUMNS ),
+      x: Math.floor(Math.random() * useSnakeStore().GRID_COLUMNS ),
+      y: Math.floor(Math.random() * useSnakeStore().GRID_ROWS ),
     };
 
     while (positionContainsSnake(position)) {
       position = {
-        x: Math.floor(Math.random() * useSnakeStore().GRID_ROWS),
-        y: Math.floor(Math.random() * useSnakeStore().GRID_COLUMNS),
+        x: Math.floor(Math.random() * useSnakeStore().GRID_COLUMNS),
+        y: Math.floor(Math.random() * useSnakeStore().GRID_ROWS),
       };
     }
 
@@ -54,7 +54,7 @@ export function useSnakeState() {
         snakeHead.x === fruitPositions[i].position.x &&
         snakeHead.y === fruitPositions[i].position.y
       ) {
-        gameScore += 1;
+        gameScore++;
         fruitPositions.splice(i, 1);
         spawnFruit();
         moveSnake(true);
@@ -70,7 +70,7 @@ export function useSnakeState() {
     for (let i = 1; i < snakePositions.length; i++) {
       const snakePosition = snakePositions[i];
       if (snakeHead.x === snakePosition.x && snakeHead.y === snakePosition.y) {
-        resetGame();
+        resetState();
         return true;
       }
     }
@@ -78,9 +78,10 @@ export function useSnakeState() {
     return false
   }
 
-  function resetGame() {
+  function resetState() {
     fruitPositions.length = 0;
     snakePositions.length = 0;
+    gameScore = 0;
 
     snakePositions.push(
       START_POSITION_SNAKE,
@@ -96,8 +97,8 @@ export function useSnakeState() {
   }
 
   const START_POSITION_SNAKE = {
-    x: Math.floor(useSnakeStore().GRID_ROWS / 2),
-    y: Math.floor(useSnakeStore().GRID_COLUMNS / 2),
+    x: Math.floor(useSnakeStore().GRID_COLUMNS / 2),
+    y: Math.floor(useSnakeStore().GRID_ROWS / 2),
   };
 
   const snakePositions: SnakePosition[] = [
@@ -168,6 +169,8 @@ export function useSnakeState() {
 
   const getSnakeLength = () => snakePositions.length;
 
+  const getGameScore = () => gameScore;
+
   return {
     gameStatus,
     moveSnake,
@@ -178,6 +181,7 @@ export function useSnakeState() {
     setSnakeNextDirection,
     fruitPositions,
     snakePositions,
-    gameScore
+    getGameScore,
+    resetState
   };
 }

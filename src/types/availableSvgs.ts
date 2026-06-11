@@ -42,5 +42,6 @@ export const availableSvgs = [
   'Snake',
   'AudioPlayer',
   'MenuDots',
+  'Reset'
 ] as const;
 export type AvailableSvgs = (typeof availableSvgs)[number];

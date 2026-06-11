@@ -32,7 +32,7 @@ const windowFlatReferences: ComputedRef<WindowFlatReference[]> = useFlatOpenWind
 
 const fixedSizeWindows = ref<
   Record<string, { width: number; height: number }>
->({ Snake: { width: useSnakeStore().CANVAS_WIDTH, height: useSnakeStore().CANVAS_HEIGHT } });
+>({ Snake: { width: useSnakeStore().WINDOW_WIDTH, height: useSnakeStore().WINDOW_HEIGHT } });
 
 const minWidthWindows: Record<string, { width: number }> = {
   Notepad: { width: 300 },

@@ -7,6 +7,8 @@ export const useBrowserStore = defineStore('browser', () => {
   const height = ref(0);
   const heightExcTaskbar = ref(0);
 
+  const currentTheme = ref('');
+
   const taskbarStore = useTaskbarStore();
 
   const isMobile = ref(window.matchMedia('(any-pointer: coarse)').matches);
@@ -36,5 +38,5 @@ export const useBrowserStore = defineStore('browser', () => {
     removeEventListener('pointerdown', onPointerDown);
   }
 
-  return { width, height, heightExcTaskbar, startListening, stopListening, isMobile };
+  return { width, height, heightExcTaskbar, startListening, stopListening, currentTheme, isMobile };
 });
