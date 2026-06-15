@@ -94,6 +94,22 @@ function onKeyUp(event: KeyboardEvent) {
   }
 }
 
+function onControlButtonClick(buttonType: 'up' | 'down' | 'left' | 'right') {
+  switch (buttonType) {
+    case 'up':
+      state.setSnakeNextDirection('up');
+      break;
+    case 'down':
+      state.setSnakeNextDirection('down');
+      break;
+    case 'left':
+      state.setSnakeNextDirection('left');
+      break;
+    case 'right':
+      state.setSnakeNextDirection('right');
+  }
+}
+
 function resetGameLoop() {
   state.resetState();
   gameScore.value = state.getGameScore();
@@ -113,6 +129,13 @@ function startGameLoop() {
 const playSvg = useSvgOrFallback('Play');
 const resetSvg = useSvgOrFallback('Reset');
 const settingsSvg = useSvgOrFallback('Settings');
+
+const circleUpSvg = useSvgOrFallback('CircleUp');
+const circleDownSvg = useSvgOrFallback('CircleDown');
+const circleLeftSvg = useSvgOrFallback('CircleLeft');
+const circleRightSvg = useSvgOrFallback('CircleRight');
+
+const circlePauseSvg = useSvgOrFallback('CirclePause');
 </script>
 <template>
   <div ref="snake" class="snake" @keydown.prevent="onKeyUp" tabindex="0">
@@ -125,6 +148,8 @@ const settingsSvg = useSvgOrFallback('Settings');
       :style="{
         width: `${useSnakeStore().CANVAS_WIDTH}px`,
         height: `${useSnakeStore().CANVAS_HEIGHT}px`,
+        minWidth: `${useSnakeStore().CANVAS_WIDTH}px`,
+        minHeight: `${useSnakeStore().CANVAS_HEIGHT}px`,
       }"
     >
       <button @click="startGameLoop()"><component :is="playSvg.svg" /></button>
@@ -141,7 +166,29 @@ const settingsSvg = useSvgOrFallback('Settings');
         height: `${useSnakeStore().CANVAS_HEIGHT}px`,
       }"
     />
-    <div class="controls"></div>
+    <div class="controls">
+      <div class="top-controls">
+        <button @click="onControlButtonClick('up')" class="control-button up">
+          <component :is="circleUpSvg.svg" />
+        </button>
+      </div>
+      <div class="center-controls">
+        <button @click="onControlButtonClick('left')" class="control-button left">
+          <component :is="circleLeftSvg.svg" />
+        </button>
+        <button class="control-button">
+          <component :is="circlePauseSvg.svg" />
+        </button>
+        <button @click="onControlButtonClick('right')" class="control-button right">
+          <component :is="circleRightSvg.svg" />
+        </button>
+      </div>
+      <div class="bottom-controls">
+        <button @click="onControlButtonClick('down')" class="control-button down">
+          <component :is="circleDownSvg.svg" />
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 <style scoped>
@@ -196,5 +243,52 @@ canvas {
 
 .snake canvas {
   border-radius: 0 0 5px 5px;
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 100%;
+  height: stretch;
+}
+
+.top-controls,
+.center-controls,
+.bottom-controls {
+  width: 100%;
+  height: calc(100% / 3);
+}
+
+.top-controls,
+.bottom-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.center-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.control-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  background: var(--button-primary-color);
+  border: var(--input-border-color) 1px solid;
+}
+
+.control-button:hover {
+  background-color: var(--button-hover-color);
+}
+
+.control-button svg {
+  width: 25px;
+  height: 25px;
 }
 </style>

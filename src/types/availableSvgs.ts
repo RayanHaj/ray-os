@@ -42,6 +42,11 @@ export const availableSvgs = [
   'Snake',
   'AudioPlayer',
   'MenuDots',
-  'Reset'
+  'Reset',
+  'CircleUp',
+  'CircleDown',
+  'CircleLeft',
+  'CircleRight',
+  'CirclePause'
 ] as const;
 export type AvailableSvgs = (typeof availableSvgs)[number];
