@@ -3,6 +3,7 @@ import { useSnakeStore } from '@/stores/games/snake.ts';
 export const fruitTypes = ['banana', 'apple', 'poison'] as const;
 export type FruitType = (typeof fruitTypes)[number];
 
+console.log('hello');
 export enum GameStatus {
   NOT_STARTED,
   PLAYING,
