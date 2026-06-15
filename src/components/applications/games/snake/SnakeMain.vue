@@ -250,7 +250,7 @@ canvas {
   flex-direction: column;
   gap: 5px;
   width: 100%;
-  height: stretch;
+  height: 100%;
 }
 
 .top-controls,
