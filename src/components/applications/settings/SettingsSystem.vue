@@ -3,35 +3,11 @@ import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import { useToastStore } from '@/stores/toast.ts';
 import { useTaskbarStore } from '@/stores/taskbar.ts';
+import { useResetState } from '@/composables/useResetState.ts';
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 
 const { windowId } = defineProps<{ windowId: string }>();
-
-async function resetState() {
-  const dbName = rayDb.db().name;
-  rayDb.close();
-
-  const dbDeleteRequest = window.indexedDB.deleteDatabase(dbName);
-  dbDeleteRequest.onerror = (_) => {
-    console.error('Error deleting database.');
-  };
-
-  dbDeleteRequest.onblocked = () => {
-    useToastStore().createToast(
-      'Please close all other RayOS tabs before resetting',
-      'error',
-      5000,
-      'window',
-      windowId,
-    );
-  };
-
-  dbDeleteRequest.onsuccess = (_) => {
-    localStorage.clear();
-    location.reload();
-  };
-}
 </script>
 
 <template>
@@ -60,7 +36,7 @@ async function resetState() {
     <hr />
     <div class="reset-state-wrapper">
       <p>Warning: close all other RayOS tabs before resetting</p>
-      <button class="reset-state-button" @click="resetState">Reset everything</button>
+      <button class="reset-state-button" @click="useResetState(rayDb, windowId)">Reset everything</button>
     </div>
   </div>
 </template>

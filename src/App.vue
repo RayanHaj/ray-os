@@ -8,6 +8,7 @@ import { RayDb } from 'ray-db-wrapper';
 import DesktopView from '@/views/DesktopView.vue';
 import { useSnapLayoutStore } from '@/stores/snapLayout.ts';
 import { useWallpaperStore } from '@/stores/settings/wallpaper.ts';
+import { useResetState } from '@/composables/useResetState.ts';
 
 const browserStore = useBrowserStore();
 const desktopStore = useDesktopStore();
@@ -18,16 +19,33 @@ const snapLayoutStore = useSnapLayoutStore();
 
 const initialised = ref(false);
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
+
+const hasThrown = ref(false);
 onBeforeMount(async () => {
   browserStore.startListening();
   wallpaperStore.initSelectedWallpaper();
 
-  await svgsStore.initializeSvgs();
-  await gridStore.initializeTileContent(rayDb);
-  initialised.value = true;
+  try {
+    await svgsStore.initializeSvgs();
+    await gridStore.initializeTileContent(rayDb);
+    initialised.value = true;
 
-  await desktopStore.updateDesktopDirectory(rayDb);
+    await desktopStore.updateDesktopDirectory(rayDb);
+  } catch (e) {
+    hasThrown.value = true;
+  }
 });
+
+function softReset() {
+  localStorage.clear();
+  location.reload();
+}
+
+async function hardReset() {
+  await useResetState(rayDb);
+}
+
+
 onUnmounted(() => {
   browserStore.stopListening();
 });
@@ -56,6 +74,11 @@ document.addEventListener('mouseout', function (event) {
     "
   >
     Loading RayOS...
+  </div>
+  <div v-if="!initialised && hasThrown">
+    <div>Something has gone wrong, try one of these fixes</div>
+    <button @click="softReset()">Soft reset</button>
+    <button @click="hardReset()">Hard reset</button>
   </div>
 </template>
 
