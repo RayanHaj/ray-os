@@ -60,7 +60,8 @@ const fileIsLoaded = computed(() => loadedFile.value?.windowId === windowId);
       :window-id="windowId"
       :allowed-file-types="['text/plain']"
       @return-value="onFileSelectReturnValue"
-    >text file</FileSelectButton>
+      >text file</FileSelectButton
+    >
   </div>
 </template>
 

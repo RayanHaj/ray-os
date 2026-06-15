@@ -6,8 +6,19 @@ export const useToastStore = defineStore('toast', () => {
   const toasts = ref<Toast[]>([]);
   const timeoutIds = ref<TimeoutId[]>([]);
 
-  function createToast(message: string, type: ToastTypes, milliseconds: number, location: 'window' | 'desktop', windowId?: string): number {
-    const toast: Toast = { message: message, type: type, milliseconds: milliseconds, location: location};
+  function createToast(
+    message: string,
+    type: ToastTypes,
+    milliseconds: number,
+    location: 'window' | 'desktop',
+    windowId?: string,
+  ): number {
+    const toast: Toast = {
+      message: message,
+      type: type,
+      milliseconds: milliseconds,
+      location: location,
+    };
     if (windowId) {
       toast.windowId = windowId;
     }

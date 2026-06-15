@@ -33,8 +33,8 @@ export function useSnakeState() {
 
   function spawnFruit() {
     let position: { x: number; y: number } = {
-      x: Math.floor(Math.random() * useSnakeStore().GRID_COLUMNS ),
-      y: Math.floor(Math.random() * useSnakeStore().GRID_ROWS ),
+      x: Math.floor(Math.random() * useSnakeStore().GRID_COLUMNS),
+      y: Math.floor(Math.random() * useSnakeStore().GRID_ROWS),
     };
 
     while (positionContainsSnake(position)) {
@@ -76,7 +76,7 @@ export function useSnakeState() {
       }
     }
 
-    return false
+    return false;
   }
 
   function resetState() {
@@ -183,6 +183,6 @@ export function useSnakeState() {
     fruitPositions,
     snakePositions,
     getGameScore,
-    resetState
+    resetState,
   };
 }

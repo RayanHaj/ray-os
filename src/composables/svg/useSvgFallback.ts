@@ -6,7 +6,12 @@ export function useSvgFallback(message: string) {
       return h('div', {
         class: 'svg-fallback',
         innerHTML: message,
-        style: { display: 'flex', justifyContent: 'center', alignItems: 'center', cursor: 'default' },
+        style: {
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          cursor: 'default',
+        },
       });
     };
   });

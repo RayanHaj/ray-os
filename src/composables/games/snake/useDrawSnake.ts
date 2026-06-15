@@ -4,7 +4,7 @@ import { useSnakeStore } from '@/stores/games/snake.ts';
 export function useDrawSnake(
   context: CanvasRenderingContext2D | null,
   snakePositions: SnakePosition[],
-  color?: string
+  color?: string,
 ) {
   if (!context) return;
 

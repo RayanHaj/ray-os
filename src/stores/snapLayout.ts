@@ -20,16 +20,16 @@ export const useSnapLayoutStore = defineStore('snapLayout', () => {
     currentSnapLayoutSession.value = {
       windowId: windowId,
       showSnapLayout: showSnapLayout,
-      selectedLayout: ''
-    }
+      selectedLayout: '',
+    };
   }
 
   function closeSnapLayout() {
     currentSnapLayoutSession.value = {
       windowId: currentSnapLayoutSession.value.windowId,
       showSnapLayout: '',
-      selectedLayout: ''
-    }
+      selectedLayout: '',
+    };
   }
 
   return { currentSnapLayoutSession, openSnapLayout, closeSnapLayout };

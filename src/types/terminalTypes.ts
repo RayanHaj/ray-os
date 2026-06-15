@@ -10,7 +10,7 @@ export const commands = [
   'help',
   'exit',
   'start',
-  'cls-history'
+  'cls-history',
 ] as const;
 export type CommandKeyword = (typeof commands)[number];
 export type LineTerminal = { line: string; isPlain: boolean };

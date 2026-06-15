@@ -14,27 +14,39 @@ export async function useFileSystemInit(rayDb: RayDb) {
   );
 
   // Early escape when initial directories already have been initialized
-  if (existingRootDirectory && existingRootDirectory.directory?.name === fileSystemStore.ROOT_DIR_NAME) {
+  if (
+    existingRootDirectory &&
+    existingRootDirectory.directory?.name === fileSystemStore.ROOT_DIR_NAME
+  ) {
     await useFileStore().initializeFiles(rayDb);
     return;
   }
 
   try {
-    const parentId = await useInsertFileSystemItem(rayDb, [], {
-      directory: { name: fileSystemStore.ROOT_DIR_NAME, children: [] },
-      isSystemFile: true,
-    }, undefined, false);
+    const parentId = await useInsertFileSystemItem(
+      rayDb,
+      [],
+      { directory: { name: fileSystemStore.ROOT_DIR_NAME, children: [] }, isSystemFile: true },
+      undefined,
+      false,
+    );
 
-      if (parentId) {
-        await useInsertFileSystemItem(rayDb, [parentId], {
-          directory: { name: 'Applications', children: [] },
-          isSystemFile: true,
-        }, undefined, false);
-        await useInsertFileSystemItem(rayDb, [parentId], {
-          directory: { name: 'Wallpapers', children: [] },
-          isSystemFile: true,
-        }, undefined, false);
-      }
+    if (parentId) {
+      await useInsertFileSystemItem(
+        rayDb,
+        [parentId],
+        { directory: { name: 'Applications', children: [] }, isSystemFile: true },
+        undefined,
+        false,
+      );
+      await useInsertFileSystemItem(
+        rayDb,
+        [parentId],
+        { directory: { name: 'Wallpapers', children: [] }, isSystemFile: true },
+        undefined,
+        false,
+      );
+    }
 
     await useFileStore().initializeFiles(rayDb);
   } catch (e) {

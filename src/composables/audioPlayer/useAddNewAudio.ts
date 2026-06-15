@@ -7,9 +7,7 @@ export function useAddNewAudio(
   currentLoadedAudio: Ref<string | undefined>,
   newAudio: LoadedAudio,
   windowId: string,
-  options?: {
-    loadAudio?: boolean
-  }
+  options?: { loadAudio?: boolean },
 ) {
   if (!newAudio.file) return;
 

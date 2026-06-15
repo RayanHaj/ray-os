@@ -59,7 +59,8 @@ export function useWindowStateManager(styles: Ref<StyleProps>, reference: Window
       } else {
         styles.value.display = 'block';
       }
-    }, { deep: true }
+    },
+    { deep: true },
   );
 
   watch(

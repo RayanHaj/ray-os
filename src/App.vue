@@ -32,6 +32,7 @@ onBeforeMount(async () => {
 
     await desktopStore.updateDesktopDirectory(rayDb);
   } catch (e) {
+    console.error(e);
     hasThrown.value = true;
   }
 });
@@ -44,7 +45,6 @@ function softReset() {
 async function hardReset() {
   await useResetState(rayDb);
 }
-
 
 onUnmounted(() => {
   browserStore.stopListening();

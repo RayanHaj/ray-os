@@ -12,7 +12,7 @@ export const useDblClick = (onDoubleClick: () => void, onSingleClick?: () => voi
       clickCount = 0;
 
       if (onSingleClick) {
-       onSingleClick();
+        onSingleClick();
       }
     }, 200);
   } else if (clickCount === 2) {

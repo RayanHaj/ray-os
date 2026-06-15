@@ -5,7 +5,7 @@ export async function useOnDragStart(
   event: DragEvent,
   multiSelect: ReturnType<typeof useMultiSelect<number>>,
   fileSystemItem: FileSystemItem,
-  path: string
+  path: string,
 ) {
   if (!multiSelect.isSelected(fileSystemItem.id)) {
     multiSelect.clear();

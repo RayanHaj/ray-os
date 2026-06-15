@@ -1,7 +1,4 @@
-import {
-  type FileItem,
-  type Item,
-} from '@/types/itemTypes.ts';
+import { type FileItem, type Item } from '@/types/itemTypes.ts';
 import { useWindowStore } from '@/stores/window.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
@@ -35,7 +32,7 @@ export async function useHandleDesktopFileClicked(item: Item & { tileId: number 
 
   function handleDirectoryClicked() {
     const nextWindowId = useWindowStore().getNextWindowId('File Explorer');
-    console.log(item)
+    console.log(item);
     if (!item.path) {
       return;
     }

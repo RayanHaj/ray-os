@@ -26,4 +26,3 @@ onBeforeMount(() => {
     </UiDropdown>
   </div>
 </template>
-

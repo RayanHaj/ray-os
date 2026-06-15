@@ -96,10 +96,13 @@ function returnSvgNameByToastType(toastType: ToastTypes): AvailableSvgs {
   }
 }
 
-function returnSvgColorByToastType(toastType: ToastTypes, onlyBlackWhite?: boolean): 'green' | 'black' | 'white' {
+function returnSvgColorByToastType(
+  toastType: ToastTypes,
+  onlyBlackWhite?: boolean,
+): 'green' | 'black' | 'white' {
   switch (toastType) {
     case 'success': {
-      return onlyBlackWhite ? 'black' : 'green'
+      return onlyBlackWhite ? 'black' : 'green';
     }
     case 'warning': {
       return 'black';

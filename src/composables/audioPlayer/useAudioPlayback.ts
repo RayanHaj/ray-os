@@ -43,9 +43,13 @@ export async function usePlayAudio(
     }
 
     if (!audioIsLoaded) {
-      audioObject.value.addEventListener('canplaythrough', async () => {
-        await playAudio();
-      }, { once: true });
+      audioObject.value.addEventListener(
+        'canplaythrough',
+        async () => {
+          await playAudio();
+        },
+        { once: true },
+      );
     } else {
       await playAudio();
     }
@@ -59,8 +63,7 @@ export function usePauseAudio(
 ) {
   if (audioObject.value === null) return;
 
-  if (!currentLoadedAudioUrl.value || currentLoadedAudioUrl.value !== audioObject.value.src)
-    return;
+  if (!currentLoadedAudioUrl.value || currentLoadedAudioUrl.value !== audioObject.value.src) return;
 
   const currentLoadedAudioIndex = loadedAudios.value.findIndex(
     (audio) => audio.audioUrl === currentLoadedAudioUrl.value,

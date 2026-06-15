@@ -45,9 +45,7 @@ onBeforeMount(async () => {
       loading="lazy"
       draggable="false"
     />
-    <div v-else class="skeleton">
-
-    </div>
+    <div v-else class="skeleton"></div>
   </div>
 </template>
 <style scoped>

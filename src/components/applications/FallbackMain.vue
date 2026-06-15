@@ -4,5 +4,4 @@
   <div>No component found :)</div>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>

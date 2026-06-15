@@ -30,6 +30,6 @@ export const windowNames = [
   'videoPlayer',
   'audioPlayer',
   'properties',
-  'snake'
+  'snake',
 ] as const;
 export type WindowName = (typeof windowNames)[number];

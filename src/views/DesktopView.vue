@@ -44,7 +44,8 @@ watch(
     } else {
       delete fixedSizeWindows.value['Snake'];
     }
-  }, {immediate: true}
+  },
+  { immediate: true },
 );
 
 const minWidthWindows: Record<string, { width: number }> = {

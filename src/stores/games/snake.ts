@@ -17,6 +17,6 @@ export const useSnakeStore = defineStore('snake', () => {
     CANVAS_HEIGHT,
     GRID_COLUMNS,
     GRID_ROWS,
-    SNAKE_BLOCK_SIZE
-  }
+    SNAKE_BLOCK_SIZE,
+  };
 });

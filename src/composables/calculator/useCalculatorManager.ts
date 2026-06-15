@@ -172,7 +172,7 @@ export function useCalculatorManager() {
     const { key, index } = getLastCalculationKeyAndIndex();
     const lastKeyAsString = key.value.toString();
     if (key.type === 'input' && lastKeyAsString.length > 1) {
-      updateKeyValue(lastKeyAsString.slice(0, lastKeyAsString.length - 1))
+      updateKeyValue(lastKeyAsString.slice(0, lastKeyAsString.length - 1));
     } else {
       updateKeyValue(calculationArray.value.splice(index, 1).toString());
     }
@@ -194,7 +194,7 @@ export function useCalculatorManager() {
   function handleSignToggle() {
     const { key } = getLastCalculationKeyAndIndex();
     if (key.type === 'input') {
-      updateKeyValue((Number(key.value) * -1).toString())
+      updateKeyValue((Number(key.value) * -1).toString());
     }
   }
 

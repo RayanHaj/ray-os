@@ -24,7 +24,7 @@ const windowContentComponents: { [windowName in WindowName]: Component } = {
   videoPlayer: VideoPlayerMain,
   audioPlayer: AudioPlayerMain,
   properties: FilePropertiesMain,
-  snake: SnakeMain
+  snake: SnakeMain,
 } as const;
 
 export function useGetWindowContentComponent(windowName: string) {

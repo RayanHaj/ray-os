@@ -19,7 +19,7 @@ export function useWindowPositionManager(
   windowRef: Ref,
   windowStateManager: ReturnType<typeof useWindowStateManager>,
   currentCorner: Ref<string>,
-  isFixed: boolean
+  isFixed: boolean,
 ) {
   const browserStore = useBrowserStore();
 

@@ -1,8 +1,4 @@
-import {
-  type FileItem,
-  type FileSystemItem,
-  type Item,
-} from '@/types/itemTypes.ts';
+import { type FileItem, type FileSystemItem, type Item } from '@/types/itemTypes.ts';
 import { useWindowStore } from '@/stores/window.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import type { Ref } from 'vue';

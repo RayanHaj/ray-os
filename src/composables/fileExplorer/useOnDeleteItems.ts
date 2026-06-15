@@ -11,7 +11,7 @@ export async function useOnDeleteItems(
   rayDb: RayDb,
   multiSelect: ReturnType<typeof useMultiSelect<number>>,
   currentFileSystemItems: FileSystemItem[],
-  windowId: string
+  windowId: string,
 ) {
   await multiSelect.forEachSelected(async (id) => {
     const fileSystemItem = currentFileSystemItems.find((item) => item.id === id);

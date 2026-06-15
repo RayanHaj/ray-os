@@ -16,7 +16,13 @@ export const useAudioPlayerStore = defineStore('audioPlayer', () => {
       return false;
     }
 
-    loadedAudio.value = { windowId: windowId, file: audioFile, fileId, isPlaying: false, playlistName: '' };
+    loadedAudio.value = {
+      windowId: windowId,
+      file: audioFile,
+      fileId,
+      isPlaying: false,
+      playlistName: '',
+    };
     return true;
   }
 
@@ -24,9 +30,5 @@ export const useAudioPlayerStore = defineStore('audioPlayer', () => {
     loadedAudio.value = { windowId: null, file: null, fileId: -1, playlistName: '' };
   }
 
-  return {
-    loadedAudio,
-    resetLoadedAudio,
-    initAudioFileAndUrl
-  };
+  return { loadedAudio, resetLoadedAudio, initAudioFileAndUrl };
 });

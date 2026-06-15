@@ -51,7 +51,8 @@ function onFileSelectReturnValue(returnValue: { windowId: string; value: FileSel
     :window-id="windowId"
     :allowed-file-types="['image/jpeg', 'image/png', 'image/webp']"
     @return-value="onFileSelectReturnValue"
-  >image file</FileSelectButton>
+    >image file</FileSelectButton
+  >
 </template>
 
 <style scoped>

@@ -4,7 +4,11 @@ import type { FileSystemItem, Item } from '@/types/itemTypes.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import type { useMultiSelect } from '@/composables/helpers/useMultiSelect.ts';
 
-export async function useOnDblClickItemInFileSelectState(rayDb: RayDb, multiSelect: ReturnType<typeof useMultiSelect<number>>, windowId: string) {
+export async function useOnDblClickItemInFileSelectState(
+  rayDb: RayDb,
+  multiSelect: ReturnType<typeof useMultiSelect<number>>,
+  windowId: string,
+) {
   const foundSelectState = useFileExplorerStore().fileSelectState.find(
     (element) => element.fileExplorerWindowId === windowId,
   );

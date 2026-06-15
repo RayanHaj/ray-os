@@ -18,7 +18,7 @@ export function useWindowSnappingManager(
   styles: Ref<StyleProps>,
   windowId: string,
   windowStateManager: ReturnType<typeof useWindowStateManager>,
-  isFixed: boolean
+  isFixed: boolean,
 ) {
   const showSnapLayout = ref<string>('');
   const browserStore = useBrowserStore();

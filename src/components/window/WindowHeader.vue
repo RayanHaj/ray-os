@@ -22,7 +22,7 @@ const {
 const activeActions = ref<('Minimize' | 'Maximize' | 'Close')[]>(['Minimize', 'Maximize', 'Close']);
 onBeforeMount(() => {
   if (useBrowserStore().isMobile) {
-    activeActions.value = ['Minimize', 'Close']
+    activeActions.value = ['Minimize', 'Close'];
     return;
   }
 

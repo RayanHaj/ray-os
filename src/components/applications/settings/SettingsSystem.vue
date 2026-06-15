@@ -36,7 +36,9 @@ const { windowId } = defineProps<{ windowId: string }>();
     <hr />
     <div class="reset-state-wrapper">
       <p>Warning: close all other RayOS tabs before resetting</p>
-      <button class="reset-state-button" @click="useResetState(rayDb, windowId)">Reset everything</button>
+      <button class="reset-state-button" @click="useResetState(rayDb, windowId)">
+        Reset everything
+      </button>
     </div>
   </div>
 </template>

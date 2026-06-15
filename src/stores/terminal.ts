@@ -10,10 +10,5 @@ export const useTerminalStore = defineStore('terminal', () => {
 
   const cachedLines = ref<LineTerminal[]>([]);
 
-  return {
-    FONT_SIZE_LS_KEY,
-    LS_COMMAND_CACHE_KEY,
-    emptyLine,
-    cachedLines
-  }
+  return { FONT_SIZE_LS_KEY, LS_COMMAND_CACHE_KEY, emptyLine, cachedLines };
 });

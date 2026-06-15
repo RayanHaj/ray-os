@@ -2,7 +2,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "Rubik", system-ui;
+  font-family: 'Rubik', system-ui;
   font-weight: bold;
   color: var(--text-color);
 }
@@ -20,7 +20,7 @@ body {
 ::-webkit-scrollbar-track {
   border-radius: 0;
   background-color: var(--input-border-color);
-  box-shadow: inset 0 0 6px rgba(0, 0, 0, .3);
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
   cursor: default;
 }
 
@@ -68,7 +68,7 @@ body {
   --tabs-hover: #4a9eff;
 }
 
-[data-theme='orange-ember']{
+[data-theme='orange-ember'] {
   --background-color: #1a0f0a;
   --text-color: #ffa366;
   --text-secondary-color: #e6804d;

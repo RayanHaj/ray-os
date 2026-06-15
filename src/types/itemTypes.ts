@@ -1,5 +1,5 @@
 export const itemTypes = ['application', 'file', 'directory'] as const;
-export type ItemType = typeof itemTypes[number]
+export type ItemType = (typeof itemTypes)[number];
 
 export interface ApplicationItem {
   type: 'application';
@@ -16,14 +16,14 @@ export interface FileItem {
 
 export interface Item {
   label: string;
-  content: ApplicationItem | FileItem | FileSystemItem & { type: 'directory' };
+  content: ApplicationItem | FileItem | (FileSystemItem & { type: 'directory' });
   id: number;
   path?: string;
 }
 
 export interface ItemInsert {
   label: string;
-  content: ApplicationItem | FileItem | FileSystemItem & { type: 'directory' };
+  content: ApplicationItem | FileItem | (FileSystemItem & { type: 'directory' });
 }
 
 export type FileSystemItem = {
@@ -51,7 +51,7 @@ export const fileExtensions = {
   'image/jpeg': 'jpeg',
   'image/png': 'png',
   'image/webp': 'webp',
-  'audio/mpeg': 'mp3'
+  'audio/mpeg': 'mp3',
 } as const;
 
 export const Applications = [
@@ -63,13 +63,17 @@ export const Applications = [
   'Audio Player',
   'Image Viewer',
   'Video Player',
-  'Snake'
+  'Snake',
 ] as const;
 
 export type Application = (typeof Applications)[number];
 export type FileType = keyof typeof fileExtensions;
 
-export const imageTypes = ['image/jpeg', 'image/png', 'image/webp'] as const satisfies readonly FileType[];
+export const imageTypes = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+] as const satisfies readonly FileType[];
 export function isImageType(type: string | undefined): type is (typeof imageTypes)[number] {
   if (!type) return false;
   return imageTypes.includes(type as (typeof imageTypes)[number]);

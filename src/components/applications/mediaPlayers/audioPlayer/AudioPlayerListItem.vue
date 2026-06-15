@@ -24,7 +24,7 @@ function onContextmenu(event: MouseEvent) {
 }
 
 const audioPlayerListItemRef = useTemplateRef('audioPlayerListItem');
-defineExpose({audioPlayerListItemRef});
+defineExpose({ audioPlayerListItemRef });
 </script>
 <template>
   <li ref="audioPlayerListItem" @contextmenu.prevent="onContextmenu" :class="{ active: isPlaying }">

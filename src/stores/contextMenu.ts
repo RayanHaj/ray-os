@@ -26,7 +26,7 @@ export const useContextMenuStore = defineStore('contextMenu', () => {
   const buttonClicked = ref<{ [button: string]: boolean }>({});
 
   function initializeContextMenu(
-    primaryActions?: readonly typeof primaryActionsContextMenu[number][],
+    primaryActions?: readonly (typeof primaryActionsContextMenu)[number][],
     secondaryActions?: readonly SecondaryActionsContextMenu[],
     position?: { left: number; top: number },
     actions?: { [buttonName: string]: () => unknown | Promise<unknown> },
@@ -39,18 +39,15 @@ export const useContextMenuStore = defineStore('contextMenu', () => {
       watcher.value();
     }
 
-    watcher.value = watch(
-      buttonClicked,
-      async (value) => {
-        const buttonName = Object.keys(value)[0];
+    watcher.value = watch(buttonClicked, async (value) => {
+      const buttonName = Object.keys(value)[0];
 
-        if (actions && typeof actions?.[buttonName] === 'function') {
-          await actions?.[buttonName]();
-        }
+      if (actions && typeof actions?.[buttonName] === 'function') {
+        await actions?.[buttonName]();
+      }
 
-        hide();
-      },
-    );
+      hide();
+    });
   }
 
   const maximumContextMenuTop = computed(

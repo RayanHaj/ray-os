@@ -209,7 +209,7 @@ watch(
   }
 }
 
-@media screen and (max-width: 500px){
+@media screen and (max-width: 500px) {
   .snap-layout {
     display: none;
   }

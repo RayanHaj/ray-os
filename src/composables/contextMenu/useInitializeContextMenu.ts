@@ -51,8 +51,8 @@ export function useInitializeContextMenu(event: MouseEvent) {
     return { initialize };
   };
   const fileExplorerGridItem = (disableOptions?: {
-    renameFile?: boolean,
-    addToDesktop?: boolean,
+    renameFile?: boolean;
+    addToDesktop?: boolean;
   }) => {
     const primaryActions = ['Copy', 'Paste', 'Delete'] as const;
     const secondaryActions = [
@@ -70,7 +70,9 @@ export function useInitializeContextMenu(event: MouseEvent) {
   };
   const audioPlayerPlaylist = () => {
     const primaryActions = [] as const;
-    const secondaryActions = [{ id: 'deletePlaylist', label: 'Delete playlist', disabled: false  }] as const;
+    const secondaryActions = [
+      { id: 'deletePlaylist', label: 'Delete playlist', disabled: false },
+    ] as const;
 
     const initialize = createInitialize(primaryActions, secondaryActions);
     return { initialize };
@@ -85,5 +87,12 @@ export function useInitializeContextMenu(event: MouseEvent) {
     return { initialize };
   };
 
-  return { desktop, tile, fileExplorerGrid, fileExplorerGridItem, audioPlayerPlaylist, audioPlayerAudio };
+  return {
+    desktop,
+    tile,
+    fileExplorerGrid,
+    fileExplorerGridItem,
+    audioPlayerPlaylist,
+    audioPlayerAudio,
+  };
 }

@@ -17,11 +17,7 @@ app.use(createPinia());
 const rayDb = await useRayDbInit();
 app.provide('rayDb', rayDb);
 
-try {
-  await useFileSystemInit(rayDb);
-} catch (e) {
-  console.error(e);
-}
+await useFileSystemInit(rayDb);
 
 useThemeInit();
 app.mount('#app');

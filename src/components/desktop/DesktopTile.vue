@@ -72,15 +72,12 @@ async function openWindow() {
   if (!desktopTileItem.value) return;
   await useHandleDesktopFileClicked(desktopTileItem.value, rayDb);
 }
-
 </script>
 <template>
   <div
     :id="tileId.toString()"
     class="tile"
-    :class="{
-      filled: desktopTileItem !== null
-    }"
+    :class="{ filled: desktopTileItem !== null }"
     :style="{ width: `${desktopStore.tileWidth}px`, height: `${desktopStore.tileHeight}px` }"
     :draggable="desktopTileItem !== null"
     @dragstart="onDragStart"
@@ -93,7 +90,11 @@ async function openWindow() {
     @contextmenu.prevent="onTileRightClick"
   >
     <div class="content" v-if="desktopTileItem && desktopTileItem.id">
-      <component :is="useGetSvgByDesktopTileItem(desktopTileItem)" :custom-width="35" :custom-height="35" />
+      <component
+        :is="useGetSvgByDesktopTileItem(desktopTileItem)"
+        :custom-width="35"
+        :custom-height="35"
+      />
       <div>{{ desktopTileItem.label }}</div>
     </div>
   </div>

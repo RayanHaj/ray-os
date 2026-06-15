@@ -9,7 +9,12 @@ import { useDeleteFileSystemItem } from '@/composables/fileSystem/useDeleteFileS
 import { useToastStore } from '@/stores/toast.ts';
 import type { RayDb } from 'ray-db-wrapper';
 
-export async function useOnFileDrop(event: DragEvent, rayDb: RayDb, currentFileSystemItems: FileSystemItem[], parentId: number) {
+export async function useOnFileDrop(
+  event: DragEvent,
+  rayDb: RayDb,
+  currentFileSystemItems: FileSystemItem[],
+  parentId: number,
+) {
   const targetElement = (event.target as Element).closest('div');
   if (targetElement?.className === 'item') {
     try {

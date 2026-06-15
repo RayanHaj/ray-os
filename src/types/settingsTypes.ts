@@ -4,10 +4,10 @@ import SettingsSystem from '@/components/applications/settings/SettingsSystem.vu
 import SettingsWallpapers from '@/components/applications/settings/wallpapers/SettingsWallpapers.vue';
 
 export const allowedSettingsOptions = ['Themes', 'Wallpapers', 'System'] as const;
-export type AllowedSettingsOptions = typeof allowedSettingsOptions[number];
+export type AllowedSettingsOptions = (typeof allowedSettingsOptions)[number];
 
 export const settingsOptionsComponents: { [option in AllowedSettingsOptions]: Component } = {
-  'Themes': SettingsThemes,
-  'Wallpapers': SettingsWallpapers,
-  'System': SettingsSystem
-}
+  Themes: SettingsThemes,
+  Wallpapers: SettingsWallpapers,
+  System: SettingsSystem,
+};

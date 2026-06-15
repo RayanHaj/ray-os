@@ -19,7 +19,7 @@ export function useWindowResizeManager(
   styles: Ref<WindowStyleObject>,
   windowRef: Ref,
   windowStateManager: ReturnType<typeof useWindowStateManager>,
-  isFixed: boolean
+  isFixed: boolean,
 ) {
   const currentCorner = ref<WindowCornerPosition>('default');
   const isMouseDown = ref(false);
@@ -214,10 +214,5 @@ export function useWindowResizeManager(
     styles.value.top = '0';
   }
 
-  return {
-    currentCorner,
-    onMouseDownWindow,
-    onMouseMoveWindow,
-    setWindowMaximized,
-  };
+  return { currentCorner, onMouseDownWindow, onMouseMoveWindow, setWindowMaximized };
 }

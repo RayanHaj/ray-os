@@ -8,13 +8,7 @@ export function useMultiSelect<T>(initSet?: T[]) {
   }
 
   function toggle(value: T) {
-    const returnVal: {
-      value: T,
-      event: 'deleted' | 'added'
-    } = {
-      value: value,
-      event: 'added'
-    };
+    const returnVal: { value: T; event: 'deleted' | 'added' } = { value: value, event: 'added' };
 
     if (set.value.has(value)) {
       set.value.delete(value);
@@ -71,6 +65,6 @@ export function useMultiSelect<T>(initSet?: T[]) {
     add,
     size,
     clear,
-    forEachSelected
-  }
+    forEachSelected,
+  };
 }

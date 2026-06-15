@@ -1,7 +1,7 @@
 import { ref } from 'vue';
 import { defineStore } from 'pinia';
 
-export type TaskbarPosition = 'center' | 'left'
+export type TaskbarPosition = 'center' | 'left';
 export const useTaskbarStore = defineStore('taskbar', () => {
   const taskbarHeight = ref(70);
   const taskbarPosition = ref<TaskbarPosition>('center');

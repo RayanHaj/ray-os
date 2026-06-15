@@ -1,7 +1,5 @@
 import type { RayDb } from 'ray-db-wrapper';
-import {
-  fileSystemLookup,
-} from '@/composables/fileSystem/useIndexedDbHelper.ts';
+import { fileSystemLookup } from '@/composables/fileSystem/useIndexedDbHelper.ts';
 import type { Ref } from 'vue';
 import type { LineTerminal } from '@/types/terminalTypes.ts';
 import { useInsertFileSystemItem } from '@/composables/fileSystem/useInsertFileSystemItem.ts';
