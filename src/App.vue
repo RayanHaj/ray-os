@@ -59,10 +59,10 @@ document.addEventListener('mouseout', function (event) {
 
 <template>
   <Transition name="fade">
-    <DesktopView v-if="initialised" />
+    <DesktopView v-if="initialised && !hasThrown" />
   </Transition>
   <div
-    v-if="!initialised"
+    v-if="!initialised && !hasThrown"
     style="
       display: flex;
       height: 100vh;
@@ -75,7 +75,7 @@ document.addEventListener('mouseout', function (event) {
   >
     Loading RayOS...
   </div>
-  <div v-if="!initialised && hasThrown">
+  <div v-else>
     <div>Something has gone wrong, try one of these fixes</div>
     <button @click="softReset()">Soft reset</button>
     <button @click="hardReset()">Hard reset</button>
