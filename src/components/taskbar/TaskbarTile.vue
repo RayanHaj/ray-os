@@ -1,36 +1,44 @@
 <script setup lang="ts">
 import { useWindowStore } from '@/stores/window.ts';
-import { computed, nextTick, onBeforeMount, ref, watch } from 'vue';
-import type { Item } from '@/types/itemTypes.js';
+import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import TaskbarTabs from '@/components/taskbar/TaskbarTabs.vue';
 import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
-import { useFileStore } from '@/stores/file.ts';
 import { useBrowserStore } from '@/stores/browser.ts';
+import { useTaskbarStore } from '@/stores/taskbar.ts';
+import type { TaskbarTileItem } from '@/types/taskbarTypes.ts';
 
-const fileStore = useFileStore();
 const isHoveringOnTile = ref(false);
 
-const { id } = defineProps<{ id: number }>();
+const { taskbarItems, applicationId } = defineProps<{
+  taskbarItems: TaskbarTileItem[];
+  applicationId: number;
+}>();
 
-const application = ref<Item | null>(null);
-onBeforeMount(() => {
-  application.value = fileStore.applications.find((item) => item.id === id) ?? null;
+const taskbarStore = useTaskbarStore();
+const windowStore = useWindowStore();
+
+const taskbarTileItem = ref<TaskbarTileItem>();
+
+onMounted(() => {
+  const foundTaskbarTileItem = taskbarItems.find((tileItem) => tileItem.id === applicationId);
+  if (!foundTaskbarTileItem) return;
+
+  taskbarTileItem.value = foundTaskbarTileItem;
 });
 
-const windowStore = useWindowStore();
 const getUnderlineClass = computed(() => {
-  if (!application.value) {
+  if (!taskbarTileItem.value) {
     return 'underline hidden';
   }
 
-  if (!windowStore.openWindowsReferences[application.value.label]) {
+  if (!windowStore.openWindowsReferences[taskbarTileItem.value.label]) {
     return 'underline hidden';
   }
 
   const openWindowsReferenceCount =
-    windowStore.openWindowsReferences[application.value.label].length;
+    windowStore.openWindowsReferences[taskbarTileItem.value.label].length;
 
-  const minimizedCount = windowStore.openWindowsReferences[application.value.label].reduce(
+  const minimizedCount = windowStore.openWindowsReferences[taskbarTileItem.value.label].reduce(
     (accumulator, value) => (value.minimized ? accumulator + 1 : accumulator),
     0,
   );
@@ -41,11 +49,11 @@ const getUnderlineClass = computed(() => {
 });
 
 function hasTabs() {
-  if (!isHoveringOnTile.value || !application.value) {
+  if (!isHoveringOnTile.value || !taskbarTileItem.value) {
     return false;
   }
 
-  const reference = windowStore.openWindowsReferences[application.value.label];
+  const reference = windowStore.openWindowsReferences[taskbarTileItem.value.label];
   if (!reference || reference.length === 0) {
     return false;
   }
@@ -110,13 +118,13 @@ function onTabsUnmounted() {
 const firstWindowOpenedOnClickTile = ref(false);
 
 function onClickTile() {
-  if (!application.value) {
+  if (!taskbarTileItem.value) {
     return;
   }
 
-  const reference = windowStore.openWindowsReferences[application.value.label];
+  const reference = windowStore.openWindowsReferences[taskbarTileItem.value.label];
   if (!reference || reference.length === 0) {
-    windowStore.pushOpenWindowReference(application.value.label);
+    windowStore.pushOpenWindowReference(taskbarTileItem.value.label);
     firstWindowOpenedOnClickTile.value = true;
     return;
   }
@@ -128,7 +136,7 @@ function onClickTile() {
 
   if (reference.length === 1) {
     windowStore.setWindowMinimized(
-      windowStore.getWindowId(application.value.label, reference[0].id),
+      windowStore.getWindowId(taskbarTileItem.value.label, reference[0].id),
     );
   }
 }
@@ -174,27 +182,28 @@ const getTitleOverflowStyle = computed(() => {
 
 <template>
   <div
-    v-if="application"
+    v-if="taskbarTileItem"
     class="tile"
     :class="setClassOnHover"
     @mouseenter.prevent="onMouseEnter(true)"
     @mouseleave.prevent="onMouseLeave(true)"
     @contextmenu.prevent="onMouseEnter(false)"
+    :style="{ width: `${taskbarStore.tileWidth}px`, height: `${taskbarStore.tileHeight}px` }"
   >
     <div ref="titleRef" v-if="showTitle" class="title-text-hover" :style="getTitleOverflowStyle">
-      {{ application.label }}
+      {{ taskbarTileItem.label }}
     </div>
     <transition name="fade-shadow">
       <TaskbarTabs
         v-if="hasTabs() && firstWindowOpenedOnClickTile === false"
-        :application-name="application.label"
+        :application-name="taskbarTileItem.label"
         @mouse-entered="mouseOnTabs = true"
         @mouse-left="mouseOnTabs = false"
         @tabs-unmounted="onTabsUnmounted"
       />
     </transition>
     <div class="content" @click="onClickTile">
-      <component class="app-svg" :is="useSvgOrFallback(application.label).svg" />
+      <component class="app-svg" :is="useSvgOrFallback(taskbarTileItem.label).svg" />
       <hr :class="getUnderlineClass" />
     </div>
   </div>
@@ -205,8 +214,6 @@ const getTitleOverflowStyle = computed(() => {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 100%;
-  height: 100%;
   position: relative;
 }
 
@@ -243,6 +250,8 @@ hr {
 .content {
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  align-items: center;
   width: 100%;
   height: 100%;
   padding: 10px;

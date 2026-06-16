@@ -39,6 +39,7 @@ const emit = defineEmits([
   'onSingleClick',
   'renameFile',
   'addToDesktop',
+  'addToTaskbar',
   'onDelete',
   'onContextMenu',
   'properties',
@@ -78,6 +79,9 @@ function onContextMenu(event: MouseEvent) {
         },
         addToDesktop: () => {
           emit('addToDesktop');
+        },
+        addToTaskbar: () => {
+          emit('addToTaskbar');
         },
         properties: () => {
           emit('properties');

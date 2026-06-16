@@ -2,15 +2,19 @@
 import { type TaskbarPosition, useTaskbarStore } from '@/stores/taskbar.ts';
 import TaskbarTile from '@/components/taskbar/TaskbarTile.vue';
 import TimeProcessSection from '@/components/TimeProcessSection.vue';
-import { useFileStore } from '@/stores/file.ts';
-import { watch } from 'vue';
+import { ref, watch } from 'vue';
+import type { TaskbarTileItem } from '@/types/taskbarTypes.ts';
 
 const taskbarStore = useTaskbarStore();
-const fileStore = useFileStore();
 
 const taskbarHeight = taskbarStore.taskbarHeight;
-const taskbarItems = fileStore.applications;
 
+const taskbarItems = ref<TaskbarTileItem[]>();
+watch(
+  () => taskbarStore.items,
+  (newItems) => taskbarItems.value = newItems,
+  { immediate: true },
+);
 watch(
   () => taskbarStore.taskbarPosition,
   (newPosition) => {
@@ -33,7 +37,12 @@ watch(
   >
     <div class="taskbar-tiles-wrapper">
       <div class="taskbar-tiles">
-        <TaskbarTile v-for="item of taskbarItems" :key="item.id" :id="item.id" />
+        <TaskbarTile
+          v-for="item of taskbarItems"
+          :key="item.tileId"
+          :taskbar-items="taskbarItems ?? []"
+          :application-id="item.id"
+        />
       </div>
     </div>
     <div class="end-alignment">

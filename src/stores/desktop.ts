@@ -1,66 +1,16 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import type { FileItem, FileSystemItem, Item, ItemInsert, ItemType } from '@/types/itemTypes.ts';
+import type { FileItem, FileSystemItem, Item, ItemInsert } from '@/types/itemTypes.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import { useToastStore } from '@/stores/toast.ts';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
-import { fileSystemLookup } from '@/composables/fileSystem/useIndexedDbHelper.ts';
-import type { DesktopTileItem } from '@/types/desktopTypes.ts';
+import type { DesktopItem, DesktopTileItem } from '@/types/desktopTypes.ts';
 import { useInsertFileSystemItem } from '@/composables/fileSystem/useInsertFileSystemItem.ts';
-
-type DesktopItem = { id: number; type: ItemType; tileId: number; path?: string };
 
 export const useDesktopStore = defineStore('desktop', () => {
   const tileWidth = ref(85);
   const tileHeight = ref(85);
   const items = ref<DesktopTileItem[]>([]);
-
-  async function getDesktopDirectory(rayDb: RayDb) {
-    const applicationItemsPath = `${useFileSystemStore().ROOT_DIR_NAME}/Desktop`;
-    return await fileSystemLookup(rayDb, applicationItemsPath);
-  }
-
-  async function updateDesktopDirectory(rayDb: RayDb) {
-    const fileItems = await rayDb.findAll<DesktopItem>('desktopFiles');
-    if (fileItems.length === 0) {
-      return;
-    }
-
-    const directory = await getDesktopDirectory(rayDb).then((directory) => {
-      if (directory && !(directory instanceof Error)) {
-        return { children: directory.children, id: directory.parent.id };
-      }
-    });
-
-    if (!directory || !directory.children || !directory.id) {
-      return;
-    }
-
-    for (const fileItem of fileItems) {
-      const item = await rayDb.findOne<Item>('files', 'id', fileItem.id);
-
-      if (!item) {
-        return;
-      }
-
-      if (item.content.type === 'directory' && item.content.directory?.children) {
-        await useInsertFileSystemItem(rayDb, [directory.id], {
-          directory: {
-            name: item.content.directory.name,
-            children: item.content.directory.children,
-          },
-        });
-      } else if (item.content.type === 'file') {
-        await useInsertFileSystemItem(rayDb, [directory.id], {
-          file: { name: item.content.name, id: item.id, type: item.content.type },
-        });
-      } else if (item.content.type === 'application') {
-        await useInsertFileSystemItem(rayDb, [directory.id], {
-          file: { name: item.label, id: item.id, type: item.content.type },
-        });
-      }
-    }
-  }
 
   async function initializeTileContent(rayDb: RayDb) {
     if (localStorage.getItem('desktopFilesInitialized') === 'initialized') {
@@ -263,21 +213,11 @@ export const useDesktopStore = defineStore('desktop', () => {
   }
 
   async function deleteDesktopItem(rayDb: RayDb, tileId: number) {
-    try {
-      await rayDb.deleteOne('desktopFiles', tileId);
-      items.value = items.value.filter((item) => item.tileId !== tileId);
-    } catch (e) {
-      throw (e as Error).message;
-    }
+    await rayDb.deleteOne('desktopFiles', tileId);
+    items.value = items.value.filter((item) => item.tileId !== tileId);
   }
 
-  async function getDesktopItems(rayDb: RayDb) {
-    try {
-      return await rayDb.findAll<DesktopItem>('desktopFiles');
-    } catch (e) {
-      throw (e as Error).message;
-    }
-  }
+  const getDesktopItems = async (rayDb: RayDb) => await rayDb.findAll<DesktopItem>('desktopFiles');
 
   function getDesktopItemByTileId(tileId: number) {
     try {
@@ -298,6 +238,5 @@ export const useDesktopStore = defineStore('desktop', () => {
     updateDesktopItem,
     getDesktopItems,
     getDesktopItemByTileId,
-    updateDesktopDirectory,
   };
 });

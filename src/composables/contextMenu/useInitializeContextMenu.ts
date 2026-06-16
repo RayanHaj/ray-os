@@ -53,6 +53,7 @@ export function useInitializeContextMenu(event: MouseEvent) {
   const fileExplorerGridItem = (disableOptions?: {
     renameFile?: boolean;
     addToDesktop?: boolean;
+    addToTaskbar?: boolean;
   }) => {
     const primaryActions = ['Copy', 'Paste', 'Delete'] as const;
     const secondaryActions = [
@@ -61,6 +62,11 @@ export function useInitializeContextMenu(event: MouseEvent) {
         id: 'addToDesktop',
         label: 'add to desktop',
         disabled: disableOptions?.addToDesktop ?? false,
+      },
+      {
+        id: 'addToTaskbar',
+        label: 'add to taskbar',
+        disabled: disableOptions?.addToTaskbar ?? false
       },
       { id: 'properties', label: 'open properties', disabled: false },
     ] as const;

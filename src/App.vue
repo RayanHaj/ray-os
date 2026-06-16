@@ -9,11 +9,12 @@ import DesktopView from '@/views/DesktopView.vue';
 import { useSnapLayoutStore } from '@/stores/snapLayout.ts';
 import { useWallpaperStore } from '@/stores/settings/wallpaper.ts';
 import { useResetState } from '@/composables/useResetState.ts';
+import { useTaskbarStore } from '@/stores/taskbar.ts';
 
 const browserStore = useBrowserStore();
 const desktopStore = useDesktopStore();
+const taskbarStore = useTaskbarStore();
 const wallpaperStore = useWallpaperStore();
-const gridStore = useDesktopStore();
 const svgsStore = useSvgsStore();
 const snapLayoutStore = useSnapLayoutStore();
 
@@ -27,10 +28,9 @@ onBeforeMount(async () => {
 
   try {
     await svgsStore.initializeSvgs();
-    await gridStore.initializeTileContent(rayDb);
+    await desktopStore.initializeTileContent(rayDb);
+    await taskbarStore.initializeTileContent(rayDb);
     initialised.value = true;
-
-    await desktopStore.updateDesktopDirectory(rayDb);
   } catch (e) {
     console.error(e);
     hasThrown.value = true;
