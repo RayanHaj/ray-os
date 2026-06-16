@@ -30,16 +30,22 @@ provide('calculatorManager', useCalculatorManager());
   position: relative;
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .header {
   height: 70px;
   padding: 10px;
+  max-width: 1000px;
+  width: 100%;
 }
 
 .calculator-wrapper,
 .history-wrapper {
   height: calc(100% - 70px);
+  max-width: 1000px;
+  width: 100%;
 }
 
 .show-history-button {
