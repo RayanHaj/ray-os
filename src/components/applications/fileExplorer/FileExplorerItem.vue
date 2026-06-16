@@ -11,6 +11,7 @@ import { useDblClick } from '@/composables/helpers/UseDblClick.ts';
 import { useContextMenuStore } from '@/stores/contextMenu.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import type { RayDb } from 'ray-db-wrapper';
+import { useTaskbarStore } from '@/stores/taskbar.ts';
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 const { fileSystemItem, filterByFileType, isSelected } = defineProps<{
@@ -54,13 +55,22 @@ const itemSize = computed<FileItemSizeValue>(
   () => itemSizes[fileExplorerStore.currentFileItemSize],
 );
 
+const addToTaskbar = !fileSystemItem.file || fileSystemItem.file.type !== 'application';
+
 function onContextMenu(event: MouseEvent) {
   if (!isSelected) {
     emit('onContextMenu');
   }
 
   useInitializeContextMenu(event)
-    .fileExplorerGridItem({ renameFile: fileSystemItem?.type === 'application' })
+    .fileExplorerGridItem(
+      { renameFile: fileSystemItem?.type === 'application', addToTaskbar: addToTaskbar },
+      {
+        addToTaskbar: useTaskbarStore().items.some((item) => item.id === fileSystemItem.file?.id)
+          ? 'remove from taskbar'
+          : undefined,
+      },
+    )
     .initialize(
       {
         Copy: () => {

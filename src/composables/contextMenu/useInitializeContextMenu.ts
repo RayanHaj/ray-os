@@ -54,6 +54,8 @@ export function useInitializeContextMenu(event: MouseEvent) {
     renameFile?: boolean;
     addToDesktop?: boolean;
     addToTaskbar?: boolean;
+  }, labelOptions?: {
+    addToTaskbar?: string;
   }) => {
     const primaryActions = ['Copy', 'Paste', 'Delete'] as const;
     const secondaryActions = [
@@ -65,7 +67,7 @@ export function useInitializeContextMenu(event: MouseEvent) {
       },
       {
         id: 'addToTaskbar',
-        label: 'add to taskbar',
+        label: labelOptions?.addToTaskbar ?? 'add to taskbar',
         disabled: disableOptions?.addToTaskbar ?? false
       },
       { id: 'properties', label: 'open properties', disabled: false },
