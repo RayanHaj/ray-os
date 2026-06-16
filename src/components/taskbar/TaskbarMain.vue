@@ -16,7 +16,7 @@ watch(
   (newPosition) => {
     const lsTaskbarPosition = localStorage.getItem('taskbarPosition');
     if (lsTaskbarPosition !== newPosition) {
-      useTaskbarStore().setTaskbarPosition(lsTaskbarPosition as TaskbarPosition);
+      taskbarStore.setTaskbarPosition(lsTaskbarPosition as TaskbarPosition);
     }
   },
   { immediate: true },

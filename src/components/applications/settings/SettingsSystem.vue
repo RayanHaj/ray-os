@@ -1,13 +1,20 @@
 <script setup lang="ts">
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import type { RayDb } from 'ray-db-wrapper';
-import { useToastStore } from '@/stores/toast.ts';
-import { useTaskbarStore } from '@/stores/taskbar.ts';
+import { type TaskbarPosition, useTaskbarStore } from '@/stores/taskbar.ts';
 import { useResetState } from '@/composables/useResetState.ts';
+import { ref, watch } from 'vue';
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
-
 const { windowId } = defineProps<{ windowId: string }>();
+
+const taskbarStore = useTaskbarStore();
+const taskbarPosition = ref<TaskbarPosition>();
+watch(
+  () => taskbarStore.taskbarPosition,
+  (newPosition) => (taskbarPosition.value = newPosition),
+  { immediate: true },
+);
 </script>
 
 <template>
