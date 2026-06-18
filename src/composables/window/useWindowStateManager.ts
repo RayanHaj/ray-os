@@ -29,7 +29,7 @@ export function useWindowStateManager(styles: Ref<StyleProps>, reference: Window
     return (
       styles.value.left === '0' &&
       styles.value.top === '0' &&
-      styles.value.width === '100%' &&
+      styles.value.width === `${useBrowserStore().width}px` &&
       styles.value.height === `${useBrowserStore().heightExcTaskbar}px`
     );
   });

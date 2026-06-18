@@ -12,13 +12,12 @@ import { useBrowserStore } from '@/stores/browser.ts';
 import { useMultiSelect } from '@/composables/helpers/useMultiSelect.ts';
 import { useFilePropertiesStore } from '@/stores/fileProperties.ts';
 import { useWindowStore } from '@/stores/window.ts';
-import { useAddFileToDesktop } from '@/composables/fileExplorer/useAddFileToDesktop.ts';
 import { useOnFileDrop } from '@/composables/fileExplorer/useOnFileDrop.ts';
 import { useOnDragStart } from '@/composables/fileExplorer/useOnDragStart.ts';
 import { useOnDblClickItemInFileSelectState } from '@/composables/fileExplorer/useOnDblClickItemInFileSelectState.js';
 import { useOnClickItem } from '@/composables/fileExplorer/useOnClickItem.ts';
 import { useOnDeleteItems } from '@/composables/fileExplorer/useOnDeleteItems.ts';
-import { useAddOrRemoveFileFromTaskbar } from '../../../composables/fileExplorer/useAddOrRemoveFileFromTaskbar.ts';
+import { useAddOrRemoveFileFromTaskbar } from '@/composables/fileExplorer/useAddOrRemoveFileFromTaskbar.ts';
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 const windowId = useInjectOrThrow<string>('windowId');
@@ -229,7 +228,7 @@ const itemSize = computed<FileItemSizeValue>(
         @on-drag-start="onDragStart($event, fileSystemItem)"
         @on-drag-end="onDragEnd($event)"
         @rename-file="onRenameFile"
-        @add-to-desktop="useAddFileToDesktop"
+        @add-to-desktop="console.log('add')"
         @add-to-taskbar="useAddOrRemoveFileFromTaskbar(rayDb, multiSelect, currentFileSystemItems)"
         @on-delete="onItemsDelete"
         @properties="onProperties(fileSystemItem)"

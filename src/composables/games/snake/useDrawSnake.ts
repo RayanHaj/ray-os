@@ -12,10 +12,10 @@ export function useDrawSnake(
   for (const snakePosition of snakePositions) {
     context.fillStyle = color ?? '#ff8080';
     context.fillRect(
-      snakePosition.x * snakeStore.SNAKE_BLOCK_SIZE,
-      snakePosition.y * snakeStore.SNAKE_BLOCK_SIZE,
-      snakeStore.SNAKE_BLOCK_SIZE,
-      snakeStore.SNAKE_BLOCK_SIZE,
+      snakePosition.x * snakeStore.snakeBlockSize.x,
+      snakePosition.y * snakeStore.snakeBlockSize.y,
+      snakeStore.snakeBlockSize.x,
+      snakeStore.snakeBlockSize.y,
     );
   }
 }
@@ -31,10 +31,10 @@ export function useDrawFruits(
   for (const snakePosition of fruitPositions) {
     context.fillStyle = color ?? '#FF0000';
     context.fillRect(
-      snakePosition.position.x * snakeStore.SNAKE_BLOCK_SIZE,
-      snakePosition.position.y * snakeStore.SNAKE_BLOCK_SIZE,
-      snakeStore.SNAKE_BLOCK_SIZE,
-      snakeStore.SNAKE_BLOCK_SIZE,
+      snakePosition.position.x * snakeStore.snakeBlockSize.x,
+      snakePosition.position.y * snakeStore.snakeBlockSize.y,
+      snakeStore.snakeBlockSize.x,
+      snakeStore.snakeBlockSize.y,
     );
   }
 }

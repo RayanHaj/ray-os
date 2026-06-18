@@ -111,7 +111,7 @@ function onFileUploadChange(event: Event) {
       </div>
     </div>
     <div class="end-wrapper">
-      <div class="end-alignment">
+      <div class="clock-wrapper">
         <label for="file-upload" class="custom-file-upload">Upload files</label>
         <input
           id="file-upload"
@@ -179,13 +179,13 @@ input[type='file'] {
   display: none;
 }
 
-.end-alignment {
+.clock-wrapper {
   display: flex;
   flex-direction: row;
   width: 350px;
 }
 
-.end-alignment label {
+.clock-wrapper label {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -228,11 +228,11 @@ input {
     width: 100%;
   }
 
-  .end-alignment {
+  .clock-wrapper {
     width: 100%;
   }
 
-  .end-alignment label {
+  .clock-wrapper label {
     width: 100%;
   }
 }

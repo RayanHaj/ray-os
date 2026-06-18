@@ -25,12 +25,13 @@ export function useWindowSnappingManager(
 
   function snapWindow(position: string) {
     if (isFixed) return;
+
     switch (position) {
       case 'left':
         {
           styles.value.left = '0';
           styles.value.height = `${browserStore.heightExcTaskbar}px`;
-          styles.value.width = '50%';
+          styles.value.width = `${browserStore.width / 2}px`;
           styles.value.top = '0';
         }
         break;
@@ -38,7 +39,7 @@ export function useWindowSnappingManager(
         {
           styles.value.left = '50%';
           styles.value.height = `${browserStore.heightExcTaskbar}px`;
-          styles.value.width = '50%';
+          styles.value.width = `${browserStore.width / 2}px`;
           styles.value.top = '0';
         }
         break;
@@ -46,7 +47,7 @@ export function useWindowSnappingManager(
         {
           styles.value.left = '0';
           styles.value.height = `${browserStore.heightExcTaskbar / 2}px`;
-          styles.value.width = '50%';
+          styles.value.width = `${browserStore.width / 2}px`;
           styles.value.top = '0';
         }
         break;
@@ -54,7 +55,7 @@ export function useWindowSnappingManager(
         {
           styles.value.left = '50%';
           styles.value.height = `${browserStore.heightExcTaskbar / 2}px`;
-          styles.value.width = '50%';
+          styles.value.width = `${browserStore.width / 2}px`;
           styles.value.top = '0';
         }
         break;
@@ -62,14 +63,14 @@ export function useWindowSnappingManager(
         {
           styles.value.left = '0';
           styles.value.height = `${browserStore.heightExcTaskbar / 2}px`;
-          styles.value.width = '50%';
+          styles.value.width = `${browserStore.width / 2}px`;
           styles.value.top = `${browserStore.heightExcTaskbar / 2}px`;
         }
         break;
       case 'bottomRight': {
         styles.value.left = '50%';
         styles.value.height = `${browserStore.heightExcTaskbar / 2}px`;
-        styles.value.width = '50%';
+        styles.value.width = `${browserStore.width / 2}px`;
         styles.value.top = `${browserStore.heightExcTaskbar / 2}px`;
       }
     }

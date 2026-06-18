@@ -206,9 +206,9 @@ export function useWindowResizeManager(
 
   function maximize() {
     if (isFixed) return;
-    const { heightExcTaskbar } = useBrowserStore();
+    const { heightExcTaskbar, width } = useBrowserStore();
 
-    styles.value.width = '100%';
+    styles.value.width = `${width}px`;
     styles.value.height = `${heightExcTaskbar}px`;
     styles.value.left = '0';
     styles.value.top = '0';

@@ -3,7 +3,6 @@ import { useSnakeStore } from '@/stores/games/snake.ts';
 export const fruitTypes = ['banana', 'apple', 'poison'] as const;
 export type FruitType = (typeof fruitTypes)[number];
 
-console.log('hello');
 export enum GameStatus {
   NOT_STARTED,
   PLAYING,
@@ -15,6 +14,7 @@ export type SnakePosition = { x: number; y: number };
 export type SnakeDirection = 'left' | 'right' | 'up' | 'down';
 
 export function useSnakeState() {
+  const snakeStore = useSnakeStore();
   const gameStatus: GameStatus = GameStatus.NOT_STARTED;
 
   let gameScore: number = 0;
@@ -33,14 +33,14 @@ export function useSnakeState() {
 
   function spawnFruit() {
     let position: { x: number; y: number } = {
-      x: Math.floor(Math.random() * useSnakeStore().GRID_COLUMNS),
-      y: Math.floor(Math.random() * useSnakeStore().GRID_ROWS),
+      x: Math.floor(Math.random() * snakeStore.gridColumns),
+      y: Math.floor(Math.random() * snakeStore.gridRows),
     };
 
     while (positionContainsSnake(position)) {
       position = {
-        x: Math.floor(Math.random() * useSnakeStore().GRID_COLUMNS),
-        y: Math.floor(Math.random() * useSnakeStore().GRID_ROWS),
+        x: Math.floor(Math.random() * snakeStore.gridColumns),
+        y: Math.floor(Math.random() * snakeStore.gridRows),
       };
     }
 
@@ -98,8 +98,8 @@ export function useSnakeState() {
   }
 
   const START_POSITION_SNAKE = {
-    x: Math.floor(useSnakeStore().GRID_COLUMNS / 2),
-    y: Math.floor(useSnakeStore().GRID_ROWS / 2),
+    x: Math.floor(snakeStore.gridColumns / 2),
+    y: Math.floor(snakeStore.gridRows / 2),
   };
 
   const snakePositions: SnakePosition[] = [
@@ -124,20 +124,20 @@ export function useSnakeState() {
   let snakeDirection: SnakeDirection = 'left';
   function moveSnake(incrementSnakeLength = false) {
     const headPosition = snakePositions[0];
-    if (headPosition.x >= useSnakeStore().GRID_COLUMNS) {
+    if (headPosition.x >= snakeStore.gridColumns) {
       move({ x: 0 });
       return;
     }
     if (headPosition.x < 0) {
-      move({ x: useSnakeStore().GRID_COLUMNS - 1 });
+      move({ x: snakeStore.gridColumns - 1 });
       return;
     }
-    if (headPosition.y >= useSnakeStore().GRID_ROWS) {
+    if (headPosition.y >= snakeStore.gridRows) {
       move({ y: 0 });
       return;
     }
     if (headPosition.y < 0) {
-      move({ y: useSnakeStore().GRID_ROWS - 1 });
+      move({ y: snakeStore.gridRows - 1 });
       return;
     }
     switch (snakeNextDirection ?? snakeDirection) {

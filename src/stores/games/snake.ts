@@ -1,22 +1,32 @@
 import { defineStore } from 'pinia';
+import { computed, ref } from 'vue';
 
 export const useSnakeStore = defineStore('snake', () => {
-  const WINDOW_WIDTH = 300;
-  const WINDOW_HEIGHT = 550;
-  const CANVAS_WIDTH = 270;
-  const CANVAS_HEIGHT = 300;
-  const SNAKE_BLOCK_SIZE = 15;
+  const WINDOW_WIDTH = ref(300);
+  const WINDOW_HEIGHT = ref(550);
+  const scoreHeight = 30;
+  const mobileControlsHeight = 150;
+  const canvasWidth = ref(270);
+  const canvasHeight = ref(300);
+  const snakeBlockSize = computed<{x: number, y: number}>(() =>{
+    return {
+      x: Math.floor(canvasWidth.value / gridRows.value),
+      y: Math.floor(canvasHeight.value / gridColumns.value)
+    }
+  });
 
-  const GRID_COLUMNS = Math.floor(CANVAS_WIDTH / SNAKE_BLOCK_SIZE);
-  const GRID_ROWS = Math.floor(CANVAS_HEIGHT / SNAKE_BLOCK_SIZE);
+  const gridColumns = ref(30);
+  const gridRows = ref(30);
 
   return {
     WINDOW_WIDTH,
     WINDOW_HEIGHT,
-    CANVAS_WIDTH,
-    CANVAS_HEIGHT,
-    GRID_COLUMNS,
-    GRID_ROWS,
-    SNAKE_BLOCK_SIZE,
+    canvasWidth,
+    canvasHeight,
+    gridColumns,
+    gridRows,
+    snakeBlockSize,
+    scoreHeight,
+    mobileControlsHeight,
   };
 });

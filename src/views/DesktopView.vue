@@ -24,8 +24,6 @@ import type { Item } from '@/types/itemTypes';
 import type { RayDb } from 'ray-db-wrapper';
 
 import wallpapersJSON from '@/json/wallpapers.json';
-import { useSnakeStore } from '@/stores/games/snake.ts';
-import { useBrowserStore } from '@/stores/browser.ts';
 
 const wallpapers: Record<string, string> = wallpapersJSON;
 
@@ -33,20 +31,20 @@ const windowFlatReferences: ComputedRef<WindowFlatReference[]> = useFlatOpenWind
 
 const fixedSizeWindows = ref<Record<string, { width: number; height: number }>>({});
 
-watch(
-  () => useBrowserStore().isMobile,
-  (newIsMobile) => {
-    if (!newIsMobile) {
-      fixedSizeWindows.value['Snake'] = {
-        width: useSnakeStore().WINDOW_WIDTH,
-        height: useSnakeStore().WINDOW_HEIGHT,
-      };
-    } else {
-      delete fixedSizeWindows.value['Snake'];
-    }
-  },
-  { immediate: true },
-);
+// watch(
+//   () => useBrowserStore().isMobile,
+//   (newIsMobile) => {
+//     if (!newIsMobile) {
+//       fixedSizeWindows.value['Snake'] = {
+//         width: useSnakeStore().WINDOW_WIDTH,
+//         height: useSnakeStore().WINDOW_HEIGHT,
+//       };
+//     } else {
+//       delete fixedSizeWindows.value['Snake'];
+//     }
+//   },
+//   { immediate: true },
+// );
 
 const minWidthWindows: Record<string, { width: number }> = {
   Notepad: { width: 300 },

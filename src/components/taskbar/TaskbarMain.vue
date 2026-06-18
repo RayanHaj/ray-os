@@ -1,40 +1,29 @@
 <script setup lang="ts">
-import { type TaskbarPosition, useTaskbarStore } from '@/stores/taskbar.ts';
+import { useTaskbarStore } from '@/stores/taskbar.ts';
 import TaskbarTile from '@/components/taskbar/TaskbarTile.vue';
 import TimeProcessSection from '@/components/TimeProcessSection.vue';
-import { ref, watch } from 'vue';
+import { ref, type StyleValue } from 'vue';
 import type { TaskbarTileItem } from '@/types/taskbarTypes.ts';
+import { useWatchTaskbarProperties } from '@/composables/taskbar/useWatchTaskbarProperties.ts';
 
 const taskbarStore = useTaskbarStore();
-
-const taskbarHeight = taskbarStore.taskbarHeight;
-
 const taskbarItems = ref<TaskbarTileItem[]>();
-watch(
-  () => taskbarStore.items,
-  (newItems) => taskbarItems.value = newItems,
-  { immediate: true },
-);
-watch(
-  () => taskbarStore.taskbarPosition,
-  (newPosition) => {
-    const lsTaskbarPosition = localStorage.getItem('taskbarPosition');
-    if (lsTaskbarPosition !== newPosition) {
-      taskbarStore.setTaskbarPosition(lsTaskbarPosition as TaskbarPosition);
-    }
-  },
-  { immediate: true },
-);
+useWatchTaskbarProperties(taskbarItems);
+
+function getTaskbarAlignmentClass() {
+  switch (taskbarStore.taskbarPosition) {
+    default:
+    case 'center':
+      return 'center';
+    case 'left':
+      return 'left';
+  }
+}
+
+const taskbarStyle: StyleValue = { height: `${taskbarStore.taskbarHeight}px` };
 </script>
 <template>
-  <div
-    :class="{
-      left: taskbarStore.taskbarPosition === 'left',
-      center: taskbarStore.taskbarPosition === 'center',
-    }"
-    :style="{ height: `${taskbarHeight}px` }"
-    class="taskbar"
-  >
+  <div :class="getTaskbarAlignmentClass()" :style="taskbarStyle" class="taskbar">
     <div class="taskbar-tiles-wrapper">
       <div class="taskbar-tiles">
         <TaskbarTile
@@ -45,7 +34,7 @@ watch(
         />
       </div>
     </div>
-    <div class="end-alignment">
+    <div class="clock-wrapper">
       <TimeProcessSection />
     </div>
   </div>
@@ -86,7 +75,7 @@ watch(
   flex-direction: row;
 }
 
-.end-alignment {
+.clock-wrapper {
   position: absolute;
   display: flex;
   flex-direction: row;
@@ -96,7 +85,7 @@ watch(
 }
 
 @media (max-width: 510px) {
-  .end-alignment {
+  .clock-wrapper {
     display: none;
   }
   .taskbar-tiles-wrapper {

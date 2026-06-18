@@ -6,6 +6,13 @@ import { useSnakeState } from '@/composables/games/snake/useSnakeState.ts';
 import { useDrawFruits, useDrawSnake } from '@/composables/games/snake/useDrawSnake.ts';
 import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
 import { useBrowserStore } from '@/stores/browser.ts';
+import type { WindowStyleObject } from '@/types/windowTypes.ts';
+import { useWindowStore } from '@/stores/window.ts';
+
+const { windowStyles } = defineProps<{ windowStyles: WindowStyleObject }>();
+
+const snakeStore = useSnakeStore();
+const browserStore = useBrowserStore();
 
 const state = useSnakeState();
 
@@ -16,11 +23,45 @@ const context = ref<CanvasRenderingContext2D | null>(null);
 
 const snakeColor = ref<string>();
 watch(
-  () => useBrowserStore().currentTheme,
+  () => browserStore.currentTheme,
   () => {
     snakeColor.value = getComputedStyle(document.documentElement).getPropertyValue(
       '--accent-color',
     );
+  },
+  { immediate: true },
+);
+
+const snake = useTemplateRef('snake');
+const windowStore = useWindowStore();
+watch(
+  () => [windowStyles.width, windowStyles.height],
+  ([width, height]) => {
+    const widthPxIndex = width.indexOf('px');
+    const heightPxIndex = height.indexOf('px');
+
+    if (widthPxIndex === -1 || heightPxIndex === -1) return;
+
+    const widthNumber = Number(width.slice(0, widthPxIndex));
+    const heightNumber = Number(height.slice(0, heightPxIndex));
+
+    const rawCanvasWidth = widthNumber - 10;
+    const rawCanvasHeight =
+      heightNumber -
+      windowStore.windowHeaderHeight -
+      snakeStore.scoreHeight -
+      (browserStore.isMobile === true ? snakeStore.mobileControlsHeight : 0) - 20;
+
+    const blockSizeX = Math.floor(rawCanvasWidth / snakeStore.gridRows);
+    const blockSizeY = Math.floor(rawCanvasHeight / snakeStore.gridColumns);
+
+    const canvasWidth = rawCanvasWidth - (rawCanvasWidth % blockSizeX);
+    const canvasHeight = rawCanvasHeight - (rawCanvasHeight % blockSizeY);
+
+    snakeStore.WINDOW_WIDTH = canvasWidth;
+    snakeStore.canvasWidth = Math.floor(canvasWidth);
+    snakeStore.WINDOW_HEIGHT = canvasHeight;
+    snakeStore.canvasHeight = Math.floor(canvasHeight);
   },
   { immediate: true },
 );
@@ -43,7 +84,7 @@ let previousTimeStamp = 0;
 function gameLoop(timeStamp: number) {
   if (timeStamp - previousTimeStamp >= TICK_INTERVAL) {
     if (context.value) {
-      context.value.clearRect(0, 0, useSnakeStore().CANVAS_WIDTH, useSnakeStore().CANVAS_HEIGHT);
+      context.value.clearRect(0, 0, snakeStore.canvasWidth, snakeStore.canvasHeight);
     }
     const died = state.checkAndHandleSnakeCollision();
 
@@ -121,7 +162,6 @@ function stopGameLoop() {
   animationFrameId.value = null;
 }
 
-const snake = useTemplateRef('snake');
 function startGameLoop() {
   animationFrameId.value = window.requestAnimationFrame(gameLoop);
 }
@@ -139,17 +179,20 @@ const circlePauseSvg = useSvgOrFallback('CirclePause');
 </script>
 <template>
   <div ref="snake" class="snake" @keydown.prevent="onKeyUp" tabindex="0">
-    <div class="score" :style="{ width: `${useSnakeStore().CANVAS_WIDTH}px` }">
+    <div
+      class="score"
+      :style="{ width: `${snakeStore.canvasWidth}px`, height: `${snakeStore.scoreHeight}px` }"
+    >
       Score: {{ gameScore }}
     </div>
     <div
       v-show="animationFrameId === null"
       class="menu"
       :style="{
-        width: `${useSnakeStore().CANVAS_WIDTH}px`,
-        height: `${useSnakeStore().CANVAS_HEIGHT}px`,
-        minWidth: `${useSnakeStore().CANVAS_WIDTH}px`,
-        minHeight: `${useSnakeStore().CANVAS_HEIGHT}px`,
+        width: `${snakeStore.canvasWidth}px`,
+        height: `${snakeStore.canvasHeight}px`,
+        minWidth: `${snakeStore.canvasWidth}px`,
+        minHeight: `${snakeStore.canvasHeight}px`,
       }"
     >
       <button @click="startGameLoop()"><component :is="playSvg.svg" /></button>
@@ -159,14 +202,15 @@ const circlePauseSvg = useSvgOrFallback('CirclePause');
     <canvas
       v-show="animationFrameId !== null"
       ref="canvas"
-      :width="useSnakeStore().CANVAS_WIDTH"
-      :height="useSnakeStore().CANVAS_HEIGHT"
-      :style="{
-        width: `${useSnakeStore().CANVAS_WIDTH}px`,
-        height: `${useSnakeStore().CANVAS_HEIGHT}px`,
-      }"
+      :width="snakeStore.canvasWidth"
+      :height="snakeStore.canvasHeight"
+      :style="{ width: `${snakeStore.canvasWidth}px`, height: `${snakeStore.canvasHeight}px` }"
     />
-    <div class="controls">
+    <div
+      v-if="browserStore.isMobile"
+      class="controls"
+      :style="{ width: `${snakeStore.canvasWidth}px`, height: `${snakeStore.mobileControlsHeight}px` }"
+    >
       <div class="top-controls">
         <button @click="onControlButtonClick('up')" class="control-button up">
           <component :is="circleUpSvg.svg" />
@@ -195,12 +239,11 @@ const circlePauseSvg = useSvgOrFallback('CirclePause');
 .snake {
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   align-items: center;
   position: relative;
   overflow: hidden;
   outline: none;
-  padding: 10px;
-  gap: 5px;
 }
 
 .menu {
@@ -249,8 +292,6 @@ canvas {
   display: flex;
   flex-direction: column;
   gap: 5px;
-  width: 100%;
-  height: 100%;
 }
 
 .top-controls,
@@ -281,10 +322,6 @@ canvas {
   height: 100%;
   background: var(--button-primary-color);
   border: var(--input-border-color) 1px solid;
-}
-
-.control-button:hover {
-  background-color: var(--button-hover-color);
 }
 
 .control-button svg {

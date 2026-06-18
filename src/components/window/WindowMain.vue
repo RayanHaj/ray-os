@@ -1,5 +1,14 @@
 <script setup lang="ts">
-import { type Component, computed, onBeforeMount, onMounted, provide, type Ref, ref } from 'vue';
+import {
+  type Component,
+  computed,
+  onBeforeMount,
+  onMounted,
+  provide,
+  type Ref,
+  ref,
+  useTemplateRef,
+} from 'vue';
 import type { WindowFlatReference, WindowStyleObject } from '@/types/windowTypes.js';
 import { useWindowStore } from '@/stores/window.js';
 import WindowHeader from '@/components/window/WindowHeader.vue';
@@ -32,8 +41,8 @@ const {
 const styles: Ref<WindowStyleObject> = ref({
   left: '25%',
   top: '25%',
-  width: width ?? '50%',
-  height: height ?? '50%',
+  width: width ?? '500px',
+  height: height ?? '500px',
   minWidth: minWidth ?? '250px',
   minHeight: minHeight ?? '50px',
   zIndex: 10,
@@ -41,7 +50,7 @@ const styles: Ref<WindowStyleObject> = ref({
   cursor: 'auto',
   transition: 'width 0.5s, height 0.5s, left 0.5s, top 0.5s',
 });
-const cachedStyles = ref({ left: '0', top: '0', width: '50%', height: '50%' });
+const cachedStyles = ref({ left: '0', top: '0', width: '500px', height: '500px' });
 
 const windowStateManager = useWindowStateManager(styles, reference);
 onBeforeMount(() => {
@@ -54,6 +63,7 @@ onMounted(() => {
   }
 });
 
+const windowRef = useTemplateRef('windowRef');
 useWindowSnappingManager(
   styles,
   windowStateManager.windowId,
@@ -61,7 +71,6 @@ useWindowSnappingManager(
   windowType === 'fixed',
 );
 
-const windowRef = ref();
 const windowResizeManager = useWindowResizeManager(
   styles,
   windowRef,
@@ -124,7 +133,7 @@ const windowContentStyles = { height: windowContentHeight.value, width: '100%' }
       @window-control-maximize="maximizeWindow"
       @window-control-minimize="minimizeWindow"
     />
-    <component :is="windowContentComponent" :style="windowContentStyles" />
+    <component :is="windowContentComponent" :style="windowContentStyles" :window-styles="styles" />
   </div>
 </template>
 
