@@ -66,7 +66,7 @@ watch(
   { immediate: true },
 );
 
-const TICK_INTERVAL = 100;
+const TICK_INTERVAL = 120;
 
 const animationFrameId = ref<number | null>(null);
 onMounted(() => {
