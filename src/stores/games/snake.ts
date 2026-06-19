@@ -2,8 +2,6 @@ import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 
 export const useSnakeStore = defineStore('snake', () => {
-  const WINDOW_WIDTH = ref(300);
-  const WINDOW_HEIGHT = ref(550);
   const scoreHeight = 30;
   const mobileControlsHeight = 150;
   const canvasWidth = ref(270);
@@ -19,8 +17,6 @@ export const useSnakeStore = defineStore('snake', () => {
   const gridRows = ref(30);
 
   return {
-    WINDOW_WIDTH,
-    WINDOW_HEIGHT,
     canvasWidth,
     canvasHeight,
     gridColumns,

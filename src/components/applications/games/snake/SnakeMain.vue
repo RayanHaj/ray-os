@@ -1,112 +1,48 @@
 .
 <script setup lang="ts">
 import { useSnakeStore } from '@/stores/games/snake.ts';
-import { onMounted, onUnmounted, ref, useTemplateRef, watch } from 'vue';
+import { onMounted, onUnmounted, ref, useTemplateRef } from 'vue';
 import { useSnakeState } from '@/composables/games/snake/useSnakeState.ts';
-import { useDrawFruits, useDrawSnake } from '@/composables/games/snake/useDrawSnake.ts';
 import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
 import { useBrowserStore } from '@/stores/browser.ts';
 import type { WindowStyleObject } from '@/types/windowTypes.ts';
-import { useWindowStore } from '@/stores/window.ts';
+import SnakeScore from '@/components/applications/games/snake/SnakeScore.vue';
+import { useGetSnakeColor } from '@/composables/games/snake/useGetSnakeColor.ts';
+import { useHandleGameScaling } from '@/composables/games/snake/useHandleGameScaling.ts';
+import { useGameLoop } from '@/composables/games/snake/useGameLoop.ts';
 
 const { windowStyles } = defineProps<{ windowStyles: WindowStyleObject }>();
+useHandleGameScaling(windowStyles);
 
 const snakeStore = useSnakeStore();
 const browserStore = useBrowserStore();
 
 const state = useSnakeState();
 
-const gameScore = ref<number>(0);
+const canvasRef = useTemplateRef('canvas');
+const snakeRef = useTemplateRef('snake');
+const scoreRef = useTemplateRef('score');
 
-const canvas = useTemplateRef('canvas');
 const context = ref<CanvasRenderingContext2D | null>(null);
+const { snakeColor } = useGetSnakeColor();
 
-const snakeColor = ref<string>();
-watch(
-  () => browserStore.currentTheme,
-  () => {
-    snakeColor.value = getComputedStyle(document.documentElement).getPropertyValue(
-      '--accent-color',
-    );
-  },
-  { immediate: true },
+const { startGameLoop, stopGameLoop, resetGameLoop, gameLoopIsRunning } = useGameLoop(
+  state,
+  context,
+  scoreRef,
+  snakeColor,
 );
 
-const snake = useTemplateRef('snake');
-const windowStore = useWindowStore();
-watch(
-  () => [windowStyles.width, windowStyles.height],
-  ([width, height]) => {
-    const widthPxIndex = width.indexOf('px');
-    const heightPxIndex = height.indexOf('px');
-
-    if (widthPxIndex === -1 || heightPxIndex === -1) return;
-
-    const widthNumber = Number(width.slice(0, widthPxIndex));
-    const heightNumber = Number(height.slice(0, heightPxIndex));
-
-    const rawCanvasWidth = widthNumber - 10;
-    const rawCanvasHeight =
-      heightNumber -
-      windowStore.windowHeaderHeight -
-      snakeStore.scoreHeight -
-      (browserStore.isMobile === true ? snakeStore.mobileControlsHeight : 0) - 20;
-
-    const blockSizeX = Math.floor(rawCanvasWidth / snakeStore.gridRows);
-    const blockSizeY = Math.floor(rawCanvasHeight / snakeStore.gridColumns);
-
-    const canvasWidth = rawCanvasWidth - (rawCanvasWidth % blockSizeX);
-    const canvasHeight = rawCanvasHeight - (rawCanvasHeight % blockSizeY);
-
-    snakeStore.WINDOW_WIDTH = canvasWidth;
-    snakeStore.canvasWidth = Math.floor(canvasWidth);
-    snakeStore.WINDOW_HEIGHT = canvasHeight;
-    snakeStore.canvasHeight = Math.floor(canvasHeight);
-  },
-  { immediate: true },
-);
-
-const TICK_INTERVAL = 120;
-
-const animationFrameId = ref<number | null>(null);
 onMounted(() => {
-  context.value = canvas.value?.getContext('2d') ?? null;
+  context.value = canvasRef.value?.getContext('2d') ?? null;
   state.spawnFruit();
-  snake.value?.focus();
+  snakeRef.value?.focus();
 });
 
 onUnmounted(() => {
-  if (!animationFrameId.value) return;
+  if (!gameLoopIsRunning.value) return;
   stopGameLoop();
 });
-
-let previousTimeStamp = 0;
-function gameLoop(timeStamp: number) {
-  if (timeStamp - previousTimeStamp >= TICK_INTERVAL) {
-    if (context.value) {
-      context.value.clearRect(0, 0, snakeStore.canvasWidth, snakeStore.canvasHeight);
-    }
-    const died = state.checkAndHandleSnakeCollision();
-
-    if (died) {
-      gameScore.value = state.getGameScore();
-    }
-
-    state.moveSnake();
-    previousTimeStamp = timeStamp;
-  }
-
-  const eaten = state.checkAndHandleFruitEaten();
-
-  if (eaten) {
-    gameScore.value = state.getGameScore();
-  }
-
-  useDrawSnake(context.value, state.snakePositions, snakeColor.value);
-  useDrawFruits(context.value, state.fruitPositions);
-
-  startGameLoop();
-}
 
 function onKeyUp(event: KeyboardEvent) {
   switch (event.key) {
@@ -127,7 +63,7 @@ function onKeyUp(event: KeyboardEvent) {
       state.setSnakeNextDirection('down');
       break;
     case 'Escape':
-      if (animationFrameId.value === null) {
+      if (!gameLoopIsRunning.value) {
         startGameLoop();
       } else {
         stopGameLoop();
@@ -151,21 +87,6 @@ function onControlButtonClick(buttonType: 'up' | 'down' | 'left' | 'right') {
   }
 }
 
-function resetGameLoop() {
-  state.resetState();
-  gameScore.value = state.getGameScore();
-}
-
-function stopGameLoop() {
-  if (!animationFrameId.value) return;
-  window.cancelAnimationFrame(animationFrameId.value);
-  animationFrameId.value = null;
-}
-
-function startGameLoop() {
-  animationFrameId.value = window.requestAnimationFrame(gameLoop);
-}
-
 const playSvg = useSvgOrFallback('Play');
 const resetSvg = useSvgOrFallback('Reset');
 const settingsSvg = useSvgOrFallback('Settings');
@@ -179,14 +100,9 @@ const circlePauseSvg = useSvgOrFallback('CirclePause');
 </script>
 <template>
   <div ref="snake" class="snake" @keydown.prevent="onKeyUp" tabindex="0">
+    <SnakeScore ref="score" />
     <div
-      class="score"
-      :style="{ width: `${snakeStore.canvasWidth}px`, height: `${snakeStore.scoreHeight}px` }"
-    >
-      Score: {{ gameScore }}
-    </div>
-    <div
-      v-show="animationFrameId === null"
+      v-show="!gameLoopIsRunning"
       class="menu"
       :style="{
         width: `${snakeStore.canvasWidth}px`,
@@ -200,7 +116,7 @@ const circlePauseSvg = useSvgOrFallback('CirclePause');
       <button @click="resetGameLoop()"><component :is="resetSvg.svg" /></button>
     </div>
     <canvas
-      v-show="animationFrameId !== null"
+      v-show="gameLoopIsRunning"
       ref="canvas"
       :width="snakeStore.canvasWidth"
       :height="snakeStore.canvasHeight"
@@ -209,7 +125,10 @@ const circlePauseSvg = useSvgOrFallback('CirclePause');
     <div
       v-if="browserStore.isMobile"
       class="controls"
-      :style="{ width: `${snakeStore.canvasWidth}px`, height: `${snakeStore.mobileControlsHeight}px` }"
+      :style="{
+        width: `${snakeStore.canvasWidth}px`,
+        height: `${snakeStore.mobileControlsHeight}px`,
+      }"
     >
       <div class="top-controls">
         <button @click="onControlButtonClick('up')" class="control-button up">
@@ -239,7 +158,6 @@ const circlePauseSvg = useSvgOrFallback('CirclePause');
 .snake {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   align-items: center;
   position: relative;
   overflow: hidden;
@@ -280,6 +198,7 @@ canvas {
 }
 
 .score {
+  border-bottom: none;
   border-radius: 5px 5px 0 0;
   padding: 5px;
 }
