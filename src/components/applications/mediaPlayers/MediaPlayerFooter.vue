@@ -10,7 +10,13 @@ const { fileName, audioDuration, audioCurrentTime, isPlaying, looped, disabled, 
     isPlaying: boolean;
     looped: boolean;
     disabled: boolean;
-    options?: { fullscreen?: boolean; dotMenu?: boolean; nextAndPrevious?: boolean };
+    shuffled?: boolean;
+    options?: {
+      fullscreen?: boolean;
+      dotMenu?: boolean;
+      nextAndPrevious?: boolean;
+      shuffle?: boolean;
+    };
   }>();
 
 const emit = defineEmits([
@@ -18,6 +24,7 @@ const emit = defineEmits([
   'sliderInput',
   'loopAudio',
   'fullscreen',
+  'shuffleAudio',
   'dotMenu',
   'previous',
   'next',
@@ -30,6 +37,7 @@ const pauseSvg = useSvgOrFallback('Pause');
 const menuDots = useSvgOrFallback('MenuDots');
 const loopSvg = useSvgOrFallback('Loop');
 const fullscreenSvg = useSvgOrFallback('Fullscreen');
+const shuffleSvg = useSvgOrFallback('Shuffle');
 
 const calculateTime = (seconds: number) => {
   const minutes = Math.floor(seconds / 60);
@@ -97,6 +105,14 @@ function getTrackBackground(value: number, min: number, max: number) {
             :disabled="disabled"
           >
             <component :is="loopSvg.svg" :custom-width="20" :custom-height="20" />
+          </button>
+          <button
+            class="audio-control-button shuffle"
+            :class="{ active: shuffled }"
+            @click="emit('shuffleAudio')"
+            :disabled="disabled"
+          >
+            <component :is="shuffleSvg.svg" :custom-width="20" :custom-height="20" />
           </button>
           <button
             v-if="options?.fullscreen"
@@ -225,13 +241,13 @@ button {
   border: none;
 }
 
-.audio-control-button.loop {
+.audio-control-button.loop, .audio-control-button.shuffle {
   padding: 5px;
   width: 35px;
   height: 35px;
 }
 
-.audio-control-button.loop.active {
+.audio-control-button.loop.active, .audio-control-button.shuffle.active {
   background: var(--highlight-color);
   border-radius: 50%;
 }

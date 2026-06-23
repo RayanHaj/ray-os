@@ -48,5 +48,6 @@ export const availableSvgs = [
   'CircleLeft',
   'CircleRight',
   'CirclePause',
+  'Shuffle'
 ] as const;
 export type AvailableSvgs = (typeof availableSvgs)[number];

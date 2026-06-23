@@ -57,6 +57,7 @@ const audioObject = ref<HTMLAudioElement | null>(null);
 const audioDuration = ref(0);
 const audioCurrentTime = ref(0);
 const audioLoop = ref(false);
+const audioShuffle = ref(false);
 
 function revokeObjectURLS() {
   for (const loadedAudio of loadedAudios.value) {
@@ -137,7 +138,9 @@ const audioSelectManager = useAudioSelectManager(
 const onAddAudioButtonClicked = () => audioSelectManager.openSelectAudioWindow(windowId);
 
 async function onAudioEnded() {
-  const nextAudio = loadedAudios.value[currentLoadedAudio.value.index + 1];
+  const nextAudio: LoadedAudio = audioShuffle.value
+    ? getShuffledAudio()
+    : loadedAudios.value[currentLoadedAudio.value.index + 1];
 
   if (nextAudio === undefined) {
     await playAudio(loadedAudios.value[0].audioUrl);
@@ -222,11 +225,35 @@ async function onNext() {
   if (audioObject.value === null) return;
 
   const currentIndex = currentLoadedAudio.value.index;
-  currentLoadedAudioUrl.value =
-    loadedAudios.value[
-      currentIndex === loadedAudios.value.length - 1 ? 0 : currentIndex + 1
-    ].audioUrl;
+  currentLoadedAudioUrl.value = audioShuffle.value
+    ? getShuffledAudio().audioUrl
+    : loadedAudios.value[currentIndex === loadedAudios.value.length - 1 ? 0 : currentIndex + 1]
+        .audioUrl;
   await playAudio(currentLoadedAudioUrl.value);
+}
+
+function toggleAudioOption(option: 'loop' | 'shuffle') {
+  switch (option) {
+    case 'loop':
+      audioLoop.value = !audioLoop.value;
+      if (audioLoop.value) audioShuffle.value = false;
+      break;
+    case 'shuffle':
+      audioShuffle.value = !audioShuffle.value;
+      if (audioShuffle.value) audioLoop.value = false;
+      break;
+  }
+}
+
+function getShuffledAudio(): LoadedAudio {
+  const currentIndex = currentLoadedAudio.value.index;
+
+  let nextAudioIndex = Math.floor(Math.random() * loadedAudios.value.length);
+  while (currentIndex === nextAudioIndex) {
+    nextAudioIndex = Math.floor(Math.random() * loadedAudios.value.length);
+  }
+
+  return loadedAudios.value[nextAudioIndex];
 }
 </script>
 <template>
@@ -262,11 +289,13 @@ async function onNext() {
       :audio-current-time="audioCurrentTime"
       :is-playing="currentLoadedAudio.audio?.isPlaying ?? false"
       :looped="audioLoop"
+      :shuffled="audioShuffle"
       :disabled="!currentLoadedAudioUrl"
-      :options="{ nextAndPrevious: true }"
+      :options="{ nextAndPrevious: true, shuffle: true }"
       @play-pause-audio="currentLoadedAudio.audio?.isPlaying ? pauseAudio() : playAudio()"
       @slider-input="onSliderInput"
-      @loop-audio="audioLoop = !audioLoop"
+      @loop-audio="toggleAudioOption('loop')"
+      @shuffle-audio="toggleAudioOption('shuffle')"
       @previous="onPrevious"
       @next="onNext"
     />
