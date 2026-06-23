@@ -33,19 +33,15 @@ watch(
     const windowsReferencesLabels = Object.keys(windowsReferences);
     const openWindowReferenceIndexesNotOnTaskbar = [];
 
-    let removed = false;
     for (const taskbarItem of taskbarItems.value) {
       if (!taskbarItem.temp) continue;
 
       const windowReferences = windowsReferences[taskbarItem.label];
       if (windowReferences !== undefined && windowReferences.length !== 0) continue;
 
-      taskbarItems.value = taskbarItems.value?.filter((ti) => ti.id !== taskbarItem.id);
-      removed = true;
-      return;
+      taskbarItems.value = taskbarItems.value?.filter((item) => item.id !== taskbarItem.id);
     }
 
-    if (removed) return;
 
     for (const label of windowsReferencesLabels) {
       if (!taskbarItems.value.some((item) => item.label === label)) {
@@ -67,10 +63,6 @@ watch(
         });
       }
     }
-
-    console.log(windowsReferences);
-
-    if (openWindowReferenceIndexesNotOnTaskbar.length === 0) return;
   },
   { deep: true },
 );
