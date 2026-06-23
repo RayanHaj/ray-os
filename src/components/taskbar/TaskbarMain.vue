@@ -2,9 +2,11 @@
 import { useTaskbarStore } from '@/stores/taskbar.ts';
 import TaskbarTile from '@/components/taskbar/TaskbarTile.vue';
 import TimeProcessSection from '@/components/TimeProcessSection.vue';
-import { ref, type StyleValue } from 'vue';
+import { ref, type StyleValue, watch } from 'vue';
 import type { TaskbarTileItem } from '@/types/taskbarTypes.ts';
 import { useWatchTaskbarProperties } from '@/composables/taskbar/useWatchTaskbarProperties.ts';
+import { useWindowStore } from '@/stores/window.ts';
+import { useFileStore } from '@/stores/file.ts';
 
 const taskbarStore = useTaskbarStore();
 const taskbarItems = ref<TaskbarTileItem[]>();
@@ -19,6 +21,59 @@ function getTaskbarAlignmentClass() {
       return 'left';
   }
 }
+
+const windowStore = useWindowStore();
+watch(
+  () => windowStore.openWindowsReferences,
+  (windowsReferences) => {
+    if (!taskbarItems.value) {
+      taskbarItems.value = [];
+    }
+
+    const windowsReferencesLabels = Object.keys(windowsReferences);
+    const openWindowReferenceIndexesNotOnTaskbar = [];
+
+    let removed = false;
+    for (const taskbarItem of taskbarItems.value) {
+      if (!taskbarItem.temp) continue;
+
+      const windowReferences = windowsReferences[taskbarItem.label];
+      if (windowReferences !== undefined && windowReferences.length !== 0) continue;
+
+      taskbarItems.value = taskbarItems.value?.filter((ti) => ti.id !== taskbarItem.id);
+      removed = true;
+      return;
+    }
+
+    if (removed) return;
+
+    for (const label of windowsReferencesLabels) {
+      if (!taskbarItems.value.some((item) => item.label === label)) {
+        const windowReference = windowsReferences[label];
+        if (windowReference.length === 0) continue;
+
+        const application = useFileStore().applications.find(
+          (application) => application.label === label,
+        );
+
+        if (!application) return;
+
+        taskbarItems.value.push({
+          content: application.content,
+          id: application.id,
+          label: application.label,
+          tileId: taskbarItems.value.length,
+          temp: true,
+        });
+      }
+    }
+
+    console.log(windowsReferences);
+
+    if (openWindowReferenceIndexesNotOnTaskbar.length === 0) return;
+  },
+  { deep: true },
+);
 
 const taskbarStyle: StyleValue = { height: `${taskbarStore.taskbarHeight}px` };
 </script>
