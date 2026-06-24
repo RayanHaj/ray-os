@@ -31,7 +31,6 @@ watch(
     }
 
     const windowsReferencesLabels = Object.keys(windowsReferences);
-    const openWindowReferenceIndexesNotOnTaskbar = [];
 
     for (const taskbarItem of taskbarItems.value) {
       if (!taskbarItem.temp) continue;

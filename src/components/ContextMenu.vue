@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, type StyleValue } from 'vue';
-import { useContextMenuStore } from '@/stores/contextMenu.ts';
+import { useContextmenuStore } from '@/stores/contextMenu.ts';
 import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
 
-const contextMenuStore = useContextMenuStore();
+const contextMenuStore = useContextmenuStore();
 
 const contextMenuStyle = computed<StyleValue>(() => {
   return {

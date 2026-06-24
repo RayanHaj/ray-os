@@ -9,7 +9,7 @@ import FileExplorerHeader from '@/components/applications/fileExplorer/FileExplo
 import FileExplorerGrid from '@/components/applications/fileExplorer/FileExplorerGrid.vue';
 import type { FileItem, FileSystemItem, Item, ItemInsert } from '@/types/itemTypes.js';
 import FileExplorerModal from '@/components/applications/fileExplorer/FileExplorerModal.vue';
-import { useContextMenuStore } from '@/stores/contextMenu.ts';
+import { useContextmenuStore } from '@/stores/contextMenu.ts';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
@@ -107,7 +107,7 @@ function toggleAddNewItemModal(
   action: ModalAction,
   item?: FileSystemItem,
 ) {
-  useContextMenuStore().hide();
+  useContextmenuStore().hide();
   modalContentType.value = contentType;
   modalAction.value = action;
   modalItem.value = item;

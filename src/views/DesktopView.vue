@@ -12,7 +12,7 @@ import UiToast from '@/ui/UiToast.vue';
 
 import { useWindowStore } from '@/stores/window.js';
 import { useWallpaperStore } from '@/stores/settings/wallpaper.js';
-import { useContextMenuStore } from '@/stores/contextMenu.js';
+import { useContextmenuStore } from '@/stores/contextMenu.js';
 
 import { useFlatOpenWindowsReferencesFull } from '@/composables/window/useFlatOpenWindowsReferencesFull.js';
 import { useOnOuterClickClose } from '@/composables/helpers/useOnOuterClickClose.js';
@@ -69,7 +69,7 @@ const inlineWindows: Record<string, boolean> = { Properties: true };
 // Windows that should not show a svg in the window header
 const showNoApplicationSvgsFor: string[] = ['Properties'];
 
-const contextMenuStore = useContextMenuStore();
+const contextMenuStore = useContextmenuStore();
 const wallpaperStore = useWallpaperStore();
 
 const wallpaperUrl: Ref<string> = ref('');

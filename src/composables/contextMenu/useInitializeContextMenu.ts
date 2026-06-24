@@ -1,4 +1,4 @@
-import { useContextMenuStore } from '@/stores/contextMenu.ts';
+import { useContextmenuStore } from '@/stores/contextMenu.ts';
 import type {
   primaryActionsContextMenu,
   SecondaryActionsContextMenu,
@@ -15,14 +15,14 @@ export function useInitializeContextMenu(event: MouseEvent) {
     ) => {
       const actions = { ...primaryActions, ...secondaryActions };
 
-      useContextMenuStore().initializeContextMenu(
+      useContextmenuStore().initializeContextMenu(
         primaryActionsList,
         secondaryActionsList,
         { left: event.clientX, top: event.clientY },
         actions,
       );
 
-      useContextMenuStore().show();
+      useContextmenuStore().show();
     };
   }
 
@@ -94,6 +94,13 @@ export function useInitializeContextMenu(event: MouseEvent) {
     const initialize = createInitialize(primaryActions, secondaryActions);
     return { initialize };
   };
+  const taskbarTile = () => {
+    const primaryActions = ['Delete'] as const;
+    const secondaryActions = [] as const;
+
+    const initialize = createInitialize(primaryActions, secondaryActions);
+    return { initialize };
+  }
 
   return {
     desktop,
@@ -102,5 +109,6 @@ export function useInitializeContextMenu(event: MouseEvent) {
     fileExplorerGridItem,
     audioPlayerPlaylist,
     audioPlayerAudio,
+    taskbarTile,
   };
 }

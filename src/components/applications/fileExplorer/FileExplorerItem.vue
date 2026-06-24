@@ -8,7 +8,7 @@ import { type FileItemSizeValue, itemSizes } from '@/types/fileExplorerTypes.js'
 import { useInitializeContextMenu } from '@/composables/contextMenu/useInitializeContextMenu.ts';
 import { useToastFeatureNotImplemented } from '@/composables/helpers/useToastFeatureNotImplemented.ts';
 import { useDblClick } from '@/composables/helpers/UseDblClick.ts';
-import { useContextMenuStore } from '@/stores/contextMenu.ts';
+import { useContextmenuStore } from '@/stores/contextMenu.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import { useTaskbarStore } from '@/stores/taskbar.ts';
@@ -102,7 +102,7 @@ function onContextMenu(event: MouseEvent) {
 
 function onClick(event: MouseEvent) {
   emit('onClick', event);
-  useContextMenuStore().hide();
+  useContextmenuStore().hide();
 
   useDblClick(
     () => emit('onDoubleClick', event),

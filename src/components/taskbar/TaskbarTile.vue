@@ -6,6 +6,9 @@ import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
 import { useBrowserStore } from '@/stores/browser.ts';
 import { useTaskbarStore } from '@/stores/taskbar.ts';
 import type { TaskbarTileItem } from '@/types/taskbarTypes.ts';
+import { useInitializeContextMenu } from '@/composables/contextMenu/useInitializeContextMenu.ts';
+import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
+import type { RayDb } from 'ray-db-wrapper';
 
 const isHoveringOnTile = ref(false);
 
@@ -178,6 +181,21 @@ const getTitleOverflowStyle = computed(() => {
 
   return '';
 });
+
+const rayDb = useInjectOrThrow<RayDb>('rayDb');
+function onContextmenu(event: MouseEvent) {
+  useInitializeContextMenu(event)
+    .taskbarTile()
+    .initialize(
+      {
+        Delete: () => {
+          if (!taskbarTileItem.value) return;
+          taskbarStore.deleteTaskbarItem(rayDb, taskbarTileItem.value.tileId);
+        },
+      },
+      {},
+    );
+}
 </script>
 
 <template>
@@ -202,7 +220,7 @@ const getTitleOverflowStyle = computed(() => {
         @tabs-unmounted="onTabsUnmounted"
       />
     </transition>
-    <div class="content" @click="onClickTile">
+    <div class="content" @click="onClickTile" @contextmenu.prevent="onContextmenu">
       <component class="app-svg" :is="useSvgOrFallback(taskbarTileItem.label).svg" />
       <hr :class="getUnderlineClass" />
     </div>

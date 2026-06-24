@@ -90,6 +90,7 @@ hr {
 }
 
 .settings.small {
+  overflow: auto;
   flex-direction: column;
 }
 

@@ -8,7 +8,7 @@ import type {
 import { useBrowserStore } from '@/stores/browser.ts';
 import { useTaskbarStore } from '@/stores/taskbar.ts';
 
-export const useContextMenuStore = defineStore('contextMenu', () => {
+export const useContextmenuStore = defineStore('contextmenu', () => {
   const fallbackPrimaryActions: PrimaryActionsContextMenu[] = ['Copy', 'Paste', 'Delete', 'Rename'];
   const fallbackSecondaryActions: SecondaryActionsContextMenu[] = [];
   const fallbackPosition: { left: number; top: number } = { left: 100, top: 100 };

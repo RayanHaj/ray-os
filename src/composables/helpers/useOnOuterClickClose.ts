@@ -1,4 +1,4 @@
-import { useContextMenuStore } from '@/stores/contextMenu.ts';
+import { useContextmenuStore } from '@/stores/contextMenu.ts';
 
 /**
  * Closes any open context menu or start menu when a click occurs outside their respective elements.
@@ -7,8 +7,8 @@ import { useContextMenuStore } from '@/stores/contextMenu.ts';
  */
 export function useOnOuterClickClose(target: HTMLElement) {
   if (!target.closest('.context-menu')) {
-    if (useContextMenuStore().isShown) {
-      useContextMenuStore().hide();
+    if (useContextmenuStore().isShown) {
+      useContextmenuStore().hide();
     }
   }
 }

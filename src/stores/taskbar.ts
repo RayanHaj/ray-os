@@ -94,9 +94,9 @@ export const useTaskbarStore = defineStore('taskbar', () => {
     }
   }
 
-  async function deleteTaskbarItem(rayDb: RayDb, tileIndex: number) {
-    await rayDb.deleteOne('taskbarFiles', tileIndex);
-    items.value.splice(tileIndex, 1);
+  async function deleteTaskbarItem(rayDb: RayDb, tileId: number) {
+    await rayDb.deleteOne('taskbarFiles', tileId);
+    items.value = items.value.filter((item) => item.tileId !== tileId);
   }
 
   function setTaskbarPosition(position: TaskbarPosition) {
