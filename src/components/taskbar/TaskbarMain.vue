@@ -64,7 +64,7 @@ watch(
 const taskbarStyle: StyleValue = { height: `${taskbarStore.taskbarHeight}px` };
 </script>
 <template>
-  <div :class="getTaskbarAlignmentClass" :style="taskbarStyle" class="taskbar">
+  <div :class="getTaskbarAlignmentClass()" :style="taskbarStyle" class="taskbar">
     <div class="taskbar-tiles-wrapper">
       <div class="taskbar-tiles">
         <TaskbarTile
