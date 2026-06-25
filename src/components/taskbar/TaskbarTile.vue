@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useWindowStore } from '@/stores/window.ts';
-import { computed, nextTick, onMounted, ref, watch } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 import TaskbarTabs from '@/components/taskbar/TaskbarTabs.vue';
 import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
 import { useBrowserStore } from '@/stores/browser.ts';
@@ -10,69 +10,44 @@ import { useInitializeContextMenu } from '@/composables/contextMenu/useInitializ
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import type { RayDb } from 'ray-db-wrapper';
 
-const isHoveringOnTile = ref(false);
-
-const { taskbarItems, applicationId } = defineProps<{
-  taskbarItems: TaskbarTileItem[];
-  applicationId: number;
-}>();
+const { taskbarTileItem } = defineProps<{ taskbarTileItem?: TaskbarTileItem }>();
 
 const taskbarStore = useTaskbarStore();
 const windowStore = useWindowStore();
 
-const taskbarTileItem = ref<TaskbarTileItem>();
-
-onMounted(() => {
-  const foundTaskbarTileItem = taskbarItems.find((tileItem) => tileItem.id === applicationId);
-  if (!foundTaskbarTileItem) return;
-
-  taskbarTileItem.value = foundTaskbarTileItem;
+const windowReference = computed(() => {
+  if (!taskbarTileItem) return { reference: null, active: false, windowCount: 0 };
+  const reference = windowStore.openWindowsReferences[taskbarTileItem.label];
+  return {
+    reference,
+    active: reference && reference.length > 0,
+    windowCount: reference && reference.length,
+    minimizedWindowCount:
+      reference &&
+      reference.reduce(
+        (accumulator, value) => (value.minimized ? accumulator + 1 : accumulator),
+        0,
+      ),
+  };
 });
 
 const getUnderlineClass = computed(() => {
-  if (!taskbarTileItem.value) {
-    return 'underline hidden';
-  }
+  if (!taskbarTileItem) return 'underline hidden';
+  if (!windowStore.openWindowsReferences[taskbarTileItem.label]) return 'underline hidden';
 
-  if (!windowStore.openWindowsReferences[taskbarTileItem.value.label]) {
-    return 'underline hidden';
-  }
-
-  const openWindowsReferenceCount =
-    windowStore.openWindowsReferences[taskbarTileItem.value.label].length;
-
-  const minimizedCount = windowStore.openWindowsReferences[taskbarTileItem.value.label].reduce(
-    (accumulator, value) => (value.minimized ? accumulator + 1 : accumulator),
-    0,
-  );
-
-  return minimizedCount === openWindowsReferenceCount
+  return windowReference.value.minimizedWindowCount === windowReference.value.windowCount
     ? 'underline minimized'
     : 'underline maximized';
 });
 
-function hasTabs() {
-  if (!isHoveringOnTile.value || !taskbarTileItem.value) {
-    return false;
-  }
-
-  const reference = windowStore.openWindowsReferences[taskbarTileItem.value.label];
-  if (!reference || reference.length === 0) {
-    return false;
-  }
-
-  return true;
-}
+const isHoveringOnTile = ref(false);
+const canOpenTabs = computed(() => windowReference.value.active && isHoveringOnTile.value && taskbarTileItem);
 
 const setClassOnHover = ref<string | null>(null);
 const setTimeoutId = ref<number | null>(null);
 const mouseOnTabs = ref(false);
 
 function onMouseEnter(useDelay: boolean) {
-  if (firstWindowOpenedOnClickTile.value) {
-    firstWindowOpenedOnClickTile.value = false;
-  }
-
   setClassOnHover.value = 'active';
   if (setTimeoutId.value) {
     clearTimeout(setTimeoutId.value);
@@ -89,16 +64,12 @@ function onMouseEnter(useDelay: boolean) {
 }
 
 function onMouseLeave(useDelay: boolean) {
-  if (firstWindowOpenedOnClickTile.value) {
-    setClassOnHover.value = null;
-  }
-
   if (setTimeoutId.value) {
     clearTimeout(setTimeoutId.value);
     setTimeoutId.value = null;
   }
 
-  if (!hasTabs() || !useDelay) {
+  if (!canOpenTabs.value || !useDelay) {
     setClassOnHover.value = null;
     isHoveringOnTile.value = false;
     return;
@@ -118,17 +89,11 @@ function onTabsUnmounted() {
   setClassOnHover.value = null;
 }
 
-const firstWindowOpenedOnClickTile = ref(false);
-
 function onClickTile() {
-  if (!taskbarTileItem.value) {
-    return;
-  }
+  if (!taskbarTileItem) return;
 
-  const reference = windowStore.openWindowsReferences[taskbarTileItem.value.label];
-  if (!reference || reference.length === 0) {
-    windowStore.pushOpenWindowReference(taskbarTileItem.value.label);
-    firstWindowOpenedOnClickTile.value = true;
+  if (!windowReference.value.active) {
+    windowStore.pushOpenWindowReference(taskbarTileItem.label);
     return;
   }
 
@@ -137,15 +102,15 @@ function onClickTile() {
 
   nextTick().then(() => (setClassOnHover.value = 'active'));
 
-  if (reference.length === 1) {
+  if (windowReference.value.reference?.length === 1) {
     windowStore.setWindowMinimized(
-      windowStore.getWindowId(taskbarTileItem.value.label, reference[0].id),
+      windowStore.getWindowId(taskbarTileItem.label, windowReference.value.reference[0].id),
     );
   }
 }
 
 const titleRef = ref();
-const showTitle = computed(() => isHoveringOnTile.value && !hasTabs());
+const showTitle = computed(() => isHoveringOnTile.value && !canOpenTabs.value);
 const titleIsOverflowing = ref<'positive' | 'negative' | ''>('');
 
 watch(
@@ -189,8 +154,8 @@ function onContextmenu(event: MouseEvent) {
     .initialize(
       {
         Delete: () => {
-          if (!taskbarTileItem.value) return;
-          taskbarStore.deleteTaskbarItem(rayDb, taskbarTileItem.value.tileId);
+          if (!taskbarTileItem) return;
+          taskbarStore.deleteTaskbarItem(rayDb, taskbarTileItem.tileId);
         },
       },
       {},
@@ -205,7 +170,7 @@ function onContextmenu(event: MouseEvent) {
     :class="setClassOnHover"
     @mouseenter.prevent="onMouseEnter(true)"
     @mouseleave.prevent="onMouseLeave(true)"
-    @contextmenu.prevent="onMouseEnter(false)"
+    @contextmenu.prevent="onContextmenu"
     :style="{ width: `${taskbarStore.tileWidth}px`, height: `${taskbarStore.tileHeight}px` }"
   >
     <div ref="titleRef" v-if="showTitle" class="title-text-hover" :style="getTitleOverflowStyle">
@@ -213,14 +178,14 @@ function onContextmenu(event: MouseEvent) {
     </div>
     <transition name="fade-shadow">
       <TaskbarTabs
-        v-if="hasTabs() && firstWindowOpenedOnClickTile === false"
+        v-if="canOpenTabs"
         :application-name="taskbarTileItem.label"
         @mouse-entered="mouseOnTabs = true"
         @mouse-left="mouseOnTabs = false"
         @tabs-unmounted="onTabsUnmounted"
       />
     </transition>
-    <div class="content" @click="onClickTile" @contextmenu.prevent="onContextmenu">
+    <div class="content" @click="onClickTile">
       <component class="app-svg" :is="useSvgOrFallback(taskbarTileItem.label).svg" />
       <hr :class="getUnderlineClass" />
     </div>

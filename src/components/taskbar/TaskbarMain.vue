@@ -9,7 +9,7 @@ import { useWindowStore } from '@/stores/window.ts';
 import { useFileStore } from '@/stores/file.ts';
 
 const taskbarStore = useTaskbarStore();
-const taskbarItems = ref<TaskbarTileItem[]>();
+const taskbarItems = ref<TaskbarTileItem[]>([]);
 useWatchTaskbarProperties(taskbarItems);
 
 function getTaskbarAlignmentClass() {
@@ -26,10 +26,6 @@ const windowStore = useWindowStore();
 watch(
   () => windowStore.openWindowsReferences,
   (windowsReferences) => {
-    if (!taskbarItems.value) {
-      taskbarItems.value = [];
-    }
-
     const windowsReferencesLabels = Object.keys(windowsReferences);
 
     for (const taskbarItem of taskbarItems.value) {
@@ -40,7 +36,6 @@ watch(
 
       taskbarItems.value = taskbarItems.value?.filter((item) => item.id !== taskbarItem.id);
     }
-
 
     for (const label of windowsReferencesLabels) {
       if (!taskbarItems.value.some((item) => item.label === label)) {
@@ -69,14 +64,13 @@ watch(
 const taskbarStyle: StyleValue = { height: `${taskbarStore.taskbarHeight}px` };
 </script>
 <template>
-  <div :class="getTaskbarAlignmentClass()" :style="taskbarStyle" class="taskbar">
+  <div :class="getTaskbarAlignmentClass" :style="taskbarStyle" class="taskbar">
     <div class="taskbar-tiles-wrapper">
       <div class="taskbar-tiles">
         <TaskbarTile
           v-for="item of taskbarItems"
           :key="item.tileId"
-          :taskbar-items="taskbarItems ?? []"
-          :application-id="item.id"
+          :taskbar-tile-item="taskbarItems.find((taskbarItem) => taskbarItem.id === item.id)"
         />
       </div>
     </div>
