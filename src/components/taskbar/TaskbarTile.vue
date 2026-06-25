@@ -9,6 +9,7 @@ import type { TaskbarTileItem } from '@/types/taskbarTypes.ts';
 import { useInitializeContextMenu } from '@/composables/contextMenu/useInitializeContextMenu.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import type { RayDb } from 'ray-db-wrapper';
+import { useHoverTileState } from '@/composables/taskbar/useHoverTileState.ts';
 
 const { taskbarTileItem } = defineProps<{ taskbarTileItem?: TaskbarTileItem }>();
 
@@ -40,53 +41,27 @@ const getUnderlineClass = computed(() => {
     : 'underline maximized';
 });
 
-const isHoveringOnTile = ref(false);
-const canOpenTabs = computed(() => windowReference.value.active && isHoveringOnTile.value && taskbarTileItem);
+const setClassOnHover = ref<'active' | null>(null);
 
-const setClassOnHover = ref<string | null>(null);
-const setTimeoutId = ref<number | null>(null);
-const mouseOnTabs = ref(false);
+const { hoverState, setHoverState, clearHoverState, clearHoverStateTimeout } = useHoverTileState();
 
-function onMouseEnter(useDelay: boolean) {
+const canOpenTabs = computed(
+  () => windowReference.value.active && hoverState.value === true && taskbarTileItem !== undefined,
+);
+
+function onMouseEnter(useTimeout: boolean) {
   setClassOnHover.value = 'active';
-  if (setTimeoutId.value) {
-    clearTimeout(setTimeoutId.value);
-    setTimeoutId.value = null;
-  }
-
-  if (useDelay) {
-    setTimeoutId.value = setTimeout(() => {
-      isHoveringOnTile.value = true;
-    }, 500);
-  } else {
-    isHoveringOnTile.value = true;
-  }
+  clearHoverStateTimeout();
+  setHoverState(useTimeout);
 }
 
-function onMouseLeave(useDelay: boolean) {
-  if (setTimeoutId.value) {
-    clearTimeout(setTimeoutId.value);
-    setTimeoutId.value = null;
-  }
-
-  if (!canOpenTabs.value || !useDelay) {
-    setClassOnHover.value = null;
-    isHoveringOnTile.value = false;
-    return;
-  }
-
-  if (useDelay) {
-    setTimeoutId.value = setTimeout(() => {
-      setClassOnHover.value = null;
-      isHoveringOnTile.value = false;
-    }, 500);
-  }
+function onMouseLeave() {
+  clearHoverState(canOpenTabs.value, true, () => (setClassOnHover.value = null));
 }
 
 function onTabsUnmounted() {
-  mouseOnTabs.value = false;
-  isHoveringOnTile.value = false;
   setClassOnHover.value = null;
+  clearHoverState(false);
 }
 
 function onClickTile() {
@@ -97,8 +72,7 @@ function onClickTile() {
     return;
   }
 
-  clearTimeout(setTimeoutId.value ?? undefined);
-  isHoveringOnTile.value = false;
+  clearHoverState(false);
 
   nextTick().then(() => (setClassOnHover.value = 'active'));
 
@@ -110,7 +84,7 @@ function onClickTile() {
 }
 
 const titleRef = ref();
-const showTitle = computed(() => isHoveringOnTile.value && !canOpenTabs.value);
+const showTitle = computed(() => hoverState.value && !canOpenTabs.value);
 const titleIsOverflowing = ref<'positive' | 'negative' | ''>('');
 
 watch(
@@ -169,7 +143,7 @@ function onContextmenu(event: MouseEvent) {
     class="tile"
     :class="setClassOnHover"
     @mouseenter.prevent="onMouseEnter(true)"
-    @mouseleave.prevent="onMouseLeave(true)"
+    @mouseleave.prevent="onMouseLeave"
     @contextmenu.prevent="onContextmenu"
     :style="{ width: `${taskbarStore.tileWidth}px`, height: `${taskbarStore.tileHeight}px` }"
   >
@@ -180,8 +154,6 @@ function onContextmenu(event: MouseEvent) {
       <TaskbarTabs
         v-if="canOpenTabs"
         :application-name="taskbarTileItem.label"
-        @mouse-entered="mouseOnTabs = true"
-        @mouse-left="mouseOnTabs = false"
         @tabs-unmounted="onTabsUnmounted"
       />
     </transition>
