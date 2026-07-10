@@ -1,11 +1,9 @@
 <script setup lang="ts">
-import { computed, onBeforeMount, ref } from 'vue';
 import type { WindowFlatReference } from '@/types/windowTypes.js';
 import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.js';
 import { useWindowStore } from '@/stores/window';
-import { fileExtensions } from '@/types/itemTypes.js';
-import { useFileSelectStateGetter } from '@/composables/fileExplorer/useFileSelectStateGetter.js';
-import { useBrowserStore } from '@/stores/browser.js';
+import { useWindowControls } from '@/composables/window/useWindowControls.ts';
+import { useGetWindowTitle } from '@/composables/window/useGetWindowTitle.ts';
 
 const {
   windowId,
@@ -19,47 +17,11 @@ const {
   showNoApplicationSvgsFor?: string[];
 }>();
 
-const activeActions = ref<('Minimize' | 'Maximize' | 'Close')[]>(['Minimize', 'Maximize', 'Close']);
-onBeforeMount(() => {
-  if (useBrowserStore().isMobile) {
-    activeActions.value = ['Minimize', 'Close'];
-    return;
-  }
+const windowTitle = useGetWindowTitle(reference.label, windowId);
 
-  switch (windowType) {
-    case 'fixed':
-      activeActions.value = ['Minimize', 'Close'];
-      break;
-    case 'inline':
-      activeActions.value = ['Maximize', 'Close'];
-  }
-});
+const windowControls = useWindowControls();
+windowControls.mount(windowType);
 
-const windowName = computed(() => {
-  const fileSelectStateGetter = useFileSelectStateGetter(windowId).value;
-
-  if (fileSelectStateGetter.active) {
-    const stringBuilder = ['select'];
-
-    if (!fileSelectStateGetter.multiSelect) {
-      stringBuilder.push('a');
-    }
-
-    stringBuilder.push(
-      fileSelectStateGetter.allowedFileTypes.map((type) => `.${fileExtensions[type]}`).join('/'),
-    );
-
-    if (fileSelectStateGetter.multiSelect) {
-      stringBuilder.push('files');
-    } else {
-      stringBuilder.push('file');
-    }
-
-    return stringBuilder.join(' ');
-  }
-
-  return reference.label;
-});
 </script>
 <template>
   <header class="window-header" :style="{ height: `${useWindowStore().windowHeaderHeight}px` }">
@@ -68,8 +30,8 @@ const windowName = computed(() => {
         v-if="!showNoApplicationSvgsFor.includes(reference.label)"
         :is="useSvgOrFallback(reference.label).svg"
       />
-      <p class="window-name">
-        {{ windowName }}
+      <p class="window-title">
+        {{ windowTitle }}
       </p>
     </div>
     <div
@@ -79,7 +41,7 @@ const windowName = computed(() => {
     />
     <div class="window-controls">
       <button
-        v-for="action in activeActions"
+        v-for="action in windowControls.activeWindowControls.value"
         :key="action"
         :class="action.toLowerCase()"
         @click="$emit(`windowControl${action}`)"
