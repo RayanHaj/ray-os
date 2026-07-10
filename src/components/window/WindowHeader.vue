@@ -1,20 +1,16 @@
 <script setup lang="ts">
-import type { WindowFlatReference } from '@/types/windowTypes.js';
+import type { WindowFlatReference, WindowType } from '@/types/windowTypes.js';
 import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.js';
 import { useWindowStore } from '@/stores/window';
 import { useWindowControls } from '@/composables/window/useWindowControls.ts';
 import { useGetWindowTitle } from '@/composables/window/useGetWindowTitle.ts';
+import type { StyleValue } from 'vue';
 
-const {
-  windowId,
-  reference,
-  windowType,
-  showNoApplicationSvgsFor = [],
-} = defineProps<{
+const { windowId, reference, windowType, showSvg } = defineProps<{
   windowId: string;
   reference: WindowFlatReference;
-  windowType?: 'fixed' | 'inline';
-  showNoApplicationSvgsFor?: string[];
+  windowType?: WindowType;
+  showSvg: boolean;
 }>();
 
 const windowTitle = useGetWindowTitle(reference.label, windowId);
@@ -22,14 +18,12 @@ const windowTitle = useGetWindowTitle(reference.label, windowId);
 const windowControls = useWindowControls();
 windowControls.mount(windowType);
 
+const windowHeaderStyles: StyleValue = { height: `${useWindowStore().windowHeaderHeight}px` };
 </script>
 <template>
-  <header class="window-header" :style="{ height: `${useWindowStore().windowHeaderHeight}px` }">
+  <header class="window-header" :style="windowHeaderStyles">
     <div class="info-wrapper">
-      <component
-        v-if="!showNoApplicationSvgsFor.includes(reference.label)"
-        :is="useSvgOrFallback(reference.label).svg"
-      />
+      <component v-if="showSvg" :is="useSvgOrFallback(reference.label).svg" />
       <p class="window-title">
         {{ windowTitle }}
       </p>

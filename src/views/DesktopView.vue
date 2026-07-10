@@ -147,7 +147,7 @@ watch(
           ? `${minHeightWindows[reference.label].height}px`
           : undefined
       "
-      :show-no-application-svgs-for="showNoApplicationSvgsFor"
+      :show-svg="!showNoApplicationSvgsFor.includes(reference.label)"
     >
       <UiToast
         toast-location="window"

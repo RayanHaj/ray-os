@@ -33,3 +33,4 @@ export const windowNames = [
   'snake',
 ] as const;
 export type WindowName = (typeof windowNames)[number];
+export type WindowType = 'inline' | 'fixed';

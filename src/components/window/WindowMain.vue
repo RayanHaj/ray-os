@@ -9,7 +9,7 @@ import {
   ref,
   useTemplateRef,
 } from 'vue';
-import type { WindowFlatReference, WindowStyleObject } from '@/types/windowTypes.js';
+import type { WindowFlatReference, WindowStyleObject, WindowType } from '@/types/windowTypes.js';
 import { useWindowStore } from '@/stores/window.js';
 import WindowHeader from '@/components/window/WindowHeader.vue';
 import { useWindowStateManager } from '@/composables/window/useWindowStateManager.js';
@@ -17,50 +17,36 @@ import { useWindowPositionManager } from '@/composables/window/useWindowPosition
 import { useWindowResizeManager } from '@/composables/window/useWindowResizeManager.js';
 import { useWindowSnappingManager } from '@/composables/window/useWindowSnappingManager.js';
 import { useBrowserStore } from '@/stores/browser.js';
+import { useWindowStyleManager } from '@/composables/window/useWindowStyleManager.ts';
 
 const {
   reference,
   windowContentComponent,
+  showSvg,
   width,
   height,
   minWidth,
   minHeight,
   windowType,
-  showNoApplicationSvgsFor,
 } = defineProps<{
   reference: WindowFlatReference;
   windowContentComponent: Component;
+  showSvg: boolean;
   width?: string;
   height?: string;
   minWidth?: string;
   minHeight?: string;
-  windowType?: 'fixed' | 'inline';
-  showNoApplicationSvgsFor: string[];
+  windowType?: WindowType;
 }>();
 
-const styles: Ref<WindowStyleObject> = ref({
-  left: '25%',
-  top: '25%',
-  width: width ?? '500px',
-  height: height ?? '500px',
-  minWidth: minWidth ?? '250px',
-  minHeight: minHeight ?? '50px',
-  zIndex: 10,
-  display: 'block',
-  cursor: 'auto',
-  transition: 'width 0.5s, height 0.5s, left 0.5s, top 0.5s',
-});
-const cachedStyles = ref({ left: '0', top: '0', width: '500px', height: '500px' });
-
+const { styles, cachedStyles } = useWindowStyleManager(width, height, minWidth, minHeight);
 const windowStateManager = useWindowStateManager(styles, reference);
-onBeforeMount(() => {
-  provide('windowId', windowStateManager.windowId);
-});
 
+const windowStore = useWindowStore();
+
+onBeforeMount(() => provide('windowId', windowStateManager.windowId));
 onMounted(() => {
-  if (useBrowserStore().isMobile) {
-    maximizeWindow();
-  }
+  if (useBrowserStore().isMobile) maximizeWindow();
 });
 
 const windowRef = useTemplateRef('windowRef');
@@ -85,25 +71,16 @@ const windowPositionManager = useWindowPositionManager(
   windowType === 'fixed',
 );
 
-function onMousedownHeader(event: MouseEvent) {
-  windowPositionManager.onMouseDownHeader(event);
-}
+const onMousedownHeader = (event: MouseEvent) => windowPositionManager.onMouseDownHeader(event);
 
-const windowStore = useWindowStore();
-function closeWindow() {
-  windowStore.removeOpenWindowReference(windowStateManager.windowId);
-}
-
-function minimizeWindow() {
-  windowStore.setWindowMinimized(windowStateManager.windowId);
-}
-
-function maximizeWindow() {
+const closeWindow = () => windowStore.removeOpenWindowReference(windowStateManager.windowId);
+const minimizeWindow = () => windowStore.setWindowMinimized(windowStateManager.windowId);
+const maximizeWindow = () => {
   if (windowType === 'fixed') return;
 
   styles.value.cursor = 'default';
   windowResizeManager.setWindowMaximized(cachedStyles);
-}
+};
 
 const getWindowBorderRadius = computed(() =>
   windowStateManager.isMaximized.value || windowStateManager.isSnapped.value ? '0px' : '10px',
@@ -127,7 +104,7 @@ const windowContentStyles = { height: windowContentHeight.value, width: '100%' }
       :window-id="windowStateManager.windowId"
       :reference="reference"
       :window-type="windowType"
-      :show-no-application-svgs-for="showNoApplicationSvgsFor"
+      :show-svg="showSvg"
       @on-mousedown-header="onMousedownHeader"
       @window-control-close="closeWindow"
       @window-control-maximize="maximizeWindow"

@@ -1,5 +1,6 @@
 import { onBeforeMount, readonly, ref } from 'vue';
 import { useBrowserStore } from '@/stores/browser.ts';
+import type { WindowType } from '@/types/windowTypes.ts';
 
 export function useWindowControls() {
   const activeWindowControls = ref<('Minimize' | 'Maximize' | 'Close')[]>([
@@ -8,7 +9,7 @@ export function useWindowControls() {
     'Close',
   ]);
 
-  const mount = (windowType?: 'fixed' | 'inline') => {
+  const mount = (windowType?: WindowType) => {
     onBeforeMount(() => {
       if (useBrowserStore().isMobile) {
         activeWindowControls.value = ['Minimize', 'Close'];
