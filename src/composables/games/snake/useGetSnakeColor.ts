@@ -14,7 +14,5 @@ export function useGetSnakeColor() {
     { immediate: true },
   );
 
-  return {
-    snakeColor
-  }
+  return { snakeColor };
 }

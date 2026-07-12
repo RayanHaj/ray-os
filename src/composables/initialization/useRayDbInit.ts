@@ -39,7 +39,7 @@ export async function useRayDbInit() {
       keyPath: 'id',
       indexes: [
         { indexName: 'id', keyPath: 'id', unique: true },
-        { indexName: 'applicationId', keyPath: 'applicationId', unique: true }
+        { indexName: 'applicationId', keyPath: 'applicationId', unique: true },
       ],
       autoIncrement: true,
     },

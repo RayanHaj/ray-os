@@ -46,19 +46,19 @@ export function useGameLoop(
   const resetGameLoop = () => {
     state.resetState();
     scoreRef.value?.setGameScore(state.getGameScore());
-  }
+  };
 
   const startGameLoop = () => {
     animationFrameId.value = window.requestAnimationFrame(gameLoop);
-  }
+  };
 
   const stopGameLoop = () => {
     if (!animationFrameId.value) return;
     window.cancelAnimationFrame(animationFrameId.value);
     animationFrameId.value = null;
-  }
+  };
 
-const gameLoopIsRunning = computed(() => animationFrameId.value !== null);
+  const gameLoopIsRunning = computed(() => animationFrameId.value !== null);
 
   return { resetGameLoop, startGameLoop, stopGameLoop, gameLoopIsRunning };
 }

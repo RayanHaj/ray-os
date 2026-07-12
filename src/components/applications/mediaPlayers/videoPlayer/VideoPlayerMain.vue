@@ -6,6 +6,7 @@ import type { LoadedVideo } from '@/types/videoPlayerTypes.js';
 import MediaPlayerFooter from '@/components/applications/mediaPlayers/MediaPlayerFooter.vue';
 import FileSelectButton from '@/components/applications/mediaPlayers/FileSelectButton.vue';
 import type { FileSelectReturnItem } from '@/types/fileExplorerTypes.ts';
+import { useRequestFullscreenVideo } from '@/composables/videoPlayer/useRequestFullscreenVideo.ts';
 
 const videoPlayerStore = useVideoPlayerStore();
 const windowId = useInjectOrThrow<string>('windowId');
@@ -13,7 +14,9 @@ const windowId = useInjectOrThrow<string>('windowId');
 const loadedVideo: Ref<LoadedVideo> = ref({ windowId: null, file: null });
 const videoUrl: Ref<string | null> = ref(null);
 
+const videoPlayerRef = useTemplateRef('videoPlayerRef');
 const videoRef = useTemplateRef('videoRef');
+const videoContentRef = useTemplateRef('videoContentRef');
 
 const videoDuration = ref(0);
 const videoCurrentTime = ref(0);
@@ -124,15 +127,17 @@ function onFileSelectReturnValue(returnValue: { windowId: string; value: FileSel
 }
 </script>
 <template>
-  <div class="video-player">
-    <video v-if="videoUrl" ref="videoRef" :src="videoUrl" />
-    <FileSelectButton
-      v-else
-      :window-id="windowId"
-      :allowed-file-types="['video/mp4']"
-      @return-value="onFileSelectReturnValue"
+  <div class="video-player" ref="videoPlayerRef">
+    <div class="video-content" ref="videoContentRef">
+      <video v-if="videoUrl" ref="videoRef" :src="videoUrl"/>
+      <FileSelectButton
+        v-else
+        :window-id="windowId"
+        :allowed-file-types="['video/mp4']"
+        @return-value="onFileSelectReturnValue"
       >video file</FileSelectButton
-    >
+      >
+    </div>
     <MediaPlayerFooter
       :file-name="loadedVideo.file?.name ?? ''"
       :audio-duration="videoDuration"
@@ -140,10 +145,11 @@ function onFileSelectReturnValue(returnValue: { windowId: string; value: FileSel
       :is-playing="videoIsPlaying"
       :looped="videoLoop"
       :disabled="false"
-      :options="{ dotMenu: true, nextAndPrevious: false }"
+      :options="{ nextAndPrevious: false, shuffle: false, fullscreen: true }"
       @play-pause-audio="videoIsPlaying ? pauseVideo() : playVideo()"
       @slider-input="onSliderInput"
       @loop-audio="videoLoop = !videoLoop"
+      @fullscreen="useRequestFullscreenVideo(videoPlayerRef)"
     />
   </div>
 </template>
@@ -154,16 +160,21 @@ function onFileSelectReturnValue(returnValue: { windowId: string; value: FileSel
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   overflow: hidden;
 
   --audio-player-footer-height: 80px;
 }
 
-.video-player video {
+.video-content {
   width: 100%;
-  max-width: 100%;
-  max-height: calc(100% - var(--audio-player-footer-height));
+  height: calc(100% - var(--audio-player-footer-height));
+  background-color: black;
+}
+
+.video-content video {
+  width: 100%;
+  height: 100%;
   object-fit: contain;
 }
 </style>

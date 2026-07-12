@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { type Component, onBeforeMount, shallowRef } from 'vue';
 import { useWindowStore } from '@/stores/window.ts';
-import { useSvgByFileNameAndDirectory } from '@/composables/svg/useSvgByFileNameAndDirectory.ts';
+import { useSvgByFileAndDirectoryName } from '../../composables/svg/useSvgByFileAndDirectoryName.ts';
 
 const { windowId } = defineProps<{ windowId: string }>();
 
@@ -12,7 +12,7 @@ function closeWindow() {
 
 const closeSvg = shallowRef<Component | null>(null);
 onBeforeMount(async () => {
-  closeSvg.value = await useSvgByFileNameAndDirectory('Close');
+  closeSvg.value = await useSvgByFileAndDirectoryName('Close');
 });
 
 function onClickTab() {

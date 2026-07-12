@@ -50,7 +50,7 @@ const minWidthWindows: Record<string, { width: number }> = {
   Notepad: { width: 300 },
   'Audio Player': { width: 330 },
   Properties: { width: 300 },
-  Calculator: { width: 330 }
+  Calculator: { width: 330 },
 };
 
 const minHeightWindows: Record<string, { height: number }> = {

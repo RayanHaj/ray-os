@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { type Component, shallowRef } from 'vue';
 import { availableSvgs, type AvailableSvgs } from '@/types/availableSvgs.ts';
-import { useSvgByFileNameAndDirectory } from '@/composables/svg/useSvgByFileNameAndDirectory.ts';
+import { useSvgByFileAndDirectoryName } from '@/composables/svg/useSvgByFileAndDirectoryName.ts';
 import { useSvgFallback } from '@/composables/svg/useSvgFallback.ts';
 
 export const useSvgsStore = defineStore('svgs', () => {
@@ -11,7 +11,7 @@ export const useSvgsStore = defineStore('svgs', () => {
 
   async function initializeSvgs() {
     for (const svg of availableSvgs) {
-      const foundSvg = await useSvgByFileNameAndDirectory(svg);
+      const foundSvg = await useSvgByFileAndDirectoryName(svg);
       svgs.value[svg] = foundSvg ?? useSvgFallback(svg);
     }
   }

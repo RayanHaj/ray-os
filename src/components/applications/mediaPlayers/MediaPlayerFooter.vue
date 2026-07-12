@@ -107,6 +107,7 @@ function getTrackBackground(value: number, min: number, max: number) {
             <component :is="loopSvg.svg" :custom-width="20" :custom-height="20" />
           </button>
           <button
+            v-if="options?.shuffle"
             class="audio-control-button shuffle"
             :class="{ active: shuffled }"
             @click="emit('shuffleAudio')"
@@ -119,7 +120,7 @@ function getTrackBackground(value: number, min: number, max: number) {
             @click="emit('fullscreen')"
             class="audio-control-button"
           >
-            <component :is="fullscreenSvg.svg" :custom-width="25" :custom-height="25" />
+            <component :is="fullscreenSvg.svg" :custom-width="22" :custom-height="22" />
           </button>
           <button v-if="options?.dotMenu" class="audio-control-button">
             <component :is="menuDots.svg" :custom-width="25" :custom-height="25" />
@@ -241,13 +242,15 @@ button {
   border: none;
 }
 
-.audio-control-button.loop, .audio-control-button.shuffle {
+.audio-control-button.loop,
+.audio-control-button.shuffle {
   padding: 5px;
   width: 35px;
   height: 35px;
 }
 
-.audio-control-button.loop.active, .audio-control-button.shuffle.active {
+.audio-control-button.loop.active,
+.audio-control-button.shuffle.active {
   background: var(--highlight-color);
   border-radius: 50%;
 }

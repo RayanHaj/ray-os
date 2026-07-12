@@ -1,7 +1,12 @@
 import { ref, type Ref } from 'vue';
 import type { WindowStyleObject } from '@/types/windowTypes.ts';
 
-export function useWindowStyleManager(width?: string, height?: string, minWidth?: string, minHeight?: string) {
+export function useWindowStyleManager(
+  width?: string,
+  height?: string,
+  minWidth?: string,
+  minHeight?: string,
+) {
   const styles: Ref<WindowStyleObject> = ref({
     left: '25%',
     top: '25%',

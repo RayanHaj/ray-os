@@ -50,13 +50,10 @@ export function useInitializeContextMenu(event: MouseEvent) {
     const initialize = createInitialize(primaryActions, secondaryActions);
     return { initialize };
   };
-  const fileExplorerGridItem = (disableOptions?: {
-    renameFile?: boolean;
-    addToDesktop?: boolean;
-    addToTaskbar?: boolean;
-  }, labelOptions?: {
-    addToTaskbar?: string;
-  }) => {
+  const fileExplorerGridItem = (
+    disableOptions?: { renameFile?: boolean; addToDesktop?: boolean; addToTaskbar?: boolean },
+    labelOptions?: { addToTaskbar?: string },
+  ) => {
     const primaryActions = ['Copy', 'Paste', 'Delete'] as const;
     const secondaryActions = [
       { id: 'renameFile', label: 'rename file', disabled: disableOptions?.renameFile ?? false },
@@ -68,7 +65,7 @@ export function useInitializeContextMenu(event: MouseEvent) {
       {
         id: 'addToTaskbar',
         label: labelOptions?.addToTaskbar ?? 'add to taskbar',
-        disabled: disableOptions?.addToTaskbar ?? false
+        disabled: disableOptions?.addToTaskbar ?? false,
       },
       { id: 'properties', label: 'open properties', disabled: false },
     ] as const;
@@ -100,7 +97,7 @@ export function useInitializeContextMenu(event: MouseEvent) {
 
     const initialize = createInitialize(primaryActions, secondaryActions);
     return { initialize };
-  }
+  };
 
   return {
     desktop,

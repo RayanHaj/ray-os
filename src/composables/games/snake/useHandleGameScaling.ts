@@ -39,5 +39,4 @@ export function useHandleGameScaling(windowStyles: WindowStyleObject) {
     },
     { immediate: true },
   );
-
 }
