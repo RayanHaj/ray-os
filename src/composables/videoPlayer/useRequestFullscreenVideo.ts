@@ -3,7 +3,6 @@ import { useToastStore } from '@/stores/toast.ts';
 export async function useRequestFullscreenVideo(video: HTMLElement | null, windowId?: string) {
   if (!video) return;
 
-  console.log(useIsInFullscreen());
   try {
     if (useIsInFullscreen()) {
       await document.exitFullscreen();
@@ -22,6 +21,4 @@ export async function useRequestFullscreenVideo(video: HTMLElement | null, windo
   }
 }
 
-export function useIsInFullscreen() {
-  return document.fullscreenElement?.nodeName === 'DIV';
-}
+export const useIsInFullscreen = () => document.fullscreenElement?.nodeName === 'DIV';
