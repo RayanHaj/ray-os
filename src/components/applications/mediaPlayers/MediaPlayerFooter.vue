@@ -137,6 +137,7 @@ function getTrackBackground(value: number, min: number, max: number) {
   width: 100%;
   height: var(--audio-player-footer-height);
   position: sticky;
+  cursor: auto;
 
   container: mediaPlayerFooter / size;
 

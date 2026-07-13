@@ -1,48 +1,49 @@
 <script setup lang="ts">
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
-import { nextTick, onMounted, onUnmounted, ref, type Ref, useTemplateRef, watch } from 'vue';
+import { nextTick, onMounted, onUnmounted, reactive, useTemplateRef, watch } from 'vue';
 import { useVideoPlayerStore } from '@/stores/videoPlayer.ts';
-import type { LoadedVideo } from '@/types/videoPlayerTypes.js';
+import { createVideo, type Video } from '@/types/videoPlayerTypes.js';
 import MediaPlayerFooter from '@/components/applications/mediaPlayers/MediaPlayerFooter.vue';
 import FileSelectButton from '@/components/applications/mediaPlayers/FileSelectButton.vue';
 import type { FileSelectReturnItem } from '@/types/fileExplorerTypes.ts';
 import { useRequestFullscreenVideo } from '@/composables/videoPlayer/useRequestFullscreenVideo.ts';
 
-const videoPlayerStore = useVideoPlayerStore();
+const video = reactive<Video>(createVideo());
+
 const windowId = useInjectOrThrow<string>('windowId');
+const videoPlayerStore = useVideoPlayerStore();
 
-const loadedVideo: Ref<LoadedVideo> = ref({ windowId: null, file: null });
-const videoUrl: Ref<string | null> = ref(null);
-
-const videoPlayerRef = useTemplateRef('videoPlayerRef');
 const videoRef = useTemplateRef('videoRef');
-const videoContentRef = useTemplateRef('videoContentRef');
-
-const videoDuration = ref(0);
-const videoCurrentTime = ref(0);
-const videoIsPlaying = ref(false);
-const videoLoop = ref(false);
+const videoPlayerRef = useTemplateRef('videoPlayerRef');
 
 onMounted(() => {
   if (videoRef.value) {
-    videoRef.value.loop = videoLoop.value;
+    videoRef.value.loop = video.looped;
     videoRef.value.addEventListener('loadedmetadata', updateAudioDuration);
-    videoRef.value.addEventListener('timeupdate', onTimeUpdate);
+    videoRef.value.addEventListener('timeupdate', updateAudioTime);
     videoRef.value.addEventListener('ended', onAudioEnded);
+    playVideo();
+
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.setActionHandler('play', () => {
+        video.isPlaying = true;
+      });
+      navigator.mediaSession.setActionHandler('pause', () => {
+        video.isPlaying = false;
+      });
+    }
   }
 });
 
 onUnmounted(() => {
   if (videoRef.value) {
     videoRef.value.removeEventListener('loadedmetadata', updateAudioDuration);
-    videoRef.value.removeEventListener('timeupdate', onTimeUpdate);
+    videoRef.value.removeEventListener('timeupdate', updateAudioTime);
     videoRef.value.removeEventListener('ended', onAudioEnded);
     videoRef.value.src = '';
   }
 
-  if (videoUrl.value) {
-    URL.revokeObjectURL(videoUrl.value);
-  }
+  if (video.url) URL.revokeObjectURL(video.url);
 
   videoPlayerStore.removeLoadedVideo(windowId);
 });
@@ -52,71 +53,66 @@ watch(
   async (newLoadedVideo) => {
     if (newLoadedVideo.windowId !== windowId) return;
 
-    loadedVideo.value = newLoadedVideo;
-    if (loadedVideo.value.file) {
-      videoUrl.value = URL.createObjectURL(loadedVideo.value.file);
+    video.videoFile = newLoadedVideo.file;
+
+    if (video.videoFile) {
+      video.url = URL.createObjectURL(video.videoFile);
     }
 
     await nextTick();
 
     if (videoRef.value) {
-      videoRef.value.loop = videoLoop.value;
+      videoRef.value.loop = video.looped;
       videoRef.value.addEventListener('loadedmetadata', updateAudioDuration);
-      videoRef.value.addEventListener('timeupdate', onTimeUpdate);
+      videoRef.value.addEventListener('timeupdate', updateAudioTime);
       videoRef.value.addEventListener('ended', onAudioEnded);
     }
   },
   { immediate: true },
 );
 
-watch(videoLoop, (newValue, oldValue) => {
-  if (newValue === oldValue) return;
-  if (!videoRef.value) return;
+watch(
+  () => video.looped,
+  (newValue) => (videoRef.value ? (videoRef.value.loop = newValue) : undefined),
+);
 
-  videoRef.value.loop = newValue;
-});
+const updateAudioDuration = () => (video.duration = videoRef.value?.duration ?? 0);
+const updateAudioTime = () => {
+  video.currentTime = videoRef.value?.currentTime ?? 0;
 
-function updateAudioDuration() {
-  videoDuration.value = videoRef.value?.duration ?? 0;
-}
-
-function onTimeUpdate() {
-  videoCurrentTime.value = videoRef.value?.currentTime ?? 0;
-
-  if (Math.floor(videoDuration.value) === Math.floor(videoCurrentTime.value) && videoRef.value) {
-    if (videoLoop.value) {
-      videoCurrentTime.value = 0;
+  if (Math.floor(video.duration) === Math.floor(video.currentTime) && videoRef.value) {
+    if (video.looped) {
+      video.currentTime = 0;
       videoRef.value.currentTime = 0;
     }
     return;
   }
-}
+};
 
-function onAudioEnded() {
-  if (!videoRef.value || videoLoop.value) return;
+const onAudioEnded = () => {
+  if (!videoRef.value || video.looped) return;
 
-  videoCurrentTime.value = 0;
+  video.currentTime = 0;
   videoRef.value.currentTime = 0;
   pauseVideo();
-}
+};
 
-function playVideo() {
+const playVideo = () => {
   if (!videoRef.value) return;
 
   videoRef.value.play();
-  videoIsPlaying.value = true;
-}
+  video.isPlaying = true;
+};
 
-function pauseVideo() {
+const pauseVideo = () => {
   if (!videoRef.value) return;
 
   videoRef.value.pause();
-  videoIsPlaying.value = false;
-}
+  video.isPlaying = false;
+};
 
-function onSliderInput(time: number) {
-  if (videoRef.value) videoRef.value.currentTime = time;
-}
+const onSliderInput = (time: number) =>
+  videoRef.value ? (videoRef.value.currentTime = time) : undefined;
 
 function onFileSelectReturnValue(returnValue: { windowId: string; value: FileSelectReturnItem[] }) {
   for (const value of returnValue.value) {
@@ -129,26 +125,26 @@ function onFileSelectReturnValue(returnValue: { windowId: string; value: FileSel
 <template>
   <div class="video-player" ref="videoPlayerRef">
     <div class="video-content" ref="videoContentRef">
-      <video v-if="videoUrl" ref="videoRef" :src="videoUrl"/>
+      <video v-if="video.url" ref="videoRef" :src="video.url" disablePictureInPicture />
       <FileSelectButton
         v-else
         :window-id="windowId"
         :allowed-file-types="['video/mp4']"
         @return-value="onFileSelectReturnValue"
-      >video file</FileSelectButton
+        >video file</FileSelectButton
       >
     </div>
     <MediaPlayerFooter
-      :file-name="loadedVideo.file?.name ?? ''"
-      :audio-duration="videoDuration"
-      :audio-current-time="videoCurrentTime"
-      :is-playing="videoIsPlaying"
-      :looped="videoLoop"
+      :file-name="video.videoFile?.name ?? ''"
+      :audio-duration="video.duration"
+      :audio-current-time="video.currentTime"
+      :is-playing="video.isPlaying"
+      :looped="video.looped"
       :disabled="false"
       :options="{ nextAndPrevious: false, shuffle: false, fullscreen: true }"
-      @play-pause-audio="videoIsPlaying ? pauseVideo() : playVideo()"
+      @play-pause-audio="video.isPlaying ? pauseVideo() : playVideo()"
       @slider-input="onSliderInput"
-      @loop-audio="videoLoop = !videoLoop"
+      @loop-audio="video.looped = !video.looped"
       @fullscreen="useRequestFullscreenVideo(videoPlayerRef)"
     />
   </div>
@@ -170,6 +166,7 @@ function onFileSelectReturnValue(returnValue: { windowId: string; value: FileSel
   width: 100%;
   height: calc(100% - var(--audio-player-footer-height));
   background-color: black;
+  cursor: auto;
 }
 
 .video-content video {
