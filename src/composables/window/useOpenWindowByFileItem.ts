@@ -38,9 +38,11 @@ export async function useOpenWindowByFileItem(file: Item & { content: FileItem }
     }
     useNotepadStore().initializeNotepadFile(
       useWindowStore().getNextWindowId('Notepad'),
-      file.id,
-      file.content.name,
-      await file.content.rawFile.text(),
+      {
+        fileId: file.id,
+        fileName: file.content.name,
+        text: await file.content.rawFile.text(),
+      }
     );
     useWindowStore().pushOpenWindowReference('Notepad');
   }

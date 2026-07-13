@@ -4,26 +4,25 @@ import type { RayDb } from 'ray-db-wrapper';
 import { useToastStore } from '@/stores/toast.ts';
 import { useSanitizeFileName } from '@/composables/fileSystem/useSanitizeFileName.ts';
 import { useValidateFileName } from '@/composables/fileSystem/useValidateFileName.ts';
+import type { NotepadFile } from '@/types/notepadTypes.ts';
 
 export async function useSaveChanges(
   rayDb: RayDb,
   headerFileName: string,
   windowId: string,
-  loadedFile?: { windowId: string; fileId: number; fileName: string; text: string },
+  notepadFile?: NotepadFile,
 ) {
   const toastStore = useToastStore();
 
-  if (!loadedFile) {
-    return;
-  }
+  if (!notepadFile) return;
 
-  const fileItem = await rayDb.findOne<Item>('files', 'id', loadedFile.fileId);
+  const fileItem = await rayDb.findOne<Item>('files', 'id', notepadFile.fileId);
   if (!fileItem || fileItem.content.type !== 'file') {
     return;
   }
 
   try {
-    const updatedText = loadedFile.text;
+    const updatedText = notepadFile.text;
     const originalFileText = await fileItem.content.rawFile?.text();
     if (updatedText === originalFileText && headerFileName === fileItem.content.name) {
       toastStore.createToast('no changes made', 'warning', 3000, 'window', windowId);

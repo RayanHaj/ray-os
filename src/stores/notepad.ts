@@ -1,12 +1,12 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
+import type { LoadedNotepadFile, NotepadFile } from '@/types/notepadTypes.ts';
 
 export const useNotepadStore = defineStore('notepad', () => {
-  const loadedFile = ref<{ windowId: string; fileId: number; fileName: string; text: string }>();
+  const loadedFile = ref<LoadedNotepadFile>();
 
-  function initializeNotepadFile(windowId: string, fileId: number, fileName: string, text: string) {
-    loadedFile.value = { windowId: windowId, fileId: fileId, fileName: fileName, text: text };
-  }
+  const initializeNotepadFile = (windowId: string, notepadFile: NotepadFile) =>
+    (loadedFile.value = { windowId: windowId, ...notepadFile });
 
   return { initializeNotepadFile, loadedFile };
 });

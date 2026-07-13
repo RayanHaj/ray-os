@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, reactive, watch } from 'vue';
 import { useNotepadStore } from '@/stores/notepad.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import NotepadHeader from '@/components/applications/notepad/NotepadHeader.vue';
@@ -7,20 +7,24 @@ import type { RayDb } from 'ray-db-wrapper';
 import { useSaveChanges } from '@/composables/notepad/useSaveChanges.ts';
 import FileSelectButton from '@/components/applications/mediaPlayers/FileSelectButton.vue';
 import type { FileSelectReturnItem } from '@/types/fileExplorerTypes.ts';
+import { createNotepadFile, type NotepadFile } from '@/types/notepadTypes.ts';
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
-
 const windowId = useInjectOrThrow<string>('windowId');
-const loadedFile = ref<{ windowId: string; fileId: number; fileName: string; text: string }>();
 
+const notepadFile = reactive<NotepadFile>(createNotepadFile());
+
+const notepadStore = useNotepadStore();
 watch(
-  () => useNotepadStore().loadedFile,
+  () => notepadStore.loadedFile,
   (newLoadedFile) => {
     if (newLoadedFile?.windowId !== windowId) return;
-    loadedFile.value = newLoadedFile;
-    useNotepadStore().loadedFile = undefined;
+    notepadFile.fileId = newLoadedFile.fileId;
+    notepadFile.fileName = newLoadedFile.fileName;
+    notepadFile.text = newLoadedFile.text;
+    notepadStore.loadedFile = undefined;
   },
-  { immediate: true },
+  { immediate: true }
 );
 
 async function onFileSelectReturnValue(returnValue: {
@@ -34,26 +38,28 @@ async function onFileSelectReturnValue(returnValue: {
 
     useNotepadStore().initializeNotepadFile(
       windowId,
-      value.fileId,
-      value.fileItem.name,
-      rawFileText,
+      {
+        fileId: value.fileId,
+        fileName: value.fileItem.name,
+        text: rawFileText,
+      }
     );
   }
 }
 
-const fileIsLoaded = computed(() => loadedFile.value?.windowId === windowId);
+const fileIsLoaded = computed(() => notepadFile.fileId !== -1 && notepadFile.fileName !== '');
 </script>
 
 <template>
   <div class="notepad">
     <NotepadHeader
-      :_file-name="loadedFile?.fileName ?? ''"
+      :_file-name="notepadFile?.fileName ?? ''"
       :file-is-loaded="fileIsLoaded"
-      :file-id="loadedFile?.fileId ?? null"
-      @on-save-changes="useSaveChanges(rayDb, $event, windowId, loadedFile)"
+      :file-id="notepadFile?.fileId ?? null"
+      @on-save-changes="useSaveChanges(rayDb, $event, windowId, notepadFile)"
     />
-    <div v-if="loadedFile" class="notepad-reader">
-      <textarea v-model="loadedFile.text" contenteditable="true" />
+    <div v-if="fileIsLoaded" class="notepad-reader">
+      <textarea v-model="notepadFile.text" contenteditable="true" />
     </div>
     <FileSelectButton
       v-else
