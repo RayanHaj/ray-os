@@ -7,6 +7,8 @@ export const useFileSystemStore = defineStore('fileSystem', () => {
   const APPLICATIONS_DIR_ID = 2;
   const WALLPAPERS_DIR_ID = 3;
 
+  const APPLICATION_DIR_PATH = `${ROOT_DIR_NAME}/Applications`;
+
   const updateFileSystemSignal = ref(false);
   function updateFileSystem() {
     updateFileSystemSignal.value = !updateFileSystemSignal.value;
@@ -14,6 +16,7 @@ export const useFileSystemStore = defineStore('fileSystem', () => {
 
   return {
     ROOT_DIR_NAME,
+    APPLICATION_DIR_PATH,
     ROOT_DIR_ID,
     APPLICATIONS_DIR_ID,
     WALLPAPERS_DIR_ID,

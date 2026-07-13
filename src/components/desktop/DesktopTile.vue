@@ -11,6 +11,7 @@ import type { DesktopTileItem } from '@/types/desktopTypes.ts';
 import { useHandleDesktopTileDragStart } from '@/composables/desktop/useHandleDesktopTileDragStart.ts';
 import { useHandleDesktopTileDrop } from '@/composables/desktop/useHandleDesktopTileDrop.ts';
 import { useGetSvgByDesktopTileItem } from '@/composables/desktop/useGetSvgByDesktopTileItem.ts';
+import { useOpenFileExplorerWindowByPath } from '@/composables/fileExplorer/useOpenFileExplorerWindowByPath.ts';
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 
@@ -31,14 +32,17 @@ function onTileRightClick(event: MouseEvent) {
     .initialize(
       {
         Delete: async () => {
-          if (!desktopTileItem.value) {
-            return;
-          }
-
+          if (!desktopTileItem.value) return;
           await desktopStore.deleteDesktopItem(rayDb, desktopTileItem.value.tileId);
         },
       },
-      {},
+      {
+        openFileExplorerLocation: async () => {
+          if (!desktopTileItem.value?.path) return;
+
+          useOpenFileExplorerWindowByPath(desktopTileItem.value.path);
+        },
+      },
     );
 }
 

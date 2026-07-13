@@ -35,7 +35,9 @@ export function useInitializeContextMenu(event: MouseEvent) {
   };
   const tile = () => {
     const primaryActions = ['Delete'] as const;
-    const secondaryActions = [] as const;
+    const secondaryActions = [
+      { id: 'openFileExplorerLocation', label: 'open File Explorer location', disabled: false }
+    ] as const;
 
     const initialize = createInitialize(primaryActions, secondaryActions);
     return { initialize };

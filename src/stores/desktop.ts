@@ -75,7 +75,12 @@ export const useDesktopStore = defineStore('desktop', () => {
 
     for (const file of applicationFiles) {
       const index = applicationFiles.indexOf(file);
-      await addDesktopItem(rayDb, { id: file.id, type: file.content.type, tileId: index + 1 });
+      await addDesktopItem(rayDb, {
+        id: file.id,
+        type: file.content.type,
+        tileId: index + 1,
+        path: useFileSystemStore().APPLICATION_DIR_PATH,
+      });
     }
 
     localStorage.setItem('desktopFilesInitialized', 'initialized');

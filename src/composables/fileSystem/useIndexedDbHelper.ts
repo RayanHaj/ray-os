@@ -102,3 +102,8 @@ export function parseToPathArray(value: string, excludeRoot = false) {
 
   return value.split('/');
 }
+
+//TODO: IMPLEMENT A FUNCTION RECURSIVELY BUILDING A PATH STARTING FROM A PARENT ID TO THE ROOT DIR
+export async function buildPathToRootFromParentId(parentId: number) {
+
+}
