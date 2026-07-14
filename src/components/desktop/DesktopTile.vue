@@ -12,6 +12,8 @@ import { useHandleDesktopTileDragStart } from '@/composables/desktop/useHandleDe
 import { useHandleDesktopTileDrop } from '@/composables/desktop/useHandleDesktopTileDrop.ts';
 import { useGetSvgByDesktopTileItem } from '@/composables/desktop/useGetSvgByDesktopTileItem.ts';
 import { useOpenFileExplorerWindowByPath } from '@/composables/fileExplorer/useOpenFileExplorerWindowByPath.ts';
+import { buildPathToRootFromParentId } from '@/composables/fileSystem/useIndexedDbHelper.ts';
+import type { FileSystemItem } from '@/types/itemTypes.ts';
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 
@@ -38,9 +40,29 @@ function onTileRightClick(event: MouseEvent) {
       },
       {
         openFileExplorerLocation: async () => {
-          if (!desktopTileItem.value?.path) return;
+          if (desktopTileItem.value) {
+            const fsItems = await rayDb.findAll<FileSystemItem>('fileSystem');
+            const parentId = fsItems.find((item) => {
+              switch (desktopTileItem.value?.content.type) {
+                case 'directory': {
+                  if (!item.directory) return;
+                  if (item.id !== desktopTileItem.value.id) return;
+                  return item;
+                }
+                case 'file':
+                case 'application': {
+                  if (!item.file) return;
+                  if (item.file.id !== desktopTileItem.value.id) return;
+                  return item;
+                }
+              }
+            })?.parents[0];
 
-          useOpenFileExplorerWindowByPath(desktopTileItem.value.path);
+            if (!parentId) return;
+
+            const path = await buildPathToRootFromParentId(rayDb, parentId);
+            useOpenFileExplorerWindowByPath(path);
+          }
         },
       },
     );

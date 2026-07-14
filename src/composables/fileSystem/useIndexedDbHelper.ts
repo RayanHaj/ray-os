@@ -104,6 +104,28 @@ export function parseToPathArray(value: string, excludeRoot = false) {
 }
 
 //TODO: IMPLEMENT A FUNCTION RECURSIVELY BUILDING A PATH STARTING FROM A PARENT ID TO THE ROOT DIR
-export async function buildPathToRootFromParentId(parentId: number) {
+export async function buildPathToRootFromParentId(rayDb: RayDb, parentId: number): Promise<string> {
+  const pathArray: string[] = [];
 
+  await buildPathToRootHelper(rayDb, pathArray, parentId);
+
+  pathArray.reverse();
+
+  return parseToPathString(pathArray);
+}
+
+async function buildPathToRootHelper(rayDb: RayDb, pathArray: string[], parentId: number) {
+  if (parentId === useFileSystemStore().ROOT_DIR_ID) {
+    pathArray.push(useFileSystemStore().ROOT_DIR_NAME);
+    return;
+  }
+
+  const parentItem = await rayDb.findOne<FileSystemItem>('fileSystem', 'id', parentId);
+
+  if (parentItem.file || !parentId) return;
+
+  if (parentItem.directory) {
+    pathArray.push(parentItem.directory.name);
+    return buildPathToRootHelper(rayDb, pathArray, parentItem.parents[0]);
+  }
 }

@@ -212,5 +212,6 @@ const onResizing = (event: WheelEvent) => {
   background-color: black;
   padding: 10px;
   gap: 5px;
+  overflow: auto;
 }
 </style>
