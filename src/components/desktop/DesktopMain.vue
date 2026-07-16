@@ -3,7 +3,6 @@ import DesktopTile from '@/components/desktop/DesktopTile.vue';
 import { useTileCountGrid } from '@/composables/desktop/useTileCountGrid.ts';
 import { useBrowserStore } from '@/stores/browser.ts';
 import { computed, ref } from 'vue';
-import { useInitializeContextMenu } from '@/composables/contextMenu/useInitializeContextMenu.ts';
 import { useTaskbarStore } from '@/stores/taskbar.ts';
 import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
 import { useGetTileId } from '@/composables/desktop/useGetTileId.ts';
@@ -14,10 +13,6 @@ type Socials = (typeof socials)[number];
 const rowCount = computed(() => useTileCountGrid().x.value);
 const columnCount = computed(() => useTileCountGrid().y.value);
 const tileIsBeingDragged = ref<boolean>(false);
-
-function onDesktopRightClick(event: MouseEvent) {
-  useInitializeContextMenu(event).desktop().initialize({}, {});
-}
 
 function onMouseLeave(_: MouseEvent) {
   if (tileIsBeingDragged.value) {
@@ -40,7 +35,6 @@ function navigateToSocialPage(social: Socials) {
       @mouseleave="onMouseLeave"
       @dragover.prevent
       @dragenter.prevent
-      @contextmenu.prevent="onDesktopRightClick"
       :style="{ height: `${useBrowserStore().heightExcTaskbar}px` }"
     >
       <div v-for="rowPosition in rowCount" :key="rowPosition">

@@ -29,12 +29,9 @@ const windowContentComponents: { [windowName in WindowName]: Component } = {
 
 export function useGetWindowContentComponent(windowName: string) {
   const formattedComponentName = useWindowNameFormatter(windowName);
-  if (formattedComponentName === undefined) {
-    return FallbackMain;
-  }
-  if (!windowNames.includes(formattedComponentName)) {
-    return FallbackMain;
-  }
 
-  return windowContentComponents[formattedComponentName];
+  if (formattedComponentName && windowNames.includes(formattedComponentName))
+    return windowContentComponents[formattedComponentName];
+
+  return FallbackMain;
 }

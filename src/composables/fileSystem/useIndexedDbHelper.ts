@@ -3,12 +3,12 @@ import type { FileSystemItem } from '@/types/itemTypes.ts';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
 import { useGetRootDirectory } from '@/composables/fileSystem/useGetRootDirectory.ts';
 
-export async function fileSystemLookup(
+export async function useFileSystemLookup(
   rayDb: RayDb,
   path: string,
 ): Promise<Error | { parent: FileSystemItem; children: FileSystemItem[] } | undefined> {
   try {
-    const pathArray: string[] = parseToPathArray(path, true);
+    const pathArray: string[] = useParseToPathArray(path, true);
     const rootDirectoryId = await useGetRootDirectory(rayDb, true);
 
     if (!rootDirectoryId) {
@@ -34,7 +34,7 @@ export async function fileSystemLookup(
 
     pathArray.splice(0, 1);
 
-    const value = await getFileSystemItem(rayDb, startPoint, pathArray);
+    const value = await useGetFileSystemItem(rayDb, startPoint, pathArray);
     if (value && value.directory) {
       if (value.directory.children.length === 0) {
         return { parent: value, children: [] };
@@ -63,7 +63,7 @@ export async function fileSystemLookup(
  * @param pathArray
  * @returns The FileSystemItem found at the end of the path, or undefined if not found.
  */
-export async function getFileSystemItem(
+export async function useGetFileSystemItem(
   rayDb: RayDb,
   startItem: FileSystemItem,
   pathArray: string[],
@@ -86,16 +86,16 @@ export async function getFileSystemItem(
       (currentItem.directory?.name === nextPathName || currentItem.file?.name === nextPathName)
     ) {
       pathArray.shift();
-      return await getFileSystemItem(rayDb, currentItem, pathArray);
+      return await useGetFileSystemItem(rayDb, currentItem, pathArray);
     }
   }
 }
 
-export function parseToPathString(value: string[]) {
+export function useParseToPathString(value: string[]) {
   return value.join('/');
 }
 
-export function parseToPathArray(value: string, excludeRoot = false) {
+export function useParseToPathArray(value: string, excludeRoot = false) {
   if (excludeRoot) {
     return value.replace('C:/', '').split('/');
   }
@@ -104,28 +104,30 @@ export function parseToPathArray(value: string, excludeRoot = false) {
 }
 
 //TODO: IMPLEMENT A FUNCTION RECURSIVELY BUILDING A PATH STARTING FROM A PARENT ID TO THE ROOT DIR
-export async function buildPathToRootFromParentId(rayDb: RayDb, parentId: number): Promise<string> {
+export async function useBuildPathToRootFromParentId(rayDb: RayDb, parentId: number): Promise<string> {
   const pathArray: string[] = [];
 
-  await buildPathToRootHelper(rayDb, pathArray, parentId);
+  await useBuildPathToRootHelper(rayDb, pathArray, parentId);
 
   pathArray.reverse();
 
-  return parseToPathString(pathArray);
+  return useParseToPathString(pathArray);
 }
 
-async function buildPathToRootHelper(rayDb: RayDb, pathArray: string[], parentId: number) {
+async function useBuildPathToRootHelper(rayDb: RayDb, pathArray: string[], parentId: number) {
   if (parentId === useFileSystemStore().ROOT_DIR_ID) {
     pathArray.push(useFileSystemStore().ROOT_DIR_NAME);
     return;
   }
 
-  const parentItem = await rayDb.findOne<FileSystemItem>('fileSystem', 'id', parentId);
+  const parentItem: FileSystemItem = await rayDb.findOne<FileSystemItem>(
+    'fileSystem',
+    'id',
+    parentId,
+  );
 
-  if (parentItem.file || !parentId) return;
+  if (parentItem.file || !parentItem.directory || !parentId) return;
 
-  if (parentItem.directory) {
-    pathArray.push(parentItem.directory.name);
-    return buildPathToRootHelper(rayDb, pathArray, parentItem.parents[0]);
-  }
+  pathArray.push(parentItem.directory.name);
+  return useBuildPathToRootHelper(rayDb, pathArray, parentItem.parents[0]);
 }

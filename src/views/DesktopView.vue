@@ -18,7 +18,7 @@ import { useFlatOpenWindowsReferencesFull } from '@/composables/window/useFlatOp
 import { useOnOuterClickClose } from '@/composables/helpers/useOnOuterClickClose.js';
 import { useGetWindowContentComponent } from '@/composables/window/useGetWindowContentComponent.js';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.js';
-import { fileSystemLookup } from '@/composables/fileSystem/useIndexedDbHelper.js';
+import { useFileSystemLookup } from '@/composables/fileSystem/useIndexedDbHelper.js';
 
 import type { Item } from '@/types/itemTypes';
 import type { RayDb } from 'ray-db-wrapper';
@@ -30,21 +30,6 @@ const wallpapers: Record<string, string> = wallpapersJSON;
 const windowFlatReferences: ComputedRef<WindowFlatReference[]> = useFlatOpenWindowsReferencesFull();
 
 const fixedSizeWindows = ref<Record<string, { width: number; height: number }>>({});
-
-// watch(
-//   () => useBrowserStore().isMobile,
-//   (newIsMobile) => {
-//     if (!newIsMobile) {
-//       fixedSizeWindows.value['Snake'] = {
-//         width: useSnakeStore().WINDOW_WIDTH,
-//         height: useSnakeStore().WINDOW_HEIGHT,
-//       };
-//     } else {
-//       delete fixedSizeWindows.value['Snake'];
-//     }
-//   },
-//   { immediate: true },
-// );
 
 const minWidthWindows: Record<string, { width: number }> = {
   Notepad: { width: 300 },
@@ -87,7 +72,7 @@ watch(
      * else it will look for the wallpaper in the default wallpapers list
      */
     if (newSelectedWallpaper.type === 'custom') {
-      const wallpaperDirectory = await fileSystemLookup(rayDb, 'Wallpapers');
+      const wallpaperDirectory = await useFileSystemLookup(rayDb, 'Wallpapers');
       if (wallpaperDirectory instanceof Error || wallpaperDirectory === undefined) return;
 
       const wallpaper = wallpaperDirectory.children.find(

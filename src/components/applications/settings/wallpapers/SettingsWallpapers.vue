@@ -3,7 +3,7 @@ import WallpaperTile from '@/components/applications/settings/wallpapers/Wallpap
 import wallpapers from '@/json/wallpapers.json';
 import { onBeforeMount, type Ref, ref, watch } from 'vue';
 import { useWallpaperStore, type WallpaperType } from '@/stores/settings/wallpaper.ts';
-import { fileSystemLookup } from '@/composables/fileSystem/useIndexedDbHelper.ts';
+import { useFileSystemLookup } from '@/composables/fileSystem/useIndexedDbHelper.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import type { FileSystemItem, Item } from '@/types/itemTypes.js';
@@ -37,7 +37,7 @@ watch(
 );
 
 async function updateCustomWallpapers() {
-  const wallpaperDirectory = await fileSystemLookup(rayDb, 'Wallpapers');
+  const wallpaperDirectory = await useFileSystemLookup(rayDb, 'Wallpapers');
   if (wallpaperDirectory instanceof Error || wallpaperDirectory === undefined) {
     return;
   }

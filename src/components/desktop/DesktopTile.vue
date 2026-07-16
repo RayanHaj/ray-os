@@ -12,7 +12,7 @@ import { useHandleDesktopTileDragStart } from '@/composables/desktop/useHandleDe
 import { useHandleDesktopTileDrop } from '@/composables/desktop/useHandleDesktopTileDrop.ts';
 import { useGetSvgByDesktopTileItem } from '@/composables/desktop/useGetSvgByDesktopTileItem.ts';
 import { useOpenFileExplorerWindowByPath } from '@/composables/fileExplorer/useOpenFileExplorerWindowByPath.ts';
-import { buildPathToRootFromParentId } from '@/composables/fileSystem/useIndexedDbHelper.ts';
+import { useBuildPathToRootFromParentId } from '@/composables/fileSystem/useIndexedDbHelper.ts';
 import type { FileSystemItem } from '@/types/itemTypes.ts';
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
@@ -23,11 +23,10 @@ const emit = defineEmits(['dragStarted', 'dragEnded']);
 const { tileId } = defineProps<{ tileId: number }>();
 
 const desktopTileItem = ref<DesktopTileItem | null>(null);
-
 function onTileRightClick(event: MouseEvent) {
   if (desktopTileItem.value) {
     event.stopPropagation();
-  }
+  } else return;
 
   useInitializeContextMenu(event)
     .tile()
@@ -60,7 +59,7 @@ function onTileRightClick(event: MouseEvent) {
 
             if (!parentId) return;
 
-            const path = await buildPathToRootFromParentId(rayDb, parentId);
+            const path = await useBuildPathToRootFromParentId(rayDb, parentId);
             useOpenFileExplorerWindowByPath(path);
           }
         },
@@ -93,6 +92,7 @@ const onDrop = async (event: DragEvent) => {
   emit('dragEnded');
   await useHandleDesktopTileDrop(event, desktopTileItem.value, rayDb);
 };
+
 
 async function openWindow() {
   if (!desktopTileItem.value) return;

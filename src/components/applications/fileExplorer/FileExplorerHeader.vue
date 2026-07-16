@@ -2,7 +2,7 @@
 import { onBeforeMount, ref } from 'vue';
 import { type FileItemSizeKey, fileItemSizes } from '@/types/fileExplorerTypes.js';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
-import { fileSystemLookup } from '@/composables/fileSystem/useIndexedDbHelper.ts';
+import { useFileSystemLookup } from '@/composables/fileSystem/useIndexedDbHelper.ts';
 import { useDeleteFileSystemItem } from '@/composables/fileSystem/useDeleteFileSystemItem.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import { RayDb } from 'ray-db-wrapper';
@@ -51,7 +51,7 @@ async function onDrop(event: DragEvent) {
     });
 
     const parentPath = currentPath.slice(0, -1).join('/') || 'C:';
-    const parentDir = await fileSystemLookup(rayDb, parentPath);
+    const parentDir = await useFileSystemLookup(rayDb, parentPath);
 
     if (!parentDir || parentDir instanceof Error) return;
 

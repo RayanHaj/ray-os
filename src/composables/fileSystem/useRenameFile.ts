@@ -15,29 +15,26 @@ export async function useRenameFile(
 
   const sanitizedFileName = useSanitizeFileName(
     newFileName,
-    fileItem.content.rawFile?.type as FileType,
+    fileItem.content.rawFile.type as FileType,
   );
 
-  if (!useValidateFileName(sanitizedFileName, windowId)) {
-    return;
-  }
+  const fileNameIsValid: boolean = useValidateFileName(sanitizedFileName, windowId);
 
-  fileItem.label = sanitizedFileName;
-  fileItem.content.name = sanitizedFileName;
-
-  if (fileItem.content.rawFile) {
+  if (fileNameIsValid) {
+    fileItem.label = sanitizedFileName;
+    fileItem.content.name = sanitizedFileName;
     fileItem.content.rawFile = new File([fileItem.content.rawFile], sanitizedFileName, {
       type: fileItem.content.rawFile.type,
     });
+
+    await rayDb.updateOne<ItemInsert>('files', fileItem);
+    await rayDb.updateManyByQuery<InsertFileSystemItem>(
+      'fileSystem',
+      () => ({ file: { name: sanitizedFileName } }),
+      (item) => item.file?.id === fileItem.id,
+    );
+
+    await useDesktopStore().updateTiles(rayDb);
+    useFileSystemStore().updateFileSystem();
   }
-
-  await rayDb.updateOne<ItemInsert>('files', fileItem);
-  await rayDb.updateManyByQuery<InsertFileSystemItem>(
-    'fileSystem',
-    () => ({ file: { name: sanitizedFileName } }),
-    (item) => item.file?.id === fileItem.id,
-  );
-
-  await useDesktopStore().updateTiles(rayDb);
-  useFileSystemStore().updateFileSystem();
 }

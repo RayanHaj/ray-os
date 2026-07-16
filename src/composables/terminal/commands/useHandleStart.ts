@@ -1,5 +1,5 @@
 import type { RayDb } from 'ray-db-wrapper';
-import { fileSystemLookup } from '@/composables/fileSystem/useIndexedDbHelper.ts';
+import { useFileSystemLookup } from '@/composables/fileSystem/useIndexedDbHelper.ts';
 import type { Application, FileSystemItem, Item } from '@/types/itemTypes.ts';
 import { useWindowStore } from '@/stores/window.ts';
 import type { Ref } from 'vue';
@@ -11,7 +11,7 @@ export async function useHandleStart(rayDb: RayDb, name: string, currentPath: Re
     return;
   }
 
-  const currentDirectory = await fileSystemLookup(rayDb, currentPath.value.join('/'));
+  const currentDirectory = await useFileSystemLookup(rayDb, currentPath.value.join('/'));
   if (currentDirectory instanceof Error) {
     return;
   }

@@ -10,8 +10,8 @@ export interface FileItem {
   name: string;
   size: number;
   createdAt: string;
+  rawFile: File;
   imgUrl?: string;
-  rawFile?: File;
 }
 
 export interface Item {

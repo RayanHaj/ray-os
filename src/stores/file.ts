@@ -3,7 +3,7 @@ import { defineStore } from 'pinia';
 import type { Item, ItemInsert } from '@/types/itemTypes.ts';
 import { Applications } from '@/types/itemTypes.ts';
 import type { RayDb } from 'ray-db-wrapper';
-import { fileSystemLookup } from '@/composables/fileSystem/useIndexedDbHelper.ts';
+import { useFileSystemLookup } from '@/composables/fileSystem/useIndexedDbHelper.ts';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
 import { useInsertFileSystemItem } from '@/composables/fileSystem/useInsertFileSystemItem.ts';
 
@@ -61,8 +61,7 @@ export const useFileStore = defineStore('file', () => {
   }
 
   async function getApplicationDirectory(rayDb: RayDb) {
-    const applicationItemsPath = `${useFileSystemStore().ROOT_DIR_NAME}/Applications`;
-    return await fileSystemLookup(rayDb, applicationItemsPath);
+    return await useFileSystemLookup(rayDb, useFileSystemStore().APPLICATION_DIR_PATH);
   }
 
   function mapApplicationsToItems(): Item[] {

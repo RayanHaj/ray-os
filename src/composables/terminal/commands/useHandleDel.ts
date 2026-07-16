@@ -1,5 +1,5 @@
 import type { RayDb } from 'ray-db-wrapper';
-import { fileSystemLookup } from '@/composables/fileSystem/useIndexedDbHelper.ts';
+import { useFileSystemLookup } from '@/composables/fileSystem/useIndexedDbHelper.ts';
 import { useDeleteFileSystemItem } from '@/composables/fileSystem/useDeleteFileSystemItem.ts';
 import type { Ref } from 'vue';
 import type { LineTerminal } from '@/types/terminalTypes.ts';
@@ -11,7 +11,7 @@ export async function useHandleDel(
   lines: Ref<LineTerminal[]>,
 ): Promise<Error | undefined> {
   try {
-    const values = await fileSystemLookup(rayDb, currentPath.value.join('/'));
+    const values = await useFileSystemLookup(rayDb, currentPath.value.join('/'));
     if (values instanceof Error) {
       return new Error('could not find value');
     }

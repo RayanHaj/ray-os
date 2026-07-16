@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, onBeforeMount, ref, watch } from 'vue';
 import {
-  fileSystemLookup,
-  parseToPathString,
+  useFileSystemLookup,
+  useParseToPathString,
 } from '@/composables/fileSystem/useIndexedDbHelper.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import FileExplorerHeader from '@/components/applications/fileExplorer/FileExplorerHeader.vue';
@@ -40,7 +40,7 @@ onBeforeMount(async () => {
 
   if (fileExplorerStore.filePathAtWindow?.windowId === windowId) {
     path.value = fileExplorerStore.filePathAtWindow.path;
-    initPath = parseToPathString(fileExplorerStore.filePathAtWindow.path);
+    initPath = useParseToPathString(fileExplorerStore.filePathAtWindow.path);
 
     fileExplorerStore.filePathAtWindow = { windowId: '', path: [] };
   }
@@ -78,7 +78,7 @@ async function handleBackClick() {
   const previousPath = path.value.pop();
 
   if (previousPath && previousPath !== fileSystemStore.ROOT_DIR_NAME) {
-    items.value = await useUpdateItemsByCurrentPath(rayDb, parseToPathString(path.value));
+    items.value = await useUpdateItemsByCurrentPath(rayDb, useParseToPathString(path.value));
     parentId.value = items.value[0].parents[0];
   } else {
     path.value = cachedPath;
@@ -151,7 +151,7 @@ async function handleModalInput(contentType: ModalContentType, action: ModalActi
       break;
     case 'add': {
       try {
-        const currentDir = await fileSystemLookup(rayDb, path.value.join('/'));
+        const currentDir = await useFileSystemLookup(rayDb, path.value.join('/'));
         if (!currentDir || currentDir instanceof Error) {
           throw new Error('Could not find current directory');
         }
@@ -262,7 +262,7 @@ async function onFileUpload(files: FileList) {
     <FileExplorerGrid
       :parent-id="parentId ?? -1"
       :current-file-system-items="items"
-      :path="parseToPathString(path)"
+      :path="useParseToPathString(path)"
       :is-in-file-select-state="fileSelectState?.active ?? false"
       :filter-by-file-type="fileSelectState?.allowedFileTypes ?? []"
       :multi-select-activated="fileSelectState?.multiSelect ?? true"

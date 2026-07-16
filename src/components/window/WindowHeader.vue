@@ -3,7 +3,7 @@ import type { WindowFlatReference, WindowType } from '@/types/windowTypes.js';
 import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.js';
 import { useWindowStore } from '@/stores/window';
 import { useWindowControls } from '@/composables/window/useWindowControls.ts';
-import { useGetWindowTitle } from '@/composables/window/useGetWindowTitle.ts';
+import { useGetWindowTitle } from '../../composables/window/useGetWindowTitle.ts';
 import type { StyleValue } from 'vue';
 
 const { windowId, reference, windowType, showSvg } = defineProps<{

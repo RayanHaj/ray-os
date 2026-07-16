@@ -13,13 +13,8 @@ export async function useRenameDirectory(
   windowId: string,
 ) {
   try {
-    if (!fileSystemItem.directory) {
-      throw Error('Passed down fileSystemItem is not of type "directory"');
-    }
-
-    if (fileSystemItem.isSystemFile) {
-      throw new SystemFileRenameError('Cannot rename system files');
-    }
+    if (!fileSystemItem.directory) throw new Error('This fileSystemItem is not of type "directory"');
+    if (fileSystemItem.isSystemFile) throw new SystemFileRenameError('Cannot rename system files');
 
     fileSystemItem.directory.name = newDirectoryName.trim();
 

@@ -1,4 +1,4 @@
-import { fileSystemLookup } from '@/composables/fileSystem/useIndexedDbHelper.ts';
+import { useFileSystemLookup } from '@/composables/fileSystem/useIndexedDbHelper.ts';
 import type { FileSystemItem, Item } from '@/types/itemTypes.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import { useDeleteFileSystemItem } from '@/composables/fileSystem/useDeleteFileSystemItem.ts';
@@ -7,7 +7,7 @@ export async function useUpdateItemsByCurrentPath(
   rayDb: RayDb,
   path: string,
 ): Promise<FileSystemItem[]> {
-  const fileSystemItems = await fileSystemLookup(rayDb, path);
+  const fileSystemItems = await useFileSystemLookup(rayDb, path);
   if (fileSystemItems instanceof Error || !fileSystemItems) {
     throw new Error(`No fileSystemItems (children) found with specified path: ${path}`);
   }
