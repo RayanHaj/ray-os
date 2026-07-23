@@ -1,5 +1,5 @@
 import type { Component } from 'vue';
-import SettingsThemes from '@/components/applications/settings/SettingsThemes.vue';
+import SettingsThemes from '@/components/applications/settings/themes/SettingsThemes.vue';
 import SettingsSystem from '@/components/applications/settings/SettingsSystem.vue';
 import SettingsWallpapers from '@/components/applications/settings/wallpapers/SettingsWallpapers.vue';
 

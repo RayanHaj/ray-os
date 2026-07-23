@@ -48,9 +48,9 @@ body {
   --text-secondary-color: #a8b2bd;
   --accent-color: #4a9eff;
   --svg-color: #e1e5e9;
-  --button-primary-color: #4a9eff;
+  --button-primary-color: #357ae8;
   --button-secondary-color: #2a3441;
-  --button-hover-color: #357ae8;
+  --button-hover-color: #2d6cdb;
   --button-text-color: #0f1419;
   --input-primary-color: #1e2328;
   --input-secondary-color: #252a30;
@@ -74,7 +74,7 @@ body {
   --text-secondary-color: #e6804d;
   --accent-color: #ff6b35;
   --svg-color: #ffa366;
-  --button-primary-color: #8b3a00;
+  --button-primary-color: #cc5529;
   --button-secondary-color: #4d2619;
   --button-hover-color: #a64500;
   --button-text-color: #ffcc99;
@@ -100,9 +100,9 @@ body {
   --text-secondary-color: #00cc00;
   --accent-color: #60ff60;
   --svg-color: #3dff3d;
-  --button-primary-color: #153015;
+  --button-primary-color: #486a48;
   --button-secondary-color: #2a4a2a;
-  --button-hover-color: #486a48;
+  --button-hover-color: #00cc00;
   --button-text-color: #ffffff;
   --input-primary-color: #0f1a0f;
   --input-secondary-color: #1f3f1f;
@@ -126,9 +126,9 @@ body {
   --text-secondary-color: #cc00cc;
   --accent-color: #47ffff;
   --svg-color: #ff47ff;
-  --button-primary-color: #1c0c2c;
+  --button-primary-color: #5f2399;
   --button-secondary-color: #38144d;
-  --button-hover-color: #5f2399;
+  --button-hover-color: #cc00cc;
   --button-text-color: #ffffff;
   --input-primary-color: #0f0a1a;
   --input-secondary-color: #251547;
@@ -152,9 +152,9 @@ body {
   --text-secondary-color: #cc8800;
   --accent-color: #ffd633;
   --svg-color: #ffc133;
-  --button-primary-color: #2c1c00;
+  --button-primary-color: #6d501f;
   --button-secondary-color: #473310;
-  --button-hover-color: #6d501f;
+  --button-hover-color: #cc8800;
   --button-text-color: #ffffff;
   --input-primary-color: #1a0f00;
   --input-secondary-color: #382b08;
@@ -178,9 +178,9 @@ body {
   --text-secondary-color: #00aacc;
   --accent-color: #70d4ff;
   --svg-color: #47edff;
-  --button-primary-color: #001c2c;
+  --button-primary-color: #00567a;
   --button-secondary-color: #003347;
-  --button-hover-color: #00567a;
+  --button-hover-color: #00aacc;
   --button-text-color: #ffffff;
   --input-primary-color: #000f1a;
   --input-secondary-color: #002a40;
@@ -204,9 +204,9 @@ body {
   --text-secondary-color: #cc2800;
   --accent-color: #ff7755;
   --svg-color: #ff5533;
-  --button-primary-color: #2c0c0c;
+  --button-primary-color: #7a2626;
   --button-secondary-color: #471919;
-  --button-hover-color: #7a2626;
+  --button-hover-color: #cc2800;
   --button-text-color: #ffffff;
   --input-primary-color: #1a0505;
   --input-secondary-color: #3a1010;
@@ -230,9 +230,9 @@ body {
   --text-secondary-color: #9933cc;
   --accent-color: #d98fff;
   --svg-color: #cc47ff;
-  --button-primary-color: #1c0c2c;
+  --button-primary-color: #5a2a7a;
   --button-secondary-color: #331a47;
-  --button-hover-color: #5a2a7a;
+  --button-hover-color: #9933cc;
   --button-text-color: #ffffff;
   --input-primary-color: #12081a;
   --input-secondary-color: #261340;
@@ -248,4 +248,56 @@ body {
   --tabs-secondary-background: #1a0c38;
   --tabs-text: #ffffff;
   --tabs-hover: #251152;
+}
+
+[data-theme='teal-ocean'] {
+  --background-color: #0a1a1f;
+  --text-color: #c9ded5;
+  --text-secondary-color: #8fa89c;
+  --accent-color: #4db8a8;
+  --svg-color: #c9ded5;
+  --button-primary-color: #2d7a70;
+  --button-secondary-color: #13262b;
+  --button-hover-color: #359185;
+  --button-text-color: #e8f4ee;
+  --input-primary-color: #0f2429;
+  --input-secondary-color: #1a3035;
+  --input-border-color: #4db8a8;
+  --input-focus-color: #4db8a830;
+  --taskbar-background-color: #0d1f24;
+  --taskbar-border-color: #4db8a8;
+  --window-primary-color: #0e2026;
+  --window-secondary-color: #162d32;
+  --window-border-color: #357a70;
+  --highlight-color: #4db8a840;
+  --tabs-background: #13262b;
+  --tabs-secondary-background: #1a3035;
+  --tabs-text: #c9ded5;
+  --tabs-hover: #4db8a8;
+}
+
+[data-theme='rose-quartz'] {
+  --background-color: #1a0f17;
+  --text-color: #f0c4d4;
+  --text-secondary-color: #c088a0;
+  --accent-color: #ff7799;
+  --svg-color: #f0c4d4;
+  --button-primary-color: #8b3a5c;
+  --button-secondary-color: #2a1820;
+  --button-hover-color: #a64570;
+  --button-text-color: #fce8ef;
+  --input-primary-color: #20121a;
+  --input-secondary-color: #2e1a26;
+  --input-border-color: #ff7799;
+  --input-focus-color: #ff779930;
+  --taskbar-background-color: #160c12;
+  --taskbar-border-color: #ff7799;
+  --window-primary-color: #1c0f16;
+  --window-secondary-color: #281420;
+  --window-border-color: #b04a68;
+  --highlight-color: #ff779940;
+  --tabs-background: #201218;
+  --tabs-secondary-background: #2a1822;
+  --tabs-text: #fce8ef;
+  --tabs-hover: #ff7799;
 }
