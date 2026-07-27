@@ -5,55 +5,43 @@ import { useHandleTerminalCommand } from '@/composables/terminal/useHandleTermin
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
-import type { LineTerminal } from '@/types/terminalTypes.js';
+import {
+  createEmptyLineTerminal,
+  createInitialLineTerminal,
+  type LineTerminal,
+} from '@/types/terminalTypes.js';
 import { useTerminalStore } from '@/stores/terminal.ts';
 import { useBrowserStore } from '@/stores/browser.ts';
+import { useGetLSTerminalFontSize } from '@/composables/terminal/useGetLSTerminalFontSize.ts';
+import { useSetLSCommandCache } from '@/composables/terminal/useSetLSCommandCache.ts';
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 const windowId = useInjectOrThrow<string>('windowId');
 
 const terminalStore = useTerminalStore();
 
-const lines = ref<LineTerminal[]>([
-  { line: 'RayOS Terminal — type "help" for commands', isPlain: true },
-  terminalStore.emptyLine,
-]);
+const lines = ref<LineTerminal[]>([createInitialLineTerminal(), createEmptyLineTerminal()]);
 
-const currentPath = ref<string[]>([]);
+const currentPath = ref<string[]>([useFileSystemStore().ROOT_DIR_NAME]);
 const currentCacheIndex = ref<number>(-1);
 
-const fontSize = ref(useBrowserStore().isMobile ? 16 : 20);
+const getInitialFontSize = () => (useBrowserStore().isMobile ? 16 : 20);
+
+const fontSize = ref<number>(getInitialFontSize());
+
 onBeforeMount(async () => {
-  currentPath.value = [useFileSystemStore().ROOT_DIR_NAME];
-  const fontSizeLS = localStorage.getItem(terminalStore.FONT_SIZE_LS_KEY);
-  if (fontSizeLS !== null) {
-    fontSize.value = Number(fontSizeLS);
-  }
+  const lsFontSize = useGetLSTerminalFontSize();
+  if (lsFontSize) fontSize.value = lsFontSize;
 
-  const commandCacheLs = localStorage.getItem(terminalStore.LS_COMMAND_CACHE_KEY);
-  if (commandCacheLs !== null) {
-    try {
-      const parsedCommandCache = (await JSON.parse(commandCacheLs)) as LineTerminal[];
-
-      if (parsedCommandCache.length > 0) {
-        terminalStore.cachedLines = parsedCommandCache;
-      }
-    } catch (e) {
-      console.error(e);
-      localStorage.setItem(terminalStore.LS_COMMAND_CACHE_KEY, JSON.stringify([]));
-    }
-  } else {
-    localStorage.setItem(terminalStore.LS_COMMAND_CACHE_KEY, JSON.stringify([]));
-  }
+  await useSetLSCommandCache();
 });
 
 const lineIndexesOfErrorLines = ref<number[]>([]);
 async function onEnter(command: string) {
   currentCacheIndex.value = -1;
 
-  if (lines.value.length > 0) {
+  if (lines.value.length > 0)
     lines.value[lines.value.length - 1] = { line: command, isPlain: false };
-  }
 
   const commandObject = await useHandleTerminalCommand(
     rayDb,
@@ -98,7 +86,7 @@ async function onEnter(command: string) {
     }
   }
 
-  pushNewEmptyLine();
+  pushEmptyLine();
   return commandObject;
 }
 
@@ -107,18 +95,12 @@ function onLineInput(value: string) {
   currentCacheIndex.value = -1;
 }
 
-function pushNewEmptyLine() {
-  lines.value.push(terminalStore.emptyLine);
-}
-
-function isReadonly(lineNumber: number) {
-  return lineNumber < lines.value.length - 1;
-}
+const pushEmptyLine = () => lines.value.push(createEmptyLineTerminal());
 
 const terminalLineRef = ref();
 function onKeyDown(event: KeyboardEvent) {
   if (event.key === 'Control') {
-    document.addEventListener('wheel', onResizing, { passive: false });
+    document.addEventListener('wheel', onMouseWheel, { passive: false });
   }
 
   switch (event.key) {
@@ -127,11 +109,9 @@ function onKeyDown(event: KeyboardEvent) {
         event.preventDefault();
         if (terminalStore.cachedLines.length === 0) return;
 
-        if (currentCacheIndex.value === -1) {
+        if (currentCacheIndex.value <= 0) {
           currentCacheIndex.value = terminalStore.cachedLines.length - 1;
-        } else if (currentCacheIndex.value > 0) {
-          currentCacheIndex.value--;
-        }
+        } else currentCacheIndex.value--;
 
         lines.value[lines.value.length - 1] = {
           ...terminalStore.cachedLines[currentCacheIndex.value],
@@ -159,13 +139,11 @@ function onKeyDown(event: KeyboardEvent) {
   }
 }
 
-async function onKeyUp(event: KeyboardEvent) {
-  if (event.key === 'Control') {
-    document.removeEventListener('wheel', onResizing);
-  }
-}
+const onKeyUp = (event: KeyboardEvent): void => {
+  if (event.key === 'Control') document.removeEventListener('wheel', onMouseWheel);
+};
 
-const onResizing = (event: WheelEvent) => {
+const onMouseWheel = (event: WheelEvent) => {
   event.preventDefault();
 
   const FONT_SIZE_STEP = 1;
@@ -191,13 +169,13 @@ const onResizing = (event: WheelEvent) => {
     :style="{ fontSize: `${fontSize}px` }"
   >
     <TerminalLine
-      v-for="(_, index) of lines"
+      v-for="(line, index) of lines"
       :ref="(el) => index === lines.length - 1 && el && (terminalLineRef = el)"
       :key="index"
       :window-id="windowId"
       :current-path="currentPath.join('/')"
-      :input-value="lines[index]"
-      :is-readonly="isReadonly(index)"
+      :line="line"
+      :is-readonly="index < lines.length - 1"
       :is-error="lineIndexesOfErrorLines.includes(index)"
       @enter-pressed="onEnter"
       @on-input="onLineInput"

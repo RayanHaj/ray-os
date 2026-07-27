@@ -3,9 +3,9 @@ import { computed, nextTick, onBeforeMount, onMounted, ref, watch } from 'vue';
 import { useWindowStore } from '@/stores/window.ts';
 import type { LineTerminal } from '@/types/terminalTypes.js';
 
-const { currentPath, inputValue, isReadonly, isError, windowId } = defineProps<{
+const { currentPath, line, isReadonly, isError, windowId } = defineProps<{
   currentPath: string;
-  inputValue: LineTerminal;
+  line: LineTerminal;
   isReadonly: boolean;
   isError: boolean;
   windowId: string;
@@ -42,7 +42,7 @@ watch(
 );
 
 watch(
-  () => inputValue.line,
+  () => line.line,
   (newValue) => {
     if (!terminalLineRef.value) return;
     if (terminalLineRef.value.textContent === newValue) return;
@@ -79,17 +79,17 @@ defineExpose({
 
 <template>
   <div v-if="isReadonly" class="wrapper">
-    <p v-if="!inputValue.isPlain" class="current-location">{{ displayPath }}</p>
+    <p v-if="!line.isPlain" class="current-location">{{ displayPath }}</p>
     <div class="terminal-line">
-      <p v-if="inputValue.line">
+      <p v-if="line.line">
         <span :style="{ color: isError ? 'red' : 'var(--text-color)' }" class="input-value">{{
-          inputValue.line
-        }}</span>
+            line.line
+          }}</span>
       </p>
     </div>
   </div>
   <div v-else class="wrapper">
-    <p v-if="!inputValue.isPlain" class="current-location">{{ displayPath }}</p>
+    <p v-if="!line.isPlain" class="current-location">{{ displayPath }}</p>
     <div
       ref="terminalLineRef"
       class="terminal-line"
