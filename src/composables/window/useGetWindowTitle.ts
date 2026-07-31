@@ -6,7 +6,7 @@ export function useGetWindowTitle(windowName: string, windowId: string) {
   const buildFileSelectString = () => {
     const fileSelectStateGetter = useFileSelectStateGetter(windowId).value;
 
-    if (fileSelectStateGetter.active) return;
+    if (!fileSelectStateGetter.active) return;
 
     const stringBuilder = ['select'];
 
