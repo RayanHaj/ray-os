@@ -112,7 +112,9 @@ function onFileUploadChange(event: Event) {
     </div>
     <div class="end-wrapper">
       <div class="clock-wrapper">
-        <label for="file-upload" class="custom-file-upload">Upload files</label>
+        <label for="file-upload" :style="{ cursor: 'pointer' }" class="custom-file-upload"
+          >Upload files</label
+        >
         <input
           id="file-upload"
           type="file"
@@ -199,7 +201,7 @@ input[type='file'] {
   width: calc(150px / 3);
   min-width: calc(125px / 3);
   background-color: var(--button-primary-color);
-  border: var(--input-border-color) solid 1px;
+  border: var(--window-border-color) 1px solid;
 }
 
 .item-size-button:hover {

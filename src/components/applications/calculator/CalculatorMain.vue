@@ -54,6 +54,5 @@ provide('calculatorManager', useCalculatorManager());
   padding: 10px;
   height: 100%;
   border-radius: 5px;
-  cursor: pointer;
 }
 </style>

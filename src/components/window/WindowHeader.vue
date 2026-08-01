@@ -82,7 +82,6 @@ const windowHeaderStyles: StyleValue = { height: `${useWindowStore().windowHeade
   width: 35px;
   height: 100%;
   border: none;
-  cursor: pointer;
 }
 
 .info-wrapper svg,

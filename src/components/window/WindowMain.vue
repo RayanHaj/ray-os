@@ -5,11 +5,9 @@ import {
   onBeforeMount,
   onMounted,
   provide,
-  type Ref,
-  ref,
   useTemplateRef,
 } from 'vue';
-import type { WindowFlatReference, WindowStyleObject, WindowType } from '@/types/windowTypes.js';
+import type { WindowFlatReference, WindowType } from '@/types/windowTypes.js';
 import { useWindowStore } from '@/stores/window.js';
 import WindowHeader from '@/components/window/WindowHeader.vue';
 import { useWindowStateManager } from '@/composables/window/useWindowStateManager.js';
@@ -122,6 +120,6 @@ const windowContentStyles = { height: windowContentHeight.value, width: '100%' }
   -webkit-user-select: none;
   overflow: hidden;
   background-color: var(--window-primary-color);
-  border: var(--window-border-color) 2px solid;
+  border: var(--window-border-color) 1px solid;
 }
 </style>

@@ -209,10 +209,6 @@ input[type='range']:disabled {
   min-width: 100px;
 }
 
-button {
-  cursor: pointer;
-}
-
 .play-button,
 .previous-button,
 .next-button {
@@ -259,7 +255,6 @@ button {
 input[type='range'] {
   -webkit-appearance: none;
   width: 100%;
-  cursor: pointer;
 }
 
 /* --- Webkit Browsers --- */

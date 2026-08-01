@@ -93,7 +93,6 @@ const onDrop = async (event: DragEvent) => {
   await useHandleDesktopTileDrop(event, desktopTileItem.value, rayDb);
 };
 
-
 async function openWindow() {
   if (!desktopTileItem.value) return;
   await useHandleDesktopFileClicked(desktopTileItem.value, rayDb);

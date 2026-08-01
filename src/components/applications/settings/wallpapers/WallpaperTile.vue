@@ -54,7 +54,6 @@ onBeforeMount(async () => {
   height: 140px;
   border-radius: 8px;
   overflow: hidden;
-  cursor: pointer;
 }
 
 .wallpaper-tile img {

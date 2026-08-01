@@ -102,7 +102,6 @@ function navigateToSocialPage(social: Socials) {
   gap: 15px;
   flex-direction: column;
   justify-content: center;
-  cursor: pointer;
 }
 
 button.socials-icons {

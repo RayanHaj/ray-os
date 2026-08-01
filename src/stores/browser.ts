@@ -16,7 +16,7 @@ export const useBrowserStore = defineStore('browser', () => {
   function updateSizes() {
     width.value = window.innerWidth;
     height.value = window.innerHeight;
-    heightExcTaskbar.value = height.value - taskbarStore.taskbarHeight + 1;
+    heightExcTaskbar.value = height.value - taskbarStore.taskbarHeight;
   }
 
   const onPointerDown = (e: PointerEvent) => {

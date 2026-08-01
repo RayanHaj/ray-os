@@ -50,7 +50,7 @@ export function useAudioSelectManager(
     useFileExplorerStore().setFileExplorerWindowAsFileSelect(
       windowId,
       nextFileExplorerId,
-      ['audio/mpeg'],
+      ['audio/mpeg', 'audio/mp4'],
       true,
     );
 

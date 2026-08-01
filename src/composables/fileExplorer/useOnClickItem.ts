@@ -38,18 +38,12 @@ export function useOnClickItem(
     if (
       multiSelect.selectedItems.value.size === 1 &&
       multiSelect.selectedItems.value.has(fileSystemItem.id)
-    ) {
-      return;
-    }
+    ) return;
 
-    if (!isInFileSelectState) {
-      multiSelect.clear();
-    }
+    if (!isInFileSelectState) multiSelect.clear();
   }
 
-  if (!multiSelectActivated) {
-    multiSelect.clear();
-  }
+  if (!multiSelectActivated) multiSelect.clear();
 
   multiSelect.toggle(fileSystemItem.id);
 }

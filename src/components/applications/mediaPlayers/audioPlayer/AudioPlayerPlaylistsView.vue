@@ -39,7 +39,6 @@ ul {
 
 button {
   font-size: var(--font-size-lg);
-  cursor: pointer;
   display: flex;
   justify-content: center;
   align-items: center;

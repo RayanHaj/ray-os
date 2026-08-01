@@ -29,10 +29,6 @@ li {
   gap: 20px;
 }
 
-button {
-  cursor: pointer;
-}
-
 .play-button {
   display: flex;
   align-items: center;
