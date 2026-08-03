@@ -31,7 +31,7 @@ const windowId = useInjectOrThrow<string>('windowId');
 
 const items = ref<FileSystemItem[]>([]);
 const path = ref<string[]>([fileSystemStore.ROOT_DIR_NAME]);
-const parentId = ref<number>();
+const parentId = ref<number>(fileSystemStore.ROOT_DIR_ID);
 
 const isDragging = ref<boolean>(false);
 
@@ -46,7 +46,6 @@ onBeforeMount(async () => {
   }
 
   items.value = await useUpdateItemsByCurrentPath(rayDb, initPath);
-  parentId.value = fileSystemStore.ROOT_DIR_ID;
 
   const fileItemSize = localStorage.getItem('fileItemSize');
   if (fileItemSize) {
@@ -260,7 +259,7 @@ async function onFileUpload(files: FileList) {
       @header-event:file-upload="onFileUpload"
     />
     <FileExplorerGrid
-      :parent-id="parentId ?? -1"
+      :parent-id="parentId"
       :current-file-system-items="items"
       :path="useParseToPathString(path)"
       :is-in-file-select-state="fileSelectState?.active ?? false"
