@@ -1,9 +1,9 @@
 import { onBeforeMount, readonly, ref } from 'vue';
 import { useBrowserStore } from '@/stores/browser.ts';
-import type { WindowType } from '@/types/windowTypes.ts';
+import type { WindowControl, WindowType } from '@/types/windowTypes.ts';
 
 export function useWindowControls() {
-  const activeWindowControls = ref<('Minimize' | 'Maximize' | 'Close')[]>([
+  const activeWindowControls = ref<(WindowControl)[]>([
     'Minimize',
     'Maximize',
     'Close',

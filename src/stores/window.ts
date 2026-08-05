@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
-import { readonly, ref } from 'vue';
+import { readonly, type Ref, ref, watch } from 'vue';
 
-import type { WindowReference } from '@/types/windowTypes.ts';
+import type { WindowControl, WindowControlSignal, WindowReference } from '@/types/windowTypes.ts';
 import type { Application } from '@/types/itemTypes.ts';
 import { useVideoPlayerStore } from '@/stores/videoPlayer.ts';
 import { useImageViewerStore } from '@/stores/imageViewer.ts';
@@ -164,7 +164,34 @@ export const useWindowStore = defineStore('window', () => {
     return zIndexesOrder.value[zIndexesOrder.value.length - 1];
   }
 
+  const _windowControlClickSignal: Ref<WindowControlSignal | undefined> = ref(undefined);
+  function updateWindowControlClickSignal(windowControlSignal: WindowControlSignal) {
+    _windowControlClickSignal.value = windowControlSignal;
+  }
+
+  //TODO Finish window control signals so a window control can be intercepted when it should not proceed with the action
+  const windowControlClickSignal = (
+    callback: (
+      windowControlSignal: WindowControlSignal,
+    ) => void | Promise<void> | boolean | Promise<boolean>,
+    options?: { proceedOnCallbackReturnBool?: boolean },
+  ) =>
+    watch(_windowControlClickSignal, async (newValue, oldValue) => {
+      if (!newValue || newValue === oldValue) return;
+
+      await callback(newValue);
+
+      // const proceed = await callback(newValue);
+      // if (typeof proceed === 'boolean' && options?.proceedOnCallbackReturnBool) {
+      //
+      // }
+
+      _windowControlClickSignal.value = undefined;
+    });
+
   return {
+    windowControlClickSignal,
+    updateWindowControlClickSignal,
     openWindowsReferences,
     zIndexesOrder,
     windowHeaderHeight,

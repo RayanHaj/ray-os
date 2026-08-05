@@ -103,10 +103,14 @@ const windowContentStyles = { height: windowContentHeight.value, width: '100%' }
       :reference="reference"
       :window-type="windowType"
       :show-svg="showSvg"
-      @on-mousedown-header="onMousedownHeader"
-      @window-control-close="closeWindow"
-      @window-control-maximize="maximizeWindow"
-      @window-control-minimize="minimizeWindow"
+      @on-mousedown-header="onMousedownHeader($event as MouseEvent)"
+      @window-control-clicked="(control) => {
+        switch (control) {
+          case 'Close': return closeWindow();
+          case 'Maximize': return maximizeWindow();
+          case 'Minimize': return minimizeWindow();
+        }
+      }"
     />
     <component :is="windowContentComponent" :style="windowContentStyles" :window-styles="styles" />
   </div>

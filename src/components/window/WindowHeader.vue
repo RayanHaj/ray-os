@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { WindowFlatReference, WindowType } from '@/types/windowTypes.js';
+import type { WindowControl, WindowFlatReference, WindowType } from '@/types/windowTypes.js';
 import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.js';
 import { useWindowStore } from '@/stores/window';
 import { useWindowControls } from '@/composables/window/useWindowControls.ts';
@@ -13,12 +13,23 @@ const { windowId, reference, windowType, showSvg } = defineProps<{
   showSvg: boolean;
 }>();
 
+const emits = defineEmits<{
+  (e: 'windowControlClicked', action: WindowControl): void;
+  (e: 'onMousedownHeader', event: MouseEvent | TouchEvent): void;
+}>();
+
 const windowTitle = useGetWindowTitle(reference.label, windowId);
 
 const windowControls = useWindowControls();
 windowControls.mount(windowType);
 
 const windowHeaderStyles: StyleValue = { height: `${useWindowStore().windowHeaderHeight}px` };
+
+const windowStore = useWindowStore();
+function handleWindowControlClicked(action: WindowControl) {
+  windowStore.updateWindowControlClickSignal({ windowControl: action, windowId });
+  emits('windowControlClicked', action);
+}
 </script>
 <template>
   <header class="window-header" :style="windowHeaderStyles">
@@ -38,7 +49,7 @@ const windowHeaderStyles: StyleValue = { height: `${useWindowStore().windowHeade
         v-for="action in windowControls.activeWindowControls.value"
         :key="action"
         :class="action.toLowerCase()"
-        @click="$emit(`windowControl${action}`)"
+        @click="handleWindowControlClicked(action)"
       >
         <component :is="useSvgOrFallback(action).svg" />
       </button>

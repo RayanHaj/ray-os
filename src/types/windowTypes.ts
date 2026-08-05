@@ -34,3 +34,9 @@ export const windowNames = [
 ] as const;
 export type WindowName = (typeof windowNames)[number];
 export type WindowType = 'inline' | 'fixed';
+export type WindowControl = 'Minimize' | 'Maximize' | 'Close';
+
+export type WindowControlSignal = {
+  windowId: string;
+  windowControl: WindowControl
+}

@@ -3,6 +3,7 @@ import { computed, ref, type StyleValue, watch } from 'vue';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import type { FileItem, Item } from '@/types/itemTypes.js';
+import { useWindowStore } from '@/stores/window.ts';
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 
@@ -12,6 +13,9 @@ const { _fileName, fileIsLoaded, fileId } = defineProps<{
   fileId: number | null;
 }>();
 const emit = defineEmits(['onSaveChanges']);
+
+const windowStore = useWindowStore();
+windowStore.windowControlClickSignal((windowControlSignal) => console.log(windowControlSignal))
 
 const fileNameRef = ref<string>('');
 watch(
