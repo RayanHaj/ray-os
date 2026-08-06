@@ -70,7 +70,7 @@ const taskbarStyle: StyleValue = { height: `${taskbarStore.taskbarHeight}px` };
         <TaskbarTile
           v-for="item of taskbarItems"
           :key="item.tileId"
-          :taskbar-tile-item="taskbarItems.find((taskbarItem) => taskbarItem.id === item.id)"
+          :taskbar-tile-item="item"
         />
       </div>
     </div>

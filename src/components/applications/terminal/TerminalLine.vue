@@ -16,11 +16,8 @@ const emit = defineEmits(['enter-pressed', 'on-input']);
 const path = ref<string>('');
 const terminalLineRef = useTemplateRef('terminalLineRef');
 
-onBeforeMount(() => {
-  path.value = currentPath;
-});
-
-onMounted(() => terminalLineRef.value?.focus())
+onBeforeMount(() => path.value = currentPath);
+onMounted(() => terminalLineRef.value?.focus());
 
 /**
  * Focuses the terminal input when this window is brought to the front.
@@ -52,21 +49,21 @@ function onEnter(event: KeyboardEvent) {
 
 const displayPath = computed(() => `PS ${path.value}>`);
 
-defineExpose({
-  focusAtEnd() {
-    nextTick(() => {
-      if (!terminalLineRef.value) return;
+function focusAtEnd() {
+  nextTick(() => {
+    if (!terminalLineRef.value) return;
 
-      terminalLineRef.value.focus();
-      const range = document.createRange();
-      const selection = window.getSelection();
-      range.selectNodeContents(terminalLineRef.value);
-      range.collapse(false);
-      selection?.removeAllRanges();
-      selection?.addRange(range);
-    });
-  },
-});
+    terminalLineRef.value.focus();
+    const range = document.createRange();
+    const selection = window.getSelection();
+    range.selectNodeContents(terminalLineRef.value);
+    range.collapse(false);
+    selection?.removeAllRanges();
+    selection?.addRange(range);
+  });
+}
+
+defineExpose({ focusAtEnd });
 </script>
 
 <template>
@@ -75,8 +72,8 @@ defineExpose({
     <div class="terminal-line">
       <p v-if="line.line">
         <span :style="{ color: isError ? 'red' : 'var(--text-color)' }" class="input-value">{{
-            line.line
-          }}</span>
+          line.line
+        }}</span>
       </p>
     </div>
   </div>
