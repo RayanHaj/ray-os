@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeMount, onMounted, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeMount, onMounted, ref, useTemplateRef, watch } from 'vue';
 import { useWindowStore } from '@/stores/window.ts';
 import type { LineTerminal } from '@/types/terminalTypes.js';
 
@@ -14,16 +14,13 @@ const { currentPath, line, isReadonly, isError, windowId } = defineProps<{
 const emit = defineEmits(['enter-pressed', 'on-input']);
 
 const path = ref<string>('');
-const terminalLineRef = ref();
+const terminalLineRef = useTemplateRef('terminalLineRef');
 
 onBeforeMount(() => {
   path.value = currentPath;
-  console.log(isError);
 });
 
-onMounted(() => {
-  terminalLineRef.value?.focus();
-});
+onMounted(() => terminalLineRef.value?.focus())
 
 /**
  * Focuses the terminal input when this window is brought to the front.
@@ -31,13 +28,8 @@ onMounted(() => {
 watch(
   () => useWindowStore().zIndexesOrder,
   (newValue, oldValue) => {
-    if (newValue === oldValue) {
-      return;
-    }
-
-    if (newValue[newValue.length - 1] === windowId) {
-      terminalLineRef.value?.focus();
-    }
+    if (newValue === oldValue) return;
+    if (newValue[newValue.length - 1] === windowId) terminalLineRef.value?.focus();
   },
 );
 

@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { readonly, type Ref, ref, watch } from 'vue';
 
-import type { WindowControl, WindowControlSignal, WindowReference } from '@/types/windowTypes.ts';
+import type { WindowControlSignal, WindowReference } from '@/types/windowTypes.ts';
 import type { Application } from '@/types/itemTypes.ts';
 import { useVideoPlayerStore } from '@/stores/videoPlayer.ts';
 import { useImageViewerStore } from '@/stores/imageViewer.ts';
@@ -17,14 +17,6 @@ export const useWindowStore = defineStore('window', () => {
   function pushOpenWindowReference(windowName: string | Application) {
     const id = getNextWindowId(windowName);
     const idNumber = Number(id.split('-')[1]);
-
-    if (windowName === 'Video Player') {
-      useVideoPlayerStore().hasOpenInstance = true;
-    }
-
-    if (windowName === 'Image Viewer') {
-      useImageViewerStore().hasOpenInstance = false;
-    }
 
     if (typeof openWindowsReferences.value[windowName] === 'undefined') {
       openWindowsReferences.value[windowName] = [{ id: idNumber, minimized: false }];
@@ -100,20 +92,6 @@ export const useWindowStore = defineStore('window', () => {
       return;
     }
 
-    if (windowId === useVideoPlayerStore().loadedVideo.windowId) {
-      const windowCount = getWindowCountByName('Video Player');
-      if (windowCount <= 1) {
-        useVideoPlayerStore().hasOpenInstance = false;
-      }
-    }
-
-    if (windowId === useImageViewerStore().loadedImage.windowId) {
-      const windowCount = getWindowCountByName('Image Viewer');
-      if (windowCount <= 1) {
-        useImageViewerStore().hasOpenInstance = false;
-      }
-    }
-
     useFileExplorerStore().fileSelectState = useFileExplorerStore().fileSelectState.filter(
       (element) => element.fileExplorerWindowId !== windowId,
     );
@@ -127,13 +105,11 @@ export const useWindowStore = defineStore('window', () => {
       (windowReference) => windowReference.id !== id,
     );
 
-    if (openWindowsReferences.value[windowName].length === 0) {
+    if (openWindowsReferences.value[windowName].length === 0)
       delete openWindowsReferences.value[windowName];
-    }
 
-    if (zIndexesOrder.value.includes(windowId)) {
+    if (zIndexesOrder.value.includes(windowId))
       zIndexesOrder.value = zIndexesOrder.value.filter((value) => value !== windowId);
-    }
 
     useToastStore().closeToastsByWindowId(windowId);
   }
