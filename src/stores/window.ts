@@ -1,10 +1,8 @@
 import { defineStore } from 'pinia';
 import { readonly, type Ref, ref, watch } from 'vue';
 
-import type { WindowControlSignal, WindowReference } from '@/types/windowTypes.ts';
+import type { WindowControl, WindowControlSignal, WindowReference } from '@/types/windowTypes.ts';
 import type { Application } from '@/types/itemTypes.ts';
-import { useVideoPlayerStore } from '@/stores/videoPlayer.ts';
-import { useImageViewerStore } from '@/stores/imageViewer.ts';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
 import { useToastStore } from '@/stores/toast.ts';
 
@@ -14,16 +12,16 @@ export const useWindowStore = defineStore('window', () => {
   const zIndexesOrder = ref<string[]>([]);
   const windowHeaderHeight = readonly(ref(30));
 
-  function pushOpenWindowReference(windowName: string | Application) {
+  function pushOpenWindowReference(windowName: string | Application, left?: string, top?: string) {
     const id = getNextWindowId(windowName);
     const idNumber = Number(id.split('-')[1]);
 
     if (typeof openWindowsReferences.value[windowName] === 'undefined') {
-      openWindowsReferences.value[windowName] = [{ id: idNumber, minimized: false }];
+      openWindowsReferences.value[windowName] = [{ id: idNumber, minimized: false, left, top }];
       return id;
     }
 
-    openWindowsReferences.value[windowName].push({ id: idNumber, minimized: false });
+    openWindowsReferences.value[windowName].push({ id: idNumber, minimized: false, left, top });
     pushWindowToFront(getWindowId(windowName, idNumber));
 
     return id;
@@ -145,6 +143,13 @@ export const useWindowStore = defineStore('window', () => {
     _windowControlClickSignal.value = windowControlSignal;
   }
 
+  function watchWindowControlClickSignal(func: (control: WindowControl) => void, windowId: string) {
+    watch(_windowControlClickSignal, (newValue) => {
+      if (newValue?.windowId !== windowId) return;
+      func(newValue.windowControl);
+    });
+  }
+
   //TODO Finish window control signals so a window control can be intercepted when it should not proceed with the action
   const windowControlClickSignal = (
     callback: (
@@ -168,6 +173,7 @@ export const useWindowStore = defineStore('window', () => {
   return {
     windowControlClickSignal,
     updateWindowControlClickSignal,
+    watchWindowControlClickSignal,
     openWindowsReferences,
     zIndexesOrder,
     windowHeaderHeight,

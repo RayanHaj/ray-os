@@ -20,16 +20,24 @@ import { useGetWindowContentComponent } from '@/composables/window/useGetWindowC
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.js';
 import { useFileSystemLookup } from '@/composables/fileSystem/useIndexedDbHelper.js';
 
-import type { Item } from '@/types/itemTypes';
+import type { Application, Item } from '@/types/itemTypes';
 import type { RayDb } from 'ray-db-wrapper';
 
 import wallpapersJSON from '@/json/wallpapers.json';
+import { useConfirmDialogStore } from '@/stores/confirmDialog.ts';
 
 const wallpapers: Record<string, string> = wallpapersJSON;
 
 const windowFlatReferences: ComputedRef<WindowFlatReference[]> = useFlatOpenWindowsReferencesFull();
 
-const fixedSizeWindows = ref<Record<string, { width: number; height: number }>>({});
+const confirmDialogStore = useConfirmDialogStore();
+
+const fixedSizeWindows = ref<Record<string, { width: number; height: number }>>({
+  'Confirm Dialog': {
+    width: confirmDialogStore.WIDTH,
+    height: confirmDialogStore.HEIGHT
+  }
+});
 
 const minWidthWindows: Record<string, { width: number }> = {
   Notepad: { width: 300 },
@@ -38,7 +46,7 @@ const minWidthWindows: Record<string, { width: number }> = {
   Calculator: { width: 330 },
 };
 
-const minHeightWindows: Record<string, { height: number }> = {
+const minHeightWindows: Record<Application | string, { height: number }> = {
   Notepad: { height: 245 },
   Calculator: { height: 315 },
   'File Explorer': { height: 315 },
@@ -49,10 +57,10 @@ const minHeightWindows: Record<string, { height: number }> = {
 };
 
 // Windows that cannot be minified
-const inlineWindows: Record<string, boolean> = { Properties: true };
+const inlineWindows: Record<string, boolean> = { Properties: true, 'Confirm Dialog': true };
 
 // Windows that should not show a svg in the window header
-const showNoApplicationSvgsFor: string[] = ['Properties'];
+const showNoApplicationSvgsFor: Application | string[] = ['Properties', 'Confirm Dialog'];
 
 const contextMenuStore = useContextmenuStore();
 const wallpaperStore = useWallpaperStore();
@@ -132,6 +140,8 @@ watch(
           ? `${minHeightWindows[reference.label].height}px`
           : undefined
       "
+      :left="reference.left"
+      :top="reference.top"
       :show-svg="!showNoApplicationSvgsFor.includes(reference.label)"
     >
       <UiToast

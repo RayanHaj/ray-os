@@ -9,10 +9,11 @@ import FallbackMain from '@/components/applications/FallbackMain.vue';
 import ImageViewerMain from '@/components/applications/mediaPlayers/imageViewer/ImageViewerMain.vue';
 import VideoPlayerMain from '@/components/applications/mediaPlayers/videoPlayer/VideoPlayerMain.vue';
 import AudioPlayerMain from '@/components/applications/mediaPlayers/audioPlayer/AudioPlayerMain.vue';
-import FilePropertiesMain from '@/components/applications/FilePropertiesMain.vue';
+import FilePropertiesMain from '@/components/applications/fileProperties/FilePropertiesMain.vue';
 
 import { useWindowNameFormatter } from '@/composables/window/useWindowNameFormatter.ts';
 import SnakeMain from '@/components/applications/games/snake/SnakeMain.vue';
+import ConfirmDialogMain from '@/components/applications/confirmDialog/ConfirmDialogMain.vue';
 
 const windowContentComponents: { [windowName in WindowName]: Component } = {
   settings: SettingsMain,
@@ -24,6 +25,7 @@ const windowContentComponents: { [windowName in WindowName]: Component } = {
   videoPlayer: VideoPlayerMain,
   audioPlayer: AudioPlayerMain,
   properties: FilePropertiesMain,
+  confirmDialog: ConfirmDialogMain,
   snake: SnakeMain,
 } as const;
 

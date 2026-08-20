@@ -8,6 +8,8 @@ import { useSaveChanges } from '@/composables/notepad/useSaveChanges.ts';
 import FileSelectButton from '@/components/applications/mediaPlayers/FileSelectButton.vue';
 import type { FileSelectReturnItem } from '@/types/fileExplorerTypes.ts';
 import { createNotepadFile, type NotepadFile } from '@/types/notepadTypes.ts';
+import type { Item } from '@/types/itemTypes.ts';
+import { createConfirmDialog } from '@/composables/confirmDialog/createConfirmDialog.ts';
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 const windowId = useInjectOrThrow<string>('windowId');
@@ -24,7 +26,7 @@ watch(
     notepadFile.text = newLoadedFile.text;
     notepadStore.loadedFile = undefined;
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 async function onFileSelectReturnValue(returnValue: {
@@ -36,18 +38,33 @@ async function onFileSelectReturnValue(returnValue: {
 
     const rawFileText = await value.fileItem.rawFile.text();
 
-    useNotepadStore().initializeNotepadFile(
-      windowId,
-      {
-        fileId: value.fileId,
-        fileName: value.fileItem.name,
-        text: rawFileText,
-      }
-    );
+    useNotepadStore().initializeNotepadFile(windowId, {
+      fileId: value.fileId,
+      fileName: value.fileItem.name,
+      text: rawFileText,
+    });
   }
 }
 
 const fileIsLoaded = computed(() => notepadFile.fileId !== -1 && notepadFile.fileName !== '');
+
+defineExpose({
+  onWindowClose: async (left: string, top: string) => {
+    const fileItem = await rayDb.findOne<Item>('files', 'id', notepadFile.fileId);
+    if (!fileItem || fileItem.content.type !== 'file') return false;
+
+    const updatedText = notepadFile.text;
+    const originalFileText = await fileItem.content.rawFile?.text();
+
+    if (updatedText === originalFileText && notepadFile.fileName === fileItem.content.name) {
+      return true;
+    } else {
+      const result = await createConfirmDialog(windowId, left, top);
+      console.log(result)
+      return result ?? false;
+    }
+  },
+});
 </script>
 
 <template>

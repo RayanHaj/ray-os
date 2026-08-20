@@ -3,7 +3,7 @@ import { ref, watch } from 'vue';
 import { type FileProperties, useFilePropertiesStore } from '@/stores/fileProperties.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import { useGetSvgByFileProperties } from '@/composables/fileExplorer/useGetSvgByFileProperties.ts';
-import FilePropertiesItem from '@/components/applications/FilePropertiesItem.vue';
+import FilePropertiesItem from '@/components/applications/fileProperties/FilePropertiesItem.vue';
 
 const windowId = useInjectOrThrow<string>('windowId');
 

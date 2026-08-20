@@ -1,13 +1,20 @@
 <script setup lang="ts">
 import {
   type Component,
+  type ComponentPublicInstance,
   computed,
   onBeforeMount,
   onMounted,
   provide,
+  ref,
   useTemplateRef,
 } from 'vue';
-import type { WindowFlatReference, WindowType } from '@/types/windowTypes.js';
+import type {
+  WindowComponentExposed,
+  WindowControl,
+  WindowFlatReference,
+  WindowType,
+} from '@/types/windowTypes.js';
 import { useWindowStore } from '@/stores/window.js';
 import WindowHeader from '@/components/window/WindowHeader.vue';
 import { useWindowStateManager } from '@/composables/window/useWindowStateManager.js';
@@ -16,6 +23,7 @@ import { useWindowResizeManager } from '@/composables/window/useWindowResizeMana
 import { useWindowSnappingManager } from '@/composables/window/useWindowSnappingManager.js';
 import { useBrowserStore } from '@/stores/browser.js';
 import { useWindowStyleManager } from '@/composables/window/useWindowStyleManager.ts';
+import { useConfirmDialogStore } from '@/stores/confirmDialog.ts';
 
 const {
   reference,
@@ -25,6 +33,8 @@ const {
   height,
   minWidth,
   minHeight,
+  left,
+  top,
   windowType,
 } = defineProps<{
   reference: WindowFlatReference;
@@ -34,17 +44,79 @@ const {
   height?: string;
   minWidth?: string;
   minHeight?: string;
+  left?: string;
+  top?: string;
   windowType?: WindowType;
 }>();
 
-const { styles, cachedStyles } = useWindowStyleManager(width, height, minWidth, minHeight);
+const { styles, cachedStyles } = useWindowStyleManager(
+  width,
+  height,
+  minWidth,
+  minHeight,
+  left,
+  top,
+);
 const windowStateManager = useWindowStateManager(styles, reference);
 
 const windowStore = useWindowStore();
 
-onBeforeMount(() => provide('windowId', windowStateManager.windowId));
+const windowComponentRef = useTemplateRef<ComponentPublicInstance & WindowComponentExposed>(
+  'windowComponent',
+);
+
+const disablePointerEvents = ref<boolean>(false);
+
+onBeforeMount(() => {
+  provide('windowId', windowStateManager.windowId);
+});
 onMounted(() => {
   if (useBrowserStore().isMobile) maximizeWindow();
+
+  windowStore.watchWindowControlClickSignal(async (control: WindowControl) => {
+    if (!windowRef.value) return;
+
+    const confirmDialogStore = useConfirmDialogStore();
+
+    const rect = windowRef.value.getBoundingClientRect();
+    const left = `${rect.left + (rect.width - confirmDialogStore.WIDTH) / 2}px`;
+    const top = `${rect.top + (rect.height - confirmDialogStore.HEIGHT) / 2}px`;
+
+    switch (control) {
+      case 'Close':
+        if (windowComponentRef.value?.onWindowClose) {
+          disablePointerEvents.value = true;
+          const proceed = await windowComponentRef.value.onWindowClose(left, top);
+          if (proceed) {
+            closeWindow();
+          } else {
+            console.log('hi!')
+            disablePointerEvents.value = false;
+            return;
+          }
+        }
+
+        return closeWindow();
+      case 'Maximize':
+        if (windowComponentRef.value?.onWindowMaximized) {
+          const proceed = await windowComponentRef.value.onWindowMaximized();
+          if (proceed) {
+            maximizeWindow();
+          } else return;
+        }
+
+        return maximizeWindow();
+      case 'Minimize':
+        if (windowComponentRef.value?.onWindowMinimized) {
+          const proceed = await windowComponentRef.value.onWindowMinimized();
+          if (proceed) {
+            minimizeWindow();
+          } else return;
+        }
+
+        return minimizeWindow();
+    }
+  }, windowStateManager.windowId);
 });
 
 const windowRef = useTemplateRef('windowRef');
@@ -86,6 +158,8 @@ const getWindowBorderRadius = computed(() =>
 
 const windowContentHeight = computed(() => `calc(100% - ${windowStore.windowHeaderHeight}px`);
 const windowContentStyles = { height: windowContentHeight.value, width: '100%' };
+
+provide('pointerEventsDisabled', disablePointerEvents);
 </script>
 
 <template>
@@ -93,7 +167,11 @@ const windowContentStyles = { height: windowContentHeight.value, width: '100%' }
     class="window"
     ref="windowRef"
     :id="windowStateManager.windowId"
-    :style="{ ...styles, borderRadius: getWindowBorderRadius }"
+    :style="{
+      ...styles,
+      borderRadius: getWindowBorderRadius,
+      pointerEvents: disablePointerEvents ? 'none' : 'auto',
+    }"
     @mousemove="windowResizeManager.onMouseMoveWindow($event)"
     @mousedown="windowResizeManager.onMouseDownWindow"
   >
@@ -104,15 +182,25 @@ const windowContentStyles = { height: windowContentHeight.value, width: '100%' }
       :window-type="windowType"
       :show-svg="showSvg"
       @on-mousedown-header="onMousedownHeader($event as MouseEvent)"
-      @window-control-clicked="(control) => {
-        switch (control) {
-          case 'Close': return closeWindow();
-          case 'Maximize': return maximizeWindow();
-          case 'Minimize': return minimizeWindow();
+      @window-control-clicked="
+        (control) => {
+          switch (control) {
+            case 'Close':
+              return closeWindow();
+            case 'Maximize':
+              return maximizeWindow();
+            case 'Minimize':
+              return minimizeWindow();
+          }
         }
-      }"
+      "
     />
-    <component :is="windowContentComponent" :style="windowContentStyles" :window-styles="styles" />
+    <component
+      ref="windowComponent"
+      :is="windowContentComponent"
+      :style="windowContentStyles"
+      :window-styles="styles"
+    />
   </div>
 </template>
 

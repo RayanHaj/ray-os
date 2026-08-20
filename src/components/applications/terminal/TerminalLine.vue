@@ -20,7 +20,7 @@ onBeforeMount(() => {
   path.value = currentPath;
 });
 
-onMounted(() => terminalLineRef.value?.focus())
+onMounted(() => terminalLineRef.value?.focus());
 
 /**
  * Focuses the terminal input when this window is brought to the front.
@@ -75,8 +75,8 @@ defineExpose({
     <div class="terminal-line">
       <p v-if="line.line">
         <span :style="{ color: isError ? 'red' : 'var(--text-color)' }" class="input-value">{{
-            line.line
-          }}</span>
+          line.line
+        }}</span>
       </p>
     </div>
   </div>
@@ -89,10 +89,12 @@ defineExpose({
       @input="emit('on-input', ($event.target as HTMLElement).textContent ?? '')"
       @keydown.enter.prevent="onEnter($event)"
       @blur="
-        () => {
-          if (useWindowStore().getFocusedWindowId() === windowId) {
-            return terminalLineRef?.focus();
-          }
+        async () => {
+          await nextTick(() => {
+            if (useWindowStore().getFocusedWindowId() === windowId) {
+              return terminalLineRef?.focus();
+            }
+          });
         }
       "
     />

@@ -28,7 +28,7 @@ const windowHeaderStyles: StyleValue = { height: `${useWindowStore().windowHeade
 const windowStore = useWindowStore();
 function handleWindowControlClicked(action: WindowControl) {
   windowStore.updateWindowControlClickSignal({ windowControl: action, windowId });
-  emits('windowControlClicked', action);
+  // emits('windowControlClicked', action);
 }
 </script>
 <template>

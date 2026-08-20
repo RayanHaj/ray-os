@@ -9,6 +9,8 @@ export function useFlatOpenWindowsReferencesFull() {
         id: element.id,
         label: key,
         minimized: element.minimized,
+        left: element.left,
+        top: element.top
       }));
     });
   });

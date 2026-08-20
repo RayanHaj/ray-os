@@ -6,10 +6,12 @@ export function useWindowStyleManager(
   height?: string,
   minWidth?: string,
   minHeight?: string,
+  left?: string,
+  top?: string
 ) {
   const styles: Ref<WindowStyleObject> = ref({
-    left: '25%',
-    top: '25%',
+    left: left ?? '25%',
+    top: top ?? '25%',
     width: width ?? '500px',
     height: height ?? '500px',
     minWidth: minWidth ?? '250px',

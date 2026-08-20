@@ -1,11 +1,15 @@
 export interface WindowReference {
   id: number;
   minimized: boolean;
+  left?: string;
+  top?: string;
 }
 export interface WindowFlatReference {
   id: number;
   label: string;
   minimized: boolean;
+  left?: string;
+  top?: string;
 }
 export type WindowStyleObject = {
   left: string;
@@ -30,6 +34,7 @@ export const windowNames = [
   'videoPlayer',
   'audioPlayer',
   'properties',
+  'confirmDialog',
   'snake',
 ] as const;
 export type WindowName = (typeof windowNames)[number];
@@ -39,4 +44,10 @@ export type WindowControl = 'Minimize' | 'Maximize' | 'Close';
 export type WindowControlSignal = {
   windowId: string;
   windowControl: WindowControl
+}
+
+export interface WindowComponentExposed {
+  onWindowClose?: (left: string, top: string) => Promise<boolean>,
+  onWindowMaximized?: () => Promise<boolean>,
+  onWindowMinimized?: () => Promise<boolean>
 }

@@ -14,8 +14,10 @@ const { _fileName, fileIsLoaded, fileId } = defineProps<{
 }>();
 const emit = defineEmits(['onSaveChanges']);
 
+const pointerEventsDisabled = useInjectOrThrow<boolean>('pointerEventsDisabled');
+
 const windowStore = useWindowStore();
-windowStore.windowControlClickSignal((windowControlSignal) => console.log(windowControlSignal))
+windowStore.windowControlClickSignal((windowControlSignal) => console.log(windowControlSignal));
 
 const fileNameRef = ref<string>('');
 watch(
@@ -53,7 +55,10 @@ async function handleExportFile() {
 }
 
 const notepadHeaderStyles = computed<StyleValue>(() => {
-  return { pointerEvents: fileIsLoaded ? 'auto' : 'none', opacity: fileIsLoaded ? '1' : '0.5' };
+  return {
+    pointerEvents: fileIsLoaded && !pointerEventsDisabled ? 'auto' : 'none',
+    opacity: fileIsLoaded ? '1' : '0.5',
+  };
 });
 </script>
 
