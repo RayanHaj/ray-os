@@ -69,11 +69,7 @@ export const useTaskbarStore = defineStore('taskbar', () => {
         return;
       }
 
-      const item: Item & { tileId: number } = await rayDb.findOne<Item & { tileId: number }>(
-        'files',
-        'id',
-        applicationId,
-      );
+      const item: Item = await rayDb.findOne<Item>('files', 'id', applicationId);
 
       if (!item || item.content.type !== 'application')
         throw new Error('Could not insert taskbar item');
@@ -84,7 +80,7 @@ export const useTaskbarStore = defineStore('taskbar', () => {
 
       if (!itemId) throw new Error('Could not insert taskbar item');
 
-      items.value = [...items.value, item];
+      items.value = [...items.value, { ...item, tileId: itemId as number }];
     } catch (e) {
       if ((e as Error).name === 'ConstraintError') {
         useToastStore().createToast('file already added to the taskbar', 'error', 3000, 'desktop');

@@ -11,7 +11,7 @@ import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import { useHoverTileState } from '@/composables/taskbar/useHoverTileState.ts';
 
-const { taskbarTileItem } = defineProps<{ taskbarTileItem?: TaskbarTileItem }>();
+const { taskbarTileItem } = defineProps<{ taskbarTileItem: TaskbarTileItem }>();
 
 const taskbarStore = useTaskbarStore();
 const windowStore = useWindowStore();
