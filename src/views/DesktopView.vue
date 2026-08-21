@@ -33,10 +33,7 @@ const windowFlatReferences: ComputedRef<WindowFlatReference[]> = useFlatOpenWind
 const confirmDialogStore = useConfirmDialogStore();
 
 const fixedSizeWindows = ref<Record<string, { width: number; height: number }>>({
-  'Confirm Dialog': {
-    width: confirmDialogStore.WIDTH,
-    height: confirmDialogStore.HEIGHT
-  }
+  'Confirm Dialog': { width: confirmDialogStore.WIDTH, height: confirmDialogStore.HEIGHT },
 });
 
 const minWidthWindows: Record<string, { width: number }> = {
@@ -57,10 +54,12 @@ const minHeightWindows: Record<Application | string, { height: number }> = {
 };
 
 // Windows that cannot be minified
-const inlineWindows: Record<string, boolean> = { Properties: true, 'Confirm Dialog': true };
+const inlineWindows: Record<string, boolean> = { Properties: true };
 
 // Windows that should not show a svg in the window header
 const showNoApplicationSvgsFor: Application | string[] = ['Properties', 'Confirm Dialog'];
+
+const disableWindowControlsFor: Application | string[] = ['Confirm Dialog'];
 
 const contextMenuStore = useContextmenuStore();
 const wallpaperStore = useWallpaperStore();
@@ -140,6 +139,7 @@ watch(
           ? `${minHeightWindows[reference.label].height}px`
           : undefined
       "
+      :disable-window-controls="disableWindowControlsFor.includes(reference.label)"
       :left="reference.left"
       :top="reference.top"
       :show-svg="!showNoApplicationSvgsFor.includes(reference.label)"

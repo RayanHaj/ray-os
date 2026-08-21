@@ -36,6 +36,7 @@ const {
   left,
   top,
   windowType,
+  disableWindowControls,
 } = defineProps<{
   reference: WindowFlatReference;
   windowContentComponent: Component;
@@ -46,6 +47,7 @@ const {
   minHeight?: string;
   left?: string;
   top?: string;
+  disableWindowControls: boolean;
   windowType?: WindowType;
 }>();
 
@@ -90,7 +92,6 @@ onMounted(() => {
           if (proceed) {
             closeWindow();
           } else {
-            console.log('hi!')
             disablePointerEvents.value = false;
             return;
           }
@@ -158,8 +159,6 @@ const getWindowBorderRadius = computed(() =>
 
 const windowContentHeight = computed(() => `calc(100% - ${windowStore.windowHeaderHeight}px`);
 const windowContentStyles = { height: windowContentHeight.value, width: '100%' };
-
-provide('pointerEventsDisabled', disablePointerEvents);
 </script>
 
 <template>
@@ -181,6 +180,7 @@ provide('pointerEventsDisabled', disablePointerEvents);
       :reference="reference"
       :window-type="windowType"
       :show-svg="showSvg"
+      :disable-window-controls="disableWindowControls"
       @on-mousedown-header="onMousedownHeader($event as MouseEvent)"
       @window-control-clicked="
         (control) => {
@@ -200,6 +200,7 @@ provide('pointerEventsDisabled', disablePointerEvents);
       :is="windowContentComponent"
       :style="windowContentStyles"
       :window-styles="styles"
+      :pointer-events-disabled="disablePointerEvents"
     />
   </div>
 </template>

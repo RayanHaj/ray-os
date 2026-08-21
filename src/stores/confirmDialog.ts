@@ -5,10 +5,13 @@ export const useConfirmDialogStore = defineStore('confirmDialog', () => {
   const WIDTH = 400;
   const HEIGHT = 300;
 
-  const confirmDialogs = ref<Record<string, boolean | undefined>>({});
+  const confirmDialogs = ref<Record<string, { message: string, confirmed: boolean | undefined }>>({});
 
-  function addConfirmDialog(confirmDialogWindowId: string) {
-    confirmDialogs.value[confirmDialogWindowId] = undefined;
+  function addConfirmDialog(message: string, confirmDialogWindowId: string) {
+    confirmDialogs.value[confirmDialogWindowId] = {
+      message,
+      confirmed: undefined
+    };
   }
 
   function removeConfirmDialog(confirmDialogWindowId: string) {

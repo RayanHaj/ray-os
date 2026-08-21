@@ -6,11 +6,12 @@ import { useWindowControls } from '@/composables/window/useWindowControls.ts';
 import { useGetWindowTitle } from '@/composables/window/useGetWindowTitle.ts';
 import type { StyleValue } from 'vue';
 
-const { windowId, reference, windowType, showSvg } = defineProps<{
+const { windowId, reference, windowType, showSvg, disableWindowControls } = defineProps<{
   windowId: string;
   reference: WindowFlatReference;
   windowType?: WindowType;
   showSvg: boolean;
+  disableWindowControls: boolean;
 }>();
 
 const emits = defineEmits<{
@@ -44,7 +45,7 @@ function handleWindowControlClicked(action: WindowControl) {
       @touchstart="$emit('onMousedownHeader', $event)"
       class="drag-zone"
     />
-    <div class="window-controls">
+    <div v-if="!disableWindowControls" class="window-controls">
       <button
         v-for="action in windowControls.activeWindowControls.value"
         :key="action"

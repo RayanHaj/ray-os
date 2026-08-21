@@ -7,14 +7,13 @@ import { useWindowStore } from '@/stores/window.ts';
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 
-const { _fileName, fileIsLoaded, fileId } = defineProps<{
+const { _fileName, fileIsLoaded, pointerEventsDisabled, fileId } = defineProps<{
   _fileName?: string;
   fileIsLoaded: boolean;
+  pointerEventsDisabled: boolean;
   fileId: number | null;
 }>();
 const emit = defineEmits(['onSaveChanges']);
-
-const pointerEventsDisabled = useInjectOrThrow<boolean>('pointerEventsDisabled');
 
 const windowStore = useWindowStore();
 windowStore.windowControlClickSignal((windowControlSignal) => console.log(windowControlSignal));

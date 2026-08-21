@@ -16,6 +16,10 @@ const windowId = useInjectOrThrow<string>('windowId');
 
 const notepadFile = reactive<NotepadFile>(createNotepadFile());
 
+const { pointerEventsDisabled } = defineProps<{
+  pointerEventsDisabled: boolean
+}>();
+
 const notepadStore = useNotepadStore();
 watch(
   () => notepadStore.loadedFile,
@@ -59,8 +63,11 @@ defineExpose({
     if (updatedText === originalFileText && notepadFile.fileName === fileItem.content.name) {
       return true;
     } else {
-      const result = await createConfirmDialog(windowId, left, top);
-      console.log(result)
+      const result = await createConfirmDialog(
+        'Unsaved changes will be lost. Continue?',
+        left,
+        top,
+      );
       return result ?? false;
     }
   },
@@ -73,6 +80,7 @@ defineExpose({
       :_file-name="notepadFile?.fileName ?? ''"
       :file-is-loaded="fileIsLoaded"
       :file-id="notepadFile?.fileId ?? null"
+      :pointer-events-disabled="pointerEventsDisabled"
       @on-save-changes="useSaveChanges(rayDb, $event, windowId, notepadFile)"
     />
     <div v-if="fileIsLoaded" class="notepad-reader">
