@@ -55,7 +55,7 @@ const fileIsLoaded = computed(() => notepadFile.fileId !== -1 && notepadFile.fil
 defineExpose({
   onWindowClose: async (left: string, top: string) => {
     const fileItem = await rayDb.findOne<Item>('files', 'id', notepadFile.fileId);
-    if (!fileItem || fileItem.content.type !== 'file') return false;
+    if (!fileItem || fileItem.content.type !== 'file') return true;
 
     const updatedText = notepadFile.text;
     const originalFileText = await fileItem.content.rawFile?.text();
