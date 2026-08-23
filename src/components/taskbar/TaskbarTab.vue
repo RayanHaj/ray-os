@@ -1,23 +1,19 @@
 <script setup lang="ts">
 import { type Component, onBeforeMount, shallowRef } from 'vue';
 import { useWindowStore } from '@/stores/window.ts';
-import { useSvgByFileAndDirectoryName } from '../../composables/svg/useSvgByFileAndDirectoryName.ts';
+import { useSvgsStore } from '@/stores/svgs.ts';
 
 const { windowId } = defineProps<{ windowId: string }>();
 
 const windowStore = useWindowStore();
-function closeWindow() {
-  windowStore.removeOpenWindowReference(windowId);
-}
 
 const closeSvg = shallowRef<Component | null>(null);
-onBeforeMount(async () => {
-  closeSvg.value = await useSvgByFileAndDirectoryName('Close');
-});
+onBeforeMount( () => closeSvg.value = useSvgsStore().svgs['Close']);
 
-function onClickTab() {
-  windowStore.setWindowMinimized(windowId);
-}
+const onClickTab = () => windowStore.setWindowMinimized(windowId);
+
+const closeWindow = () =>
+  windowStore.updateWindowControlClickSignal({ windowId, windowControl: 'Close' });
 </script>
 
 <template>
