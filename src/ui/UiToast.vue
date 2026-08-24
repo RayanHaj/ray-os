@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useToastStore } from '@/stores/toast.ts';
 import { useTaskbarStore } from '@/stores/taskbar.ts';
-import { nextTick, ref, watch } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 import { useSvgsStore } from '@/stores/svgs.ts';
 import type { Toast, ToastTypes } from '@/types/toastTypes.js';
 import type { AvailableSvgs } from '@/types/availableSvgs.js';
@@ -28,6 +28,7 @@ function updateStyles(toasts: Toast[]) {
     let height = toastRefs.value[index]?.clientHeight;
 
     const previousToast = toastRefs.value[index - 1];
+
     if (index > 0 && previousToast) {
       topValueToast += previousToast.clientHeight + 10;
     }
@@ -56,23 +57,29 @@ function updateStyles(toasts: Toast[]) {
   });
 }
 
+const filteredToasts = computed(() =>
+  toastStore.toasts.filter(
+    (toast) => toast.location === toastLocation && toast.windowId === windowId,
+  ),
+);
+
 const showToasts = ref<boolean>(false);
 watch(
-  () => toastStore.toasts,
+  filteredToasts,
   async (newToasts) => {
     if (toastLocation === 'window' && !newToasts.some((toast) => toast.windowId === windowId)) {
       showToasts.value = false;
       return;
     }
 
-    const filteredToasts = newToasts.filter((toast) => toast.location === toastLocation);
-    if (filteredToasts.length === 0) {
+    if (newToasts.length === 0) {
       showToasts.value = false;
     } else {
       showToasts.value = true;
 
       await nextTick();
-      updateStyles(filteredToasts);
+
+      updateStyles(newToasts);
     }
   },
   { immediate: true },
@@ -122,7 +129,7 @@ function returnSvgColorByToastType(
         if (el) toastRefs[index] = el as HTMLElement;
       }
     "
-    v-for="(toast, index) of toastStore.toasts"
+    v-for="(toast, index) of filteredToasts"
     :key="`${index}-${toast.message}`"
     class="toast"
     :class="toast.type"

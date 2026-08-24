@@ -63,7 +63,6 @@ defineExpose({
     const updatedText = notepadFile.text;
     const originalFileText = await fileItem.content.rawFile?.text();
 
-    console.log(notepadFile.fileName, notepadHeaderRef.value.fileName);
     if (
       updatedText === originalFileText &&
       notepadFile.fileName === notepadHeaderRef.value.fileName
