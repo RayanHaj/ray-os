@@ -10,11 +10,9 @@ export async function useSaveChanges(
   rayDb: RayDb,
   headerFileName: string,
   windowId: string,
-  notepadFile?: NotepadFile,
+  notepadFile: NotepadFile,
 ) {
   const toastStore = useToastStore();
-
-  if (!notepadFile) return;
 
   const fileItem = await rayDb.findOne<Item>('files', 'id', notepadFile.fileId);
   if (!fileItem || fileItem.content.type !== 'file') {
@@ -51,6 +49,10 @@ export async function useSaveChanges(
         () => ({ file: { name: fileName } }),
         (item) => item.file?.id === fileItem.id,
       );
+
+      notepadFile.fileName = fileName;
+      notepadFile.text = updatedText;
+
       useFileSystemStore().updateFileSystem();
 
       toastStore.createToast('saved changes', 'success', 2000, 'window', windowId);

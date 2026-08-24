@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, reactive, watch } from 'vue';
+import { computed, reactive, useTemplateRef, watch } from 'vue';
 import { useNotepadStore } from '@/stores/notepad.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import NotepadHeader from '@/components/applications/notepad/NotepadHeader.vue';
@@ -15,19 +15,20 @@ const rayDb = useInjectOrThrow<RayDb>('rayDb');
 const windowId = useInjectOrThrow<string>('windowId');
 
 const notepadFile = reactive<NotepadFile>(createNotepadFile());
+const fileIsLoaded = computed(() => notepadFile.fileId !== -1 && notepadFile.fileName !== '');
 
-const { pointerEventsDisabled } = defineProps<{
-  pointerEventsDisabled: boolean
-}>();
+const { pointerEventsDisabled } = defineProps<{ pointerEventsDisabled: boolean }>();
 
 const notepadStore = useNotepadStore();
 watch(
   () => notepadStore.loadedFile,
   (newLoadedFile) => {
     if (newLoadedFile?.windowId !== windowId) return;
+
     notepadFile.fileId = newLoadedFile.fileId;
     notepadFile.fileName = newLoadedFile.fileName;
     notepadFile.text = newLoadedFile.text;
+
     notepadStore.loadedFile = undefined;
   },
   { immediate: true },
@@ -50,17 +51,23 @@ async function onFileSelectReturnValue(returnValue: {
   }
 }
 
-const fileIsLoaded = computed(() => notepadFile.fileId !== -1 && notepadFile.fileName !== '');
-
+const notepadHeaderRef = useTemplateRef('notepadHeader');
 defineExpose({
   onWindowClose: async (left: string, top: string) => {
+    if (!notepadHeaderRef.value) return false;
+
     const fileItem = await rayDb.findOne<Item>('files', 'id', notepadFile.fileId);
+
     if (!fileItem || fileItem.content.type !== 'file') return true;
 
     const updatedText = notepadFile.text;
     const originalFileText = await fileItem.content.rawFile?.text();
 
-    if (updatedText === originalFileText && notepadFile.fileName === fileItem.content.name) {
+    console.log(notepadFile.fileName, notepadHeaderRef.value.fileName);
+    if (
+      updatedText === originalFileText &&
+      notepadFile.fileName === notepadHeaderRef.value.fileName
+    ) {
       return true;
     } else {
       const result = await createConfirmDialog(
@@ -77,7 +84,8 @@ defineExpose({
 <template>
   <div class="notepad">
     <NotepadHeader
-      :_file-name="notepadFile?.fileName ?? ''"
+      ref="notepadHeader"
+      :notepad-file="notepadFile"
       :file-is-loaded="fileIsLoaded"
       :file-id="notepadFile?.fileId ?? null"
       :pointer-events-disabled="pointerEventsDisabled"

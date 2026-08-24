@@ -1,32 +1,34 @@
 <script setup lang="ts">
-import { computed, ref, type StyleValue, watch } from 'vue';
+import { computed, type Reactive, ref, type StyleValue, watch } from 'vue';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import type { FileItem, Item } from '@/types/itemTypes.js';
 import { useWindowStore } from '@/stores/window.ts';
+import type { NotepadFile } from '@/types/notepadTypes.ts';
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 
-const { _fileName, fileIsLoaded, pointerEventsDisabled, fileId } = defineProps<{
+const { notepadFile, fileIsLoaded, pointerEventsDisabled, fileId } = defineProps<{
+  notepadFile: Reactive<NotepadFile>;
   _fileName?: string;
   fileIsLoaded: boolean;
   pointerEventsDisabled: boolean;
   fileId: number | null;
 }>();
+
 const emit = defineEmits(['onSaveChanges']);
 
 const windowStore = useWindowStore();
 windowStore.windowControlClickSignal((windowControlSignal) => console.log(windowControlSignal));
 
-const fileNameRef = ref<string>('');
-watch(
-  () => _fileName,
-  (newFileName) => (fileNameRef.value = newFileName ?? ''),
+const fileName = ref<string>('');
+watch(() => notepadFile.fileName,
+  (newFileName) => (fileName.value = newFileName ?? ''),
   { immediate: true },
 );
 
 function onFileNameInput(event: InputEvent) {
-  fileNameRef.value = (event.target as HTMLInputElement).value;
+  fileName.value = (event.target as HTMLInputElement).value;
 }
 
 function onFileNameBlur(event: FocusEvent) {
@@ -36,7 +38,7 @@ function onFileNameBlur(event: FocusEvent) {
 async function handleExportFile() {
   if (!fileId) return;
 
-  emit('onSaveChanges', fileNameRef.value);
+  emit('onSaveChanges', fileName.value);
 
   const file = await rayDb.findOne<Item & { content: FileItem }>('files', 'id', fileId);
 
@@ -47,7 +49,7 @@ async function handleExportFile() {
 
   const a = document.createElement('a');
   a.href = objectUrl;
-  a.download = fileNameRef.value;
+  a.download = fileName.value;
   a.click();
 
   URL.revokeObjectURL(objectUrl);
@@ -59,6 +61,10 @@ const notepadHeaderStyles = computed<StyleValue>(() => {
     opacity: fileIsLoaded ? '1' : '0.5',
   };
 });
+
+defineExpose({
+  fileName
+});
 </script>
 
 <template>
@@ -68,11 +74,11 @@ const notepadHeaderStyles = computed<StyleValue>(() => {
       contenteditable="true"
       @input="onFileNameInput($event as InputEvent)"
       @blur="onFileNameBlur($event as FocusEvent)"
-      :value="fileNameRef"
+      :value="fileName"
     />
     <div class="buttons">
       <button class="button" @click="handleExportFile()">Export file</button>
-      <button class="button" @click="emit('onSaveChanges', fileNameRef)">save changes</button>
+      <button class="button" @click="emit('onSaveChanges', fileName)">save changes</button>
     </div>
   </div>
 </template>

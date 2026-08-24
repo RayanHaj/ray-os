@@ -21,6 +21,7 @@ import {
 import AudioPlayerPlaylistView from '@/components/applications/mediaPlayers/audioPlayer/AudioPlayerPlaylistView.vue';
 import AudioPlayerPlaylistsView from '@/components/applications/mediaPlayers/audioPlayer/AudioPlayerPlaylistsView.vue';
 import { useAudioSelectManager } from '@/composables/audioPlayer/useAudioSelectManager.ts';
+import { createConfirmDialog } from '@/composables/confirmDialog/createConfirmDialog.ts';
 
 const audioPlayerStore = useAudioPlayerStore();
 
@@ -255,6 +256,33 @@ function getShuffledAudio(): LoadedAudio {
 
   return loadedAudios.value[nextAudioIndex];
 }
+
+defineExpose({
+  onWindowClose: async (left: string, top: string) => {
+    if (!currentLoadedPlaylist.value.playlist) return true;
+
+    const storedPlaylist = await rayDb.findOne<Playlist>(
+      'playlists',
+      'id',
+      currentLoadedPlaylist.value.playlist.id,
+    );
+    const updatedPlaylist = {
+      ...currentLoadedPlaylist.value,
+      audios: [...currentLoadedPlaylist.value.playlist.audios],
+    };
+
+    if (JSON.stringify(storedPlaylist) === JSON.stringify(updatedPlaylist)) {
+      return true;
+    } else {
+      const result = await createConfirmDialog(
+        'Unsaved changes will be lost. Continue?',
+        left,
+        top,
+      );
+      return result ?? false;
+    }
+  },
+});
 </script>
 <template>
   <div class="audio-player">
