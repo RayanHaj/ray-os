@@ -5,6 +5,7 @@ import { useToastStore } from '@/stores/toast.ts';
 import { useSanitizeFileName } from '@/composables/fileSystem/useSanitizeFileName.ts';
 import { useValidateFileName } from '@/composables/fileSystem/useValidateFileName.ts';
 import type { NotepadFile } from '@/types/notepadTypes.ts';
+import { useUpdateFileSystem } from '@/composables/fileSystem/useUpdateFileSystem.ts';
 
 export async function useSaveChanges(
   rayDb: RayDb,
@@ -53,7 +54,7 @@ export async function useSaveChanges(
       notepadFile.fileName = fileName;
       notepadFile.text = updatedText;
 
-      useFileSystemStore().updateFileSystem();
+      await useUpdateFileSystem(rayDb);
 
       toastStore.createToast('saved changes', 'success', 2000, 'window', windowId);
     }
