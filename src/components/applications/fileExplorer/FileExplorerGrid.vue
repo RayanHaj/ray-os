@@ -18,7 +18,6 @@ import { useOnDblClickItemInFileSelectState } from '@/composables/fileExplorer/u
 import { useOnClickItem } from '@/composables/fileExplorer/useOnClickItem.ts';
 import { useOnDeleteItems } from '@/composables/fileExplorer/useOnDeleteItems.ts';
 import { useAddOrRemoveFileFromTaskbar } from '@/composables/fileExplorer/useAddOrRemoveFileFromTaskbar.ts';
-
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 const windowId = useInjectOrThrow<string>('windowId');
 
@@ -28,6 +27,7 @@ const {
   parentId,
   isInFileSelectState,
   filterByFileType,
+  multiSelect,
   multiSelectActivated,
 } = defineProps<{
   currentFileSystemItems: FileSystemItem[];
@@ -35,6 +35,7 @@ const {
   parentId: number;
   isInFileSelectState: boolean;
   filterByFileType: FileType[];
+  multiSelect: ReturnType<typeof useMultiSelect<number>>;
   multiSelectActivated: boolean;
 }>();
 
@@ -68,9 +69,8 @@ async function onContextMenu(event: MouseEvent) {
 }
 
 const onFileDrop = async (event: DragEvent) =>
-  await useOnFileDrop(event, rayDb, currentFileSystemItems, parentId);
+  await useOnFileDrop(event, rayDb, currentFileSystemItems, multiSelect, parentId);
 
-const multiSelect = useMultiSelect<number>();
 const onDragStart = (event: DragEvent, fileSystemItem: FileSystemItem) => {
   emit('onDragStart', event);
   useOnDragStart(event, multiSelect, fileSystemItem, path);
@@ -197,7 +197,6 @@ const itemSize = computed<FileItemSizeValue>(
   () => itemSizes[useFileExplorerStore().currentFileItemSize],
 );
 </script>
-
 <template>
   <section
     class="file-explorer-grid"

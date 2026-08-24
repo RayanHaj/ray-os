@@ -22,6 +22,7 @@ import { useValidateFileName } from '@/composables/fileSystem/useValidateFileNam
 import { useRenameFile } from '@/composables/fileSystem/useRenameFile.ts';
 import { useRenameDirectory } from '@/composables/fileSystem/useRenameDirectory.ts';
 import { useInsertFileSystemItem } from '@/composables/fileSystem/useInsertFileSystemItem.ts';
+import { useMultiSelect } from '@/composables/helpers/useMultiSelect.ts';
 
 const fileExplorerStore = useFileExplorerStore();
 const fileSystemStore = useFileSystemStore();
@@ -34,6 +35,8 @@ const path = ref<string[]>([fileSystemStore.ROOT_DIR_NAME]);
 const parentId = ref<number>(fileSystemStore.ROOT_DIR_ID);
 
 const isDragging = ref<boolean>(false);
+
+const multiSelect = useMultiSelect<number>();
 
 onBeforeMount(async () => {
   let initPath: string = fileSystemStore.ROOT_DIR_NAME;
@@ -255,6 +258,7 @@ async function onFileUpload(files: FileList) {
     <FileExplorerHeader
       :current-path="path"
       :is-dragging="isDragging"
+      :multi-select="multiSelect"
       @header-event:back="handleBackClick"
       @header-event:file-upload="onFileUpload"
     />
@@ -264,6 +268,7 @@ async function onFileUpload(files: FileList) {
       :path="useParseToPathString(path)"
       :is-in-file-select-state="fileSelectState?.active ?? false"
       :filter-by-file-type="fileSelectState?.allowedFileTypes ?? []"
+      :multi-select="multiSelect"
       :multi-select-activated="fileSelectState?.multiSelect ?? true"
       @on-drag-start="isDragging = true"
       @on-drag-end="isDragging = false"

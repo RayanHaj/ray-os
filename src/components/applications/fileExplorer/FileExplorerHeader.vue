@@ -2,16 +2,26 @@
 import { onBeforeMount, ref } from 'vue';
 import { type FileItemSizeKey, fileItemSizes } from '@/types/fileExplorerTypes.js';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
-import { useFileSystemLookup } from '@/composables/fileSystem/useIndexedDbHelper.ts';
+import {
+  useFileSystemLookup,
+  useGetFileSystemItem,
+} from '@/composables/fileSystem/useIndexedDbHelper.ts';
 import { useDeleteFileSystemItem } from '@/composables/fileSystem/useDeleteFileSystemItem.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import { RayDb } from 'ray-db-wrapper';
 import { fileExtensions, type FileSystemItem } from '@/types/itemTypes.js';
 import { useInsertFileSystemItem } from '@/composables/fileSystem/useInsertFileSystemItem.ts';
+import type { useMultiSelect } from '@/composables/helpers/useMultiSelect.ts';
+import { useFileSystemStore } from '@/stores/fileSystem.ts';
 
-const { currentPath = ['C:/'], isDragging } = defineProps<{
+const {
+  currentPath = ['C:/'],
+  isDragging,
+  multiSelect,
+} = defineProps<{
   currentPath?: string[];
   isDragging: boolean;
+  multiSelect: ReturnType<typeof useMultiSelect<number>>;
 }>();
 
 const emit = defineEmits(['header-event:back', 'header-event:file-upload']);
@@ -35,49 +45,46 @@ function updateSelectedItemSizeButton(itemSizeKey: FileItemSizeKey) {
 
 async function onDrop(event: DragEvent) {
   try {
-    const plainItem = event.dataTransfer?.getData('text/plain');
-    if (!plainItem) return;
+    await multiSelect.forEachSelected(async (id) => {
+      const fileSystemItem = await rayDb.findOne<FileSystemItem>('fileSystem', 'id', id);
 
-    const parsedItem = JSON.parse(plainItem);
-    if (typeof parsedItem !== 'object') return;
+      await useDeleteFileSystemItem(rayDb, id, {
+        files: { dontDeleteFromFilesStore: true },
+        directories: { onlyDeleteParent: true },
+        updateFileSystem: false,
+      });
 
-    const dropItem = parsedItem as FileSystemItem;
-    if (dropItem.isSystemFile) return;
+      const parentPath = currentPath.slice(0, -1).join('/') || 'C:';
+      const parentDir = await useFileSystemLookup(rayDb, parentPath);
 
-    await useDeleteFileSystemItem(rayDb, dropItem.id, {
-      files: { dontDeleteFromFilesStore: true },
-      directories: { onlyDeleteParent: true },
-      updateFileSystem: false,
-    });
+      if (!parentDir || parentDir instanceof Error) return;
 
-    const parentPath = currentPath.slice(0, -1).join('/') || 'C:';
-    const parentDir = await useFileSystemLookup(rayDb, parentPath);
+      const newDirectoryId = await useInsertFileSystemItem(
+        rayDb,
+        [parentDir.parent.id!],
+        fileSystemItem,
+        false,
+      );
 
-    if (!parentDir || parentDir instanceof Error) return;
+      if (fileSystemItem.directory) {
+        for (const childId of fileSystemItem.directory.children) {
+          const childItem = await rayDb.findOne<FileSystemItem>('fileSystem', 'id', childId);
+          if (!childItem) continue;
 
-    const newDirectoryId = await useInsertFileSystemItem(
-      rayDb,
-      [parentDir.parent.id!],
-      dropItem,
-      false,
-    );
+          const oldDirectoryIdIndex = childItem.parents.findIndex(
+            (parentId) => parentId === fileSystemItem.id,
+          );
+          if (oldDirectoryIdIndex === -1) continue;
 
-    if (dropItem.directory) {
-      for (const childId of dropItem.directory.children) {
-        const childItem = await rayDb.findOne<FileSystemItem>('fileSystem', 'id', childId);
-        if (!childItem) continue;
-
-        const oldDirectoryIdIndex = childItem.parents.findIndex(
-          (parentId) => parentId === dropItem.id,
-        );
-        if (oldDirectoryIdIndex === -1) continue;
-
-        childItem.parents[oldDirectoryIdIndex] = newDirectoryId;
-        await rayDb.updateOne('fileSystem', childItem);
+          childItem.parents[oldDirectoryIdIndex] = newDirectoryId;
+          await rayDb.updateOne('fileSystem', childItem);
+        }
       }
-    }
 
-    emit('header-event:back');
+      useFileSystemStore().updateFileSystem();
+
+      emit('header-event:back');
+    });
   } catch (e) {
     console.error(e);
   }
