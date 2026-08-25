@@ -40,20 +40,22 @@ export async function useSavePlaylist(
       return;
     }
 
-    currentLoadedPlaylist.name = trimmedPlaylistName;
-    currentLoadedPlaylist.audios = IDBAudioIds;
-
-    const foundPlaylist = await rayDb.findOne<Playlist>(
-      'playlists',
-      'id',
-      currentLoadedPlaylist.id,
+    const playlistUpdated = await useIsPlaylistUpdated(
+      rayDb,
+      currentLoadedPlaylist,
+      loadedAudios.value,
+      trimmedPlaylistName,
     );
-    const updatedPlaylist = { ...currentLoadedPlaylist, audios: [...currentLoadedPlaylist.audios] };
 
-    if (JSON.stringify(foundPlaylist) === JSON.stringify(updatedPlaylist)) {
+    if (!playlistUpdated) {
       useToastStore().createToast('No changes made', 'warning', 2500, 'window', windowId);
       return;
     }
+
+    currentLoadedPlaylist.name = trimmedPlaylistName;
+    currentLoadedPlaylist.audios = IDBAudioIds;
+
+    const updatedPlaylist = { ...currentLoadedPlaylist, audios: [...currentLoadedPlaylist.audios] };
 
     await rayDb.updateOne<Playlist>('playlists', updatedPlaylist);
 
@@ -68,6 +70,22 @@ export async function useSavePlaylist(
       windowId,
     );
   }
+}
+
+export async function useIsPlaylistUpdated(
+  rayDb: RayDb,
+  loadedPlaylist: Playlist,
+  loadedAudios: LoadedAudio[],
+  updatedPlaylistName: string,
+): Promise<boolean> {
+  const IDBAudioIds = loadedAudios.map((loadedAudios) => loadedAudios.fileId);
+
+  const newLoadedPlaylist = { ...loadedPlaylist, name: updatedPlaylistName.trim(), audios: IDBAudioIds }
+
+  const foundPlaylist = await rayDb.findOne<Playlist>('playlists', 'id', loadedPlaylist.id);
+  const updatedPlaylist = { ...newLoadedPlaylist, audios: [...newLoadedPlaylist.audios] };
+
+  return JSON.stringify(foundPlaylist) !== JSON.stringify(updatedPlaylist);
 }
 
 export async function useOpenPlaylist(
@@ -119,12 +137,12 @@ export async function useOpenPlaylist(
   currentPage.value = 'playlist';
 
   if (playPlaylist) {
-    if (audioObject.value?.src) {
-      return;
-    }
+    if (audioObject.value?.src) return { audios: foundLoadedAudios };
 
     await usePlayAudio(audioObject, loadedAudios, currentLoadedAudioUrl);
   }
+
+  return { audios: foundLoadedAudios };
 }
 
 export async function useDeletePlaylist(

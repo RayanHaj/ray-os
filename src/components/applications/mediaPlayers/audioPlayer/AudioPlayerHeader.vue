@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import { computed, ref, type StyleValue, watch } from 'vue';
-import type { AudioPlayerPages } from '@/types/audioPlayerTypes.js';
+import type { AudioPlayerPages, Playlist } from '@/types/audioPlayerTypes.js';
 
-const { _playlistName, currentPage } = defineProps<{
-  _playlistName: string;
+const { loadedPlaylist, currentPage } = defineProps<{
+  loadedPlaylist: { playlist?: Playlist; index?: number };
   currentPage: AudioPlayerPages;
 }>();
 
 const playlistName = ref('');
 watch(
-  () => _playlistName,
+  () => loadedPlaylist.playlist?.name,
   (newPlaylistName, oldPlaylistName) => {
-    if (newPlaylistName === oldPlaylistName) return;
+    if (!newPlaylistName || newPlaylistName === oldPlaylistName) return;
     playlistName.value = newPlaylistName;
   },
   { immediate: true },
@@ -31,6 +31,10 @@ const audioPlayerHeaderStyles = computed<StyleValue>(() => {
     pointerEvents: currentPage === 'playlist' ? 'auto' : 'none',
     opacity: currentPage === 'playlist' ? '1' : '0.5',
   };
+});
+
+defineExpose({
+  playlistName
 });
 </script>
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, onUnmounted, ref, useTemplateRef, watch } from 'vue';
 import { useAudioPlayerStore } from '@/stores/audioPlayer.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import MediaPlayerFooter from '@/components/applications/mediaPlayers/MediaPlayerFooter.vue';
@@ -14,6 +14,7 @@ import {
 } from '@/composables/audioPlayer/useUpdateAudioValues.ts';
 import { usePauseAudio, usePlayAudio } from '@/composables/audioPlayer/useAudioPlayback.ts';
 import {
+  useIsPlaylistUpdated,
   useDeletePlaylist,
   useOpenPlaylist,
   useSavePlaylist,
@@ -22,6 +23,7 @@ import AudioPlayerPlaylistView from '@/components/applications/mediaPlayers/audi
 import AudioPlayerPlaylistsView from '@/components/applications/mediaPlayers/audioPlayer/AudioPlayerPlaylistsView.vue';
 import { useAudioSelectManager } from '@/composables/audioPlayer/useAudioSelectManager.ts';
 import { createConfirmDialog } from '@/composables/confirmDialog/createConfirmDialog.ts';
+import { useToastStore } from '@/stores/toast.ts';
 
 const audioPlayerStore = useAudioPlayerStore();
 
@@ -30,7 +32,9 @@ const windowId = useInjectOrThrow<string>('windowId');
 
 const currentPage = ref<AudioPlayerPages>('playlists');
 
+const initialLoadedAudios = ref<LoadedAudio[]>([]);
 const loadedAudios = ref<LoadedAudio[]>([]);
+
 const currentLoadedAudioUrl = ref<string | undefined>();
 
 const currentLoadedAudio = computed(() => {
@@ -43,14 +47,15 @@ const currentLoadedAudio = computed(() => {
 const loadedPlaylists = ref<Playlist[]>([]);
 const currentLoadedPlaylistId = ref<number>();
 
-const currentLoadedPlaylist = computed(() => {
+const currentLoadedPlaylist = computed<{ playlist?: Playlist; index?: number }>(() => {
   return {
     playlist: loadedPlaylists.value.find(
       (playlist) => playlist.id === currentLoadedPlaylistId.value,
     ),
-    index: loadedPlaylists.value.findIndex(
-      (playlist) => playlist.id === currentLoadedPlaylistId.value,
-    ),
+    index:
+      loadedPlaylists.value.findIndex(
+        (playlist) => playlist.id === currentLoadedPlaylistId.value,
+      ) ?? undefined,
   };
 });
 
@@ -184,8 +189,8 @@ const savePlaylist = (updatedPlaylistName: string) =>
     rayDb,
   );
 
-const openPlaylist = (playlist: Playlist) =>
-  useOpenPlaylist(
+const openPlaylist = async (playlist: Playlist) => {
+  const { audios } = await useOpenPlaylist(
     playlist,
     currentLoadedPlaylistId,
     currentPage,
@@ -195,6 +200,9 @@ const openPlaylist = (playlist: Playlist) =>
     windowId,
     rayDb,
   );
+
+  initialLoadedAudios.value = audios;
+};
 
 const deletePlaylist = (id: number) =>
   useDeletePlaylist(id, loadedPlaylists, currentLoadedPlaylistId, rayDb, windowId);
@@ -257,21 +265,20 @@ function getShuffledAudio(): LoadedAudio {
   return loadedAudios.value[nextAudioIndex];
 }
 
+const audioPlayerHeaderRef = useTemplateRef('audioPlayerHeaderRef');
 defineExpose({
   onWindowClose: async (left: string, top: string) => {
+    if (!audioPlayerHeaderRef.value) return true;
     if (!currentLoadedPlaylist.value.playlist) return true;
 
-    const storedPlaylist = await rayDb.findOne<Playlist>(
-      'playlists',
-      'id',
-      currentLoadedPlaylist.value.playlist.id,
+    const playlistUpdated = await useIsPlaylistUpdated(
+      rayDb,
+      currentLoadedPlaylist.value.playlist,
+      loadedAudios.value,
+      audioPlayerHeaderRef.value.playlistName,
     );
-    const updatedPlaylist = {
-      ...currentLoadedPlaylist.value,
-      audios: [...currentLoadedPlaylist.value.playlist.audios],
-    };
 
-    if (JSON.stringify(storedPlaylist) === JSON.stringify(updatedPlaylist)) {
+    if (!playlistUpdated) {
       return true;
     } else {
       const result = await createConfirmDialog(
@@ -287,10 +294,11 @@ defineExpose({
 <template>
   <div class="audio-player">
     <AudioPlayerHeader
-      :_playlist-name="currentLoadedPlaylist.playlist?.name ?? ''"
+      :loaded-playlist="currentLoadedPlaylist"
       :current-page="currentPage"
       @go-to-playlists="currentPage = 'playlists'"
       @save-playlist="savePlaylist"
+      ref="audioPlayerHeaderRef"
     />
     <div class="content">
       <AudioPlayerPlaylistsView

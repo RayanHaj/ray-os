@@ -10,7 +10,6 @@ const rayDb = useInjectOrThrow<RayDb>('rayDb');
 
 const { notepadFile, fileIsLoaded, pointerEventsDisabled, fileId } = defineProps<{
   notepadFile: Reactive<NotepadFile>;
-  _fileName?: string;
   fileIsLoaded: boolean;
   pointerEventsDisabled: boolean;
   fileId: number | null;
