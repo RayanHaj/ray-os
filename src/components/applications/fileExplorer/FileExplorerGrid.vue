@@ -98,28 +98,6 @@ const onClickItem = (event: MouseEvent, fileSystemItem: FileSystemItem) =>
     isInFileSelectState,
   );
 
-const onClickGrid = () => multiSelect.clear();
-
-const onItemsDelete = async () =>
-  await useOnDeleteItems(rayDb, multiSelect, currentFileSystemItems, windowId);
-
-const onRenameFile = () => {
-  const id = multiSelect.getFirst();
-  const fileSystemItem = currentFileSystemItems.find((fileSystemItem) => fileSystemItem.id === id);
-
-  if (!fileSystemItem) return;
-
-  emit('renameFile', {
-    contentType: fileSystemItem.directory ? 'directory' : 'file',
-    item: fileSystemItem,
-  });
-};
-
-const onGridItemContextMenu = (fileSystemItem: FileSystemItem) => {
-  multiSelect.clear();
-  multiSelect.toggle(fileSystemItem.id);
-};
-
 const selectAllToggle = ref<boolean>(false);
 watch(
   () => currentFileSystemItems,
@@ -143,6 +121,31 @@ watch(selectAllToggle, (newToggledVal) => {
     multiSelect.clear();
   }
 });
+
+const onClickGrid = () => {
+  multiSelect.clear();
+  selectAllToggle.value = false;
+};
+
+const onItemsDelete = async () =>
+  await useOnDeleteItems(rayDb, multiSelect, currentFileSystemItems, windowId);
+
+const onRenameFile = () => {
+  const id = multiSelect.getFirst();
+  const fileSystemItem = currentFileSystemItems.find((fileSystemItem) => fileSystemItem.id === id);
+
+  if (!fileSystemItem) return;
+
+  emit('renameFile', {
+    contentType: fileSystemItem.directory ? 'directory' : 'file',
+    item: fileSystemItem,
+  });
+};
+
+const onGridItemContextMenu = (fileSystemItem: FileSystemItem) => {
+  multiSelect.clear();
+  multiSelect.toggle(fileSystemItem.id);
+};
 
 async function onProperties(fileSystemItem: FileSystemItem) {
   const propertiesWindowId = useWindowStore().getNextWindowId('Properties');
