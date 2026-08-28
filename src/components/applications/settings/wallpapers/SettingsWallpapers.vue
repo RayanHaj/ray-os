@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import WallpaperTile from '@/components/applications/settings/wallpapers/WallpaperTile.vue';
-import wallpapers from '@/json/wallpapers.json';
+import wallpapers from '@/config/wallpapers.json';
 import { onBeforeMount, type Ref, ref, watch } from 'vue';
 import { useWallpaperStore, type WallpaperType } from '@/stores/settings/wallpaper.ts';
 import { useFileSystemLookup } from '@/composables/fileSystem/useIndexedDbHelper.ts';

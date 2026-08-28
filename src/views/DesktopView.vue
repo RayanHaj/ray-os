@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type ComputedRef, type Ref, ref, watch } from 'vue';
+import { type ComputedRef } from 'vue';
 import { type WindowFlatReference } from '@/types/windowTypes';
 
 import DesktopMain from '@/components/desktop/DesktopMain.vue';
@@ -11,97 +11,59 @@ import ContextMenu from '@/components/ContextMenu.vue';
 import UiToast from '@/ui/UiToast.vue';
 
 import { useWindowStore } from '@/stores/window.js';
-import { useWallpaperStore } from '@/stores/settings/wallpaper.js';
 import { useContextmenuStore } from '@/stores/contextMenu.js';
 
 import { useFlatOpenWindowsReferencesFull } from '@/composables/window/useFlatOpenWindowsReferencesFull.js';
 import { useOnOuterClickClose } from '@/composables/helpers/useOnOuterClickClose.js';
 import { useGetWindowContentComponent } from '@/composables/window/useGetWindowContentComponent.js';
-import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.js';
-import { useFileSystemLookup } from '@/composables/fileSystem/useIndexedDbHelper.js';
-
-import type { Application, Item } from '@/types/itemTypes';
-import type { RayDb } from 'ray-db-wrapper';
-
-import wallpapersJSON from '@/json/wallpapers.json';
-import { useConfirmDialogStore } from '@/stores/confirmDialog.ts';
-
-const wallpapers: Record<string, string> = wallpapersJSON;
-
-const windowFlatReferences: ComputedRef<WindowFlatReference[]> = useFlatOpenWindowsReferencesFull();
-
-const confirmDialogStore = useConfirmDialogStore();
-
-const fixedSizeWindows = ref<Record<string, { width: number; height: number }>>({
-  'Confirm Dialog': { width: confirmDialogStore.WIDTH, height: confirmDialogStore.HEIGHT },
-});
-
-const minWidthWindows: Record<string, { width: number }> = {
-  Notepad: { width: 300 },
-  'Audio Player': { width: 330 },
-  Properties: { width: 300 },
-  Calculator: { width: 330 },
-};
-
-const minHeightWindows: Record<Application | string, { height: number }> = {
-  Notepad: { height: 245 },
-  Calculator: { height: 315 },
-  'File Explorer': { height: 315 },
-  'Audio Player': { height: 315 },
-  'Video Player': { height: 245 },
-  'Image Viewer': { height: 245 },
-  Properties: { height: 350 },
-};
-
-// Windows that cannot be minified
-const inlineWindows: Record<string, boolean> = { Properties: true };
-
-// Windows that should not show a svg in the window header
-const showNoApplicationSvgsFor: Application | string[] = ['Properties', 'Confirm Dialog'];
-
-const disableWindowControlsFor: Application | string[] = ['Confirm Dialog'];
+import { windowsConfig } from '@/config/windowsConfig.ts';
+import { useHandleWallpaper } from '@/composables/desktop/useHandleWallpaper.ts';
 
 const contextMenuStore = useContextmenuStore();
-const wallpaperStore = useWallpaperStore();
+const windowFlatReferences: ComputedRef<WindowFlatReference[]> = useFlatOpenWindowsReferencesFull();
 
-const wallpaperUrl: Ref<string> = ref('');
+const { wallpaperUrl } = useHandleWallpaper();
 
-const rayDb = useInjectOrThrow<RayDb>('rayDb');
+const windowType = (windowName: string): 'fixed' | 'inline' | undefined => {
+  const fixedSize = windowsConfig(windowName).getFixedSize();
+  if (fixedSize) return 'fixed';
 
-watch(
-  () => wallpaperStore.selectedWallpaper,
-  async (newSelectedWallpaper, oldSelectedWallpaper) => {
-    if (newSelectedWallpaper === oldSelectedWallpaper || !newSelectedWallpaper) return;
+  const isInline = windowsConfig(windowName).getIsInline();
+  if (isInline) return 'inline';
+};
 
-    /**
-     * if selected wallpaper is of type 'custom' it will find the wallpaper in the 'Wallpapers'
-     * directory and get the wallpaper file from the files object store
-     * else it will look for the wallpaper in the default wallpapers list
-     */
-    if (newSelectedWallpaper.type === 'custom') {
-      const wallpaperDirectory = await useFileSystemLookup(rayDb, 'Wallpapers');
-      if (wallpaperDirectory instanceof Error || wallpaperDirectory === undefined) return;
+const windowWidth = (windowName: string): string | undefined => {
+  const width = windowsConfig(windowName).getFixedSize()?.width;
+  if (!width) return;
 
-      const wallpaper = wallpaperDirectory.children.find(
-        (wallpaper) => wallpaper.id === newSelectedWallpaper.id,
-      );
+  return `${width}px`;
+};
 
-      if (!wallpaper || !wallpaper?.file) return;
+const windowHeight = (windowName: string): string | undefined => {
+  const height = windowsConfig(windowName).getFixedSize()?.height;
+  if (!height) return;
 
-      // gets the raw wallpaper file from the files object store
-      const wallpaperFile = await rayDb.findOne<Item>('files', 'id', wallpaper.file.id);
+  return `${height}px`;
+};
 
-      if (wallpaperFile.content.type !== 'file' || !wallpaperFile.content.rawFile) return;
+const windowMinWidth = (windowName: string): string | undefined => {
+  const minWidth = windowsConfig(windowName).getMinWidth();
+  if (!minWidth) return;
 
-      wallpaperUrl.value = `url('${wallpaperStore.getWallpaperUrlByFile(wallpaperFile.content.rawFile)}')`;
-    } else {
-      const fileName = wallpapers[`wallpaper-${newSelectedWallpaper.id}`];
-      const url = `/wallpapers/${fileName}`;
-      wallpaperUrl.value = `url('${url}')`;
-    }
-  },
-  { immediate: true },
-);
+  return `${minWidth}px`;
+};
+
+const windowMinHeight = (windowName: string): string | undefined => {
+  const minHeight = windowsConfig(windowName).getMinHeight();
+  if (!minHeight) return;
+
+  return `${minHeight}px`;
+};
+
+const disableWindowControls = (windowName: string) =>
+  windowsConfig(windowName).getDisableControls();
+
+const disableIcon = (windowName: string) => windowsConfig(windowName).getDisableIcon();
 </script>
 
 <template>
@@ -114,35 +76,15 @@ watch(
       :key="useWindowStore().getWindowId(reference.label, reference.id)"
       :reference="reference"
       :window-content-component="useGetWindowContentComponent(reference.label)"
-      :window-type="
-        fixedSizeWindows[reference.label] !== undefined
-          ? 'fixed'
-          : inlineWindows[reference.label] !== undefined
-            ? 'inline'
-            : undefined
-      "
-      :width="
-        fixedSizeWindows[reference.label]
-          ? `${fixedSizeWindows[reference.label].width}px`
-          : undefined
-      "
-      :height="
-        fixedSizeWindows[reference.label]
-          ? `${fixedSizeWindows[reference.label].height}px`
-          : undefined
-      "
-      :min-width="
-        minWidthWindows[reference.label] ? `${minWidthWindows[reference.label].width}px` : undefined
-      "
-      :min-height="
-        minHeightWindows[reference.label]
-          ? `${minHeightWindows[reference.label].height}px`
-          : undefined
-      "
-      :disable-window-controls="disableWindowControlsFor.includes(reference.label)"
+      :window-type="windowType(reference.label)"
+      :width="windowWidth(reference.label)"
+      :height="windowHeight(reference.label)"
+      :min-width="windowMinWidth(reference.label)"
+      :min-height="windowMinHeight(reference.label)"
+      :disable-window-controls="disableWindowControls(reference.label)"
+      :disable-icon="disableIcon(reference.label)"
       :left="reference.left"
       :top="reference.top"
-      :show-svg="!showNoApplicationSvgsFor.includes(reference.label)"
     >
       <UiToast
         toast-location="window"

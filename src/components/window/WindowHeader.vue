@@ -6,11 +6,11 @@ import { useWindowControls } from '@/composables/window/useWindowControls.ts';
 import { useGetWindowTitle } from '@/composables/window/useGetWindowTitle.ts';
 import type { StyleValue } from 'vue';
 
-const { windowId, reference, windowType, showSvg, disableWindowControls } = defineProps<{
+const { windowId, reference, windowType, disableIcon, disableWindowControls } = defineProps<{
   windowId: string;
   reference: WindowFlatReference;
   windowType?: WindowType;
-  showSvg: boolean;
+  disableIcon: boolean;
   disableWindowControls: boolean;
 }>();
 
@@ -35,7 +35,7 @@ function handleWindowControlClicked(action: WindowControl) {
 <template>
   <header class="window-header" :style="windowHeaderStyles">
     <div class="info-wrapper">
-      <component v-if="showSvg" :is="useSvgOrFallback(reference.label).svg" />
+      <component v-if="!disableIcon" :is="useSvgOrFallback(reference.label).svg" />
       <p class="window-title">
         {{ windowTitle }}
       </p>

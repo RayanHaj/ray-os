@@ -23,7 +23,6 @@ import AudioPlayerPlaylistView from '@/components/applications/mediaPlayers/audi
 import AudioPlayerPlaylistsView from '@/components/applications/mediaPlayers/audioPlayer/AudioPlayerPlaylistsView.vue';
 import { useAudioSelectManager } from '@/composables/audioPlayer/useAudioSelectManager.ts';
 import { createConfirmDialog } from '@/composables/confirmDialog/createConfirmDialog.ts';
-import { useToastStore } from '@/stores/toast.ts';
 
 const audioPlayerStore = useAudioPlayerStore();
 

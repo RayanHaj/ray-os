@@ -28,7 +28,7 @@ import { useConfirmDialogStore } from '@/stores/confirmDialog.ts';
 const {
   reference,
   windowContentComponent,
-  showSvg,
+  disableIcon,
   width,
   height,
   minWidth,
@@ -40,7 +40,7 @@ const {
 } = defineProps<{
   reference: WindowFlatReference;
   windowContentComponent: Component;
-  showSvg: boolean;
+  disableIcon: boolean;
   width?: string;
   height?: string;
   minWidth?: string;
@@ -179,7 +179,7 @@ const windowContentStyles = { height: windowContentHeight.value, width: '100%' }
       :window-id="windowStateManager.windowId"
       :reference="reference"
       :window-type="windowType"
-      :show-svg="showSvg"
+      :disable-icon="disableIcon"
       :disable-window-controls="disableWindowControls"
       @on-mousedown-header="onMousedownHeader($event as MouseEvent)"
       @window-control-clicked="

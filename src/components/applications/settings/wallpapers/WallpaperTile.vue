@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import wallpapersJSON from '@/json/wallpapers.json';
+import wallpapersJSON from '@/config/wallpapers.json';
 import { useWallpaperStore } from '@/stores/settings/wallpaper.ts';
 import type { CustomWallpaperId, PredefinedWallpaperId } from '@/types/wallpaperTypes.js';
 import { onBeforeMount, ref } from 'vue';
