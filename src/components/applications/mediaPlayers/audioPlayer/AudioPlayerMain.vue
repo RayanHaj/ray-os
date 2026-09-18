@@ -209,6 +209,11 @@ const deletePlaylist = (id: number) =>
 function createEmptyPlaylist() {
   loadedAudios.value = [];
   currentLoadedPlaylistId.value = undefined;
+
+  if (audioPlayerHeaderRef.value) {
+    audioPlayerHeaderRef.value.playlistName = '';
+  }
+
   currentPage.value = 'playlist';
 }
 

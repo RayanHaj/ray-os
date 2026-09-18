@@ -25,10 +25,12 @@ const windowFlatReferences: ComputedRef<WindowFlatReference[]> = useFlatOpenWind
 const { wallpaperUrl } = useHandleWallpaper();
 
 const windowType = (windowName: string): 'fixed' | 'inline' | undefined => {
-  const fixedSize = windowsConfig(windowName).getFixedSize();
+  const windowConfig = windowsConfig(windowName);
+
+  const fixedSize = windowConfig.getFixedSize();
   if (fixedSize) return 'fixed';
 
-  const isInline = windowsConfig(windowName).getIsInline();
+  const isInline = windowConfig.getIsInline();
   if (isInline) return 'inline';
 };
 
