@@ -16,7 +16,14 @@ export async function useHandleDel(
       return new Error('could not find value');
     }
 
-    const targetValue = values?.children.filter((child) => child.directory?.name === name)[0];
+    const targetValue = values?.children.filter((child) => {
+      if (child.file) {
+        return child.file.name === name;
+      } else if (child.directory) {
+        return child.directory.name === name;
+      }
+    })[0];
+
     if (!targetValue || !targetValue.id) {
       return new Error('could not find value');
     }
@@ -27,7 +34,10 @@ export async function useHandleDel(
       return new Error((e as Error).message);
     }
 
-    lines.value.push({ line: `directory (${name}) successfully deleted`, isPlain: true });
+    lines.value.push({
+      line: `${targetValue.directory ? 'directory' : 'file'} (${name}) successfully deleted`,
+      isPlain: true,
+    });
   } catch (e) {
     return e as Error;
   }
