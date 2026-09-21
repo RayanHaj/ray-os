@@ -12,9 +12,8 @@ export async function useHandleDel(
 ): Promise<Error | undefined> {
   try {
     const values = await useFileSystemLookup(rayDb, currentPath.value.join('/'));
-    if (values instanceof Error) {
-      return new Error('could not find value');
-    }
+
+    if (values instanceof Error) return new Error('could not find value');
 
     const targetValue = values?.children.filter((child) => {
       if (child.file) {
