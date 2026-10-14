@@ -126,7 +126,7 @@ function onFileUploadChange(event: Event) {
           id="file-upload"
           type="file"
           multiple
-          :accept="Object.keys(fileExtensions).join(',')"
+          :accept="[...Object.keys(fileExtensions), ...Object.values(fileExtensions).map(ext => `.${ext}`)].join(',')"
           @change="onFileUploadChange"
         />
         <button
