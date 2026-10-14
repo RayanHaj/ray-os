@@ -53,6 +53,7 @@ export const fileExtensions = {
   'image/webp': 'webp',
   'audio/mpeg': 'mp3',
   'audio/mp4': 'm4a',
+  'audio/x-m4a': 'm4a',
   'video/x-matroska': 'mkv',
 } as const;
 
