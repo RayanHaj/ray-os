@@ -52,7 +52,8 @@ export const fileExtensions = {
   'image/png': 'png',
   'image/webp': 'webp',
   'audio/mpeg': 'mp3',
-  'audio/mp4': 'm4a'
+  'audio/mp4': 'm4a',
+  'video/x-matroska': 'mkv',
 } as const;
 
 export const Applications = [
@@ -80,7 +81,7 @@ export function isImageType(type: string | undefined): type is (typeof imageType
   return imageTypes.includes(type as (typeof imageTypes)[number]);
 }
 
-export const videoTypes = ['video/mp4'] as const satisfies readonly FileType[];
+export const videoTypes = ['video/mp4', 'video/x-matroska'] as const satisfies readonly FileType[];
 export function isVideoType(type: string | undefined): type is (typeof videoTypes)[number] {
   if (!type) return false;
   return videoTypes.includes(type as (typeof videoTypes)[number]);

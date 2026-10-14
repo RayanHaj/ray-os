@@ -129,7 +129,7 @@ function onFileSelectReturnValue(returnValue: { windowId: string; value: FileSel
       <FileSelectButton
         v-else
         :window-id="windowId"
-        :allowed-file-types="['video/mp4']"
+        :allowed-file-types="['video/mp4', 'video/x-matroska']"
         @return-value="onFileSelectReturnValue"
         >video file</FileSelectButton
       >

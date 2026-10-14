@@ -31,7 +31,8 @@ export function useGetSvgByFileProperties(fileProperties: FileProperties) {
     case 'image/webp': {
       return imageSvg.svg;
     }
-    case 'video/mp4': {
+    case 'video/mp4':
+    case 'video/x-matroska': {
       return videoSvg.svg;
     }
     case 'text/plain': {
