@@ -7,7 +7,12 @@ import {
 import type { RayDb } from 'ray-db-wrapper';
 import FileExplorerHeader from '@/components/applications/fileExplorer/FileExplorerHeader.vue';
 import FileExplorerGrid from '@/components/applications/fileExplorer/FileExplorerGrid.vue';
-import type { FileItem, FileSystemItem, Item, ItemInsert } from '@/types/itemTypes.js';
+import {
+  type FileItem,
+  type FileSystemItem,
+  type Item,
+  type ItemInsert,
+} from '@/types/itemTypes.js';
 import FileExplorerModal from '@/components/applications/fileExplorer/FileExplorerModal.vue';
 import { useContextmenuStore } from '@/stores/contextMenu.ts';
 import { useFileSystemStore } from '@/stores/fileSystem.ts';
@@ -216,12 +221,17 @@ const fileSelectState = computed(() =>
 
 async function onFileUpload(files: FileList) {
   for (const file of files) {
+    const rawFile =
+      file.type === 'audio/x-m4a'
+        ? new File([file], file.name, { type: 'audio/mp4', lastModified: file.lastModified })
+        : file;
+
     const fileObject: FileItem = {
       type: 'file',
       name: file.name,
       size: file.size,
       createdAt: file.lastModified.toString(),
-      rawFile: file,
+      rawFile: rawFile,
     };
 
     if (!parentId.value) return;

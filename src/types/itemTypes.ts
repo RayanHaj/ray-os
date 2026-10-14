@@ -94,8 +94,18 @@ export function isAudioType(type: string | undefined): type is (typeof audioType
   return audioTypes.includes(type as (typeof audioTypes)[number]);
 }
 
-export const textTypes = ['text/plain'];
+export const textTypes = ['text/plain'] as const satisfies readonly FileType[];
 export function isTextType(type: string | undefined): type is (typeof textTypes)[number] {
   if (!type) return false;
   return textTypes.includes(type as (typeof textTypes)[number]);
+}
+
+export function isSupportedType(
+  type: string | undefined,
+): type is
+  | (typeof imageTypes)[number]
+  | (typeof videoTypes)[number]
+  | (typeof audioTypes)[number]
+  | (typeof textTypes)[number] {
+  return isImageType(type) || isVideoType(type) || isAudioType(type) || isTextType(type)
 }
