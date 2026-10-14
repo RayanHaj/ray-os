@@ -88,7 +88,7 @@ export function isVideoType(type: string | undefined): type is (typeof videoType
   return videoTypes.includes(type as (typeof videoTypes)[number]);
 }
 
-export const audioTypes = ['audio/mpeg', 'audio/mp4'] as const satisfies readonly FileType[];
+export const audioTypes = ['audio/mpeg', 'audio/mp4', 'audio/x-m4a'] as const satisfies readonly FileType[];
 export function isAudioType(type: string | undefined): type is (typeof audioTypes)[number] {
   if (!type) return false;
   return audioTypes.includes(type as (typeof audioTypes)[number]);
