@@ -2,7 +2,6 @@ import { defineStore } from 'pinia';
 import type { LoadedAudio } from '@/types/audioPlayerTypes.ts';
 import { ref, type Ref } from 'vue';
 import { isAudioType } from '@/types/itemTypes.ts';
-import { useWindowStore } from '@/stores/window.ts';
 
 export const useAudioPlayerStore = defineStore('audioPlayer', () => {
   const loadedAudio: Ref<LoadedAudio> = ref({
@@ -13,7 +12,9 @@ export const useAudioPlayerStore = defineStore('audioPlayer', () => {
   });
 
   function initAudioFileAndUrl(windowId: string, audioFile: File, fileId: number): boolean {
-    if (!isAudioType(audioFile.type)) return false;
+    if (!isAudioType(audioFile.type)) {
+      return false;
+    }
 
     loadedAudio.value = {
       windowId: windowId,
@@ -22,8 +23,6 @@ export const useAudioPlayerStore = defineStore('audioPlayer', () => {
       isPlaying: false,
       playlistName: '',
     };
-
-    useWindowStore().pushOpenWindowReference('Audio Player');
     return true;
   }
 
