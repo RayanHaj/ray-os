@@ -24,8 +24,11 @@ const windowFlatReferences: ComputedRef<WindowFlatReference[]> = useFlatOpenWind
 
 const { wallpaperUrl } = useHandleWallpaper();
 
-const windowType = (windowName: string): 'fixed' | 'inline' | undefined => {
+const windowType = (windowName: string, windowId: string): 'fixed' | 'inline' | undefined => {
   const windowConfig = windowsConfig(windowName);
+
+  const windowTypeOverride = useWindowStore().getWindowTypeOverride(windowId);
+  if (windowTypeOverride) return windowTypeOverride;
 
   const fixedSize = windowConfig.getFixedSize();
   if (fixedSize) return 'fixed';
@@ -78,7 +81,9 @@ const disableIcon = (windowName: string) => windowsConfig(windowName).getDisable
       :key="useWindowStore().getWindowId(reference.label, reference.id)"
       :reference="reference"
       :window-content-component="useGetWindowContentComponent(reference.label)"
-      :window-type="windowType(reference.label)"
+      :window-type="
+        windowType(reference.label, useWindowStore().getWindowId(reference.label, reference.id))
+      "
       :width="windowWidth(reference.label)"
       :height="windowHeight(reference.label)"
       :min-width="windowMinWidth(reference.label)"

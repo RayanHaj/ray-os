@@ -4,7 +4,6 @@ import { type FileItemSizeKey, fileItemSizes } from '@/types/fileExplorerTypes.j
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
 import {
   useFileSystemLookup,
-  useGetFileSystemItem,
 } from '@/composables/fileSystem/useIndexedDbHelper.ts';
 import { useDeleteFileSystemItem } from '@/composables/fileSystem/useDeleteFileSystemItem.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';

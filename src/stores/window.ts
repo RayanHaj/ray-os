@@ -1,7 +1,12 @@
 import { defineStore } from 'pinia';
 import { readonly, type Ref, ref, watch } from 'vue';
 
-import type { WindowControl, WindowControlSignal, WindowReference } from '@/types/windowTypes.ts';
+import type {
+  WindowControl,
+  WindowControlSignal,
+  WindowReference,
+  WindowType,
+} from '@/types/windowTypes.ts';
 import type { Application } from '@/types/itemTypes.ts';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
 import { useToastStore } from '@/stores/toast.ts';
@@ -150,6 +155,16 @@ export const useWindowStore = defineStore('window', () => {
     });
   }
 
+  const overrideWindowTypes: Ref<Record<string, WindowType>> = ref({});
+
+  const setWindowTypeOverride = (windowId: string, windowType: WindowType) =>
+    (overrideWindowTypes.value[windowId] = windowType);
+
+  const removeWindowTypeOverride = (windowId: string) => delete overrideWindowTypes.value[windowId];
+
+  const getWindowTypeOverride = (windowId: string) =>
+    windowId in overrideWindowTypes.value ? overrideWindowTypes.value[windowId] : null;
+
   //TODO Finish window control signals so a window control can be intercepted when it should not proceed with the action
   const windowControlClickSignal = (
     callback: (
@@ -186,5 +201,8 @@ export const useWindowStore = defineStore('window', () => {
     getWindowId,
     getZIndex,
     getFocusedWindowId,
+    getWindowTypeOverride,
+    setWindowTypeOverride,
+    removeWindowTypeOverride
   };
 });

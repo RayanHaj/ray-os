@@ -1,4 +1,4 @@
-import { type Ref, ref, watch } from 'vue';
+import { onBeforeUnmount, type Ref, ref, watch } from 'vue';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
 import { useAddNewAudio } from '@/composables/audioPlayer/useAddNewAudio.ts';
 import { useWindowStore } from '@/stores/window.ts';
@@ -12,6 +12,14 @@ export function useAudioSelectManager(
   windowId: string,
 ) {
   const fileExplorerWindowId = ref<string>();
+
+  onBeforeUnmount(() => {
+    if (fileExplorerWindowId.value) {
+      useWindowStore().removeWindowTypeOverride(fileExplorerWindowId.value);
+      useWindowStore().removeOpenWindowReference(fileExplorerWindowId.value);
+    }
+  });
+
   watch(
     () => useFileExplorerStore().fileSelectReturnValue,
     async (returnValues) => {
@@ -40,12 +48,15 @@ export function useAudioSelectManager(
         );
       }
 
+      useWindowStore().removeWindowTypeOverride(fileExplorerWindowId.value);
       useWindowStore().removeOpenWindowReference(fileExplorerWindowId.value, windowId);
     },
   );
 
   function useOpenSelectAudioWindow(windowId: string) {
     const nextFileExplorerId = useWindowStore().getNextWindowId('File Explorer');
+
+    useWindowStore().setWindowTypeOverride(nextFileExplorerId, 'inline');
 
     useFileExplorerStore().setFileExplorerWindowAsFileSelect(
       windowId,

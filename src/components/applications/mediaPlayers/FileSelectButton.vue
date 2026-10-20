@@ -18,12 +18,15 @@ const emit = defineEmits<{
 const fileExplorerWindowId = ref<string>();
 onBeforeUnmount(() => {
   if (fileExplorerWindowId.value) {
+    useWindowStore().removeWindowTypeOverride(fileExplorerWindowId.value);
     useWindowStore().removeOpenWindowReference(fileExplorerWindowId.value);
   }
 });
 
 function handleSelectTextFile() {
   const nextFileExplorerId = useWindowStore().getNextWindowId('File Explorer');
+
+  useWindowStore().setWindowTypeOverride(nextFileExplorerId, 'inline');
 
   useFileExplorerStore().setFileExplorerWindowAsFileSelect(
     windowId,
@@ -53,6 +56,7 @@ watch(
 
     emit('returnValue', returnValue);
 
+    useWindowStore().removeWindowTypeOverride(fileExplorerWindowId.value);
     useWindowStore().removeOpenWindowReference(fileExplorerWindowId.value, windowId);
   },
 );
