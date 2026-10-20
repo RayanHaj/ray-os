@@ -2,7 +2,7 @@
 import type { FileType } from '@/types/itemTypes.ts';
 import { useWindowStore } from '@/stores/window.ts';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
-import { computed, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import type { FileSelectReturnItem } from '@/types/fileExplorerTypes.ts';
 import { useSvgOrFallback } from '@/composables/svg/useSvgOrFallback.ts';
 
@@ -16,6 +16,12 @@ const emit = defineEmits<{
 }>();
 
 const fileExplorerWindowId = ref<string>();
+onBeforeUnmount(() => {
+  if (fileExplorerWindowId.value) {
+    useWindowStore().removeOpenWindowReference(fileExplorerWindowId.value);
+  }
+});
+
 function handleSelectTextFile() {
   const nextFileExplorerId = useWindowStore().getNextWindowId('File Explorer');
 
