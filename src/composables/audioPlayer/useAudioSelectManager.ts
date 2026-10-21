@@ -13,10 +13,11 @@ export function useAudioSelectManager(
 ) {
   const fileExplorerWindowId = ref<string>();
 
+  const windowStore = useWindowStore();
   onBeforeUnmount(() => {
     if (fileExplorerWindowId.value) {
-      useWindowStore().removeWindowTypeOverride(fileExplorerWindowId.value);
-      useWindowStore().removeOpenWindowReference(fileExplorerWindowId.value);
+      windowStore.removeWindowTypeOverride(fileExplorerWindowId.value);
+      windowStore.removeOpenWindowReference(fileExplorerWindowId.value);
     }
   });
 
@@ -48,15 +49,15 @@ export function useAudioSelectManager(
         );
       }
 
-      useWindowStore().removeWindowTypeOverride(fileExplorerWindowId.value);
-      useWindowStore().removeOpenWindowReference(fileExplorerWindowId.value, windowId);
+      windowStore.removeWindowTypeOverride(fileExplorerWindowId.value);
+      windowStore.removeOpenWindowReference(fileExplorerWindowId.value, windowId);
     },
   );
 
   function useOpenSelectAudioWindow(windowId: string) {
-    const nextFileExplorerId = useWindowStore().getNextWindowId('File Explorer');
+    const nextFileExplorerId = windowStore.getNextWindowId('File Explorer');
 
-    useWindowStore().setWindowTypeOverride(nextFileExplorerId, 'inline');
+    windowStore.setWindowTypeOverride(nextFileExplorerId, 'inline');
 
     useFileExplorerStore().setFileExplorerWindowAsFileSelect(
       windowId,
@@ -65,7 +66,7 @@ export function useAudioSelectManager(
       true,
     );
 
-    fileExplorerWindowId.value = useWindowStore().pushOpenWindowReference('File Explorer');
+    fileExplorerWindowId.value = windowStore.pushOpenWindowReference('File Explorer');
   }
 
   return { openSelectAudioWindow: useOpenSelectAudioWindow };
