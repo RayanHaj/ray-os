@@ -7,6 +7,7 @@ import { useFileSystemStore } from '@/stores/fileSystem.ts';
 import type { DesktopItem, DesktopTileItem } from '@/types/desktopTypes.ts';
 import { useInitReadMe } from '@/composables/initialization/useInitReadMe.ts';
 import { useInitAboutMe } from '@/composables/initialization/useInitAboutMe.ts';
+import { useOpenWindowByFileItem } from '@/composables/window/useOpenWindowByFileItem.ts';
 
 export const useDesktopStore = defineStore('desktop', () => {
   const tileWidth = ref(85);
@@ -20,7 +21,7 @@ export const useDesktopStore = defineStore('desktop', () => {
     }
 
     await useInitReadMe(rayDb);
-    await useInitAboutMe(rayDb);
+    const aboutMeFile = await useInitAboutMe(rayDb);
 
     const applicationFiles = (await rayDb.findAll<Item>('files')).filter(
       (file) => file.content.type === 'application',
@@ -39,19 +40,7 @@ export const useDesktopStore = defineStore('desktop', () => {
     localStorage.setItem('desktopFilesInitialized', 'initialized');
     await updateTiles(rayDb);
 
-    function getReadMeFileItem(): FileItem {
-      const response = await fetch('/rayosinformation.txt');
-      const blob = await response.blob();
-      const file = new File([blob], 'README.txt', { type: 'text/plain' });
-
-      return {
-        type: 'file',
-        name: file.name,
-        size: file.size,
-        createdAt: file.lastModified.toString(),
-        rawFile: file,
-      };
-    }
+    if (aboutMeFile) await useOpenWindowByFileItem(aboutMeFile as Item & { content: FileItem });
   }
 
   async function updateTiles(rayDb: RayDb) {

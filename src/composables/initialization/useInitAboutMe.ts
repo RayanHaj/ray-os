@@ -5,10 +5,10 @@ import { useFileSystemStore } from '@/stores/fileSystem.ts';
 import { useDesktopStore } from '@/stores/desktop.ts';
 import { useToastStore } from '@/stores/toast.ts';
 
-export async function useInitAboutMe(rayDb: RayDb) {
-  const response = await fetch('/rayosinformation.txt');
+export async function useInitAboutMe(rayDb: RayDb): Promise<Item | null> {
+  const response = await fetch('/aboutme.txt');
   const blob = await response.blob();
-  const file = new File([blob], 'README.txt', { type: 'text/plain' });
+  const file = new File([blob], 'ABOUTME.txt', { type: 'text/plain' });
 
   const fileObject: FileItem = {
     type: 'file',
@@ -31,13 +31,16 @@ export async function useInitAboutMe(rayDb: RayDb) {
       );
     });
 
+    let fileId: number | null = null;
     if (!foundReadMe) {
-      const fileId = await rayDb.insertOne<ItemInsert>('files', {
+      const id = await rayDb.insertOne<ItemInsert>('files', {
         label: fileObject.name,
         content: fileObject,
       });
 
-      if (fileId && typeof fileId === 'number') {
+      if (id && typeof id === 'number') {
+        fileId = id;
+
         await useInsertFileSystemItem(rayDb, [useFileSystemStore().ROOT_DIR_ID], {
           file: { name: fileObject.name, id: fileId, type: file.type },
           isSystemFile: true,
@@ -49,12 +52,24 @@ export async function useInitAboutMe(rayDb: RayDb) {
 
         await useDesktopStore().addDesktopItem(rayDb, {
           id: fileId,
-          tileId: applicationFiles.length + 1,
+          tileId: applicationFiles.length + 2,
           type: 'file',
         });
       }
     }
+
+    if (!fileId)
+      return null;
+
+    const aboutMeItem = await rayDb.findOne<Item>('files', 'id', fileId);
+
+    if (!aboutMeItem)
+      return null;
+
+    return aboutMeItem;
   } catch (e) {
     useToastStore().createToast((e as Error).message, 'error', 5000, 'desktop');
   }
+
+  return null;
 }

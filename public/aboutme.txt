@@ -1,0 +1,11 @@
+Rayan el Hajaoui
+
+Software Engineering student at the Hogeschool van Amsterdam.
+
+The desktop environment you're looking at right now — I built it. Vue.js, TypeScript and IndexedDB, from scratch.
+
+E-mail:
+rayan.el.hajaoui@proton.me
+
+GitHub:
+https://github.com/RayanHaj
