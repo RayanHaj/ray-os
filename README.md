@@ -1,18 +1,29 @@
-# portfolio
+<img width="1919" height="919" alt="image" src="https://github.com/user-attachments/assets/a840166c-562a-46b2-aaa0-875c86fb2a21" /># RayOS
 
-This template should help get you started developing with Vue 3 in Vite.
+A desktop environment that runs entirely in the browser — I built it from scratch as my personal project and portfolio.
 
-## Recommended IDE Setup
+👉 **Try it live at [rayanelhajaoui.dev](https://rayanelhajaoui.dev)**
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## What is RayOS?
 
-## Type Support for `.vue` Imports in TS
+RayOS turns a browser tab into a small operating system: draggable and resizable windows, a persistent filesystem, a file explorer, and apps running side by side — all client-side, no backend.
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+Files you create or upload are stored in **IndexedDB**, so your desktop survives reloads. On mobile, windows open fullscreen with the same core functionality.
 
-## Customize configuration
+## Features
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+- Draggable, resizable, focus-aware window management
+- File explorer and Terminal with an attached filesystem backed by IndexedDB (persistent across sessions)
+- File upload, images, video, audio and text files
+- Responsive layout — full desktop experience on large screens, fullscreen windows on mobile
+- Runs entirely client-side; no data ever leaves your browser
+- And A LOT more!
+
+## Tech Stack
+
+- [Vue 3](https://vuejs.org/) + [TypeScript](https://www.typescriptlang.org/)
+- [Vite](https://vite.dev/)
+- IndexedDB for filesystem persistence
 
 ## Project Setup
 
@@ -32,30 +43,15 @@ npm run dev
 npm run build
 ```
 
-### Run Unit Tests with [Vitest](https://vitest.dev/)
-
-```sh
-npm run test:unit
-```
-
-### Run End-to-End Tests with [Cypress](https://www.cypress.io/)
-
-```sh
-npm run test:e2e:dev
-```
-
-This runs the end-to-end tests against the Vite development server.
-It is much faster than the production build.
-
-But it's still recommended to test the production build with `test:e2e` before deploying (e.g. in CI environments):
-
-```sh
-npm run build
-npm run test:e2e
-```
-
 ### Lint with [ESLint](https://eslint.org/)
 
 ```sh
 npm run lint
 ```
+
+## Author
+
+**Rayan el Hajaoui** — Software Engineering student at the Hogeschool van Amsterdam.
+
+- E-mail: rayan.el.hajaoui@proton.me
+- Portfolio: you're looking at it — [rayanelhajaoui.dev](https://rayanelhajaoui.dev)
