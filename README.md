@@ -1,8 +1,10 @@
-<img width="1919" height="919" alt="image" src="https://github.com/user-attachments/assets/a840166c-562a-46b2-aaa0-875c86fb2a21" /># RayOS
+# **RayOS**
 
 A desktop environment that runs entirely in the browser — I built it from scratch as my personal project and portfolio.
 
 👉 **Try it live at [rayanelhajaoui.dev](https://rayanelhajaoui.dev)**
+
+![RayOS screenshot](public/rayos-screenshot.png)
 
 ## What is RayOS?
 
@@ -17,13 +19,12 @@ Files you create or upload are stored in **IndexedDB**, so your desktop survives
 - File upload, images, video, audio and text files
 - Responsive layout — full desktop experience on large screens, fullscreen windows on mobile
 - Runs entirely client-side; no data ever leaves your browser
-- And A LOT more!
 
 ## Tech Stack
 
 - [Vue 3](https://vuejs.org/) + [TypeScript](https://www.typescriptlang.org/)
 - [Vite](https://vite.dev/)
-- IndexedDB for filesystem persistence
+- IndexedDB
 
 ## Project Setup
 
