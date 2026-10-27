@@ -30,7 +30,10 @@ const selectedItemSizeButton = ref<FileItemSizeKey>('small');
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
 
+const windowId = ref('');
 onBeforeMount(() => {
+  windowId.value = useInjectOrThrow<string>('windowId');
+  console.log(windowId.value)
   const fileItemSize = localStorage.getItem('fileItemSize');
   if (fileItemSize) {
     updateSelectedItemSizeButton(fileItemSize as FileItemSizeKey);
@@ -89,11 +92,13 @@ async function onDrop(event: DragEvent) {
   }
 }
 
+const fileExplorerStore = useFileExplorerStore();
 function onFileUploadChange(event: Event) {
   const input = event.target as HTMLInputElement;
   const files = input.files ? [...input.files] : null;
   if (!files || files.length === 0) return;
 
+  fileExplorerStore.setFilesUploadedInWindow(windowId.value, files);
   emit('header-event:file-upload', files);
   input.value = '';
 }
@@ -127,6 +132,7 @@ function onFileUploadChange(event: Event) {
           multiple
           :accept="[...Object.keys(fileExtensions), ...Object.values(fileExtensions).map(ext => `.${ext}`)].join(',')"
           @change="onFileUploadChange"
+          @click="console.log(windowId)"
         />
         <button
           class="item-size-button"

@@ -10,8 +10,8 @@ const helpArray = [
   'exit        : close the terminal',
   'dir         : list the contents of the current directory',
   'mkdir       : create a new directory',
-  'del         : delete a file or folder',
-  'start       : open a file or application',
+  'del         : delete a file or directory',
+  'start       : open a file, directory or application',
   '',
   'Tip: ctrl + scroll or pinch to zoom to adjust font size',
 ];
