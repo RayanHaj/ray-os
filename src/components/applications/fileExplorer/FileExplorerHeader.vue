@@ -2,9 +2,7 @@
 import { onBeforeMount, ref } from 'vue';
 import { type FileItemSizeKey, fileItemSizes } from '@/types/fileExplorerTypes.js';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
-import {
-  useFileSystemLookup,
-} from '@/composables/fileSystem/useIndexedDbHelper.ts';
+import { useFileSystemLookup } from '@/composables/fileSystem/useIndexedDbHelper.ts';
 import { useDeleteFileSystemItem } from '@/composables/fileSystem/useDeleteFileSystemItem.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import { RayDb } from 'ray-db-wrapper';
@@ -33,7 +31,6 @@ const rayDb = useInjectOrThrow<RayDb>('rayDb');
 const windowId = ref('');
 onBeforeMount(() => {
   windowId.value = useInjectOrThrow<string>('windowId');
-  console.log(windowId.value)
   const fileItemSize = localStorage.getItem('fileItemSize');
   if (fileItemSize) {
     updateSelectedItemSizeButton(fileItemSize as FileItemSizeKey);
@@ -45,7 +42,7 @@ function updateSelectedItemSizeButton(itemSizeKey: FileItemSizeKey) {
   useFileExplorerStore().updateItemSize(itemSizeKey);
 }
 
-async function onDrop(event: DragEvent) {
+async function onDrop(_: DragEvent) {
   try {
     await multiSelect.forEachSelected(async (id) => {
       const fileSystemItem = await rayDb.findOne<FileSystemItem>('fileSystem', 'id', id);
@@ -123,14 +120,23 @@ function onFileUploadChange(event: Event) {
     </div>
     <div class="end-wrapper">
       <div class="clock-wrapper">
-        <label for="file-upload" :style="{ cursor: 'pointer' }" class="custom-file-upload"
+        <label
+          :for="`file-upload ${windowId}`"
+          :style="{ cursor: 'pointer' }"
+          class="custom-file-upload"
           >Upload files</label
         >
         <input
-          id="file-upload"
+          class="file-upload"
+          :id="`file-upload ${windowId}`"
           type="file"
           multiple
-          :accept="[...Object.keys(fileExtensions), ...Object.values(fileExtensions).map(ext => `.${ext}`)].join(',')"
+          :accept="
+            [
+              ...Object.keys(fileExtensions),
+              ...Object.values(fileExtensions).map((ext) => `.${ext}`),
+            ].join(',')
+          "
           @change="onFileUploadChange"
           @click="console.log(windowId)"
         />
