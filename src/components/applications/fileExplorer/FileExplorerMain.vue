@@ -219,8 +219,6 @@ const fileSelectState = computed(() =>
   fileExplorerStore.fileSelectState.find((element) => element.fileExplorerWindowId === windowId),
 );
 
-fileExplorerStore.watchFilesUploadedInWindow(windowId, (files) => onFileUpload(files));
-
 async function onFileUpload(files: File[]) {
   for (const file of files) {
     const rawFile =
@@ -272,6 +270,7 @@ async function onFileUpload(files: File[]) {
       :is-dragging="isDragging"
       :multi-select="multiSelect"
       @header-event:back="handleBackClick"
+      @header-event:file-upload="onFileUpload"
     />
     <FileExplorerGrid
       :parent-id="parentId"

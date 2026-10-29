@@ -89,15 +89,13 @@ async function onDrop(_: DragEvent) {
   }
 }
 
-const fileExplorerStore = useFileExplorerStore();
 function onFileUploadChange(event: Event) {
   const input = event.target as HTMLInputElement;
   const files = input.files ? [...input.files] : null;
   if (!files || files.length === 0) return;
 
-  fileExplorerStore.setFilesUploadedInWindow(windowId.value, files);
-  emit('header-event:file-upload', files);
   input.value = '';
+  emit('header-event:file-upload', files);
 }
 </script>
 
