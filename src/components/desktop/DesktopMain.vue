@@ -102,11 +102,12 @@ function navigateToSocialPage(social: Socials) {
   gap: 15px;
   flex-direction: column;
   justify-content: center;
-}
-
-button.socials-icons {
   background: none;
   border: none;
+}
+
+.socials-icons:hover {
+  cursor: pointer;
 }
 
 .socials-name {

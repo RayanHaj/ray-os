@@ -14,7 +14,7 @@ const { windowId, reference, windowType, disableIcon, disableWindowControls } = 
   disableWindowControls: boolean;
 }>();
 
-const emits = defineEmits<{
+defineEmits<{
   (e: 'windowControlClicked', action: WindowControl): void;
   (e: 'onMousedownHeader', event: MouseEvent | TouchEvent): void;
 }>();
@@ -29,7 +29,6 @@ const windowHeaderStyles: StyleValue = { height: `${useWindowStore().windowHeade
 const windowStore = useWindowStore();
 function handleWindowControlClicked(action: WindowControl) {
   windowStore.updateWindowControlClickSignal({ windowControl: action, windowId });
-  // emits('windowControlClicked', action);
 }
 </script>
 <template>

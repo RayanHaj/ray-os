@@ -59,7 +59,11 @@ const { styles, cachedStyles } = useWindowStyleManager(
   left,
   top,
 );
+
 const windowStateManager = useWindowStateManager(styles, reference);
+onBeforeMount(() => {
+  provide('windowId', windowStateManager.windowId);
+});
 
 const windowStore = useWindowStore();
 
@@ -68,10 +72,6 @@ const windowComponentRef = useTemplateRef<ComponentPublicInstance & WindowCompon
 );
 
 const disablePointerEvents = ref<boolean>(false);
-
-onBeforeMount(() => {
-  provide('windowId', windowStateManager.windowId);
-});
 onMounted(() => {
   if (useBrowserStore().isMobile) maximizeWindow();
 
@@ -182,18 +182,6 @@ const windowContentStyles = { height: windowContentHeight.value, width: '100%' }
       :disable-icon="disableIcon"
       :disable-window-controls="disableWindowControls"
       @on-mousedown-header="onMousedownHeader($event as MouseEvent)"
-      @window-control-clicked="
-        (control) => {
-          switch (control) {
-            case 'Close':
-              return closeWindow();
-            case 'Maximize':
-              return maximizeWindow();
-            case 'Minimize':
-              return minimizeWindow();
-          }
-        }
-      "
     />
     <component
       ref="windowComponent"
