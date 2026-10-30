@@ -20,11 +20,28 @@ function onMouseLeave(_: MouseEvent) {
   }
 }
 
-function navigateToSocialPage(social: Socials) {
+async function navigateToSocialPage(social: Socials) {
   switch (social) {
-    case 'Github': {
-      window.open('https://github.com/RayanHaj', '_blank');
-    }
+    case 'Github':
+      {
+        window.open('https://github.com/RayanHaj', '_blank');
+      }
+      break;
+    // case 'CV':
+    // {
+    //   const response = await fetch('/cv.pdf');
+    //   const blob = await response.blob();
+    //   const url = window.URL.createObjectURL(blob);
+    //
+    //   const link = document.createElement('a');
+    //   link.href = url;
+    //   link.download = 'cv-rayan-el-hajaoui.pdf';
+    //   document.body.appendChild(link);
+    //   link.click();
+    //
+    //   document.body.removeChild(link);
+    //   window.URL.revokeObjectURL(url);
+    // }
   }
 }
 </script>
@@ -48,14 +65,17 @@ function navigateToSocialPage(social: Socials) {
       </div>
     </div>
     <div class="socials">
-      <button
-        v-for="social in socials"
-        :key="social"
-        class="socials-icons"
-        @click="navigateToSocialPage(social)"
-      >
-        <component class="social-svg" :is="useSvgOrFallback(social).svg" />
-      </button>
+      <div class="links">
+        <button
+          v-for="social in socials"
+          :key="social"
+          class="socials-icons"
+          @click="navigateToSocialPage(social)"
+        >
+          <component class="social-svg" :is="useSvgOrFallback(social).svg" />
+        </button>
+        <a href="/cv.pdf" download> My CV</a>
+      </div>
       <p class="socials-name">Made by Rayan el Hajaoui</p>
     </div>
   </div>
@@ -108,6 +128,13 @@ function navigateToSocialPage(social: Socials) {
 
 .socials-icons:hover {
   cursor: pointer;
+}
+
+.links {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
 }
 
 .socials-name {
