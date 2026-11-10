@@ -2,7 +2,7 @@
 
 A desktop environment that runs entirely in the browser — I built it from scratch as my personal project and portfolio.
 
-👉 **Try it live at [rayanelhajaoui.dev](https://rayanelhajaoui.dev)**
+**Try it live at [rayanelhajaoui.dev](https://rayanelhajaoui.dev)**
 
 ![RayOS screenshot](public/rayos-screenshot.png)
 
@@ -55,4 +55,4 @@ npm run lint
 **Rayan el Hajaoui** — Software Engineering student at the Hogeschool van Amsterdam.
 
 - E-mail: rayan.el.hajaoui@proton.me
-- Portfolio: you're looking at it — [rayanelhajaoui.dev](https://rayanelhajaoui.dev)
+- [rayanelhajaoui.dev](https://rayanelhajaoui.dev)
