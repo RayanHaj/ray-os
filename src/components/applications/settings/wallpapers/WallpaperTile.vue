@@ -6,7 +6,7 @@ import { onBeforeMount, ref } from 'vue';
 import {
   useDataUrlToFile,
   useGenerateImageThumbnail,
-} from '@/composables/helpers/useCompressImage.ts';
+} from '@/composables/helpers/useGenerateImageThumbnail.ts';
 const wallpapers: Record<string, string> = wallpapersJSON;
 
 const { wallpaperId, selected, file } = defineProps<{

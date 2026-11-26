@@ -218,8 +218,8 @@ const itemSize = computed<FileItemSizeValue>(
       :style="{ padding: useBrowserStore().isMobile ? '10px 75px 10px 10px' : '10px' }"
     >
       <FileExplorerItem
-        v-for="fileSystemItem in currentFileSystemItems"
-        :key="fileSystemItem.id"
+        v-for="(fileSystemItem, index) in currentFileSystemItems"
+        :key="`${index} - ${fileSystemItem.id}`"
         :file-system-item="fileSystemItem"
         :filter-by-file-type="filterByFileType"
         :is-selected="multiSelect.selectedItems.value.has(fileSystemItem.id)"

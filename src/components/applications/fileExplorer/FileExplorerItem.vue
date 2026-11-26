@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useGetIsDisabledItem } from '@/composables/fileExplorer/useGetIsDisabledItem.ts';
-import { type FileSystemItem, type FileType, type Item } from '@/types/itemTypes.js';
-import { computed, ref, watch } from 'vue';
+import { type FileSystemItem, type FileType, isImageType, type Item } from '@/types/itemTypes.js';
+import { computed, onBeforeMount, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useGetSvgByFileSystemItem } from '@/composables/fileExplorer/useGetSvgByFileSystemItem.ts';
 import { useFileExplorerStore } from '@/stores/fileExplorer.ts';
 import { type FileItemSizeValue, itemSizes } from '@/types/fileExplorerTypes.js';
@@ -12,14 +12,36 @@ import { useContextmenuStore } from '@/stores/contextMenu.ts';
 import { useInjectOrThrow } from '@/composables/helpers/useInjectOrThrow.ts';
 import type { RayDb } from 'ray-db-wrapper';
 import { useTaskbarStore } from '@/stores/taskbar.ts';
+import { useToastStore } from '@/stores/toast.ts';
+import { useGenerateImageThumbnail } from '@/composables/helpers/useGenerateImageThumbnail.ts';
 
 const rayDb = useInjectOrThrow<RayDb>('rayDb');
+const windowId = useInjectOrThrow<string>('windowId');
 const { fileSystemItem, filterByFileType, isSelected } = defineProps<{
   fileSystemItem: FileSystemItem;
   filterByFileType: FileType[];
   isSelected: boolean;
-  windowId: string;
 }>();
+
+const thumbnailURL = ref<string | null>(null);
+
+onBeforeMount(async () => {
+  try {
+    if (!fileSystemItem.file) return;
+
+    const isImage = isImageType(fileSystemItem.file.type);
+    if (!isImage) return;
+
+    const fileItem = await rayDb.findOne<Item>('files', 'id', fileSystemItem.file.id);
+    if (fileItem.content.type !== 'file') return;
+
+    // const compressedThumbnail = await useGenerateImageThumbnail(fileItem.content.rawFile);
+    thumbnailURL.value = URL.createObjectURL(fileItem.content.rawFile);
+  } catch (e) {
+    console.error('could not find fileItem in RayDB for thumbnail creation');
+    thumbnailURL.value = null;
+  }
+});
 
 // Used to determine if this item should be disabled or not
 const currentFileItem = ref<Item | null>(null);
@@ -121,7 +143,17 @@ function onClick(event: MouseEvent) {
     @dragend="emit('onDragEnd', $event)"
     @contextmenu.prevent.stop="onContextMenu"
   >
+    <img
+      v-if="thumbnailURL"
+      :src="thumbnailURL"
+      :width="`${itemSize.size}px`"
+      :height="`${itemSize.size}px`"
+      alt="Thumbnail"
+      loading="lazy"
+      draggable="false"
+    />
     <component
+      v-else
       class="file-svg"
       :is="useGetSvgByFileSystemItem(fileSystemItem)"
       :custom-width="itemSize.size"
